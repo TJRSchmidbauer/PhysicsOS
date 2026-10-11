@@ -1,11 +1,12 @@
 # PhysicsOS Desktop
 
-The Tauri 2 shell wraps the existing PhysicsOS web build. It does not fork the
-business UI.
+Die Tauri-2-Hülle umschließt den bestehenden PhysicsOS-Web-Build. Sie forkt nicht
+die Business-Oberfläche.
 
-## Development
+## Entwicklung
 
-Initialize the Harness submodule, install the root workspace, then run:
+Das Harness-Submodul initialisieren, den Root-Workspace installieren und dann
+ausführen:
 
 ```sh
 git submodule update --init --recursive vendor/deepseek-harness
@@ -13,67 +14,71 @@ pnpm install
 pnpm --dir apps/desktop dev
 ```
 
-`tauri.conf.json` starts `pnpm --dir ../.. dev` and loads the Harness web UI at
-`http://127.0.0.1:3080`.
+`tauri.conf.json` startet `pnpm --dir ../.. dev` und lädt die Harness-Web-Oberfläche
+unter `http://127.0.0.1:3080`.
 
-## Local unsigned package
+## Lokales unsigniertes Paket
 
-`build:local` deliberately uses the committed `web/` fallback. That page is a
-development smoke target, not a release artifact.
+`build:local` verwendet bewusst den eingecheckten Fallback `web/`. Diese Seite ist
+ein Smoke-Ziel für die Entwicklung, kein Release-Artefakt.
 
 ```sh
 pnpm run desktop:build
 ```
 
-The command removes Tauri, Apple, and Windows signing credentials from the child
-environment and invokes `tauri build --debug --no-bundle`. On macOS it emits:
+Der Befehl entfernt Tauri-, Apple- und Windows-Signatur-Credentials aus der
+Umgebung des Kindprozesses und ruft `tauri build --debug --no-bundle` auf. Unter
+macOS erzeugt er:
 
 ```text
 apps/desktop/src-tauri/target/debug/physicsos-desktop
 ```
 
-## macOS installer
+## macOS-Installer
 
-Build a real release frontend, bundled Node sidecar, and unsigned DMG on macOS:
+Ein echtes Release-Frontend, den gebündelten Node-Sidecar und ein unsigniertes DMG
+unter macOS bauen:
 
 ```sh
 pnpm --dir apps/desktop run build:release -- --unsigned --bundles app,dmg
 ```
 
-The installer is written under:
+Der Installer wird hier abgelegt:
 
 ```text
 apps/desktop/src-tauri/target/<rust-target>/release/bundle/dmg/
 ```
 
-`--unsigned` disables updater artifacts and passes `--no-sign` to Tauri. The
-result is not Developer ID signed or notarized. On first launch, macOS
-Gatekeeper may block it. Either Control-click the app and choose **Open**, then
-confirm through **System Settings > Privacy & Security > Open Anyway**, or
-remove the quarantine attribute after copying it to Applications:
+`--unsigned` deaktiviert Updater-Artefakte und übergibt `--no-sign` an Tauri. Das
+Ergebnis ist weder mit einer Developer ID signiert noch notarisiert. Beim ersten
+Start kann macOS Gatekeeper es blockieren. Entweder mit Control-Klick auf die App
+**Öffnen** wählen und dann unter **Systemeinstellungen > Datenschutz & Sicherheit >
+Trotzdem öffnen** bestätigen, oder nach dem Kopieren nach Programme das
+Quarantäne-Attribut entfernen:
 
 ```sh
 xattr -dr com.apple.quarantine /Applications/PhysicsOS.app
 ```
 
-Verify the downloaded checksum before using this workaround for a distributed
-unsigned build.
+Prüfen Sie die heruntergeladene Prüfsumme, bevor Sie diesen Workaround für einen
+verteilten unsignierten Build verwenden.
 
-## Release package
+## Release-Paket
 
-Release builds use the shared Harness frontend, not `web/`. The packaging script
-builds `@deepseek-ai/dsh-web-frontend`, verifies
-`vendor/deepseek-harness/apps/web/dist/index.html`, copies it to
-`apps/desktop/web-release/`, packages the sidecar, and invokes Tauri with
-`frontendDist = "../web-release"`.
+Release-Builds verwenden das gemeinsame Harness-Frontend, nicht `web/`. Das
+Packaging-Skript baut `@deepseek-ai/dsh-web-frontend`, prüft
+`vendor/deepseek-harness/apps/web/dist/index.html`, kopiert es nach
+`apps/desktop/web-release/`, paketiert den Sidecar und ruft Tauri mit
+`frontendDist = "../web-release"` auf.
 
-At runtime, the release shell starts the packaged Harness `web` host on a
-loopback port, waits for its readiness line, and navigates the main window to
-that origin. This is what injects `window.__DSH_BOOT__` and its client plugin
-manifest. The static `web-release/` copy remains part of the bundle, while the
-window is hidden until the host is ready.
+Zur Laufzeit startet die Release-Hülle den paketierten Harness-`web`-Host auf einem
+Loopback-Port, wartet auf dessen Readiness-Zeile und navigiert das Hauptfenster zu
+diesem Origin. Dadurch werden `window.__DSH_BOOT__` und das Client-Plugin-Manifest
+injiziert. Die statische Kopie `web-release/` bleibt Teil des Bundles, während das
+Fenster verborgen bleibt, bis der Host bereit ist.
 
-Provide the production updater public key and endpoint through the environment:
+Den öffentlichen Produktions-Updater-Schlüssel und den Endpunkt über die Umgebung
+bereitstellen:
 
 ```sh
 export PHYSICSOS_DESKTOP_UPDATE_PUBKEY='<production minisign public key>'
@@ -81,72 +86,74 @@ export PHYSICSOS_DESKTOP_UPDATE_ENDPOINT='https://updates.physicsos.app/physicso
 pnpm run desktop:release
 ```
 
-Alternatively, copy `release.config.example.json` to
-`apps/desktop/release.config.json`, replace both updater fields, and keep the
-file out of git. `PHYSICSOS_DESKTOP_RELEASE_CONFIG` can point at another file.
-Environment values win over the file.
+Alternativ `release.config.example.json` nach
+`apps/desktop/release.config.json` kopieren, beide Updater-Felder ersetzen und die
+Datei aus Git heraushalten. `PHYSICSOS_DESKTOP_RELEASE_CONFIG` kann auf eine andere
+Datei zeigen. Umgebungswerte haben Vorrang vor der Datei.
 
-Release validation is a hard gate:
+Die Release-Validierung ist ein hartes Gate:
 
 ```sh
 pnpm run desktop:release-config
 ```
 
-It rejects the committed development key, the `physicsos.dev` placeholder host,
-non-HTTPS endpoints, and a release build that still points at `web/`.
+Sie weist den eingecheckten Entwicklungsschlüssel, den Platzhalter-Host
+`physicsos.dev`, Nicht-HTTPS-Endpunkte und einen Release-Build zurück, der noch auf
+`web/` zeigt.
 
-Bundles are written under:
+Bundles werden hier abgelegt:
 
 ```text
 apps/desktop/src-tauri/target/<rust-target>/release/bundle/
 ```
 
-The bundler can be narrowed explicitly:
+Der Bundler kann ausdrücklich eingegrenzt werden:
 
 ```sh
 # macOS
 pnpm --dir apps/desktop run build:release -- --target aarch64-apple-darwin --bundles app,dmg
 
-# Windows (run on Windows)
+# Windows (unter Windows ausführen)
 pnpm --dir apps/desktop run build:release -- --target x86_64-pc-windows-msvc --bundles nsis,msi
 ```
 
-Without updater or code-signing secrets, prepend `--unsigned`. The release
-script disables updater artifacts and does not require production updater
-credentials. With all production updater secrets present, it creates signed
-updater artifacts and keeps the normal strict release validation.
+Ohne Updater- oder Code-Signing-Secrets `--unsigned` voranstellen. Das
+Release-Skript deaktiviert Updater-Artefakte und benötigt keine
+Produktions-Updater-Credentials. Sind alle Produktions-Updater-Secrets vorhanden,
+erzeugt es signierte Updater-Artefakte und behält die normale strenge
+Release-Validierung bei.
 
-## Application icon
+## App-Icon
 
-The release icon source was generated with the requested
-`gpt-image-2.5-sunburst` image model from a PhysicsOS atom/electric-spark brief.
-The committed source is:
+Die Quelle des Release-Icons wurde mit dem gewünschten Bildmodell
+`gpt-image-2.5-sunburst` aus einem PhysicsOS-Briefing „Atom/elektrischer Funke“
+erzeugt. Die eingecheckte Quelle ist:
 
 ```text
 apps/desktop/design/app-icon-source-sunburst.png
 ```
 
-Regenerate the platform assets after changing the source:
+Die Plattform-Assets nach einer Änderung der Quelle neu erzeugen:
 
 ```sh
 pnpm --dir apps/desktop exec tauri icon design/app-icon-source-sunburst.png
 ```
 
-The image client reads the provider URL, model, key, prompt, and output path
-from environment variables; the key is never written to the repository or the
-manifest.
+Der Bild-Client liest Provider-URL, Modell, Key, Prompt und Ausgabepfad aus
+Umgebungsvariablen; der Key wird niemals in das Repository oder das Manifest
+geschrieben.
 
-## Agent sidecar
+## Agent-Sidecar
 
-Build and collect the sidecar before a release:
+Den Sidecar vor einem Release bauen und einsammeln:
 
 ```sh
 pnpm run desktop:sidecar
 ```
 
-This runs the Harness host build, deploys `@deepseek-ai/dsh` with a hoisted
-dependency tree, copies the vendored Cordis packages plus the PhysicsOS
-bridge entry, and writes:
+Das führt den Harness-Host-Build aus, deployt `@deepseek-ai/dsh` mit einem
+gehoisteten Abhängigkeitsbaum, kopiert die gevendorten Cordis-Pakete plus den
+PhysicsOS-Bridge-Einstieg und schreibt:
 
 ```text
 apps/desktop/src-tauri/resources/agent-sidecar/sidecar.json
@@ -155,119 +162,128 @@ apps/desktop/src-tauri/resources/agent-sidecar/runtime/sidecar/bridge.mjs
 apps/desktop/src-tauri/resources/agent-sidecar/runtime/node
 ```
 
-The generated runtime is several hundred megabytes and is intentionally ignored
-by git. Tauri bundles the directory as `agent-sidecar/`. The Rust shell resolves
-`sidecar.json` from Tauri's resource directory first, falls back to the source
-resource directory during development, and retains
-`PHYSICSOS_AGENT_SIDECAR` as an explicit executable override.
+Die erzeugte Runtime ist mehrere hundert Megabyte groß und wird bewusst von Git
+ignoriert. Tauri bündelt das Verzeichnis als `agent-sidecar/`. Die Rust-Hülle löst
+`sidecar.json` zuerst aus dem Ressourcenverzeichnis von Tauri auf, fällt während der
+Entwicklung auf das Quell-Ressourcenverzeichnis zurück und behält
+`PHYSICSOS_AGENT_SIDECAR` als ausdrückliche Überschreibung der ausführbaren Datei bei.
 
-The manifest's main `args` still launch the Harness `web` host. `sidecarArgs`
-launches the bridge as the agent process:
+Die Haupt-`args` des Manifests starten weiterhin den Harness-`web`-Host.
+`sidecarArgs` startet die Bridge als Agent-Prozess:
 
 ```sh
 <resource-dir>/agent-sidecar/runtime/node <resource-dir>/agent-sidecar/runtime/lib/bin.js
 <resource-dir>/agent-sidecar/runtime/node <resource-dir>/agent-sidecar/runtime/sidecar/bridge.mjs
 ```
 
-Packaging downloads the checksum-pinned official Node 24.21.0 runtime for the
-target platform and places it at `runtime/node` or `runtime/node.exe`. The
-manifest invokes that relative executable, so the app does not depend on Node
-being installed or on `PATH`. The archive URL, platform, version, and SHA-256
-are recorded at `runtime/node-runtime.json`.
+Beim Paketieren wird die per Prüfsumme gepinnte offizielle Node-24.21.0-Runtime für
+die Zielplattform heruntergeladen und unter `runtime/node` bzw. `runtime/node.exe`
+abgelegt. Das Manifest ruft diese relative ausführbare Datei auf, daher hängt die
+App nicht davon ab, dass Node installiert ist oder im `PATH` liegt. Archiv-URL,
+Plattform, Version und SHA-256 stehen in `runtime/node-runtime.json`.
 
-Windows packaging must run on Windows so pnpm deploys the target-specific
-native optional dependencies. The workflow builds NSIS and MSI installers on
-the Windows runner and exercises the bundled `node.exe` smoke path. The bundled
-Node runtime, signing, installation, and first-launch behavior still require
-validation on a real Windows host; macOS cannot execute `node.exe`.
+Das Windows-Packaging muss unter Windows laufen, damit pnpm die
+zielspezifischen nativen optionalen Abhängigkeiten deployt. Der Workflow baut
+NSIS- und MSI-Installer auf dem Windows-Runner und führt den Smoke-Pfad mit dem
+gebündelten `node.exe` aus. Die gebündelte Node-Runtime, das Signieren, die
+Installation und das Verhalten beim ersten Start erfordern weiterhin eine
+Validierung auf einem echten Windows-Host; macOS kann `node.exe` nicht ausführen.
 
-## CI installers
+## CI-Installer
 
-`.github/workflows/desktop-release.yml` runs for `v*` tags and manual
-dispatches. It builds macOS arm64, macOS x86_64, and Windows x86_64 NSIS/MSI
-installers, then uploads the packages and any updater `.sig` files as workflow
-artifacts. Missing signing secrets select an unsigned build rather than failing.
+`.github/workflows/desktop-release.yml` läuft für `v*`-Tags und manuelle
+Auslösungen. Er baut NSIS-/MSI-Installer für macOS arm64, macOS x86_64 und Windows
+x86_64 und lädt die Pakete sowie alle Updater-`.sig`-Dateien als
+Workflow-Artefakte hoch. Fehlende Signatur-Secrets führen zu einem unsignierten
+Build statt zu einem Fehler.
 
-| Secret                               | Purpose                                         |
-| ------------------------------------ | ----------------------------------------------- |
-| `PHYSICSOS_DESKTOP_UPDATE_PUBKEY`    | Tauri updater public key trusted by the app     |
-| `PHYSICSOS_DESKTOP_UPDATE_ENDPOINT`  | HTTPS `latest.json` endpoint                    |
-| `TAURI_SIGNING_PRIVATE_KEY`          | Tauri updater private key                       |
-| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Updater key password, if encrypted              |
-| `APPLE_CERTIFICATE`                  | Base64-encoded Developer ID Application `.p12`  |
-| `APPLE_CERTIFICATE_PASSWORD`         | `.p12` password                                 |
-| `APPLE_SIGNING_IDENTITY`             | Developer ID Application identity               |
-| `APPLE_ID`                           | Apple notarization account                      |
-| `APPLE_PASSWORD`                     | Apple app-specific password                     |
-| `APPLE_TEAM_ID`                      | Apple team ID                                   |
-| `WINDOWS_CERTIFICATE`                | Base64-encoded Windows code-signing certificate |
-| `WINDOWS_CERTIFICATE_PASSWORD`       | Windows certificate password                    |
-| `WINDOWS_CERTIFICATE_THUMBPRINT`     | Optional certificate thumbprint                 |
+| Secret                               | Zweck                                                        |
+| ------------------------------------ | ------------------------------------------------------------ |
+| `PHYSICSOS_DESKTOP_UPDATE_PUBKEY`    | Öffentlicher Tauri-Updater-Schlüssel, dem die App vertraut   |
+| `PHYSICSOS_DESKTOP_UPDATE_ENDPOINT`  | HTTPS-Endpunkt für `latest.json`                             |
+| `TAURI_SIGNING_PRIVATE_KEY`          | Privater Tauri-Updater-Schlüssel                             |
+| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | Passwort des Updater-Schlüssels, falls verschlüsselt         |
+| `APPLE_CERTIFICATE`                  | Base64-kodiertes Developer-ID-Application-`.p12`             |
+| `APPLE_CERTIFICATE_PASSWORD`         | `.p12`-Passwort                                              |
+| `APPLE_SIGNING_IDENTITY`             | Developer-ID-Application-Identität                           |
+| `APPLE_ID`                           | Apple-Konto für die Notarisierung                            |
+| `APPLE_PASSWORD`                     | App-spezifisches Apple-Passwort                              |
+| `APPLE_TEAM_ID`                      | Apple-Team-ID                                                |
+| `WINDOWS_CERTIFICATE`                | Base64-kodiertes Windows-Code-Signing-Zertifikat             |
+| `WINDOWS_CERTIFICATE_PASSWORD`       | Passwort des Windows-Zertifikats                             |
+| `WINDOWS_CERTIFICATE_THUMBPRINT`     | Optionaler Zertifikat-Fingerabdruck                          |
 
-The updater public key, endpoint, and private key must all be present to enable
-signed updater artifacts. macOS still requires the Apple certificate and
-identity for code signing; Windows requires either the encoded certificate or
-a certificate thumbprint.
+Öffentlicher Updater-Schlüssel, Endpunkt und privater Schlüssel müssen alle
+vorhanden sein, um signierte Updater-Artefakte zu aktivieren. macOS benötigt für
+das Code-Signing weiterhin das Apple-Zertifikat und die Identität; Windows benötigt
+entweder das kodierte Zertifikat oder einen Zertifikat-Fingerabdruck.
 
-### Agent bridge protocol
+### Agent-Bridge-Protokoll
 
-The Rust allowlist and 120-second unary request timeout are unchanged. The
-bridge emits a `ready` event with protocol version `1`; `TauriSidecarRpc.start`
-waits for that handshake before returning. The manifest stays at version `1`.
+Die Rust-Allowlist und das 120-Sekunden-Timeout für unäre Anfragen bleiben
+unverändert. Die Bridge sendet ein `ready`-Ereignis mit Protokollversion `1`;
+`TauriSidecarRpc.start` wartet auf diesen Handshake, bevor es zurückkehrt. Das
+Manifest bleibt bei Version `1`.
 
-The bridge connects to the local `dsh web` host at
-`PHYSICSOS_HARNESS_URL` (default `http://127.0.0.1:38971`). On every request the
-Tauri shell reads the current `physicsos_session` cookie from the main WebView
-and adds it to the sidecar params under a reserved field. The bridge strips that
-field before mapping the request, never logs it, and never writes it to disk.
+Die Bridge verbindet sich mit dem lokalen `dsh web`-Host unter
+`PHYSICSOS_HARNESS_URL` (Standard `http://127.0.0.1:38971`). Bei jeder Anfrage liest
+die Tauri-Hülle das aktuelle Cookie `physicsos_session` aus dem Haupt-WebView und
+fügt es unter einem reservierten Feld zu den Sidecar-Parametern hinzu. Die Bridge
+entfernt dieses Feld, bevor sie die Anfrage abbildet, protokolliert es niemals und
+schreibt es niemals auf die Platte.
 
-Implemented methods:
+Implementierte Methoden:
 
-- `session/create` calls the real `session.create` RPC, stores the returned
-  session id, and returns the `PhysicsAgentSession` view the adapter expects.
-- `session/send` opens the account-scoped `/api/events.mux` WebSocket, queues
-  one text prompt through `session.prompt`, and streams text/tool/terminal
-  events tagged with a generated run id.
-- `run/cancel` calls the real `session.cancel` RPC and emits one terminal
-  `run_failed` event with code `RUN_CANCELLED`.
-- `run/resume` reattaches to a run that is still active in this bridge process.
-  It does not replay completed history: an unknown or finished run fails with
-  `RUN_NOT_RESUMABLE`.
+- `session/create` ruft den echten RPC `session.create` auf, speichert die
+  zurückgegebene Sitzungs-ID und liefert die `PhysicsAgentSession`-Sicht, die der
+  Adapter erwartet.
+- `session/send` öffnet den kontobezogenen WebSocket `/api/events.mux`, reiht über
+  `session.prompt` einen Textprompt ein und streamt Text-/Tool-/Terminal-Ereignisse,
+  versehen mit einer erzeugten Run-ID.
+- `run/cancel` ruft den echten RPC `session.cancel` auf und sendet ein terminales
+  Ereignis `run_failed` mit dem Code `RUN_CANCELLED`.
+- `run/resume` hängt sich wieder an einen Run an, der in diesem Bridge-Prozess noch
+  aktiv ist. Es spielt keinen abgeschlossenen Verlauf erneut ab: Ein unbekannter
+  oder beendeter Run schlägt mit `RUN_NOT_RESUMABLE` fehl.
 
-The bridge fails closed for inputs the Harness prompt wire cannot represent:
-attachments return `UNSUPPORTED_ATTACHMENTS`; scene/question/model-policy
-metadata returns `UNSUPPORTED_SESSION_CONTEXT`; Harness questions and approval
-prompts return a terminal `SIDECAR_INTERACTION_UNSUPPORTED` event and cancel the
-run. `scene_changed`, `observation_changed`, and `verification_completed` are
-PhysicsOS domain events, not Harness events, so the sidecar does not fabricate
-them.
+Die Bridge schlägt geschlossen fehl (fail closed) bei Eingaben, die das
+Harness-Prompt-Protokoll nicht darstellen kann: Anhänge liefern
+`UNSUPPORTED_ATTACHMENTS`; Metadaten zu Szene/Aufgabe/Modellrichtlinie liefern
+`UNSUPPORTED_SESSION_CONTEXT`; Harness-Fragen und Freigabe-Prompts liefern ein
+terminales Ereignis `SIDECAR_INTERACTION_UNSUPPORTED` und brechen den Run ab.
+`scene_changed`, `observation_changed` und `verification_completed` sind
+PhysicsOS-Domänenereignisse, keine Harness-Ereignisse, daher erfindet der Sidecar
+sie nicht.
 
-Run the bridge tests with:
+Die Bridge-Tests ausführen mit:
 
 ```sh
 node --test apps/desktop/sidecar/bridge.test.mjs
 node --test apps/desktop/sidecar/bridge.live.test.mjs
 ```
 
-The live test starts a temporary local `dsh web`, injects a local OpenAI-
-compatible mock model, authenticates an admin, and asserts a real
-`session.create` plus one prompt turn through the bridge.
+Der Live-Test startet ein temporäres lokales `dsh web`, injiziert ein lokales
+OpenAI-kompatibles Mock-Modell, authentifiziert einen Admin und prüft ein echtes
+`session.create` plus einen Prompt-Durchlauf über die Bridge.
 
-## Updater key rotation
+## Rotation des Updater-Schlüssels
 
-Generate a new production key outside the repository:
+Einen neuen Produktionsschlüssel außerhalb des Repositorys erzeugen:
 
 ```sh
 pnpm --dir apps/desktop exec tauri signer generate -w ~/.tauri/physicsos-updater.key
 ```
 
-Store the printed public key in the release environment or release config. Store
-the private key and password only in the release secret manager. A new public
-key changes the trust root, so the first release carrying it must be distributed
-through an existing trusted build; subsequent updates use the new key.
+Den ausgegebenen öffentlichen Schlüssel in der Release-Umgebung oder der
+Release-Konfiguration ablegen. Den privaten Schlüssel und das Passwort nur im
+Release-Secret-Manager speichern. Ein neuer öffentlicher Schlüssel ändert den
+Vertrauensanker, daher muss das erste Release mit ihm über einen bestehenden
+vertrauenswürdigen Build verteilt werden; nachfolgende Updates verwenden den neuen
+Schlüssel.
 
-Release signing also needs `TAURI_SIGNING_PRIVATE_KEY` and
-`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. macOS distribution needs an Apple
-Developer ID certificate plus notarization credentials; Windows distribution
-needs its code-signing certificate. Publish the signed `.sig` and matching
-`latest.json` to the configured endpoint after all platform artifacts exist.
+Das Release-Signieren benötigt außerdem `TAURI_SIGNING_PRIVATE_KEY` und
+`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. Die macOS-Verteilung benötigt ein Apple-
+Developer-ID-Zertifikat plus Notarisierungs-Credentials; die Windows-Verteilung
+benötigt ihr Code-Signing-Zertifikat. Die signierte `.sig` und die passende
+`latest.json` am konfigurierten Endpunkt veröffentlichen, sobald alle
+Plattform-Artefakte vorliegen.

@@ -1,46 +1,46 @@
 # Harness Overlay
 
-`vendor/deepseek-harness` 是 pin 住的上游 submodule，本仓库不修改上游历史。PhysicsOS 需要叠加到 Harness 工作区的内容全部放在这里，由 `scripts/overlay/harness-overlay.mjs` 同步。
+`vendor/deepseek-harness` ist ein gepinntes Upstream-Submodul; dieses Repo verändert die Upstream-Historie nicht. Alles, was PhysicsOS auf den Harness-Arbeitsbereich überlagern muss, liegt hier und wird von `scripts/overlay/harness-overlay.mjs` synchronisiert.
 
-## 内容
+## Inhalt
 
-| 路径                                                              | 说明                                                                                                                                                                         |
-| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `files/packages/client/ui-physicsos/`                             | PhysicsOS 正式 Client Plugin 源码与测试（`lib/`、`node_modules/` 为构建产物，不入库）                                                                                        |
-| `files/packages/physicsos/tool-physicsos/`                        | PhysicsOS 宿主侧工具插件 `@deepseek-ai/dsh-tool-physicsos`：把 `@physicsos/agent-tools` 注册为模型可调用的 `physics_*` 工具（`lib/` 由 `pnpm run build:agent` 生成，不入库） |
-| `files/packages/physicsos/auth-host/`                             | PhysicsOS 账户体系与共享 `/api` 账号策略：学校/账号/会话、资源归属、私有工作区及学生预设限制                                                                                 |
-| `files/apps/cli/config/agent-presets/physics-student/`            | Agent 预设「物理学习模式」：物理宪法 persona + 物理工具 + 提问工具，随附根目录发现，Web 设置页可选                                                                           |
-| `files/packages/client/ui-settings-models/src/client/protocol.ts` | Harness 侧新增文件，被本地改动引用                                                                                                                                           |
-| `files/apps/web/public/physicsos/`                                | 网页压缩版首页资产                                                                                                                                                           |
-| `upstream-changes.patch`                                          | 对 Harness 已跟踪文件的本地改动（不含 `AGENTS.md` 类文档删除）；含 `apps/cli/package.json` 对工具插件的依赖与 `tsconfig.host.json` 的项目引用                                |
+| Pfad                                                              | Beschreibung                                                                                                                                                                                                                         |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `files/packages/client/ui-physicsos/`                             | Quellcode und Tests des offiziellen PhysicsOS-Client-Plugins (`lib/` und `node_modules/` sind Build-Artefakte und nicht im Repo)                                                                                                     |
+| `files/packages/physicsos/tool-physicsos/`                        | Hostseitiges PhysicsOS-Tool-Plugin `@deepseek-ai/dsh-tool-physicsos`: registriert `@physicsos/agent-tools` als vom Modell aufrufbare `physics_*`-Tools (`lib/` wird von `pnpm run build:agent` erzeugt und ist nicht im Repo)        |
+| `files/packages/physicsos/auth-host/`                             | PhysicsOS-Kontosystem und gemeinsame `/api`-Kontorichtlinie: Schule/Konto/Sitzung, Ressourcenzugehörigkeit, private Arbeitsbereiche und Einschränkungen für Schüler-Voreinstellungen                                                  |
+| `files/apps/cli/config/agent-presets/physics-student/`            | Agent-Voreinstellung „Physik-Lernmodus“: Persona mit Physik-Verfassung + Physik-Tools + Fragetool, wird über die Root-Erkennung mitgeliefert und ist in den Web-Einstellungen wählbar                                                |
+| `files/packages/client/ui-settings-models/src/client/protocol.ts` | Harness-seitig neu hinzugefügte Datei, auf die lokale Änderungen verweisen                                                                                                                                                           |
+| `files/apps/web/public/physicsos/`                                | Für das Web komprimierte Startseiten-Assets                                                                                                                                                                                          |
+| `upstream-changes.patch`                                          | Lokale Änderungen an vom Harness bereits verfolgten Dateien (ohne Löschungen von Dokumenten wie `AGENTS.md`); enthält die Abhängigkeit von `apps/cli/package.json` auf das Tool-Plugin und den Projektverweis in `tsconfig.host.json` |
 
-## 用法
+## Verwendung
 
 ```sh
 git submodule update --init --recursive
 node scripts/overlay/harness-overlay.mjs apply
 ```
 
-`apply` 只做叠加复制，不会删除 `vendor/deepseek-harness` 中已有的 `node_modules/` 与 `lib/`；补丁若已应用会跳过。
+`apply` kopiert nur als Überlagerung und löscht nicht die in `vendor/deepseek-harness` vorhandenen `node_modules/` und `lib/`; ein bereits angewendeter Patch wird übersprungen.
 
-在 `vendor/deepseek-harness` 里改完代码后，回写到本目录：
+Nach Änderungen an Code in `vendor/deepseek-harness` in dieses Verzeichnis zurückschreiben:
 
 ```sh
 node scripts/overlay/harness-overlay.mjs capture
 ```
 
-## 编辑器
+## Editor
 
-`files/**` 里的 `tsconfig.json` 不是可编译的项目文件：它们的 `extends` 与 `references` 指向 `tsconfig.base.json`、`vendor/cosmokit` 等路径，这些路径只有 `apply` 进 `vendor/deepseek-harness` 之后才存在。打开 overlay 里的 `.ts` 文件、或开启项目级诊断时，TS server 会原地加载这些 tsconfig 并把缺失目标报成错误——那是上下文缺失，不是代码问题；真实信号以 vendor 路径下的 `pnpm run typecheck` 为准。
+Die `tsconfig.json` in `files/**` sind keine kompilierbaren Projektdateien: Ihre `extends` und `references` zeigen auf Pfade wie `tsconfig.base.json` und `vendor/cosmokit`, die erst nach `apply` in `vendor/deepseek-harness` existieren. Beim Öffnen einer `.ts`-Datei im Overlay oder bei aktivierter Projektdiagnose lädt der TS-Server diese tsconfig-Dateien an Ort und Stelle und meldet fehlende Ziele als Fehler – das ist fehlender Kontext, kein Codeproblem; das echte Signal liefert `pnpm run typecheck` unter dem vendor-Pfad.
 
-要让 IDE 不再报这类噪音，在用户设置里关掉项目级诊断（本仓库 `.vscode/` 在 `.gitignore` 中，属本机配置）：
+Damit die IDE dieses Rauschen nicht mehr meldet, schalten Sie in den Benutzereinstellungen die Projektdiagnose aus (`.vscode/` dieses Repos steht in der `.gitignore` und ist lokale Konfiguration):
 
 ```json
 { "typescript.tsserver.experimental.enableProjectDiagnostics": false }
 ```
 
-## 边界
+## Grenzen
 
-- 上游文件版权与许可证归 DeepSeek（MIT），详见仓库根 `NOTICE.md`。
-- `files/**` 是 PhysicsOS 自有代码，按仓库根 `LICENSE` 授权。
-- 升级 Harness pin 的流程见 `docs/HARNESS-UPSTREAM.md`；pin 变更后必须重新 `capture` 并确认 patch 仍可应用。
+- Urheberrecht und Lizenz der Upstream-Dateien liegen bei DeepSeek (MIT), Details siehe `NOTICE.md` im Repo-Root.
+- `files/**` ist PhysicsOS-eigener Code und steht unter der `LICENSE` im Repo-Root.
+- Zum Ablauf beim Aktualisieren des Harness-Pins siehe `docs/HARNESS-UPSTREAM.md`; nach einer Pin-Änderung muss erneut `capture` ausgeführt und bestätigt werden, dass sich der Patch noch anwenden lässt.

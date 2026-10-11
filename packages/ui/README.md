@@ -2,11 +2,11 @@
 
 ## Purpose
 
-PhysicsOS 设计 token、primitive 与领域组件。视觉以 `UI/原型图` 与 `docs/06-UI-DESIGN-SYSTEM.md` 为准。
+Design-Tokens, Primitive und Domänenkomponenten von PhysicsOS. Maßgeblich für die Optik sind `UI/原型图` (Prototypen) und `docs/06-UI-DESIGN-SYSTEM.md`.
 
 ## Forbidden
 
-- 大面积紫色 / 赛博朋克
-- Emoji 当正式图标
-- 在组件内写死 Physics Engine 公式求解
-- 直接依赖 DeepSeek Harness
+- Großflächiges Violett / Cyberpunk
+- Emojis als offizielle Icons
+- Fest in Komponenten verdrahtete Formellösungen der Physics Engine
+- Direkte Abhängigkeit von DeepSeek Harness

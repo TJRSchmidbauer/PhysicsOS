@@ -1,66 +1,66 @@
 # @deepseek-ai/dsh-tool-physicsos
 
-PhysicsOS 物理工具的 Harness 宿主侧插件（host-plane tool plugin）。它把 `@physicsos/agent-tools` 的 `PhysicsToolRuntime` 注册成模型可调用的七个工具，自身不含任何物理计算——数值全部来自 PhysicsOS 引擎、验证器与题目运行时。
+Hostseitiges Plugin (host-plane tool plugin) des Harness für die PhysicsOS-Physik-Tools. Es registriert die `PhysicsToolRuntime` aus `@physicsos/agent-tools` als sieben vom Modell aufrufbare Tools und enthält selbst keine Physikberechnung – alle Zahlenwerte stammen aus der PhysicsOS-Engine, dem Verifier und der Aufgaben-Runtime.
 
-## 注册的工具
+## Registrierte Tools
 
-| 模型可见名 | 运行时方法 | 作用 |
+| Für das Modell sichtbarer Name | Runtime-Methode | Wirkung |
 | --- | --- | --- |
-| `physics_list_experiments` | `listExperiments()` | 实验目录（id / 领域 / 学段 / 标题） |
-| `physics_create_experiment` | `createExperiment(id, title?)` | 按目录 id 建真实 `PhysicsScene`，返回 `sceneId` |
-| `physics_solve_question` | `solveQuestion(text)` | 题面 → 解析 → 建场景 → 引擎求解 → 校验，返回结构化解答与 `sceneId` |
-| `physics_describe_scene` | `describeScene(sceneId)` | 场景当前状态：对象 id、可观察量、可用命令 |
-| `physics_scene_command` | `applyCommand(sceneId, type, payload)` | 执行一条 `SceneCommand`（revision +1）；被拒绝时返回 `ok: false`，不抛错 |
-| `physics_simulate` | `simulate(sceneId)` | 引擎模拟 + 守恒校验：导出量、事件、每条检查 |
-| `physics_observe` | `observe(sceneId, t)` | 某时刻的引擎状态 |
+| `physics_list_experiments` | `listExperiments()` | Experimentkatalog (id / Domäne / Stufe / Titel) |
+| `physics_create_experiment` | `createExperiment(id, title?)` | baut anhand der Katalog-id eine echte `PhysicsScene`, gibt `sceneId` zurück |
+| `physics_solve_question` | `solveQuestion(text)` | Aufgabentext → Parsen → Szene bauen → Engine-Lösung → Prüfung, gibt strukturierte Lösung und `sceneId` zurück |
+| `physics_describe_scene` | `describeScene(sceneId)` | aktueller Zustand der Szene: Objekt-ids, Beobachtungsgrößen, verfügbare Befehle |
+| `physics_scene_command` | `applyCommand(sceneId, type, payload)` | führt einen `SceneCommand` aus (revision +1); bei Ablehnung wird `ok: false` zurückgegeben, kein Fehler geworfen |
+| `physics_simulate` | `simulate(sceneId)` | Engine-Simulation + Erhaltungsprüfung: abgeleitete Größen, Ereignisse, jede Prüfung |
+| `physics_observe` | `observe(sceneId, t)` | Engine-Zustand zu einem Zeitpunkt |
 
-名称、描述与模型可见文本都来自 `@physicsos/agent-tools`（`PHYSICS_TOOL_DOCS`、`PHYSICS_TOOL_RENDERERS`），任何 Harness 绑定呈现给模型的契约与措辞都相同：规范值是运行时的 JSON（供 Code Mode / 程序读取），`render` 输出运行时的中文文本投影（每个数值带单位、每条校验带判定）。运行时的编码拒绝（`SCENE_NOT_FOUND`、`UNKNOWN_EXPERIMENT`…）以 `PhysicsToolCallError` 抛出，`code` 落在 `tool/result` 的 `error.info.code` 上。
+Namen, Beschreibungen und der für das Modell sichtbare Text stammen aus `@physicsos/agent-tools` (`PHYSICS_TOOL_DOCS`, `PHYSICS_TOOL_RENDERERS`); der dem Modell von jeder Harness-Anbindung präsentierte Vertrag und Wortlaut sind gleich: Der kanonische Wert ist das JSON der Runtime (für Code Mode / Programme), `render` gibt die chinesische Textprojektion der Runtime aus (jeder Zahlenwert mit Einheit, jede Prüfung mit Urteil). Kodierte Ablehnungen der Runtime (`SCENE_NOT_FOUND`, `UNKNOWN_EXPERIMENT` …) werden als `PhysicsToolCallError` geworfen, der `code` landet in `error.info.code` von `tool/result`.
 
-## 配置
+## Konfiguration
 
 ```yaml
 - id: tool-physicsos
   name: '@deepseek-ai/dsh-tool-physicsos'
   config:
-    sceneScope: session   # session（默认）| process
-    maxScenes: 64         # 每个运行时保留的场景上限，超出丢最旧
+    sceneScope: session   # session (Standard) | process
+    maxScenes: 64         # Obergrenze der je Runtime gehaltenen Szenen, darüber wird die älteste verworfen
 ```
 
-`session`：每个 Agent 会话一份 `PhysicsToolRuntime`，学生之间的场景互不可见；`process`：本宿主上所有会话共享一份（无 Agent 的调用方——测试、Code Mode——落在匿名作用域）。
+`session`: eine `PhysicsToolRuntime` pro Agent-Sitzung, die Szenen der Lernenden sind füreinander unsichtbar; `process`: alle Sitzungen auf diesem Host teilen sich eine (Aufrufer ohne Agent – Tests, Code Mode – landen im anonymen Geltungsbereich).
 
-## 所属组合
+## Zugehörige Kompositionen
 
-- Web：`apps/cli/config/agent-presets/physics-student/agent.cordis.yml`（预设「物理学习模式」：物理宪法 persona + 本插件 + `tool-ask-user`，不含 shell / 文件 / 网页 / 子代理工具）。
-- Headless 验收：`tests/agent/physics-headless.patch.yml`（同一组合，写成 `--patch` 覆盖层）。
+- Web: `apps/cli/config/agent-presets/physics-student/agent.cordis.yml` (Voreinstellung „Physik-Lernmodus“: Persona mit Physik-Verfassung + dieses Plugin + `tool-ask-user`, ohne Shell-/Datei-/Web-/Subagent-Tools).
+- Headless-Abnahme: `tests/agent/physics-headless.patch.yml` (dieselbe Komposition, als `--patch`-Overlay geschrieben).
 
-## 构建与验证（在 PhysicsOS 仓库根目录）
+## Build und Verifikation (im Wurzelverzeichnis des PhysicsOS-Repos)
 
 ```sh
-pnpm run build:agent       # tsc -b + tsdown → lib/index.js（内联 @physicsos/*，外部化 @deepseek-ai/*）
+pnpm run build:agent       # tsc -b + tsdown → lib/index.js (inlined @physicsos/*, externalized @deepseek-ai/*)
 pnpm run typecheck:agent
 pnpm run lint:agent
 pnpm run test:agent        # tests/tool-physicsos.spec.ts + tests/preset-composition.spec.ts
-node tests/agent/headless-physics-acceptance.mjs   # 真实 dsh 进程 + mock LLM 的端到端门禁
+node tests/agent/headless-physics-acceptance.mjs   # End-to-End-Gate mit echtem dsh-Prozess + Mock-LLM
 ```
 
-## Model Experience
+## Modellerfahrung
 
-### The `physics_*` tool family
+### Die `physics_*`-Tool-Familie
 
-#### What the model sees
+#### Was das Modell sieht
 
-Seven tool registrations — `physics_list_experiments`, `physics_create_experiment`, `physics_solve_question`, `physics_describe_scene`, `physics_scene_command`, `physics_simulate`, `physics_observe` — whose names, descriptions, and result text come verbatim from `@physicsos/agent-tools` (`PHYSICS_TOOL_DOCS` / `PHYSICS_TOOL_RENDERERS`); this package mounts them unchanged.
+Sieben Tool-Registrierungen – `physics_list_experiments`, `physics_create_experiment`, `physics_solve_question`, `physics_describe_scene`, `physics_scene_command`, `physics_simulate`, `physics_observe` –, deren Namen, Beschreibungen und Ergebnistexte wörtlich aus `@physicsos/agent-tools` (`PHYSICS_TOOL_DOCS` / `PHYSICS_TOOL_RENDERERS`) stammen; dieses Paket hängt sie unverändert ein.
 
-#### Token effect
+#### Token-Wirkung
 
-Each tool adds one fixed entry to the request's tool list, and each call returns a Chinese text projection of the runtime's canonical JSON — numbers carry units, every conservation check carries a verdict.
+Jedes Tool fügt der Tool-Liste der Anfrage einen festen Eintrag hinzu, und jeder Aufruf liefert eine chinesische Textprojektion des kanonischen JSON der Runtime – Zahlen tragen Einheiten, jede Erhaltungsprüfung trägt ein Urteil.
 
-#### KV Cache effect
+#### KV-Cache-Wirkung
 
-The seven tool entries are fixed strings, so the prompt prefix stays cache-stable across calls; only per-call arguments and the returned result block extend the context.
+Die sieben Tool-Einträge sind feste Zeichenketten, daher bleibt das Prompt-Präfix über Aufrufe hinweg cache-stabil; nur die Argumente je Aufruf und der zurückgegebene Ergebnisblock erweitern den Kontext.
 
-## Known Limitations and Deferred Work
+## Bekannte Einschränkungen und zurückgestellte Arbeit
 
-- 本包是 DEV INTEGRATION BRIDGE 的宿主侧对应物：`@physicsos/agent-tools` 通过 `link:` 引入源码，打包时内联进 `lib/index.js`，运行时不依赖 tsx 解析 `.ts`。
-- 不修改 Harness Agent Loop / Session / Tools 内核；只注册工具（docs/04 §6、§154）。
-- 物理事实的唯一来源是 `PhysicsScene` 与引擎（docs/02 §3–§7）；本包不持有第二套场景状态。
+- Dieses Paket ist das hostseitige Gegenstück der DEV INTEGRATION BRIDGE: `@physicsos/agent-tools` wird per `link:` als Quellcode eingebunden und beim Bündeln in `lib/index.js` inlined; zur Laufzeit hängt nichts von einer Auflösung von `.ts` durch tsx ab.
+- Der Kern aus Harness Agent Loop / Session / Tools wird nicht verändert; es werden nur Tools registriert (docs/04 §6, §154).
+- Die einzige Quelle physikalischer Fakten sind `PhysicsScene` und die Engine (docs/02 §3–§7); dieses Paket hält keinen zweiten Szenenzustand.

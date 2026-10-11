@@ -1,36 +1,36 @@
 # @deepseek-ai/dsh-class-host
 
-PhysicsOS class, assignment, submission, review, and completion host plugin.
-One prefix (`/physicsos/class`) over the shared `physicsosIdentity` service and
-the `physicsos_class` storage domain.
+Host-Plugin von PhysicsOS für Klassen, Aufgaben, Abgaben, Durchsicht und
+Abschluss. Ein Präfix (`/physicsos/class`) über dem gemeinsamen Service
+`physicsosIdentity` und der Storage-Domäne `physicsos_class`.
 
-| Surface                                                    | Who reads                                                                                 | Who writes                                    |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `/classes`                                                 | students see classes they belong to; teachers see classes they own; admins see the tenant | teacher and above                             |
-| `/classes/:id/members`                                     | owner or school admin                                                                     | owner or school admin, by canonical `userKey` |
-| `/classes/:id/assignments`                                 | class members, owner, or admin                                                            | owner or school admin                         |
-| `/classes/:id/assignments/:id/submission`                  | the submitting student                                                                    | the submitting student, if a member           |
-| `/classes/:id/assignments/:id/submissions`                 | owner or school admin                                                                     | —                                             |
-| `/classes/:id/assignments/:id/submissions/:userKey/review` | —                                                                                         | owner or school admin                         |
-| `/classes/:id/dashboard`                                   | owner or school admin                                                                     | —                                             |
+| Oberfläche                                                 | Wer liest                                                                                                     | Wer schreibt                                      |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `/classes`                                                 | Lernende sehen Klassen, denen sie angehören; Lehrkräfte sehen Klassen, die sie besitzen; Admins sehen den Mandanten | Lehrkraft und höher                               |
+| `/classes/:id/members`                                     | Besitzer oder Schul-Admin                                                                                     | Besitzer oder Schul-Admin, über kanonischen `userKey` |
+| `/classes/:id/assignments`                                 | Klassenmitglieder, Besitzer oder Admin                                                                        | Besitzer oder Schul-Admin                         |
+| `/classes/:id/assignments/:id/submission`                  | die abgebende lernende Person                                                                                 | die abgebende lernende Person, sofern Mitglied    |
+| `/classes/:id/assignments/:id/submissions`                 | Besitzer oder Schul-Admin                                                                                     | —                                                 |
+| `/classes/:id/assignments/:id/submissions/:userKey/review` | —                                                                                                             | Besitzer oder Schul-Admin                         |
+| `/classes/:id/dashboard`                                   | Besitzer oder Schul-Admin                                                                                     | —                                                 |
 
-The identity service is resolved per request because this host can load before
-`auth-host` publishes it. Every service method re-checks tenant and ownership;
-the route guard is an outer door, not the only check.
+Der Identity-Service wird pro Anfrage aufgelöst, weil dieser Host geladen werden
+kann, bevor `auth-host` ihn veröffentlicht. Jede Service-Methode prüft Mandant und
+Besitz erneut; der Route-Guard ist eine äußere Tür, nicht die einzige Prüfung.
 
-## Bounds
+## Grenzen
 
-- Request bodies: 32 KiB.
-- Class name: 80 characters; description: 500 characters.
-- Membership: 500 users per class.
-- Assignments: 500 per class; listed at most 200 at a time.
-- Submission text: 16,000 characters; reviews at most 2,000 characters.
-- List limits: classes 500, members 500, submissions 500.
+- Request-Bodys: 32 KiB.
+- Klassenname: 80 Zeichen; Beschreibung: 500 Zeichen.
+- Mitgliedschaft: 500 Nutzer pro Klasse.
+- Aufgaben: 500 pro Klasse; höchstens 200 auf einmal aufgelistet.
+- Abgabetext: 16.000 Zeichen; Durchsichten höchstens 2.000 Zeichen.
+- Listenlimits: Klassen 500, Mitglieder 500, Abgaben 500.
 
-## Verification
+## Verifikation
 
-- `tests/routes.spec.ts` covers role enforcement, tenant isolation, membership,
-  target/due validation, submission receipts, review, dashboard counts,
-  payload bounds, and audit.
-- `tests/composition.spec.ts` boots the real Cordis chain with `class-host`
-  before `auth-host` and runs the full workflow on live session cookies.
+- `tests/routes.spec.ts` deckt Rollendurchsetzung, Mandantenisolation, Mitgliedschaft,
+  Ziel-/Fälligkeitsvalidierung, Abgabequittungen, Durchsicht, Dashboard-Zähler,
+  Payload-Grenzen und Audit ab.
+- `tests/composition.spec.ts` bootet die echte Cordis-Kette mit `class-host` vor
+  `auth-host` und führt den vollständigen Workflow mit Live-Sitzungs-Cookies aus.

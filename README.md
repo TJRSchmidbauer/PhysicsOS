@@ -1,44 +1,44 @@
 # PhysicsOS
 
-> **开源公益项目**：面向初高中物理教学，公益定位。授权见 [`LICENSE`](./LICENSE)（Apache License 2.0，OSI 认证的开源许可，允许修改、分发与商业使用）。项目欢迎外部开发者共同维护，参与方式见 [`CONTRIBUTING.md`](./CONTRIBUTING.md)。
+> **Gemeinnütziges Open-Source-Projekt**: für den Physikunterricht der Mittel- und Oberstufe (Klassen 7–12), gemeinnützig ausgerichtet. Lizenz siehe [`LICENSE`](./LICENSE) (Apache License 2.0, eine von der OSI zertifizierte Open-Source-Lizenz, die Änderung, Weitergabe und kommerzielle Nutzung erlaubt). Externe Entwickler sind zur gemeinsamen Pflege willkommen; zur Beteiligung siehe [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 >
-> **状态：公测开放（public beta）**。正式入口为 <https://physics.dongsiwei.com>。账户体系、出卷专区、学习记录跨设备同步、生产部署、模型号池与管理员运维面板均已上线；接口与界面仍会迭代，真实教学反馈会直接影响后续优先级。
+> **Status: öffentliche Beta (public beta)**. Der offizielle Einstieg ist <https://physics.dongsiwei.com>. Kontosystem, Prüfungsbereich zum Erstellen von Klausuren, geräteübergreifende Synchronisierung der Lernaufzeichnungen, Produktionsbetrieb, Modell-Pool und Admin-Betriebspanel sind online; Schnittstellen und Oberfläche werden weiter iteriert, und echtes Unterrichts-Feedback beeinflusst die weiteren Prioritäten unmittelbar.
 
-PhysicsOS 的定位是**个人物理实验与学习平台**，不是学校 LMS：不做班级管理、作业发布、提交批改和教学管理流程。教师和学生都以个人账号使用实验、题库、AI 助教与学习记录。
+PhysicsOS ist als **persönliche Plattform für Physikexperimente und Lernen** positioniert, nicht als Schul-LMS: keine Klassenverwaltung, keine Aufgabenvergabe, keine Abgabe und Korrektur, keine Unterrichtsverwaltungsabläufe. Lehrkräfte wie Lernende nutzen Experimente, Aufgabenbank, KI-Assistenz und Lernaufzeichnungen mit persönlichen Konten.
 
-PhysicsOS 是一个面向初高中物理学习的公益可视化智能体，通过 AI 理解题目并结合物理引擎，将抽象物理过程转化为可交互、可观察、可计算、可验证的真实物理场景。
+PhysicsOS ist ein gemeinnütziger, visueller intelligenter Agent für das Physiklernen in der Mittel- und Oberstufe: Er versteht Aufgaben per KI und überführt abstrakte physikalische Vorgänge mithilfe der Physik-Engine in interaktive, beobachtbare, berechenbare und überprüfbare reale Physikszenen.
 
-当前正式产品运行在 DeepSeek Harness Web Client 中，Physics Engine 负责结果，Observation 与统一 `PhysicsCanvas` 负责把结果变成可交互视觉。
+Das aktuelle Produkt läuft im DeepSeek Harness Web Client; die Physics Engine liefert die Ergebnisse, Observation und die einheitliche `PhysicsCanvas` machen daraus interaktive Visualisierungen.
 
-## 界面截图
+## Screenshots
 
-以下截图取自 2026-09-30 的正式生产站点，由
-`tests/acceptance/promo-shots.mjs` 使用真实浏览器登录后自动拍摄（账号为专用演示账号，非管理员账号）。
+Die folgenden Screenshots stammen von der offiziellen Produktionsseite vom 2026-09-30 und wurden von
+`tests/acceptance/promo-shots.mjs` nach der Anmeldung in einem echten Browser automatisch aufgenommen (dediziertes Demo-Konto, kein Admin-Konto).
 
-| 平台首页 | 实验中心 |
+| Plattform-Startseite | Experimentzentrum |
 | --- | --- |
-| ![平台首页](docs/reports/screenshots/promo/01-home.png) | ![实验中心](docs/reports/screenshots/promo/02-experiment-center.png) |
+| ![Plattform-Startseite](docs/reports/screenshots/promo/01-home.png) | ![Experimentzentrum](docs/reports/screenshots/promo/02-experiment-center.png) |
 
-| 串联电路 | 凸透镜成像规律 |
+| Reihenschaltung | Abbildungsgesetze der Sammellinse |
 | --- | --- |
-| ![串联电路](docs/reports/screenshots/promo/03-lab-series-circuit.png) | ![凸透镜成像规律](docs/reports/screenshots/promo/04-lab-convex-lens.png) |
+| ![Reihenschaltung](docs/reports/screenshots/promo/03-lab-series-circuit.png) | ![Abbildungsgesetze der Sammellinse](docs/reports/screenshots/promo/04-lab-convex-lens.png) |
 
-| 探究液体内部的压强 | 探究晶体的熔化过程 |
+| Druck im Inneren einer Flüssigkeit untersuchen | Schmelzvorgang eines Kristalls untersuchen |
 | --- | --- |
-| ![液体压强](docs/reports/screenshots/promo/05-lab-liquid-pressure.png) | ![晶体熔化](docs/reports/screenshots/promo/06-lab-melting.png) |
+| ![Flüssigkeitsdruck](docs/reports/screenshots/promo/05-lab-liquid-pressure.png) | ![Kristallschmelzen](docs/reports/screenshots/promo/06-lab-melting.png) |
 
-| 资源库 | 解题卡片 |
+| Bibliothek | Lösungskarte |
 | --- | --- |
-| ![资源库](docs/reports/screenshots/promo/07-library.png) | ![解题卡片](docs/reports/screenshots/promo/09-solved-question.png) |
+| ![Bibliothek](docs/reports/screenshots/promo/07-library.png) | ![Lösungskarte](docs/reports/screenshots/promo/09-solved-question.png) |
 
-最后一张是一道题的完整回答：结论由力学引擎给出并逐条校验（重力分量、支持力、场景结构），右侧是同一个 `PhysicsScene` 在实验台里的可交互形态——**AI 讲题、引擎给结果、场景可复现**是这条链路的全部主张。
+Das letzte Bild zeigt die vollständige Antwort auf eine Aufgabe: Das Ergebnis liefert die Mechanik-Engine und prüft es Punkt für Punkt (Gewichtskomponente, Stützkraft, Szenenstruktur); rechts steht dieselbe `PhysicsScene` in ihrer interaktiven Form im Experimentiertisch – **die KI erklärt die Aufgabe, die Engine liefert das Ergebnis, die Szene ist reproduzierbar**: Das ist der gesamte Anspruch dieser Kette.
 
-完整上线范围、生产复验和教师演示顺序见
-[`docs/reports/BETA-LAUNCH-REPORT.md`](./docs/reports/BETA-LAUNCH-REPORT.md)。
+Vollständigen Live-Umfang, Produktions-Nachprüfung und die Reihenfolge der Lehrer-Demo siehe
+[`docs/reports/BETA-LAUNCH-REPORT.md`](./docs/reports/BETA-LAUNCH-REPORT.md).
 
-## 正式入口
+## Offizieller Einstieg
 
-唯一正式 Web Runtime Host：
+Der einzige offizielle Web Runtime Host:
 
 ```text
 vendor/deepseek-harness/apps/web
@@ -46,62 +46,62 @@ vendor/deepseek-harness/apps/web
 @deepseek-ai/dsh-client-ui-physicsos
 ```
 
-旧版独立原型 `apps/web` 已删除；浏览器端正式入口是 vendor harness 的 `dsh-client-ui-physicsos`。
+Der alte eigenständige Prototyp `apps/web` wurde gelöscht; der offizielle Browser-Einstieg ist `dsh-client-ui-physicsos` im vendor-Harness.
 
-## 当前能力
+## Aktuelle Fähigkeiten
 
-- PhysicsOS 首页、侧栏、学生模式与正式 Harness 工作区
-- 实验中心：力学/光学/声学/机械波/流体/热学/电场/磁场/电路/复合场/电磁感应/近代物理十二个分类；**回旋加速器已接通时变场求解**（不再是“即将支持”），新增纵波、反射折射、衍射、多普勒与光电效应模板；继续上次实验与按学习记录的薄弱点推荐
-- 匀强磁场带电粒子实验：参数编辑、运行/暂停/单步/重置、倍速、时间轴、可观察量、数据、图像、推导和事件
-- 五类力学场景：匀速、匀加速、平抛/斜抛、牛顿第二定律、无摩擦斜面
-- 碰撞实验：弹性/非弹性（e = 0.5）/完全非弹性三类模板，独立碰撞引擎（多刚体圆-圆冲量求解、边界反射、恢复系数模型），动量守恒与动能守恒（弹性时）引擎验证，碰撞事件进时间轴；首页 Hero 是同一套圆形刚体 + 速度箭头的弹性碰撞小场景（装饰性，带轨迹尾迹与接触闪环）
-- 电场与复合场：点电荷/多点电荷/匀强场/平行板偏转，速度选择器、质谱仪、E+B(+g)、多场区
-- 直流动态电路：串联/并联/混联、开关、滑动变阻器准静态扫描、电流表/电压表读数、测电动势与内阻（MNA 直流引擎）；实验室 AI 助教 8 个电路意图（干路电流、路端电压、内阻、串联环流、并联分流、滑变扫描、功率守恒、理想电表），答案引用引擎派生量与 KCL/功率/路端电压定律/理想电表四项具名校验
-- 电磁感应：导体棒切割磁感线（E = BLv，棒扫过磁场的动画）与磁通量变化（E = −dΦ/dt，楞次定律定方向）两类实验台；B/R/棒速/磁通量变化率实时可编辑，法拉第定律、楞次方向与回路欧姆定律三项引擎验证（31 个引擎测试）
-- 几何光学成像：平面镜、凸透镜、凹面镜、凸面镜四类实验模板，引擎解析薄透镜/球面镜方程与五区成像规律并构造主光路（23 个引擎测试）；6 道光学黄金题（平面镜与凸透镜三区、凹面镜、凸面镜）已入题库
-- 机械波：绳上的简谐横波（波形以 v = λf 平移、标记质点只振动不迁移）、双源干涉（路程差 Δ = nλ / (n+½)λ 判定加强减弱，合振幅 |2A·cos(πΔ/λ)|）、两端固定的弦驻波（L = nλ/2、f_n = n·v/2L、波节与波腹）三个实验台；A/f/v/Δ/L/n 实时可编辑，介质定波速、波源定频率，11 项引擎校验（27 个引擎测试）；6 道机械波黄金题已入题库
-- 声学/流体/热学/杠杆：回声测距、阿基米德浮力、晶体熔化与比热容比较、杠杆平衡，各自有独立领域引擎
-- 统一 `PhysicsCanvas`：粒子域共用坐标、网格、轨迹、矢量、标注与交互；电路以原理图范式接入同一画布
-- Question Space：80 道内置题（磁场 10、电场 19、力学 6、复合场 21、光学 6、电路 6、电磁感应 6、机械波 6），真实 Question Runtime、Engine、Verifier 与 Observation 链
-- Question → Lab：题目使用同一个 `PhysicsScene` revision 打开实验室（题面事实不可被实验污染）
-- 基于 `requestAnimationFrame` 的连续动画；磁场微观周期使用稳定展示时钟，力学逐帧读取 Engine `stateAt`
-- **平台公益模型**：用户侧只暴露一个公共模型（`平台公益模型`），背后是管理员可随时增删的**模型通道与号池**（`/physicsos/model-pool`）——通道声明上游模型别名、按优先级分层轮换、key 加权轮转与失效冷却，换号池或换 key 不影响用户看到的模型名；额度来自公益站 token，见「[致谢](#致谢)」
-- 桌面、窄桌面和手机布局；手机导航完成后自动收起侧栏
-- Harness 会话里的模型可以真正调用物理引擎：Agent 预设「物理学习模式」（`physics-student`）挂载 `@deepseek-ai/dsh-tool-physicsos`，模型通过 `physics_solve_question / physics_create_experiment / physics_scene_command / physics_simulate / physics_observe` 等七个工具开实验、解题、改条件、模拟与校验，数值全部来自引擎（`node tests/agent/headless-physics-acceptance.mjs` 端到端门禁）
+- PhysicsOS-Startseite, Seitenleiste, Schülermodus und offizieller Harness-Arbeitsbereich
+- Experimentzentrum: zwölf Kategorien – Mechanik/Optik/Akustik/mechanische Wellen/Fluide/Wärmelehre/elektrisches Feld/Magnetfeld/Stromkreise/zusammengesetzte Felder/elektromagnetische Induktion/moderne Physik; **das Zyklotron ist an den Löser für zeitabhängige Felder angeschlossen** (nicht mehr „demnächst unterstützt“); neu hinzugekommen sind Vorlagen für Längswellen, Reflexion/Brechung, Beugung, Doppler-Effekt und Fotoeffekt; außerdem Fortsetzen des letzten Experiments und Empfehlungen anhand der Schwächen aus den Lernaufzeichnungen
+- Experiment zu geladenen Teilchen im homogenen Magnetfeld: Parameterbearbeitung, Start/Pause/Einzelschritt/Zurücksetzen, Geschwindigkeitsstufen, Zeitachse, Beobachtungsgrößen, Daten, Diagramme, Herleitung und Ereignisse
+- Fünf Mechanik-Szenentypen: gleichförmige Bewegung, gleichmäßig beschleunigte Bewegung, waagerechter/schräger Wurf, zweites Newtonsches Gesetz, reibungsfreie schiefe Ebene
+- Stoßexperimente: drei Vorlagen – elastisch, inelastisch (e = 0,5) und vollständig inelastisch; eigene Stoß-Engine (Impulslösung für mehrere starre Kreis-Kreis-Körper, Randreflexion, Modell mit Stoßzahl), Engine-Prüfung von Impulserhaltung und (beim elastischen Stoß) Energieerhaltung, Stoßereignisse landen auf der Zeitachse; der Hero-Bereich der Startseite ist dieselbe kleine elastische Stoßszene aus kreisförmigen starren Körpern mit Geschwindigkeitspfeilen (dekorativ, mit Spurschweif und Kontaktblitz-Ring)
+- Elektrisches Feld und zusammengesetzte Felder: Punktladung/mehrere Punktladungen/homogenes Feld/Ablenkung im Plattenkondensator, Geschwindigkeitsfilter, Massenspektrometer, E+B(+g), mehrere Feldbereiche
+- Dynamische Gleichstromkreise: Reihen-/Parallel-/gemischte Schaltung, Schalter, quasistatischer Durchlauf eines Schiebewiderstands, Strom-/Spannungsmesser-Anzeigen, Messung von EMK und Innenwiderstand (MNA-Gleichstrom-Engine); der KI-Assistent im Labor kennt 8 Stromkreis-Intentionen (Hauptstrom, Klemmenspannung, Innenwiderstand, Kreisstrom in der Reihenschaltung, Stromteilung in der Parallelschaltung, Schiebewiderstand-Durchlauf, Leistungserhaltung, ideale Messgeräte), und seine Antworten zitieren aus der Engine abgeleitete Größen sowie vier benannte Prüfungen: KCL / Leistung / Klemmenspannungsgesetz / ideale Messgeräte
+- Elektromagnetische Induktion: zwei Experimentiertische – Leiterstab schneidet Feldlinien (E = BLv, Animation des Stabs im Magnetfeld) und Änderung des magnetischen Flusses (E = −dΦ/dt, Richtung nach der Lenzschen Regel); B/R/Stabgeschwindigkeit/Flussänderungsrate sind in Echtzeit editierbar, drei Engine-Prüfungen – Faradaysches Gesetz, Lenzsche Richtung und Ohmsches Gesetz im Kreis (31 Engine-Tests)
+- Geometrisch-optische Abbildung: vier Experimentvorlagen – Planspiegel, Sammellinse, Hohlspiegel, Wölbspiegel; die Engine löst die Gleichungen für dünne Linsen/Kugelspiegel analytisch, wendet die Abbildungsgesetze der fünf Bereiche an und konstruiert den Hauptstrahlengang (23 Engine-Tests); 6 optische Goldaufgaben (Planspiegel und drei Bereiche der Sammellinse, Hohlspiegel, Wölbspiegel) sind in der Aufgabenbank
+- Mechanische Wellen: drei Experimentiertische – harmonische Transversalwelle auf einem Seil (die Wellenform verschiebt sich gemäß v = λf, markierte Teilchen schwingen nur und wandern nicht), Zweiquellen-Interferenz (Verstärkung/Auslöschung nach Gangunterschied Δ = nλ / (n+½)λ, resultierende Amplitude |2A·cos(πΔ/λ)|) und stehende Welle auf einer beidseitig eingespannten Saite (L = nλ/2, f_n = n·v/2L, Knoten und Bäuche); A/f/v/Δ/L/n sind in Echtzeit editierbar, das Medium bestimmt die Wellengeschwindigkeit, die Quelle die Frequenz; 11 Engine-Prüfungen (27 Engine-Tests); 6 Goldaufgaben zu mechanischen Wellen sind in der Aufgabenbank
+- Akustik/Fluide/Wärmelehre/Hebel: Echolot-Entfernungsmessung, Auftrieb nach Archimedes, Schmelzen von Kristallen und Vergleich der spezifischen Wärmekapazität, Hebelgleichgewicht – jeweils mit eigener Domänen-Engine
+- Einheitliche `PhysicsCanvas`: Teilchen-Domänen teilen Koordinaten, Gitter, Bahnen, Vektoren, Beschriftungen und Interaktion; Stromkreise werden im Schaltplan-Paradigma in dieselbe Zeichenfläche eingebunden
+- Question Space: 80 integrierte Aufgaben (Magnetfeld 10, elektrisches Feld 19, Mechanik 6, zusammengesetzte Felder 21, Optik 6, Stromkreise 6, elektromagnetische Induktion 6, mechanische Wellen 6) mit echter Kette aus Question Runtime, Engine, Verifier und Observation
+- Question → Lab: Aufgaben öffnen das Labor mit derselben `PhysicsScene`-Revision (Fakten der Aufgabenstellung können nicht durch Experimente verfälscht werden)
+- Kontinuierliche Animation auf Basis von `requestAnimationFrame`; die mikroskopische Periode im Magnetfeld nutzt eine stabile Anzeigeuhr, die Mechanik liest die Engine-Funktion `stateAt` Bild für Bild
+- **Gemeinnütziges Plattformmodell**: Auf Nutzerseite wird nur ein öffentliches Modell angezeigt (`平台公益模型`, „gemeinnütziges Plattformmodell“); dahinter stehen vom Admin jederzeit änderbare **Modellkanäle und ein Konten-Pool** (`/physicsos/model-pool`) – Kanäle deklarieren Upstream-Modellaliase, rotieren nach Prioritätsstufen, rotieren Keys gewichtet und kühlen bei Ausfall ab; ein Wechsel von Pool oder Key ändert den sichtbaren Modellnamen nicht; das Kontingent stammt aus Tokens gemeinnütziger Stationen, siehe „[Danksagung](#danksagung)“
+- Desktop-, schmale Desktop- und Smartphone-Layouts; die Seitenleiste klappt nach der Navigation auf dem Smartphone automatisch ein
+- Das Modell in einer Harness-Sitzung kann die Physik-Engine tatsächlich aufrufen: Die Agent-Voreinstellung „Physik-Lernmodus“ (`physics-student`) bindet `@deepseek-ai/dsh-tool-physicsos` ein; das Modell öffnet über sieben Tools wie `physics_solve_question / physics_create_experiment / physics_scene_command / physics_simulate / physics_observe` Experimente, löst Aufgaben, ändert Bedingungen, simuliert und prüft, alle Zahlenwerte stammen aus der Engine (End-to-End-Gate: `node tests/agent/headless-physics-acceptance.mjs`)
 
-## 尚未完成
+## Noch nicht fertig
 
-- 实验室 AI 助教抽屉仍以确定性意图匹配为主；模型化回答见 backlog
-  `AGENT_MODEL_BACKED_ANSWERS_BACKLOG`，会话 Agent 已使用 `physics-student` 预设
-- `web_search` 仍指向 DeepSeek 官方端点，未迁移到第三方模型网关
-- 第三方网关敏感词过滤仍需用真实题库采样；命中时可能返回 `500 / new_api_error`
-- 当前为单副本；扩容前必须把 `PHYSICSOS_SESSIONS_ROOT` 切到共享文件系统
-- Content-Security-Policy 暂缓，当前启用 HSTS、nosniff、X-Frame-Options、
-  Referrer-Policy 与 Permissions-Policy
-- 管理员 TOTP 已实现但当前生产账号尚未启用
-- 桌面端保留为可选壳，暂不投入签名、公证、商店发布和自动更新
-- 图片 / PDF / VLM 录题已经实现；真实卷库继续扩充仍需要可授权卷源与教师核验
+- Die KI-Assistenz-Schublade im Labor arbeitet weiterhin überwiegend mit deterministischem Intent-Matching; modellgestützte Antworten stehen im Backlog
+  `AGENT_MODEL_BACKED_ANSWERS_BACKLOG`, der Sitzungs-Agent verwendet bereits die Voreinstellung `physics-student`
+- `web_search` zeigt weiterhin auf den offiziellen DeepSeek-Endpunkt und wurde nicht auf ein Drittanbieter-Modell-Gateway migriert
+- Der Sensitivwort-Filter des Drittanbieter-Gateways muss noch mit einer echten Aufgabenbank stichprobenartig getestet werden; bei Treffern kann `500 / new_api_error` zurückkommen
+- Derzeit eine einzelne Replik; vor einer Skalierung muss `PHYSICSOS_SESSIONS_ROOT` auf ein gemeinsames Dateisystem umgestellt werden
+- Content-Security-Policy ist zurückgestellt; aktuell aktiv sind HSTS, nosniff, X-Frame-Options,
+  Referrer-Policy und Permissions-Policy
+- Admin-TOTP ist implementiert, aber für die aktuellen Produktionskonten noch nicht aktiviert
+- Der Desktop-Client bleibt eine optionale Hülle; Signierung, Notarisierung, Store-Veröffentlichung und automatische Updates sind vorerst nicht vorgesehen
+- Erfassung von Aufgaben aus Bildern / PDF / VLM ist implementiert; der weitere Ausbau der echten Klausurbibliothek erfordert lizenzierbare Klausurquellen und Prüfung durch Lehrkräfte
 
-界面会明确标记尚未接通的能力，不用占位成功状态冒充完成。
+Die Oberfläche kennzeichnet nicht angebundene Fähigkeiten ausdrücklich und täuscht keinen Erfolgszustand als Platzhalter vor.
 
-## 参与贡献
+## Mitwirken
 
-公测阶段最需要的是**真实使用反馈**与**小而准的改动**：
+In der Beta-Phase werden vor allem **echtes Nutzungs-Feedback** und **kleine, präzise Änderungen** gebraucht:
 
-- **报问题 / 提需求**：用 [issue 模板](https://github.com/122-syf-wcy/PhysicsOS/issues/new/choose)（问题报告 / 功能请求 / 提问）。请写清复现步骤、期望与实际结果；界面问题附截图、物理问题附题干原文。
-- **提 PR**：先读 [`CONTRIBUTING.md`](./CONTRIBUTING.md)。一个 PR 聚焦一个主题，并跑过 `pnpm typecheck && pnpm lint && pnpm test`；只改 Web 覆盖层时可用「验证」里的 `:web` 变体（更快）。
-- **想找入手点**：上面的「尚未完成」与「已知问题」就是当前 backlog。领域引擎与黄金题最容易上手——每个领域引擎都带独立测试，改完直接 `pnpm test:web` 验证。
-- **安全问题**：不要开公开 issue，按 [`SECURITY.md`](./SECURITY.md) 私下上报。
+- **Probleme melden / Wünsche äußern**: Nutzen Sie die [Issue-Vorlagen](https://github.com/122-syf-wcy/PhysicsOS/issues/new/choose) (Problembericht / Feature-Wunsch / Frage). Beschreiben Sie bitte Reproduktionsschritte sowie erwartetes und tatsächliches Ergebnis; bei Oberflächenproblemen mit Screenshot, bei Physikproblemen mit dem Originalwortlaut der Aufgabe.
+- **PR einreichen**: Lesen Sie zuerst [`CONTRIBUTING.md`](./CONTRIBUTING.md). Ein PR behandelt ein Thema und muss `pnpm typecheck && pnpm lint && pnpm test` bestanden haben; wenn nur das Web-Overlay geändert wird, genügt die schnellere `:web`-Variante unter „Verifikation“.
+- **Einstiegspunkte finden**: Die obigen Abschnitte „Noch nicht fertig“ und „Bekannte Probleme“ sind das aktuelle Backlog. Domänen-Engines und Goldaufgaben sind am einfachsten – jede Domänen-Engine hat eigene Tests, nach der Änderung genügt `pnpm test:web` zur Verifikation.
+- **Sicherheitsprobleme**: Eröffnen Sie kein öffentliches Issue, sondern melden Sie sie gemäß [`SECURITY.md`](./SECURITY.md) vertraulich.
 
-## 已知问题
+## Bekannte Probleme
 
-- 暂无阻塞性已知问题。`pnpm typecheck:web` 仅覆盖 `src/`（不含 `tests/`），若需检查测试代码请运行 `vitest`（测试经 esbuild 转译，不做完整类型检查）。
+- Derzeit keine blockierenden bekannten Probleme. `pnpm typecheck:web` deckt nur `src/` ab (ohne `tests/`); zur Prüfung des Testcodes führen Sie `vitest` aus (Tests werden über esbuild transpiliert, ohne vollständige Typprüfung).
 
-## 启动
+## Start
 
-前置环境：Node.js `>=24`，pnpm 由仓库 `packageManager` 字段管理。
+Voraussetzung: Node.js `>=24`; pnpm wird über das Feld `packageManager` des Repos verwaltet.
 
-正式 Web 入口依赖 Harness submodule 与 overlay 叠加，clone 后需要三步：
+Der offizielle Web-Einstieg hängt vom Harness-Submodul und der Overlay-Überlagerung ab; nach dem Klonen sind drei Schritte nötig:
 
 ```sh
 git submodule update --init --recursive
@@ -109,23 +109,23 @@ node scripts/overlay/harness-overlay.mjs apply
 pnpm install
 ```
 
-仓库使用 Git LFS 存放 `UI/` 与 `docs/` 下的大图，clone 前请先安装 `git-lfs`（未安装时这些 PNG 只会是 pointer 文件，不影响代码运行）。
+Das Repo speichert große Bilder unter `UI/` und `docs/` in Git LFS; installieren Sie vor dem Klonen `git-lfs` (ohne Installation sind diese PNGs nur Pointer-Dateien, was die Ausführung des Codes nicht beeinträchtigt).
 
-然后启动：
+Dann starten:
 
 ```sh
 pnpm dev
 ```
 
-默认地址：`http://127.0.0.1:3080/`
+Standardadresse: `http://127.0.0.1:3080/`
 
-也可以直接进入 Harness：
+Sie können auch direkt den Harness aufrufen:
 
 ```sh
 pnpm -C vendor/deepseek-harness dsh web
 ```
 
-## 验证
+## Verifikation
 
 ```sh
 pnpm typecheck
@@ -134,7 +134,7 @@ pnpm test
 pnpm build
 ```
 
-需要只验证正式 Web 覆盖层时：
+Wenn nur das offizielle Web-Overlay verifiziert werden soll:
 
 ```sh
 pnpm typecheck:web
@@ -143,18 +143,18 @@ pnpm test:web
 pnpm build:web
 ```
 
-## 视觉资产
+## Visuelle Assets
 
-- `UI/generated/`：生成模型输出的 4K/原始资产与生成元数据
-- `UI/generated/mascot/`：IP 形象「小 Q」的透明原图（wave / think / search 三个姿态）
-- `UI/generated/collision/`：碰撞实验教学插画（弹性/完全非弹性/动量守恒台/牛顿摆，1024×1024 PNG 与 manifest 元数据）
-- `vendor/deepseek-harness/apps/web/public/physicsos/`：经过网页压缩的正式运行资产（`mascot/` 下为 160/320/640 三档 WebP）
-- `scripts/design/cutout-mascot.py`：把白底渲染切成保留柔和阴影的透明图并导出网页尺寸
-- `scripts/design/imagegen-client.mjs`：OpenAI 兼容图像生成客户端（默认端点 `https://zz.211b.site`，模型 gpt-image，含模型/尺寸回退与 5xx 退避重试，输出 PNG + 元数据 manifest）
+- `UI/generated/`: 4K-/Rohassets der Generierungsmodelle samt Generierungs-Metadaten
+- `UI/generated/mascot/`: transparente Originale der IP-Figur „Xiao Q“ (drei Posen: wave / think / search)
+- `UI/generated/collision/`: Lehrillustrationen zum Stoßexperiment (elastisch/vollständig inelastisch/Impulserhaltungstisch/Newton-Pendel, PNG 1024×1024 mit Manifest-Metadaten)
+- `vendor/deepseek-harness/apps/web/public/physicsos/`: für das Web komprimierte offizielle Laufzeit-Assets (unter `mascot/` WebP in drei Stufen: 160/320/640)
+- `scripts/design/cutout-mascot.py`: schneidet Renderings mit weißem Hintergrund zu transparenten Bildern mit erhaltenen weichen Schatten und exportiert Web-Größen
+- `scripts/design/imagegen-client.mjs`: OpenAI-kompatibler Bildgenerierungs-Client (Standard-Endpunkt `https://zz.211b.site`, Modell gpt-image, mit Modell-/Größen-Fallback und Backoff-Wiederholung bei 5xx, Ausgabe PNG + Metadaten-Manifest)
 
-首页 Hero 是一个实时弹性碰撞小场景加小 Q（装饰性，不进入物理引擎）；入口卡片仍使用真实磁场实验器材图，原始 4K 文件保留在 `UI/generated/`，网页不直接加载 8-10 MB 原图。IP 与动效规范见 `docs/06-UI-DESIGN-SYSTEM.md` §3.1 与 §37。
+Der Hero-Bereich der Startseite ist eine Echtzeit-Szene eines elastischen Stoßes samt Xiao Q (dekorativ, geht nicht in die Physik-Engine ein); die Einstiegskarten verwenden weiterhin echte Bilder der Magnetfeld-Experimentiergeräte, die ursprünglichen 4K-Dateien bleiben in `UI/generated/`, die Webseite lädt die 8–10 MB großen Originale nicht direkt. Regeln für IP und Animation siehe `docs/06-UI-DESIGN-SYSTEM.md` §3.1 und §37.
 
-## 架构边界
+## Architekturgrenzen
 
 ```text
 Question / Lab
@@ -166,50 +166,50 @@ Engine → Verifier → Observation
 SceneVisualModel → PhysicsCanvas
 ```
 
-- React 不计算物理解答。
-- Renderer 不决定物理事实。
-- Harness core 的 Agent Loop、Session 和 Tools 不做 PhysicsOS 特化修改。
-- 领域包位于根目录 `packages/`，正式界面适配层位于 `vendor/deepseek-harness/packages/client/ui-physicsos/`。
-- 自有代码与上游代码的规模与归属核对：见 [`docs/ARCHITECTURE-OWNERSHIP.md`](./docs/ARCHITECTURE-OWNERSHIP.md)。
+- React berechnet keine Physiklösungen.
+- Der Renderer entscheidet keine physikalischen Fakten.
+- Agent Loop, Session und Tools des Harness-Kerns werden nicht PhysicsOS-spezifisch verändert.
+- Die Domänenpakete liegen im Wurzelverzeichnis unter `packages/`, die Anpassungsschicht der offiziellen Oberfläche unter `vendor/deepseek-harness/packages/client/ui-physicsos/`.
+- Abgleich von Umfang und Zuordnung zwischen eigenem und Upstream-Code: siehe [`docs/ARCHITECTURE-OWNERSHIP.md`](./docs/ARCHITECTURE-OWNERSHIP.md).
 
-详细边界见 `docs/HARNESS-UPSTREAM.md` 与 `docs/HARNESS-UI-OVERLAY.md`。
+Details zu den Grenzen siehe `docs/HARNESS-UPSTREAM.md` und `docs/HARNESS-UI-OVERLAY.md`.
 
-## Harness overlay
+## Harness-Overlay
 
-正式 UI 代码放在 `overlays/harness/`，由脚本叠加进 pin 住的上游 submodule，仓库不改上游历史：
+Der Code der offiziellen Oberfläche liegt in `overlays/harness/` und wird per Skript auf das gepinnte Upstream-Submodul überlagert; das Repo verändert die Upstream-Historie nicht:
 
 ```sh
 node scripts/overlay/harness-overlay.mjs apply     # overlay → vendor/deepseek-harness
 node scripts/overlay/harness-overlay.mjs capture   # vendor/deepseek-harness → overlay
 ```
 
-说明见 `overlays/harness/README.md`。
+Erläuterungen siehe `overlays/harness/README.md`.
 
-## 致谢
+## Danksagung
 
-平台的**公益模型额度**来自下列公益站，而且是两处都在用：
+Das **Kontingent des gemeinnützigen Modells** der Plattform stammt von den folgenden gemeinnützigen Stationen, und zwar werden beide Verwendungen bedient:
 
-- **产品运行时**：学生和老师的每一次解题都走「平台公益模型」号池，池子接的就是它们的 token；
-- **项目开发本身**：写代码、补测试、排查线上问题时用到的模型调用，同样来自这些站点。
+- **Produktionsbetrieb**: Jede Aufgabenlösung von Lernenden und Lehrkräften läuft über den Pool „gemeinnütziges Plattformmodell“, und dieser Pool ist an deren Tokens angeschlossen;
+- **Projektentwicklung selbst**: Die Modellaufrufe beim Schreiben von Code, Ergänzen von Tests und Untersuchen von Produktionsproblemen stammen ebenfalls von diesen Stationen.
 
-一个公益教学项目能跑起来，靠的是这些站点：
+Dass ein gemeinnütziges Lehrprojekt laufen kann, verdankt sich diesen Stationen:
 
-| 公益站 | 地址 |
+| Gemeinnützige Station | Adresse |
 | --- | --- |
 | 黑与白公益站 | <https://ai.hybgzs.com/panel> |
 | 咕咕嘎嘎公益站 | <https://api.fengshao1227.com/> |
 | lucky API 公益站 | <https://new.lucky0625.qzz.io/> |
 | luckyg 公益站 | <https://luckyg.131518.xyz/> |
 
-这些站点各自独立运营，与 PhysicsOS 没有隶属关系：可用模型、额度与稳定性由它们自行决定，
-本项目不对其可用性作任何承诺，也请勿把这里的地址当作稳定的生产依赖。
-如果你是其一的运营者并希望调整署名或链接方式，开个 issue 即可。
+Diese Stationen werden jeweils unabhängig betrieben und haben keine Zugehörigkeit zu PhysicsOS: Verfügbare Modelle, Kontingente und Stabilität bestimmen sie selbst,
+das Projekt gibt keinerlei Zusage zu ihrer Verfügbarkeit, und die hier genannten Adressen sollten nicht als stabile Produktionsabhängigkeit betrachtet werden.
+Wenn Sie Betreiber einer dieser Stationen sind und die Nennung oder Verlinkung anpassen möchten, eröffnen Sie einfach ein Issue.
 
-项目已在 [LINUX DO](https://linux.do) 社区发布并认可，欢迎社区的朋友来试用与反馈。
+Das Projekt wurde in der Community [LINUX DO](https://linux.do) veröffentlicht und dort gebilligt; Mitglieder der Community sind herzlich eingeladen, es auszuprobieren und Feedback zu geben.
 
-## 许可与用途
+## Lizenz und Verwendung
 
-- 自有代码与文档：[`LICENSE`](./LICENSE)，**Apache License 2.0**（OSI 认证的开源许可），允许使用、修改、分发与商业使用，需保留版权、许可与 NOTICE 声明。
-- 项目定位仍是面向初高中物理教学的公益项目；许可放开不等于承诺提供商业支持或 SLA，安全问题上报渠道见 [`SECURITY.md`](./SECURITY.md)。
-- 第三方组件与上游归属：见 [`NOTICE.md`](./NOTICE.md)。DeepSeek Harness 为上游 MIT 项目，本仓库只分发自有插件与改动补丁；其中的 C-Eval 题库数据仍为 CC BY-NC-SA 4.0（非商业），不随本仓库 Apache-2.0 授权。
-- 视觉资产 `UI/generated/**` 由图像生成模型产出，随仓库按 Apache-2.0 授权；如需商用请自行核对生成模型服务方的条款。
+- Eigener Code und eigene Dokumentation: [`LICENSE`](./LICENSE), **Apache License 2.0** (von der OSI zertifizierte Open-Source-Lizenz), erlaubt Nutzung, Änderung, Weitergabe und kommerzielle Nutzung; Urheberrechts-, Lizenz- und NOTICE-Hinweise müssen beibehalten werden.
+- Das Projekt bleibt ein gemeinnütziges Projekt für den Physikunterricht in der Mittel- und Oberstufe; die offene Lizenz bedeutet keine Zusage zu kommerziellem Support oder SLA, zum Meldeweg für Sicherheitsprobleme siehe [`SECURITY.md`](./SECURITY.md).
+- Komponenten von Drittanbietern und Upstream-Zuordnung: siehe [`NOTICE.md`](./NOTICE.md). DeepSeek Harness ist ein Upstream-MIT-Projekt, dieses Repo verteilt nur eigene Plugins und Änderungs-Patches; die darin enthaltenen C-Eval-Aufgabendaten stehen weiterhin unter CC BY-NC-SA 4.0 (nicht kommerziell) und fallen nicht unter die Apache-2.0-Lizenz dieses Repos.
+- Die visuellen Assets `UI/generated/**` wurden von Bildgenerierungsmodellen erzeugt und stehen mit dem Repo unter Apache-2.0; bei kommerzieller Nutzung prüfen Sie bitte selbst die Bedingungen des Anbieters des Generierungsmodells.

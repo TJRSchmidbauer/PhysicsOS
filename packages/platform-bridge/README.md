@@ -2,18 +2,18 @@
 
 ## Purpose
 
-隔离浏览器 / 未来 Tauri 的平台能力。业务组件禁止出现 `window.__TAURI__`。
+Isoliert die Plattformfähigkeiten von Browser / künftigem Tauri. In Geschäftskomponenten darf `window.__TAURI__` nicht vorkommen.
 
 ## Responsibilities
 
-- `PlatformBridge` 契约
-- `BrowserPlatformBridge`：浏览器文件 / 剪贴板 / 通知 / localStorage
-- `TauriPlatformBridge`：原生设备指纹、应用数据目录、更新检查与安装
+- Contract `PlatformBridge`
+- `BrowserPlatformBridge`: Browser-Dateien / Zwischenablage / Benachrichtigungen / localStorage
+- `TauriPlatformBridge`: Native Geräte-Fingerprint, App-Datenverzeichnis, Update-Prüfung und -Installation
 
-Tauri 桥只接受 shell 注入的 `window.__TAURI__.core.invoke` 或测试客户端，
-普通浏览器里会以 `TAURI_UNAVAILABLE` 失败关闭。设备标识由 Rust 侧读取原始值、
-加持久盐后哈希；更新检查与安装只接受精确匹配的候选版本，产物验签由
-`tauri-plugin-updater` 使用编译进应用的公钥完成。
+Die Tauri-Bridge akzeptiert nur das von der Shell injizierte `window.__TAURI__.core.invoke` oder einen Testclient,
+in einem gewöhnlichen Browser schlägt sie mit `TAURI_UNAVAILABLE` fail-closed fehl. Die Gerätekennung wird auf der Rust-Seite aus dem Rohwert gelesen,
+mit einem persistenten Salt versehen und gehasht; Update-Prüfung und -Installation akzeptieren nur exakt passende Kandidatenversionen, die Signaturprüfung des Artefakts
+übernimmt `tauri-plugin-updater` mit dem in die App einkompilierten öffentlichen Schlüssel.
 
 ## Allowed Dependencies
 
@@ -21,4 +21,4 @@ Tauri 桥只接受 shell 注入的 `window.__TAURI__.core.invoke` 或测试客�
 
 ## Forbidden Dependencies
 
-DeepSeek Harness、Physics Engine、React 业务页面。
+DeepSeek Harness, Physics Engine, React-Geschäftsseiten.

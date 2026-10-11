@@ -1,16 +1,15 @@
 # @physicsos/engine-magnetic
 
-Magnetic physics engine for one charged particle in a uniform magnetic field,
-with `v perpendicular B`, magnetic force only, and a 2D analytical circular
-motion solver.
+Magnetische Physik-Engine für ein geladenes Teilchen in einem homogenen Magnetfeld,
+mit `v senkrecht B`, nur Magnetkraft und einem analytischen 2D-Löser für die Kreisbewegung.
 
-`simulate(scene, request)` emits a deterministic analytical trajectory that
-contains the five required verification checkpoints and enough intermediate
-states for renderer-neutral circular-path observations, together with traceable
-derived facts. `stateAt(scene, time)` and the host-facing
-`stateAtSeconds(scene, seconds)` return the analytical state used by Timeline
-playback. The model does not cover electric fields, gravity, boundaries,
-relativistic effects, or a velocity component parallel to the field.
+`simulate(scene, request)` gibt eine deterministische analytische Trajektorie aus,
+die die fünf erforderlichen Verifikations-Checkpoints und genügend Zwischenzustände für
+renderer-neutrale Beobachtungen des Kreispfads enthält, zusammen mit nachvollziehbaren
+abgeleiteten Fakten. `stateAt(scene, time)` und das hostseitige
+`stateAtSeconds(scene, seconds)` liefern den analytischen Zustand, den die Timeline-
+Wiedergabe verwendet. Das Modell deckt keine elektrischen Felder, keine Schwerkraft, keine Grenzen,
+keine relativistischen Effekte und keine zum Feld parallele Geschwindigkeitskomponente ab.
 
-Part of the PhysicsOS physics domain runtime. This package is PhysicsOS-owned and
-must never be copied into `vendor/deepseek-harness`.
+Teil der PhysicsOS-Physikdomänen-Runtime. Dieses Package gehört PhysicsOS und
+darf niemals nach `vendor/deepseek-harness` kopiert werden.

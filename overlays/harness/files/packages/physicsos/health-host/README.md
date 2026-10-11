@@ -1,24 +1,23 @@
 # PhysicsOS Health Host
 
-`@deepseek-ai/dsh-health-host` registers two exact routes on the Harness Web
-server:
+`@deepseek-ai/dsh-health-host` registriert zwei exakte Routen auf dem Harness-Webserver:
 
-- `GET /healthz` is process liveness and never touches a dependency.
-- `GET /readyz` checks PostgreSQL and Redis over TCP and returns `503` until
-  every configured dependency answers.
+- `GET /healthz` ist die Prozess-Liveness und berührt nie eine Abhängigkeit.
+- `GET /readyz` prüft PostgreSQL und Redis per TCP und liefert `503`, bis
+  jede konfigurierte Abhängigkeit antwortet.
 
-Production secret wiring uses two files:
+Die Verdrahtung der Produktions-Secrets verwendet zwei Dateien:
 
 ```text
 DATABASE_URL_FILE=/run/secrets/database_url
 REDIS_URL_FILE=/run/secrets/redis_url
 ```
 
-The files contain `postgresql://...` and `redis://...` URLs. They are reread for
-each readiness request, capped at 8 KiB, and never included in responses or
-logs. With no configured checks, readiness fails closed with
-`NO_READINESS_CHECKS`.
+Die Dateien enthalten URLs der Form `postgresql://...` und `redis://...`. Sie werden bei
+jeder Readiness-Anfrage neu gelesen, auf 8 KiB begrenzt und nie in Antworten oder
+Logs aufgenommen. Sind keine Prüfungen konfiguriert, schlägt die Readiness fail-closed mit
+`NO_READINESS_CHECKS` fehl.
 
-`deployment.patch.yml` binds the production web server to all container
-interfaces and mounts the compiled plugin by absolute path. The Compose port
-binding remains loopback-only by default.
+`deployment.patch.yml` bindet den Produktions-Webserver an alle Container-
+Schnittstellen und hängt das kompilierte Plugin per absolutem Pfad ein. Die Compose-Port-
+Bindung bleibt standardmäßig nur auf Loopback.

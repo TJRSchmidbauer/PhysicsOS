@@ -1,8 +1,8 @@
 # @physicsos/physics-verifier
 
-Verifies a magnetic `PhysicsScene` together with an already-produced
-`SimulationResult`. It never calls an engine and never regenerates trajectory
-states.
+Verifiziert eine magnetische `PhysicsScene` zusammen mit einem bereits erzeugten
+`SimulationResult`. Er ruft nie eine Engine auf und erzeugt nie Trajektorien-
+Zustände neu.
 
 ## API
 
@@ -15,8 +15,8 @@ const verifier = new MagneticPhysicsVerifier({ tolerance })
 const sameVerification = verifier.verify(scene, simulation)
 ```
 
-The return value is the `VerificationResult` contract owned by
-`@physicsos/physics-core`:
+Der Rückgabewert ist der Contract `VerificationResult`, der
+`@physicsos/physics-core` gehört:
 
 ```ts
 {
@@ -27,26 +27,26 @@ The return value is the `VerificationResult` contract owned by
 }
 ```
 
-Every check stores `expected`, `actual`, and the exact `PhysicsTolerance` used in
-`check.details`. Failed checks are promoted to structured `errors` through the
-core `summarizeVerification` helper; this package does not define a competing
-result envelope.
+Jede Prüfung speichert `expected`, `actual` und die exakt verwendete `PhysicsTolerance` in
+`check.details`. Fehlgeschlagene Prüfungen werden über den Core-Helfer
+`summarizeVerification` zu strukturierten `errors` hochgestuft; dieses Package definiert keinen konkurrierenden
+Ergebnisumschlag.
 
-## Magnetic checks
+## Magnetische Prüfungen
 
-- scene schema/revision validation and result scene/revision binding
-- finite-number validation across the scene and result
-- canonical unit and dimension checks for radius, period, angular velocity, and force
-- the frozen magnetic model preconditions and all five engine-emitted assumptions
-- speed conservation at `0`, `T/4`, `T/2`, `3T/4`, and `T`
-- `F · v ≈ 0` at every verification sample
-- `r ≈ mv / (|q|B)`, `T ≈ 2πm / (|q|B)`, and `ω ≈ |q|B / m`
-- `|F| ≈ |q|vB` for the derived magnitude and sampled force vectors
-- supplied `stateAt(T) ≈ stateAt(0)` position/velocity closure
+- Validierung von Schema/Revision der Szene und Bindung von Szene/Revision des Ergebnisses
+- Prüfung auf endliche Zahlen in Szene und Ergebnis
+- Prüfungen kanonischer Einheiten und Dimensionen für Radius, Periode, Winkelgeschwindigkeit und Kraft
+- die Vorbedingungen des eingefrorenen magnetischen Modells und alle fünf von der Engine ausgegebenen Annahmen
+- Erhaltung des Geschwindigkeitsbetrags bei `0`, `T/4`, `T/2`, `3T/4` und `T`
+- `F · v ≈ 0` an jedem Verifikations-Stützpunkt
+- `r ≈ mv / (|q|B)`, `T ≈ 2πm / (|q|B)` und `ω ≈ |q|B / m`
+- `|F| ≈ |q|vB` für die abgeleitete Größe und die abgetasteten Kraftvektoren
+- Schließung von Position/Geschwindigkeit des gelieferten `stateAt(T) ≈ stateAt(0)`
 
-All numeric comparisons use a single `PhysicsTolerance`. Pass a custom policy to
-the constructor or function when a caller needs a documented domain policy;
-otherwise `DEFAULT_TOLERANCE` from `physics-core` is used.
+Alle numerischen Vergleiche verwenden eine einzige `PhysicsTolerance`. Eine eigene Richtlinie lässt sich dem
+Konstruktor oder der Funktion übergeben, wenn ein Aufrufer eine dokumentierte Domänenrichtlinie braucht;
+andernfalls wird `DEFAULT_TOLERANCE` aus `physics-core` verwendet.
 
-Part of the PhysicsOS physics domain runtime. This package is PhysicsOS-owned and
-must never be copied into `vendor/deepseek-harness`.
+Teil der PhysicsOS-Physikdomänen-Runtime. Dieses Package gehört PhysicsOS und
+darf niemals nach `vendor/deepseek-harness` kopiert werden.

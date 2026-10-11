@@ -2,22 +2,22 @@
 
 ## Purpose
 
-PhysicsOS 跨 package 的稳定基础类型：Brand ID、时间、错误。
+Stabile Basistypen über Package-Grenzen hinweg in PhysicsOS: Brand ID, Zeit, Fehler.
 
 ## Responsibilities
 
 - branded ID
-- ISO 时间辅助
-- 统一错误类型（含明确的 UnimplementedError）
+- ISO-Zeit-Hilfen
+- Einheitliche Fehlertypen (einschließlich des ausdrücklichen UnimplementedError)
 
 ## Public API
 
-见 `src/index.ts`。
+Siehe `src/index.ts`.
 
 ## Allowed Dependencies
 
-无运行时依赖。
+Keine Laufzeitabhängigkeiten.
 
 ## Forbidden Dependencies
 
-React、DOM、DeepSeek Harness、Tauri、任何 Physics Engine 实现。
+React, DOM, DeepSeek Harness, Tauri, jede Implementierung einer Physics Engine.

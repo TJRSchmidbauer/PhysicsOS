@@ -1,6 +1,6 @@
 # @physicsos/physics-math
 
-Physics math primitives: Vector3 algebra, dot, cross, magnitude, normalize
+Physik-Mathematik-Primitive: Vector3-Algebra, Skalarprodukt, Kreuzprodukt, Betrag, Normalisierung
 
-Part of the PhysicsOS physics domain runtime. This package is PhysicsOS-owned and
-must never be copied into `vendor/deepseek-harness`.
+Teil der PhysicsOS-Physikdomänen-Runtime. Dieses Package gehört PhysicsOS und
+darf niemals nach `vendor/deepseek-harness` kopiert werden.

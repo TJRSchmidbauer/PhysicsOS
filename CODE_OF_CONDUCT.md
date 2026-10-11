@@ -132,10 +132,10 @@ For answers to common questions about this code of conduct, see the FAQ at
 [FAQ]: https://www.contributor-covenant.org/faq
 [translations]: https://www.contributor-covenant.org/translations
 
-## 中文执行说明
+## Hinweise zur Durchsetzung
 
-- 本文件采用 Contributor Covenant 2.1 英文原文；发生解释分歧时，以英文原文为准。
-- 项目目前由维护者（见 [`.github/CODEOWNERS`](./.github/CODEOWNERS)）负责执行本准则。举报请走私密渠道，不要在公开 issue 或讨论区点名当事人。
-- 维护者会在保护当事人隐私的前提下先确认事实，再按上面的四档措施处理；处理结果（不涉及隐私的部分）会在社区内简要说明原因。
-- 对维护者本人的举报，可由其他维护者或通过 GitHub 私密渠道转交；若只有一名维护者，举报人可以选择先暂停参与、待新的维护者加入后再处理。
-- 本准则适用于仓库内的 issue、PR、评审、讨论，以及以项目名义参与的外部场合。
+- Diese Datei übernimmt den englischen Originaltext des Contributor Covenant 2.1 (siehe Quellenangabe oben); bei Auslegungsunterschieden ist der englische Originaltext maßgeblich.
+- Das Projekt wird derzeit von den Maintainern (siehe [`.github/CODEOWNERS`](./.github/CODEOWNERS)) bei der Durchsetzung dieses Kodex vertreten. Meldungen laufen über den vertraulichen Weg; bitte nennen Sie die Beteiligten nicht in öffentlichen Issues oder im Diskussionsbereich.
+- Die Maintainer klären unter Wahrung der Privatsphäre der Beteiligten zunächst den Sachverhalt und handeln dann nach den obigen vier Stufen; das Ergebnis (soweit es die Privatsphäre nicht berührt) wird in der Community kurz begründet.
+- Meldungen gegen die Maintainer selbst können von anderen Maintainern oder über den vertraulichen Weg von GitHub weitergeleitet werden; gibt es nur einen Maintainer, kann die meldende Person wählen, die Teilnahme zunächst auszusetzen, bis neue Maintainer hinzukommen und den Fall bearbeiten.
+- Dieser Kodex gilt für Issues, PRs, Reviews und Diskussionen im Repository sowie für externe Anlässe, bei denen im Namen des Projekts teilgenommen wird.

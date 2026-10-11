@@ -1,16 +1,16 @@
 # @physicsos/physics-scene
 
-PhysicsScene contract, scene commands, physics events, reducer and revision guard
+PhysicsScene-Contract, Szenenbefehle, Physik-Ereignisse, Reducer und Revisions-Guard
 
-`SceneRuntime` / `SceneStore` expose `getScene()`, `execute(command)`, and
-`getEvents()`. Every successful command increments the scene revision exactly
-once and appends its traceable event; stale `expectedRevision` values return
-`SCENE_REVISION_CONFLICT` without changing the scene or event log.
+`SceneRuntime` / `SceneStore` stellen `getScene()`, `execute(command)` und
+`getEvents()` bereit. Jeder erfolgreiche Befehl erhöht die Szenen-Revision genau
+einmal und hängt sein nachvollziehbares Ereignis an; veraltete `expectedRevision`-Werte liefern
+`SCENE_REVISION_CONFLICT`, ohne Szene oder Ereignislog zu ändern.
 
-`createMagneticScene()` owns the minimum frozen-model scene input, units, and
-observable definitions. `createSceneCommand()` lets host adapters create branded
-command envelopes from transport-safe string IDs without importing shared ID or
-unit internals.
+`createMagneticScene()` besitzt die minimale Szeneneingabe des eingefrorenen Modells, die Einheiten und die
+Observable-Definitionen. `createSceneCommand()` erlaubt Host-Adaptern, gebrandete
+Befehlsumschläge aus transportsicheren String-IDs zu erzeugen, ohne gemeinsame ID- oder
+Einheiten-Interna zu importieren.
 
-Part of the PhysicsOS physics domain runtime. This package is PhysicsOS-owned and
-must never be copied into `vendor/deepseek-harness`.
+Teil der PhysicsOS-Physikdomänen-Runtime. Dieses Package gehört PhysicsOS und
+darf niemals nach `vendor/deepseek-harness` kopiert werden.

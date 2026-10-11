@@ -1,6 +1,6 @@
 # @physicsos/physics-units
 
-Physics units runtime: dimensions, SI unit registry, quantities, canonical conversion
+Physik-Einheiten-Runtime: Dimensionen, SI-Einheiten-Registry, Größen, kanonische Umrechnung
 
-Part of the PhysicsOS physics domain runtime. This package is PhysicsOS-owned and
-must never be copied into `vendor/deepseek-harness`.
+Teil der PhysicsOS-Physikdomänen-Runtime. Dieses Package gehört PhysicsOS und
+darf niemals nach `vendor/deepseek-harness` kopiert werden.

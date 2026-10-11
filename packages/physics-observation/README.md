@@ -1,7 +1,7 @@
 # @physicsos/physics-observation
 
-Observation runtime: turns `PhysicsScene + SimulationResult + SimulationState`
-into renderer-neutral magnetic observations.
+Observation-Runtime: wandelt `PhysicsScene + SimulationResult + SimulationState`
+in renderer-neutrale magnetische Observationen um.
 
 ## API
 
@@ -11,12 +11,12 @@ import { observeMagneticScene } from '@physicsos/physics-observation'
 const observationState = observeMagneticScene({ scene, simulation, state })
 ```
 
-The runtime emits velocity, Lorentz-force, trajectory, orbit-center, and radius
-observations only when their `ObservableDefinition.visible` flag is enabled. It
-never solves a trajectory or recalculates a force: values are read from Engine
-facts and validated at the Observation boundary. Renderer concerns such as
-grid, axes, scale bars, field glyphs, and background patterns remain outside
-this package.
+Die Runtime gibt Observationen zu Geschwindigkeit, Lorentzkraft, Trajektorie, Bahnmittelpunkt und Radius
+nur aus, wenn das Flag `ObservableDefinition.visible` aktiviert ist. Sie
+löst nie eine Trajektorie und berechnet nie eine Kraft neu: Werte werden aus den
+Engine-Fakten gelesen und an der Observation-Grenze validiert. Renderer-Belange wie
+Raster, Achsen, Maßstabsbalken, Feldsymbole und Hintergrundmuster bleiben außerhalb
+dieses Packages.
 
-Part of the PhysicsOS physics domain runtime. This package is PhysicsOS-owned and
-must never be copied into `vendor/deepseek-harness`.
+Teil der PhysicsOS-Physikdomänen-Runtime. Dieses Package gehört PhysicsOS und
+darf niemals nach `vendor/deepseek-harness` kopiert werden.

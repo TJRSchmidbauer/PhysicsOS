@@ -1,55 +1,58 @@
 # @deepseek-ai/dsh-learning-host
 
-PhysicsOS personal learning host plugin. It serves `/physicsos/learning` over
-the `physicsos_learning` storage-domain unit:
+Host-Plugin für das persönliche Lernen in PhysicsOS. Es bedient `/physicsos/learning`
+über die Storage-Domänen-Einheit `physicsos_learning`:
 
-| Method | Path                     | Result                                                    |
-| ------ | ------------------------ | --------------------------------------------------------- |
-| GET    | `/attempts?limit&cursor` | the caller's attempts, newest first, cursor-paginated     |
-| PUT    | `/attempts/:id`          | idempotent immutable attempt upsert                       |
-| GET    | `/scenes?limit&cursor`   | the caller's saved scenes, newest first, cursor-paginated |
-| PUT    | `/scenes/:sceneId`       | idempotent saved-scene upsert                             |
-| DELETE | `/scenes/:sceneId`       | idempotent saved-scene removal                            |
+| Methode | Pfad                     | Ergebnis                                                              |
+| ------- | ------------------------ | --------------------------------------------------------------------- |
+| GET     | `/attempts?limit&cursor` | die Versuche der aufrufenden Person, neueste zuerst, cursor-paginiert |
+| PUT     | `/attempts/:id`          | idempotentes unveränderliches Upsert eines Versuchs                   |
+| GET     | `/scenes?limit&cursor`   | die gespeicherten Szenen der aufrufenden Person, neueste zuerst, cursor-paginiert |
+| PUT     | `/scenes/:sceneId`       | idempotentes Upsert einer gespeicherten Szene                         |
+| DELETE  | `/scenes/:sceneId`       | idempotentes Entfernen einer gespeicherten Szene                      |
 
-The account and tenant come exclusively from the session through the
-`physicsosIdentity` service. No endpoint accepts `userKey` or `schoolId` from
-the wire, and there is no administrator read path for personal rows. Hosts are
-declared before auth-host, so identity is resolved lazily per request; missing
-identity fails closed with `503`, and an unresolved session with `401`.
+Konto und Mandant stammen ausschließlich aus der Sitzung über den Service
+`physicsosIdentity`. Kein Endpunkt akzeptiert `userKey` oder `schoolId` von der
+Leitung, und es gibt keinen Administrator-Lesepfad für persönliche Zeilen. Hosts
+werden vor auth-host deklariert, daher wird die Identität pro Anfrage verzögert
+aufgelöst; fehlende Identität schlägt geschlossen mit `503` fehl, eine nicht
+aufgelöste Sitzung mit `401`.
 
-## Privacy Boundary
+## Datenschutzgrenze
 
-`physicsos_learning` is separate from `physicsos_auth.learning_counts`.
-Personal attempts may contain prompts and answers, while aggregate counters
-remain anonymous school-by-day knowledge observations. Saving an attempt here
-does not update the aggregate ledger.
+`physicsos_learning` ist getrennt von `physicsos_auth.learning_counts`. Persönliche
+Versuche können Prompts und Antworten enthalten, während aggregierte Zähler
+anonyme Wissensbeobachtungen pro Schule und Tag bleiben. Das Speichern eines
+Versuchs hier aktualisiert das aggregierte Hauptbuch nicht.
 
-## Client Wiring
+## Client-Anbindung
 
-The package is intentionally not added to shared bundle wiring in this task.
-The controller must add it to the overlay path list, host project references,
-root host typecheck/lint/test commands, and the shipped cordis composition.
-The client controller must create `createLearningApi()`, pass it to
-`createLearningRecordController` and `createPhysicsSurfaceController`, then
-call both `sync()` methods after the authenticated storage namespace exists.
+Das Paket wird in dieser Aufgabe bewusst nicht in die gemeinsame Bundle-Verdrahtung
+aufgenommen. Der Controller muss es in die Overlay-Pfadliste, die
+Host-Projektverweise, die Root-Host-Befehle für typecheck/lint/test und die
+ausgelieferte Cordis-Komposition eintragen. Der Client-Controller muss
+`createLearningApi()` erzeugen, an `createLearningRecordController` und
+`createPhysicsSurfaceController` übergeben und danach beide `sync()`-Methoden
+aufrufen, sobald der authentifizierte Storage-Namespace existiert.
 
-## Verification
+## Verifikation
 
-- `tests/routes.spec.ts` covers authentication, tenant/account isolation,
-  pagination, idempotency, scene updates, and scene deletion.
-- `tests/composition.spec.ts` boots the real storage/auth/learning chain,
-  proves cross-session reads, and proves personal saves do not enter the
-  aggregate dashboard.
-- `tests/client-sync.spec.ts` covers local migration, offline-first writes,
-  remote merge, scene tombstones, request encoding, and error codes.
+- `tests/routes.spec.ts` deckt Authentifizierung, Mandanten-/Kontoisolation,
+  Paginierung, Idempotenz, Szenen-Updates und Szenen-Löschung ab.
+- `tests/composition.spec.ts` bootet die echte Kette aus Storage/Auth/Learning,
+  belegt sitzungsübergreifendes Lesen und belegt, dass persönliche Speicherungen
+  nicht in das aggregierte Dashboard gelangen.
+- `tests/client-sync.spec.ts` deckt lokale Migration, Offline-First-Schreibvorgänge,
+  Remote-Merge, Szenen-Tombstones, Request-Kodierung und Fehlercodes ab.
 
-## Known Limitations and Deferred Work
+## Bekannte Einschränkungen und zurückgestellte Arbeit
 
-- The client sync methods are exposed but shared `client/index.ts` wiring is
-  owned by the controller, so the shipped application does not call them until
-  that wiring lands.
-- Sync cursors are opaque but not signed; they only narrow the caller's own
-  rows and cannot grant access to another account or tenant.
-- Saved scenes are bounded by request size and a shallow structural contract,
-  not full physics-engine validation; the Lab remains the validator of the
-  rendered scene.
+- Die Client-Sync-Methoden sind bereitgestellt, aber die gemeinsame Verdrahtung in
+  `client/index.ts` liegt beim Controller, daher ruft die ausgelieferte Anwendung sie
+  erst auf, wenn diese Verdrahtung landet.
+- Sync-Cursor sind opak, aber nicht signiert; sie grenzen nur die eigenen Zeilen der
+  aufrufenden Person ein und können keinen Zugriff auf ein anderes Konto oder einen
+  anderen Mandanten gewähren.
+- Gespeicherte Szenen sind durch die Request-Größe und einen flachen strukturellen
+  Vertrag begrenzt, nicht durch eine vollständige Validierung durch die
+  Physik-Engine; das Labor bleibt der Validator der gerenderten Szene.

@@ -1,49 +1,50 @@
 # NOTICE
 
-PhysicsOS 是**开源公益项目**，自有代码与文档按仓库根目录 `LICENSE`（PolyForm Noncommercial 1.0.0）授权，仅限非商业公益用途。
+PhysicsOS ist ein **gemeinnütziges Open-Source-Projekt**; der eigene Code und die eigene Dokumentation werden gemäß der `LICENSE` im Repository-Wurzelverzeichnis (PolyForm Noncommercial 1.0.0) lizenziert, ausschließlich für nichtkommerzielle, gemeinnützige Zwecke.
 
-## 第三方组件
+## Komponenten Dritter
 
 ### DeepSeek Harness
 
-- 上游仓库：<https://github.com/deepseek-ai/deepseek-harness>
-- 集成方式：Git submodule `vendor/deepseek-harness`，pin 见 `docs/HARNESS-UPSTREAM.md`
-- 上游许可证：MIT License，Copyright (c) 2026 DeepSeek
+- Upstream-Repository: <https://github.com/deepseek-ai/deepseek-harness>
+- Integrationsweise: Git-Submodul `vendor/deepseek-harness`, Pin siehe `docs/HARNESS-UPSTREAM.md`
+- Upstream-Lizenz: MIT License, Copyright (c) 2026 DeepSeek
 
-本仓库不重新分发 Harness 源码整体，只分发：
+Dieses Repository verteilt den Harness-Quellcode nicht als Ganzes neu, sondern nur:
 
-- `overlays/harness/files/`：PhysicsOS 自行编写的 Harness Client Plugin 与静态资产
-- `overlays/harness/upstream-changes.patch`：对 Harness 源文件的本地改动补丁
+- `overlays/harness/files/`: von PhysicsOS selbst geschriebene Harness-Client-Plugins und statische Assets
+- `overlays/harness/upstream-changes.patch`: Patch mit lokalen Änderungen an Harness-Quelldateien
 
-补丁命中的上游文件仍受上游 MIT License 约束，其版权归 DeepSeek 所有；PhysicsOS 只对补丁中新增的内容主张权利。使用者必须自行从上游仓库获取 Harness 源码，并保留其 MIT 许可与版权声明。
+Die vom Patch betroffenen Upstream-Dateien unterliegen weiterhin der MIT-Lizenz des Upstreams, das Urheberrecht liegt bei DeepSeek; PhysicsOS beansprucht nur Rechte an den im Patch neu hinzugefügten Inhalten. Nutzer müssen den Harness-Quellcode selbst aus dem Upstream-Repository beziehen und dessen MIT-Lizenz und Urheberrechtsvermerk beibehalten.
 
-`overlays/harness/files/packages/client/ui-physicsos/package.json` 中的 `"license": "MIT"` 字段是 Harness 工作区自身的包校验要求（`verify-dsh-package-licenses`），不代表 PhysicsOS 自有代码改为 MIT 授权。PhysicsOS 自有代码的授权口径以本仓库 `LICENSE` 为准。
+Das Feld `"license": "MIT"` in `overlays/harness/files/packages/client/ui-physicsos/package.json` ist eine Anforderung der Package-Prüfung des Harness-Workspace selbst (`verify-dsh-package-licenses`) und bedeutet nicht, dass der eigene Code von PhysicsOS auf MIT umgestellt wurde. Maßgeblich für die Lizenzierung des eigenen Codes von PhysicsOS ist die `LICENSE` dieses Repositorys.
 
-### C-Eval 题库数据（`scripts/ingest-ceval-physics.mjs`）
+### C-Eval-Aufgabendaten (`scripts/ingest-ceval-physics.mjs`)
 
-- 上游数据集：<https://huggingface.co/datasets/ceval/ceval-exam>
-- 使用范围：`middle_school_physics` 与 `high_school_physics` 两个学科的全部
-  401 条单选题目（题干 / 四个选项 / 答案 / 解析）
-- 上游许可证：**CC BY-NC-SA 4.0**（署名 — 非商业性使用 — 相同方式共享）
-- 兼容性：PhysicsOS 自有代码按 PolyForm Noncommercial 1.0.0 授权，同为
-  非商业用途；本仓库按 CC BY-NC-SA 的署名与相同方式共享条款使用该数据
+- Upstream-Datensatz: <https://huggingface.co/datasets/ceval/ceval-exam>
+- Nutzungsumfang: alle 401 Einfachauswahl-Aufgaben der beiden Fächer `middle_school_physics` und
+  `high_school_physics` (Aufgabenstellung / vier Optionen / Antwort / Lösung)
+- Upstream-Lizenz: **CC BY-NC-SA 4.0** (Namensnennung — nicht kommerziell — Weitergabe unter gleichen Bedingungen)
+- Kompatibilität: Der eigene Code von PhysicsOS wird unter PolyForm Noncommercial 1.0.0 lizenziert, ebenfalls
+  nichtkommerziell; dieses Repository verwendet die Daten gemäß den Bedingungen von CC BY-NC-SA zu Namensnennung und Weitergabe unter gleichen Bedingungen
 
-数据经 `scripts/ingest-ceval-physics.mjs` 映射进 PhysicsOS 题库，逐条保留：
+Die Daten werden über `scripts/ingest-ceval-physics.mjs` in die Aufgabenbank von PhysicsOS abgebildet, wobei je Eintrag erhalten bleiben:
 
-- `sourceLabel`：`C-Eval <config>（<split>）`
-- `sourceUrl`：上游数据集地址
-- `answerTier`：`web-public`
-- `reuseModes`：`['adapt']` —— **不含 `verbatim`**，即组卷算法只能把它当改写
-  骨架，不会原样印成试卷
-- `anomalies`：如实登记该数据源**未提供**的字段（无官方考点标注、难度、能力
-  层级、分值，且未经任何真实试卷核验）；其中考点是由题干与选项按脚本内公开的
-  关键词表**机器推得**的，标记为 `knowledge-derived-from-stem`
-- 全部条目以 `status: 'pending'` 入库，**必须经教师在出卷专区逐条核验**后
-  才会参与组卷
+- `sourceLabel`: `C-Eval <config>（<split>）`
+- `sourceUrl`: Adresse des Upstream-Datensatzes
+- `answerTier`: `web-public`
+- `reuseModes`: `['adapt']` —— **ohne `verbatim`**, d. h. der Klausurzusammenstellungs-Algorithmus darf sie nur als Grundgerüst
+  für Umformulierungen verwenden, sie werden nie wörtlich als Klausur gedruckt
+- `anomalies`: wahrheitsgemäße Aufzeichnung der Felder, die diese Datenquelle **nicht liefert** (keine offizielle
+  Wissenspunkt-Kennzeichnung, Schwierigkeit, Kompetenzstufe, Punktzahl, und keine Verifikation anhand einer echten Klausur); die Wissenspunkte wurden
+  aus Aufgabenstellung und Optionen nach der im Skript offengelegten Schlüsselworttabelle **maschinell abgeleitet** und mit
+  `knowledge-derived-from-stem` markiert
+- Alle Einträge werden mit `status: 'pending'` aufgenommen und **müssen von Lehrkräften im Klausurbereich einzeln verifiziert werden**,
+  bevor sie an der Klausurzusammenstellung teilnehmen
 
-这些题目**不是贵州真题**，也未与任何试卷核对过；它们的作用是让组卷算法有
-真实可用的题目来源，而不是冒充已核验的卷库内容。
+Diese Aufgaben sind **keine Originalaufgaben aus Guizhou** und wurden mit keiner Klausur abgeglichen; ihre Aufgabe ist es, dem Zusammenstellungs-Algorithmus
+eine echte nutzbare Aufgabenquelle zu geben, nicht, bereits verifizierte Inhalte der Klausurbibliothek vorzutäuschen.
 
-### 视觉资产
+### Visuelle Assets
 
-`UI/generated/` 下的图像由生成模型产出，生成参数保存在同名 `.json` 中，同样按 `LICENSE` 仅限非商业公益用途使用。
+Die Bilder unter `UI/generated/` wurden von einem Generierungsmodell erzeugt, die Generierungsparameter liegen in der gleichnamigen `.json`; sie dürfen ebenfalls gemäß `LICENSE` nur für nichtkommerzielle, gemeinnützige Zwecke verwendet werden.

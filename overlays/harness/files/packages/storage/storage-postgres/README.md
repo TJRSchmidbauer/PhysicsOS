@@ -1,33 +1,33 @@
 # @deepseek-ai/dsh-storage-postgres
 
-PostgreSQL backend for the [storage hub](../storage/README.md): registers as
-backend `postgres` and serves the `kv` facet through one bounded `pg`
-connection pool.
+PostgreSQL-Backend für den [Storage-Hub](../storage/README.md): registriert sich als
+Backend `postgres` und bedient die `kv`-Facette über einen begrenzten
+`pg`-Verbindungspool.
 
-## Storage model
+## Speichermodell
 
-The backend keeps its metadata in two tables inside the configured schema:
-`dsh_storage_units` stamps each unit's descriptor version at first open, and
-`dsh_storage_globals` holds each unit's global singleton. A unit/table pair
-gets its own `u_<digest>` table, where the digest is derived from both
-validated names. This keeps physical identifiers inside PostgreSQL's 63-byte
-limit and prevents underscore combinations such as (`a_b`, `c`) and (`a`,
-`b_c`) from sharing storage.
+Das Backend hält seine Metadaten in zwei Tabellen innerhalb des konfigurierten
+Schemas: `dsh_storage_units` stempelt beim ersten Öffnen die Descriptor-Version jeder
+Einheit, und `dsh_storage_globals` hält das globale Singleton jeder Einheit. Ein Paar
+aus Einheit/Tabelle erhält eine eigene Tabelle `u_<digest>`, wobei der Digest aus
+beiden validierten Namen abgeleitet wird. Das hält physische Bezeichner innerhalb der
+63-Byte-Grenze von PostgreSQL und verhindert, dass Unterstrich-Kombinationen wie
+(`a_b`, `c`) und (`a`, `b_c`) denselben Speicher teilen.
 
-Records use a JSON text value plus a SHA-256 hash of the JSON-encoded key.
-The hash is the primary key, while the full key remains in `key_json`; keys
-therefore do not consume PostgreSQL's B-tree entry budget and may contain
-NUL, Unicode, or very large strings. Upserts and deletes are single
-parameterized SQL statements, so PostgreSQL's statement atomicity and normal
-durable commit behavior satisfy the hub's write contract without a
-caller-visible transaction.
+Datensätze verwenden einen JSON-Textwert plus einen SHA-256-Hash des JSON-kodierten
+Schlüssels. Der Hash ist der Primärschlüssel, während der vollständige Schlüssel in
+`key_json` verbleibt; Schlüssel verbrauchen daher nicht das B-Tree-Eintragsbudget von
+PostgreSQL und dürfen NUL, Unicode oder sehr große Zeichenketten enthalten. Upserts
+und Deletes sind einzelne parametrisierte SQL-Anweisungen, sodass die
+Anweisungsatomarität von PostgreSQL und das normale dauerhafte Commit-Verhalten den
+Schreibvertrag des Hubs ohne eine für den Aufrufer sichtbare Transaktion erfüllen.
 
-Unit and table names are validated against the storage hub's `UNIT_NAME_RE`.
-The schema name is validated and length-bounded before quoting. Metadata
-names are fixed, physical names are digests, and every record value or key
-travels as a SQL parameter.
+Namen von Einheiten und Tabellen werden gegen `UNIT_NAME_RE` des Storage-Hubs
+validiert. Der Schemaname wird vor dem Quoting validiert und in der Länge begrenzt.
+Metadatennamen sind fest, physische Namen sind Digests, und jeder Datensatzwert und
+Schlüssel wird als SQL-Parameter übertragen.
 
-## Configuration (schemastery)
+## Konfiguration (schemastery)
 
 ```ts
 interface Config {
@@ -38,45 +38,47 @@ interface Config {
 }
 ```
 
-`ssl: true` uses the platform's normal certificate verification.
-`ssl: 'require'` enables TLS while accepting the server certificate without
-additional CA configuration. Invalid configuration fails during plugin
-construction rather than at the first query.
+`ssl: true` verwendet die normale Zertifikatsprüfung der Plattform.
+`ssl: 'require'` aktiviert TLS und akzeptiert das Serverzertifikat ohne zusätzliche
+CA-Konfiguration. Eine ungültige Konfiguration schlägt bei der Konstruktion des
+Plugins fehl und nicht erst bei der ersten Abfrage.
 
-## Lifecycle and errors
+## Lebenszyklus und Fehler
 
-Opening a missing unit creates its metadata row and record tables
-transactionally. A differing version stamp rejects with `version-mismatch`.
-An invalid JSON value or key in the medium rejects reads with
-`malformed-medium`. A second open of the same unit name rejects, calls after
-a unit close reject with `closed`, and both unit and backend close are
-idempotent and drain in-flight operations.
+Das Öffnen einer fehlenden Einheit legt ihre Metadatenzeile und die Datensatztabellen
+transaktional an. Ein abweichender Versionsstempel wird mit `version-mismatch`
+abgelehnt. Ein ungültiger JSON-Wert oder Schlüssel im Medium lässt Lesevorgänge mit
+`malformed-medium` ablehnen. Ein zweites Öffnen desselben Einheitennamens wird
+abgelehnt, Aufrufe nach dem Schließen einer Einheit werden mit `closed` abgelehnt, und
+sowohl das Schließen der Einheit als auch des Backends ist idempotent und lässt
+laufende Operationen auslaufen.
 
-## Model Experience
+## Modellerfahrung
 
-### Stored domain records
+### Gespeicherte Domänendatensätze
 
-#### What the model sees
+#### Was das Modell sieht
 
-Nothing. This backend contributes no prompt, tool, or schema; it persists
-host-side domain data behind `ctx.storage`.
+Nichts. Dieses Backend steuert keinen Prompt, kein Tool und kein Schema bei; es
+persistiert hostseitige Domänendaten hinter `ctx.storage`.
 
-#### Token effect
+#### Token-Wirkung
 
-Zero live-request tokens.
+Null Live-Request-Tokens.
 
-#### KV Cache effect
+#### KV-Cache-Wirkung
 
-None. The backend never touches live request prefixes.
+Keine. Das Backend berührt nie Präfixe von Live-Anfragen.
 
-## Known Limitations and Deferred Work
+## Bekannte Einschränkungen und zurückgestellte Arbeit
 
-- There is no schema migration framework. The release currently has one
-  layout and treats compatibility changes as a future migration task.
-- PostgreSQL lock or serialization failures are surfaced directly; this
-  backend adds no retry loop.
-- The key primary key uses a SHA-256 digest. A digest collision between two
-  distinct keys would alias those records; the probability is treated as
-  negligible for the current medium.
-- TLS modes beyond `true` and `'require'` are deferred until a deployment
-  needs custom certificate material or hostname verification controls.
+- Es gibt kein Framework für Schema-Migrationen. Das Release hat derzeit ein Layout
+  und behandelt Kompatibilitätsänderungen als künftige Migrationsaufgabe.
+- Lock- oder Serialisierungsfehler von PostgreSQL werden direkt durchgereicht; dieses
+  Backend fügt keine Wiederholungsschleife hinzu.
+- Der Primärschlüssel der Schlüssel verwendet einen SHA-256-Digest. Eine
+  Digest-Kollision zwischen zwei verschiedenen Schlüsseln würde diese Datensätze
+  aliasieren; die Wahrscheinlichkeit gilt für das aktuelle Medium als vernachlässigbar.
+- TLS-Modi jenseits von `true` und `'require'` sind zurückgestellt, bis eine
+  Bereitstellung eigenes Zertifikatsmaterial oder Steuerungen zur
+  Hostnamenprüfung benötigt.

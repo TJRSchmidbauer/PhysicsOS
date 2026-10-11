@@ -1,126 +1,126 @@
 # @deepseek-ai/dsh-paper-host
 
-PhysicsOS 出卷专区 host plugin — the paper domain (blueprints, spec tables, bank-driven drafting, per-question review, hash-bound approval, DOCX/PDF export) and the `/physicsos/paper` REST surface over the `webServer` service and a `physicsos_paper` storage-domain unit.
+Host-Plugin für den PhysicsOS-Klausurbereich (出卷专区) – die Klausurdomäne (Blueprints, Spezifikationstabellen, bankgesteuertes Entwerfen, Prüfung pro Aufgabe, hashgebundene Freigabe, DOCX-/PDF-Export) und die REST-Oberfläche `/physicsos/paper` über den Service `webServer` und eine Storage-Domänen-Einheit `physicsos_paper`.
 
-只出卷 + 答案解析：本插件产出标准可打印 A4 试卷与解析，不做作业、批改或班级管理。
+Nur Klausur + Lösungsweg: Dieses Plugin erzeugt standardmäßig druckbare A4-Klausuren und Lösungsblätter; es macht keine Hausaufgaben, keine Korrektur und keine Klassenverwaltung.
 
-## Model
+## Modell
 
 ```
-source_paper ──< annotations        # 真题原卷 + 逐题考点标注（录入面）
-                                      卷库浏览读的也是这两张表
-bank_items ──< bank_usage           # verified 题库 + 上卷台账（新鲜度闸依据）
-blueprints                          # 已核实结构模板（中考物理90 / 理综150 / 高考100）
-jobs ──< exports                    # 出卷任务 —— 一次组卷到交付的完整状态机
+source_paper ──< annotations        # Originalklausur + Prüfungspunkt-Annotation pro Aufgabe (Erfassungsfläche)
+                                      auch das Durchsuchen der Klausurbibliothek liest diese beiden Tabellen
+bank_items ──< bank_usage           # verifizierte Aufgabenbank + Nutzungshauptbuch (Grundlage des Frischegates)
+blueprints                          # verifizierte Strukturvorlagen (Physik-Zhongkao 90 / Naturwissenschaften komplex 150 / Gaokao 100)
+jobs ──< exports                    # Klausuraufträge – der vollständige Zustandsautomat von der Zusammenstellung bis zur Lieferung
 ```
 
-`jobs` 是唯一的写权威：组卷计划、草稿文档、逐题审核记录、独立解题报告、批准哈希、导出清单都挂在它上面。
+`jobs` ist die einzige Schreibautorität: Zusammenstellungsplan, Entwurfsdokument, Prüfprotokoll pro Aufgabe, unabhängiger Lösungsbericht, Freigabe-Hash und Exportmanifest hängen daran.
 
-### 任务状态机
+### Zustandsautomat des Auftrags
 
 ```
 spec → drafting → checking → review → approved → exported
                      ↘ failed
 ```
 
-`review` 之后每一次 `commitDocument`（换题、修订、改文档）都会作废当前 approval —— 批准绑定的是内容哈希，任何改动都无法绕过。
+Nach `review` macht jedes `commitDocument` (Aufgabe tauschen, überarbeiten, Dokument ändern) die aktuelle Freigabe ungültig – die Freigabe ist an den Inhalts-Hash gebunden, keine Änderung kann sie umgehen.
 
-## REST surface (`/physicsos/paper`)
+## REST-Oberfläche (`/physicsos/paper`)
 
-### 真题原卷与考点
+### Originalklausuren und Prüfungspunkte
 
-| Method | Path | 说明 |
+| Methode | Pfad | Beschreibung |
 | --- | --- | --- |
-| GET | `/sources` | 原卷列表（可按 `status` 过滤） |
-| POST | `/sources` | 录入原卷（region / school / kind / featured） |
-| GET | `/annotations?source=` | 考点标注列表 |
-| POST | `/sources/:id/annotations` | 逐题标注（题号 / 题型 / 分值 / 考点 / 能力 / 完整题干） |
-| POST | `/sources/:id/verify` | 原卷核验（`pending → verified`） |
-| POST | `/sources/:id/import/csv` | 批量标注导入（朴素逗号切分，装不下含逗号的题面） |
-| POST | `/annotations/:id/review` | 标注核验 |
-| GET | `/stats` | 录入面统计 |
+| GET | `/sources` | Liste der Originalklausuren (nach `status` filterbar) |
+| POST | `/sources` | Originalklausur erfassen (region / school / kind / featured) |
+| GET | `/annotations?source=` | Liste der Prüfungspunkt-Annotationen |
+| POST | `/sources/:id/annotations` | Annotation pro Aufgabe (Aufgabennummer / Typ / Punktwert / Prüfungspunkt / Kompetenz / vollständiger Aufgabentext) |
+| POST | `/sources/:id/verify` | Originalklausur verifizieren (`pending → verified`) |
+| POST | `/sources/:id/import/csv` | Massenimport von Annotationen (naive Kommatrennung, Aufgabentexte mit Kommas passen nicht hinein) |
+| POST | `/annotations/:id/review` | Annotation verifizieren |
+| GET | `/stats` | Statistik der Erfassungsfläche |
 
-> 卷库浏览端只显示 `verified` 的原卷与标注；`pending` 在出卷专区的管理台账里可见。
+> Das Durchsuchen der Klausurbibliothek zeigt nur `verified`-Originalklausuren und -Annotationen; `pending` ist im Verwaltungshauptbuch des Klausurbereichs sichtbar.
 
-### 题库
+### Aufgabenbank
 
-| Method | Path | 说明 |
+| Methode | Pfad | Beschreibung |
 | --- | --- | --- |
-| GET | `/bank/items?status=&level=&kind=` | 题库列表；`status` 只接受 `pending\|verified\|rejected`，非法值 400 |
-| POST | `/bank/items` | 直接入库（严格 wire） |
-| PUT | `/bank/items/:id` | 修订条目；`id` / `enteredBy` 被 `omit` 剥掉，不可注入 |
-| POST | `/bank/ingest` | 粘贴导入：模型结构化抽取 + 异常识别 |
+| GET | `/bank/items?status=&level=&kind=` | Liste der Aufgabenbank; `status` akzeptiert nur `pending\|verified\|rejected`, ungültige Werte ergeben 400 |
+| POST | `/bank/items` | direkt aufnehmen (striktes Wire-Format) |
+| PUT | `/bank/items/:id` | Eintrag überarbeiten; `id` / `enteredBy` werden per `omit` entfernt und können nicht eingeschleust werden |
+| POST | `/bank/ingest` | Import per Einfügen: strukturierte Modell-Extraktion + Anomalieerkennung |
 | POST | `/bank/items/:id/review` | `pending → verified / rejected` |
-| GET | `/bank/items/:id/usage` | 该题的上卷台账 |
+| GET | `/bank/items/:id/usage` | Nutzungshauptbuch dieser Aufgabe |
 
-### 组卷与交付
+### Zusammenstellung und Lieferung
 
-| Method | Path | 说明 |
+| Methode | Pfad | Beschreibung |
 | --- | --- | --- |
-| GET/POST | `/blueprints` | 结构模板列表 / 新建 |
-| POST | `/blueprints/:id/verify` | 模板核验 |
-| GET | `/jobs` | 任务列表 |
-| POST | `/jobs` | 建任务（`{blueprintId, request}`）→ 生成双向细目表 |
-| PUT | `/jobs/:id/spec` | 教师确认/调整细目表 |
-| GET | `/jobs/:id/bank-plan` | 组卷计划预览（每题 supply 模式与得分，不上卷） |
-| POST | `/jobs/:id/draft` | 起草（异步，202） |
-| POST | `/jobs/:id/check` | 自动检查 + 独立解题（异步，202） |
-| POST | `/jobs/:id/questions/:no/repair` | 按教师意见单题修订 |
-| POST | `/jobs/:id/questions/:no/replace` | 换题（同步校验先于 202，无候选即 404） |
-| POST | `/jobs/:id/questions/:no/review` | 逐题批准 / 退回 |
-| PUT | `/jobs/:id/document` | 直接改文档（改动作废 approval） |
-| POST | `/jobs/:id/approve` | 整卷批准（绑定当前哈希） |
-| POST | `/jobs/:id/export` | 导出四件套（学生卷/解析卷 × PDF/DOCX） |
-| GET | `/jobs/:id/files/:name` | 下载；文件名走白名单，路径 `normalize` 后不得越出导出根 |
+| GET/POST | `/blueprints` | Liste der Strukturvorlagen / neu anlegen |
+| POST | `/blueprints/:id/verify` | Vorlage verifizieren |
+| GET | `/jobs` | Auftragsliste |
+| POST | `/jobs` | Auftrag anlegen (`{blueprintId, request}`) → zweidimensionale Spezifikationstabelle erzeugen |
+| PUT | `/jobs/:id/spec` | Lehrkraft bestätigt/passt die Spezifikationstabelle an |
+| GET | `/jobs/:id/bank-plan` | Vorschau des Zusammenstellungsplans (Supply-Modus und Score je Aufgabe, ohne Aufnahme in die Klausur) |
+| POST | `/jobs/:id/draft` | Entwerfen (asynchron, 202) |
+| POST | `/jobs/:id/check` | automatische Prüfung + unabhängiges Lösen (asynchron, 202) |
+| POST | `/jobs/:id/questions/:no/repair` | einzelne Aufgabe nach Anmerkung der Lehrkraft überarbeiten |
+| POST | `/jobs/:id/questions/:no/replace` | Aufgabe tauschen (synchrone Validierung vor dem 202, ohne Kandidat sofort 404) |
+| POST | `/jobs/:id/questions/:no/review` | Aufgabe einzeln freigeben / zurückweisen |
+| PUT | `/jobs/:id/document` | Dokument direkt ändern (Änderung macht die Freigabe ungültig) |
+| POST | `/jobs/:id/approve` | gesamte Klausur freigeben (an den aktuellen Hash gebunden) |
+| POST | `/jobs/:id/export` | Vierer-Paket exportieren (Schülerklausur/Lösungsklausur × PDF/DOCX) |
+| GET | `/jobs/:id/files/:name` | Download; Dateinamen laufen über eine Allowlist, der Pfad darf nach `normalize` den Export-Root nicht verlassen |
 
-失败一律 `{error:{code,message}}`，携带对应 HTTP 状态。
+Fehler antworten stets mit `{error:{code,message}}` und dem entsprechenden HTTP-Status.
 
-## 组卷算法（纯函数，在 `@physicsos/question-paper`）
+## Zusammenstellungsalgorithmus (reine Funktionen, in `@physicsos/question-paper`)
 
-细目表每行独立决策，四档供给：
+Jede Zeile der Spezifikationstabelle wird unabhängig entschieden, vier Versorgungsstufen:
 
-| 模式 | 触发 | 行为 |
+| Modus | Auslöser | Verhalten |
 | --- | --- | --- |
-| `verbatim` | 候选得分 ≥ 0.85 | 原题直落，不改一字 |
-| `adapt` | 得分 ∈ [0.55, 0.85) | 以原题为骨架改写情境与数值，答案重算 |
-| `generate` | 有行无候选过线 | 让模型新出（可带题库范例） |
-| `gap` | 题型/考点无解 | 诚实留空，不硬凑 |
+| `verbatim` | Kandidaten-Score ≥ 0,85 | Originalaufgabe wird übernommen, kein Wort geändert |
+| `adapt` | Score ∈ [0,55; 0,85) | Situation und Zahlenwerte werden auf dem Gerüst der Originalaufgabe umgeschrieben, Antwort neu berechnet |
+| `generate` | Zeile ohne Kandidat über der Schwelle | Modell neu aufgabenstellen lassen (mit Beispielen aus der Aufgabenbank möglich) |
+| `gap` | Aufgabentyp/Prüfungspunkt ohne Lösung | ehrlich leer lassen, nichts zusammenstückeln |
 
-候选得分 = 知识点 0.45 + 难度 0.25 + 能力 0.15 + 来源 0.15，来源按「已核验真题 > 精选校卷/联考 > 其他已复核 > 公开/回忆版」递减。`freshnessPapers` 道新鲜度闸把近几卷用过的题压下去（只计 approved/exported 卷，failed 卷不占额度）。
+Kandidaten-Score = Wissenspunkt 0,45 + Schwierigkeit 0,25 + Kompetenz 0,15 + Quelle 0,15; die Quelle nimmt ab in der Reihenfolge „verifizierte Originalklausur > ausgewählte Schul-/Verbundklausur > sonstige geprüfte > öffentlich/aus dem Gedächtnis rekonstruiert“. Das Frischegate `freshnessPapers` drückt Aufgaben herunter, die in den letzten Klausuren verwendet wurden (nur approved/exported-Klausuren zählen, failed-Klausuren belegen kein Kontingent).
 
-**provenance 不可伪造**：`generated` 题在 `draftSection` 统一盖 `{mode:'generated'}`，会刷掉模型可能自带的假 `bankItemId`；台账按**实际上卷题目的 provenance** 记账，而不是按计划——降级成 generate 的题不会被误记成 adapted。
+**provenance ist nicht fälschbar**: `generated`-Aufgaben erhalten in `draftSection` einheitlich den Stempel `{mode:'generated'}`, was eine vom Modell möglicherweise mitgebrachte falsche `bankItemId` wegwischt; das Hauptbuch bucht nach der **provenance der tatsächlich in die Klausur aufgenommenen Aufgabe**, nicht nach dem Plan – eine zu generate herabgestufte Aufgabe wird nicht fälschlich als adapted verbucht.
 
-## 校验与证据
+## Prüfung und Belege
 
-- `checks.ts`（纯函数）：总分 / 分值 / 题号连续性 / 缺答案 / 缺图 / 超纲 / 重复题
-- 独立解题轮：不给候选答案，重解一遍再比对，产出 `SolveResult` 进 `solveReport`
-- 每次导出前 `approval` 必须与当前版本哈希一致
+- `checks.ts` (reine Funktionen): Gesamtpunktzahl / Punktwerte / Lückenlosigkeit der Aufgabennummern / fehlende Antwort / fehlende Abbildung / außerhalb des Stoffs / doppelte Aufgaben
+- Unabhängige Lösungsrunde: ohne Kandidatenantwort noch einmal lösen und vergleichen, erzeugt ein `SolveResult` in `solveReport`
+- Vor jedem Export muss die `approval` mit dem Hash der aktuellen Version übereinstimmen
 
-## 依赖的外部工具
+## Externe Werkzeuge, von denen es abhängt
 
-| 工具 | 用途 | 缺失时 |
+| Werkzeug | Zweck | Bei Fehlen |
 | --- | --- | --- |
-| `pandoc` | Markdown → DOCX（`$LaTeX$` → OMML 可编辑公式） | 导出失败并报错 |
-| `soffice` (LibreOffice) | DOCX → PDF | 导出失败并报错 |
-| `unzip` | 取出参考模板的 `reference.docx` | 导出失败并报错 |
+| `pandoc` | Markdown → DOCX (`$LaTeX$` → bearbeitbare OMML-Formeln) | Export schlägt fehl und meldet einen Fehler |
+| `soffice` (LibreOffice) | DOCX → PDF | Export schlägt fehl und meldet einen Fehler |
+| `unzip` | `reference.docx` der Referenzvorlage entnehmen | Export schlägt fehl und meldet einen Fehler |
 
-三者都以 `spawn` 隔离调用（不经 shell），带超时与 `cwd` 隔离。
+Alle drei werden isoliert per `spawn` aufgerufen (nicht über eine Shell), mit Timeout und `cwd`-Isolation.
 
-## 构建注意
+## Hinweis zum Build
 
-`tsdown` 的入口是 `lib/types/index.js`（`tsc` 产物），**必须先 `tsc -b` 再 `tsdown`**——直接跑 `tsdown` 打的是上一次的旧产物，表现是「路由在源码里却 404」。用包内的 `pnpm run bundle`，它按正确顺序跑两步。
+Der Einstieg von `tsdown` ist `lib/types/index.js` (Produkt von `tsc`), daher **erst `tsc -b`, dann `tsdown`** – ein direkter `tsdown`-Lauf bündelt das alte Produkt des letzten Mals; das äußert sich als „die Route steht im Quellcode, liefert aber 404“. Verwenden Sie `pnpm run bundle` im Paket, das beide Schritte in der richtigen Reihenfolge ausführt.
 
-## Model Experience
+## Modellerfahrung
 
-None, as the package serves browser REST surfaces for papers and the question bank and registers nothing model-facing.
+Keine, da das Paket Browser-REST-Oberflächen für Klausuren und die Aufgabenbank bedient und nichts modellseitig Sichtbares registriert.
 
-#### KV Cache effect
+#### KV-Cache-Wirkung
 
-None; this package neither assembles nor sends a provider request.
+Keine; dieses Paket stellt keine Provider-Anfrage zusammen und sendet auch keine.
 
-## Known Limitations and Deferred Work
+## Bekannte Einschränkungen und zurückgestellte Arbeit
 
-- CSV 导入是朴素逗号/制表符切分，含逗号的题面装不下——题干走逐题表单录入
-- 浏览端只显示 `verified` 的原卷与考点
-- 题目题型列显示原始枚举（如 `choice-single`），要中文标签属后续小改
-- 无 REAL-composition 测试（`routes.spec.ts` 走 Map-backed domain），真实链路由 `auth-host` 之外的手工 e2e 与浏览器验收承载
+- Der CSV-Import trennt naiv nach Komma/Tabulator, Aufgabentexte mit Kommas passen nicht hinein – Aufgabentexte werden über das Formular pro Aufgabe erfasst
+- Die Browse-Seite zeigt nur `verified`-Originalklausuren und -Prüfungspunkte
+- Die Spalte für den Aufgabentyp zeigt das rohe Enum (z. B. `choice-single`); chinesische Labels sind eine spätere kleine Änderung
+- Kein REAL-Composition-Test (`routes.spec.ts` läuft über eine Map-gestützte Domäne); die echte Kette tragen manuelle E2E-Tests außerhalb von `auth-host` und die Browser-Abnahme

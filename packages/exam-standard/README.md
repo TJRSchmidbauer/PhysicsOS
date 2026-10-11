@@ -1,69 +1,73 @@
 # @physicsos/exam-standard
 
-The **Exam Standard Runtime**: the contract core that makes a generated paper
-governed by versioned official standards rather than the language model
-"feeling like" a Guizhou paper. It is the project's third moat, alongside the
-physics world runtime and the question compiler.
+Die **Exam Standard Runtime**: der Vertragskern, der dafür sorgt, dass eine erzeugte
+Klausur von versionierten offiziellen Standards bestimmt wird und nicht davon, dass
+das Sprachmodell sich eine Klausur aus Guizhou „so vorstellt“. Sie ist neben der
+Physik-Welt-Runtime und dem Aufgaben-Compiler der dritte Burggraben des Projekts.
 
-This package ships **contracts and machinery only**. It contains **no populated
-real pack** — no Guizhou paper structure, question count, score split,
-difficulty number, rubric or source metadata. Populating Guizhou 2026 later is a
-data task driven by official documents; extension to another province or the
-national 新高考 is a new versioned pack, never a branch in this engine.
+Dieses Paket liefert **ausschließlich Verträge und Mechanik**. Es enthält **kein
+befülltes echtes Pack** – keine Klausurstruktur aus Guizhou, keine Aufgabenanzahl,
+keine Punkteverteilung, keine Schwierigkeitszahl, keinen Bewertungsraster, keine
+Quellenmetadaten. Das spätere Befüllen mit Guizhou 2026 ist eine Datenaufgabe, die
+von offiziellen Dokumenten getrieben wird; die Erweiterung auf eine andere Provinz
+oder das landesweite 新高考 ist ein neues versioniertes Pack, niemals ein Zweig in
+dieser Engine.
 
-## Versioning — never a single boolean
+## Versionierung – niemals ein einzelnes Boolean
 
 ```
 CN → Guizhou → { 中考 | 高考 } → { 2024 | 2025 | 2026 … }
 ```
 
-A profile is keyed by `(jurisdiction, stage, subject, year)`. 中考 and 高考 are
-**entirely separate profiles** (different curriculum roots; no shared template
-with a difficulty switch). The governor of what may be asked is the
-**考试范围 / Curriculum Scope** (`ContentScope`) — never a 考试大纲.
+Ein Profil wird durch `(jurisdiction, stage, subject, year)` identifiziert. 中考 und
+高考 sind **vollständig getrennte Profile** (unterschiedliche Lehrplanwurzeln; keine
+gemeinsame Vorlage mit Schwierigkeitsschalter). Maßgeblich dafür, was gefragt werden
+darf, ist der **考试范围 / Curriculum Scope** (`ContentScope`) – niemals ein 考试大纲.
 
-## Contracts
+## Verträge
 
 `ExamProfile`, `PaperBlueprint`, `ContentScope`, `QuestionTaxonomy`,
 `CompetencyModel`, `AnswerStandard`, `ScoringStandard`, `OfficialSourceRef`,
-`QuestionRecord`, and the three distinct answer levels (`FinalAnswer`,
-`ExamSolution`, `LearningExplanation`) with structured `ScoringPoint`s.
+`QuestionRecord` und die drei getrennten Antwortebenen (`FinalAnswer`,
+`ExamSolution`, `LearningExplanation`) mit strukturierten `ScoringPoint`s.
 
-## Resolution and the unconfirmed state
+## Auflösung und der unbestätigte Zustand
 
 ```ts
 import { createExamStandardRegistry, planPaper, examStandardRegistry } from '@physicsos/exam-standard'
 
-const registry = createExamStandardRegistry()          // empty: no real pack
+const registry = createExamStandardRegistry()          // leer: kein echtes Pack
 registry.resolve({ jurisdiction: 'CN-GZ', stage: 'ZHONGKAO', subject: 'PHYSICS', year: 2026 })
-// → { status: 'UNCONFIRMED', code: 'NO_PACK_REGISTERED', … }   // never a default
+// → { status: 'UNCONFIRMED', code: 'NO_PACK_REGISTERED', … }   // niemals ein Default
 
-planPaper(registry, target) // → { status: 'REFUSED', code, reason }  // never guesses
+planPaper(registry, target) // → { status: 'REFUSED', code, reason }  // rät niemals
 ```
 
-An unconfirmed profile, an incomplete blueprint or an ambiguous target produce
-an explicit `UNCONFIRMED` / `REFUSED` state with a stable code. The runtime that
-guesses official norms is worse than one that refuses.
+Ein unbestätigtes Profil, ein unvollständiger Blueprint oder ein mehrdeutiges Ziel
+erzeugen einen ausdrücklichen Zustand `UNCONFIRMED` / `REFUSED` mit einem stabilen
+Code. Eine Runtime, die offizielle Normen errät, ist schlechter als eine, die
+ablehnt.
 
-## Two verifiers, kept distinct
+## Zwei Verifier, getrennt gehalten
 
-- `@physicsos/physics-verifier` → *is the physics right?* (not this package)
-- `verifyExamCompliance` → *is this in scope, a valid type, a valid score, a
-  valid answer format, within the difficulty target, and does it satisfy
-  blueprint coverage?*
+- `@physicsos/physics-verifier` → *Stimmt die Physik?* (nicht dieses Paket)
+- `verifyExamCompliance` → *Liegt das im Stoffumfang, ist es ein gültiger Typ, eine
+  gültige Punktzahl, ein gültiges Antwortformat, im Rahmen des Schwierigkeitsziels,
+  und erfüllt es die Blueprint-Abdeckung?*
 
-The exam verifier consumes the physics verifier's `PhysicsVerificationSummary`
-structurally (so the dependency stays out) and merely echoes the physics result
-count; it does not adjudicate physics. Its `ExamComplianceReport` ends at
-`READY_FOR_TEACHER_REVIEW` — the system proposes, a teacher approves. It never
-ends at "official".
+Der Klausur-Verifier verarbeitet die `PhysicsVerificationSummary` des
+Physik-Verifiers strukturell (damit die Abhängigkeit draußen bleibt) und gibt nur die
+Anzahl der Physik-Ergebnisse wieder; über die Physik urteilt er nicht. Sein
+`ExamComplianceReport` endet bei `READY_FOR_TEACHER_REVIEW` – das System schlägt vor,
+eine Lehrkraft genehmigt. Er endet niemals bei „offiziell“.
 
-## Anti-fake-official gate
+## Gate gegen gefälschte Offizialität
 
-`checkNotFakeOfficial` requires every generated artefact to be labelled a
-PhysicsOS 模拟试卷 / 非官方试卷 and rejects anything presenting itself as
-official (an `OFFICIAL_PAPER_CLAIM` label, attribution to a real authority, or
-body text claiming official issuance) with the stable code
+`checkNotFakeOfficial` verlangt, dass jedes erzeugte Artefakt als PhysicsOS
+模拟试卷 / 非官方试卷 (Probeklausur / nicht offizielle Klausur) gekennzeichnet ist,
+und weist alles zurück, was sich als offiziell ausgibt (ein Label
+`OFFICIAL_PAPER_CLAIM`, eine Zuschreibung an eine echte Behörde oder Fließtext, der
+eine offizielle Herausgabe behauptet), mit dem stabilen Code
 `EXAM_FAKE_OFFICIAL_CLAIM`.
 
 ## Tests
@@ -74,6 +78,7 @@ pnpm -C packages/exam-standard typecheck   # tsc --noEmit
 pnpm -C packages/exam-standard lint        # eslint
 ```
 
-Tests use clearly-labelled synthetic fixtures (`TEST-FIXTURE-*`, `.invalid`
-URLs) and assert the honest failure mode: with no confirmed profile/sources,
-resolution and planning refuse rather than default.
+Die Tests verwenden eindeutig gekennzeichnete synthetische Fixtures
+(`TEST-FIXTURE-*`, `.invalid`-URLs) und prüfen den ehrlichen Fehlermodus: Ohne
+bestätigtes Profil/bestätigte Quellen lehnen Auflösung und Planung ab, statt einen
+Default zu verwenden.

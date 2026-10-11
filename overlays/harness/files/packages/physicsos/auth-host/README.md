@@ -1,10 +1,10 @@
 # @deepseek-ai/dsh-auth-host
 
-PhysicsOS 账户体系 host plugin — school-tenant registration and login, argon2id passwords, opaque cookie sessions, invite-code admission, TOTP two-factor login, personal API tokens, attempt rate limiting, the `/physicsos/auth` REST surface, and the shared `/api` account policy over the `webServer` service and a `physicsos_auth` storage-domain unit.
+Host-Plugin für das PhysicsOS-Kontosystem (账户体系) – Registrierung und Anmeldung auf Schul-Mandanten, argon2id-Passwörter, opake Cookie-Sitzungen, Zulassung per Einladungscode, TOTP-Zwei-Faktor-Anmeldung, persönliche API-Tokens, Begrenzung von Versuchen, die REST-Oberfläche `/physicsos/auth` und die gemeinsame `/api`-Kontorichtlinie über den Service `webServer` und eine Storage-Domänen-Einheit `physicsos_auth`.
 
-## Model
+## Modell
 
-The school is a first-class tenant, not a profile field:
+Die Schule ist ein erstklassiger Mandant, kein Profilfeld:
 
 ```
 school (tenant)
@@ -12,129 +12,130 @@ school (tenant)
        └─ session   keyed `sha256(token)` → raw tokens never persist
 ```
 
-`reset_requests` is the admin recovery queue and lifecycle trail. A request can
-be pending, active, used, cancelled, expired, superseded, or failed delivery.
-`password_reset_tokens` is keyed by the SHA-256 of the raw token; the raw value
-exists only in the delivery message or the one-time admin issue response.
+`reset_requests` ist die Wiederherstellungswarteschlange der Admins und die Lebenszyklus-Spur. Eine Anfrage kann pending, active, used, cancelled, expired, superseded oder failed delivery sein.
+`password_reset_tokens` ist nach dem SHA-256 des Roh-Tokens geschlüsselt; der Rohwert
+existiert nur in der Zustellnachricht oder in der einmaligen Admin-Ausstellungsantwort.
 
-`invites`, `api_tokens`, `login_challenges`, and `totp_recovery_codes` also keep
-only SHA-256 digests. Invite and API-token secrets cross the wire once at
-creation; TOTP login challenges and recovery codes are single-use.
+`invites`, `api_tokens`, `login_challenges` und `totp_recovery_codes` halten ebenfalls
+nur SHA-256-Digests. Einladungs- und API-Token-Geheimnisse gehen bei der Erstellung
+genau einmal über die Leitung; TOTP-Anmelde-Challenges und Wiederherstellungscodes
+sind einmalig verwendbar.
 
-`api_resources` is the durable ownership ledger for Harness sessions and
-workspaces. A non-admin account owns every session it creates and exactly one
-host-created private workspace under `workspaceRoot`; legacy/unowned resources
-remain visible only to a `SUPER_ADMIN`.
+`api_resources` ist das dauerhafte Besitz-Hauptbuch für Harness-Sitzungen und
+-Arbeitsbereiche. Ein Nicht-Admin-Konto besitzt jede Sitzung, die es erstellt, und
+genau einen vom Host erstellten privaten Arbeitsbereich unter `workspaceRoot`;
+Legacy-/besitzerlose Ressourcen bleiben nur für einen `SUPER_ADMIN` sichtbar.
 
-## Shared `/api` policy
+## Gemeinsame `/api`-Richtlinie
 
-The generic Harness API is a first-class authenticated surface when this host is mounted:
+Die generische Harness-API ist eine erstklassige authentifizierte Oberfläche, sobald dieser Host eingehängt ist:
 
-- every `/api` request needs a live `physicsos_session` cookie or a live personal Bearer token;
-- `read` tokens may call only read-only methods; mutating methods require `write`;
-- `session.*`, `subagent.*`, goal, skill, and nested Typert payloads are checked against `api_resources`;
-- `session.list`, `session.search`, workspace lists, archive state, and WebSocket mux/host frames are filtered to owned resources;
-- `/api/respond` accepts a pending approval/question response only after the same account received that `rpcId`; the pending map is process-local with a 15-minute TTL;
-- non-admin `session.create` ignores caller `cwd`/arbitrary workspace choices and always uses the account's private workspace plus the `physics-student` preset;
-- host path/configuration methods and agent-preset mutation stay administrator-only;
-- host-describe reports the account's private workspace, not the deployment root.
+- jede `/api`-Anfrage braucht ein gültiges `physicsos_session`-Cookie oder ein gültiges persönliches Bearer-Token;
+- `read`-Tokens dürfen nur lesende Methoden aufrufen; schreibende Methoden erfordern `write`;
+- `session.*`-, `subagent.*`-, Goal-, Skill- und verschachtelte Typert-Payloads werden gegen `api_resources` geprüft;
+- `session.list`, `session.search`, Arbeitsbereichslisten, Archivstatus und WebSocket-Mux-/Host-Frames werden auf eigene Ressourcen gefiltert;
+- `/api/respond` akzeptiert die Antwort auf eine ausstehende Freigabe/Frage nur, nachdem dasselbe Konto diese `rpcId` erhalten hat; die Map der ausstehenden Einträge ist prozesslokal mit 15 Minuten TTL;
+- `session.create` eines Nicht-Admins ignoriert `cwd`/beliebige Arbeitsbereichs-Wahlen des Aufrufers und verwendet stets den privaten Arbeitsbereich des Kontos plus die Voreinstellung `physics-student`;
+- Host-Pfad-/Konfigurationsmethoden und das Ändern von Agent-Voreinstellungen bleiben Administratoren vorbehalten;
+- host-describe meldet den privaten Arbeitsbereich des Kontos, nicht das Bereitstellungs-Root.
 
-The policy is attached by `client-connection` as an optional `apiPolicy`
-service wrapping the complete shared dispatcher, so both Typert Gateway methods
-and legacy API Proxy methods pass the same gate.
+Die Richtlinie wird von `client-connection` als optionaler `apiPolicy`-Service
+angehängt, der den gesamten gemeinsamen Dispatcher umschließt, sodass sowohl
+Typert-Gateway-Methoden als auch Legacy-API-Proxy-Methoden dasselbe Gate durchlaufen.
 
-## REST surface (`/physicsos/auth`)
+## REST-Oberfläche (`/physicsos/auth`)
 
-| Method | Path | Body | Result |
+| Methode | Pfad | Body | Ergebnis |
 | --- | --- | --- | --- |
-| POST | `/register` | `{schoolName, schoolId?, username, displayName, password, deviceId?, inviteCode?}` | `201 {user}` + `Set-Cookie` when admission policy allows |
+| POST | `/register` | `{schoolName, schoolId?, username, displayName, password, deviceId?, inviteCode?}` | `201 {user}` + `Set-Cookie`, wenn die Zulassungsrichtlinie es erlaubt |
 | POST | `/login` | `{username, password, rememberDevice?, schoolId?, deviceId?}` | `200 {user}` + `Set-Cookie` |
-| POST | `/login/2fa` | `{challengeToken, code}` | completes a TOTP login and emits `Set-Cookie`; `code` may be a one-time recovery code |
-| POST | `/logout` | — | `200 {ok}` + expired cookie; session row revoked |
-| GET | `/me` | — | `200 {user}` or `401 UNAUTHENTICATED`; accepts cookie or `Authorization: Bearer <token>` |
-| POST | `/usage/learning` | `{knowledgeId, correct}` | `201 {cell}` signed-in only; folds the report into one `learning_counts` cell keyed `schoolId|date|knowledgeId` — school from the session, date from the server clock, no account on the row |
-| POST | `/devices` | `{deviceId}` (hash-shaped hex) | `200 {device}` signed-in only; idempotent re-seen, `403 DEVICE_REVOKED` on a revoked machine |
-| POST | `/2fa/setup` | — | `200 {secret, uri}` for `TEACHER`/administrator enrollment |
-| POST | `/2fa/enable` | `{code}` | enables TOTP and returns ten one-time recovery codes exactly once |
-| POST | `/2fa/verify` | `{code}` | validates a current TOTP for the signed-in account |
-| POST | `/2fa/disable` | `{password, code}` | disables TOTP and deletes every recovery-code row |
-| GET | `/api-tokens` | — | lists the acting account's tokens with masks only |
-| POST | `/api-tokens` | `{name, scope?: "read"\|"write", expiresAt?}` | creates a token; returns `secret` exactly once |
-| POST | `/api-tokens/:id/revoke` | — | revokes an owned token immediately |
-| POST | `/password/forgot` | `{username, schoolId?}` | `200 {ok}` uniform receipt; queues or directly delivers a one-time reset when the account resolves uniquely |
-| POST | `/password/reset` | `{token, newPassword}` | `200 {ok}`; password changed, every session and sibling token revoked |
-| POST | `/school-requests` | `{schoolName, contact}` | `201 {request}` anonymous school application, IP-rate-limited |
+| POST | `/login/2fa` | `{challengeToken, code}` | schließt eine TOTP-Anmeldung ab und sendet `Set-Cookie`; `code` darf ein einmaliger Wiederherstellungscode sein |
+| POST | `/logout` | — | `200 {ok}` + abgelaufenes Cookie; Sitzungszeile widerrufen |
+| GET | `/me` | — | `200 {user}` oder `401 UNAUTHENTICATED`; akzeptiert Cookie oder `Authorization: Bearer <token>` |
+| POST | `/usage/learning` | `{knowledgeId, correct}` | `201 {cell}` nur angemeldet; faltet die Meldung in eine `learning_counts`-Zelle mit dem Schlüssel `schoolId|date|knowledgeId` – Schule aus der Sitzung, Datum von der Serveruhr, kein Konto in der Zeile |
+| POST | `/devices` | `{deviceId}` (hash-förmiges Hex) | `200 {device}` nur angemeldet; idempotentes Wiedersehen, `403 DEVICE_REVOKED` bei einem widerrufenen Gerät |
+| POST | `/2fa/setup` | — | `200 {secret, uri}` für die Einrichtung durch `TEACHER`/Administrator |
+| POST | `/2fa/enable` | `{code}` | aktiviert TOTP und gibt zehn einmalige Wiederherstellungscodes genau einmal zurück |
+| POST | `/2fa/verify` | `{code}` | validiert ein aktuelles TOTP für das angemeldete Konto |
+| POST | `/2fa/disable` | `{password, code}` | deaktiviert TOTP und löscht jede Wiederherstellungscode-Zeile |
+| GET | `/api-tokens` | — | listet die Tokens des handelnden Kontos nur mit Maskierung |
+| POST | `/api-tokens` | `{name, scope?: "read"\|"write", expiresAt?}` | erstellt ein Token; gibt `secret` genau einmal zurück |
+| POST | `/api-tokens/:id/revoke` | — | widerruft ein eigenes Token sofort |
+| POST | `/password/forgot` | `{username, schoolId?}` | `200 {ok}` einheitliche Quittung; reiht ein einmaliges Zurücksetzen ein oder stellt es direkt zu, wenn das Konto eindeutig aufgelöst wird |
+| POST | `/password/reset` | `{token, newPassword}` | `200 {ok}`; Passwort geändert, jede Sitzung und jedes Geschwister-Token widerrufen |
+| POST | `/school-requests` | `{schoolName, contact}` | `201 {request}` anonymer Schulantrag, IP-ratenbegrenzt |
 
-Admin surface (`/physicsos/auth` continued; `SCHOOL_ADMIN` scoped to their own tenant, `SUPER_ADMIN` platform-wide):
+Admin-Oberfläche (`/physicsos/auth` Fortsetzung; `SCHOOL_ADMIN` auf den eigenen Mandanten beschränkt, `SUPER_ADMIN` plattformweit):
 
-| Method | Path | Result |
+| Methode | Pfad | Ergebnis |
 | --- | --- | --- |
-| GET | `/school-requests` | pending join applications |
-| POST | `/school-requests/:id/(approve\|reject)` | onboard or refuse an applicant |
-| GET | `/schools` | tenant list |
-| POST | `/schools` | create a tenant (super admin) |
-| POST | `/schools/:id/status` | suspend/reactivate a tenant |
-| GET | `/invites` | tenant-scoped invite list (`?schoolId&limit`), masked and with used counts |
-| POST | `/invites` | mint 1–100 hashed codes for `{schoolId, count, maxUses, expiresAt?}` |
-| POST | `/invites/:id/disable` | stop a code without deleting its usage history |
-| GET | `/users` | account list (`?schoolId&role&q`), tenant-scoped for school admins |
-| POST | `/users` | create an account (CSV import's per-row call) |
-| POST | `/users/:key/(status\|reset-password\|revoke-sessions)` | suspend/reactivate, reset password, kill all sessions |
-| GET | `/devices` | registered machines with risk signals |
-| POST | `/devices/:id/revoked` | revoke/restore by physical machine — new logins 403, live sessions 401 on next resolve |
-| GET | `/password-resets` | tenant-scoped recovery queue (`?status&schoolId&q&limit`) |
-| POST | `/password-resets/:id/issue` | mint and return a one-time link; invalidates every older token |
-| POST | `/password-resets/:id/cancel` | cancel the request and revoke its current token |
-| GET | `/dashboard` | aggregate counts + learning-analytics cells for the admin console |
-| GET | `/audit` | tenant-scoped audit events, including first-device/first-IP `auth.new_login` rows |
-| POST | `/audit/export` | CSV or JSONL stream filtered by `{format, schoolId?, from?, to?, limit?}`; maximum 50,000 rows |
+| GET | `/school-requests` | ausstehende Beitrittsanträge |
+| POST | `/school-requests/:id/(approve\|reject)` | Antragsteller aufnehmen oder ablehnen |
+| GET | `/schools` | Mandantenliste |
+| POST | `/schools` | einen Mandanten anlegen (Super-Admin) |
+| POST | `/schools/:id/status` | einen Mandanten sperren/reaktivieren |
+| GET | `/invites` | mandantenbezogene Einladungsliste (`?schoolId&limit`), maskiert und mit Verwendungszählern |
+| POST | `/invites` | 1–100 gehashte Codes für `{schoolId, count, maxUses, expiresAt?}` erzeugen |
+| POST | `/invites/:id/disable` | einen Code stoppen, ohne seine Nutzungshistorie zu löschen |
+| GET | `/users` | Kontenliste (`?schoolId&role&q`), für Schul-Admins mandantenbezogen |
+| POST | `/users` | ein Konto anlegen (Aufruf pro Zeile des CSV-Imports) |
+| POST | `/users/:key/(status\|reset-password\|revoke-sessions)` | sperren/reaktivieren, Passwort zurücksetzen, alle Sitzungen beenden |
+| GET | `/devices` | registrierte Geräte mit Risikosignalen |
+| POST | `/devices/:id/revoked` | pro physischem Gerät widerrufen/wiederherstellen – neue Anmeldungen 403, Live-Sitzungen 401 bei der nächsten Auflösung |
+| GET | `/password-resets` | mandantenbezogene Wiederherstellungswarteschlange (`?status&schoolId&q&limit`) |
+| POST | `/password-resets/:id/issue` | einen einmaligen Link erzeugen und zurückgeben; macht jedes ältere Token ungültig |
+| POST | `/password-resets/:id/cancel` | die Anfrage abbrechen und ihr aktuelles Token widerrufen |
+| GET | `/dashboard` | aggregierte Zähler + Zellen der Lernanalytik für die Admin-Konsole |
+| GET | `/audit` | mandantenbezogene Audit-Ereignisse, einschließlich der `auth.new_login`-Zeilen für erstes Gerät/erste IP |
+| POST | `/audit/export` | CSV- oder JSONL-Stream, gefiltert nach `{format, schoolId?, from?, to?, limit?}`; maximal 50.000 Zeilen |
 
-Failures answer `{error:{code,message,...details}}` with `BAD_REQUEST`, `SCHOOL_NOT_FOUND`, `SCHOOL_AMBIGUOUS`, `SCHOOL_REQUIRED`, `USERNAME_TAKEN`, `INVALID_CREDENTIALS`, `INVALID_RESET_TOKEN`, `RATE_LIMITED`, `DEPENDENCY_UNAVAILABLE`, `DEVICE_REVOKED`, `UNAUTHENTICATED`, `FORBIDDEN`, `REGISTRATION_CLOSED`, `INVITE_REQUIRED`, `INVALID_INVITE_CODE`, `TWO_FACTOR_REQUIRED`, `INVALID_TWO_FACTOR_CHALLENGE`, `INVALID_TWO_FACTOR_CODE`, `TOKEN_SCOPE_REQUIRED`.
+Fehler antworten mit `{error:{code,message,...details}}` und `BAD_REQUEST`, `SCHOOL_NOT_FOUND`, `SCHOOL_AMBIGUOUS`, `SCHOOL_REQUIRED`, `USERNAME_TAKEN`, `INVALID_CREDENTIALS`, `INVALID_RESET_TOKEN`, `RATE_LIMITED`, `DEPENDENCY_UNAVAILABLE`, `DEVICE_REVOKED`, `UNAUTHENTICATED`, `FORBIDDEN`, `REGISTRATION_CLOSED`, `INVITE_REQUIRED`, `INVALID_INVITE_CODE`, `TWO_FACTOR_REQUIRED`, `INVALID_TWO_FACTOR_CHALLENGE`, `INVALID_TWO_FACTOR_CODE`, `TOKEN_SCOPE_REQUIRED`.
 
-### Tenant resolution
+### Mandantenauflösung
 
-The school stays a first-class tenant internally, but the public wire never carries a school list — the user types a name, the host resolves it:
+Die Schule bleibt intern ein erstklassiger Mandant, aber die öffentliche Leitung trägt nie eine Schulliste – die Person tippt einen Namen, der Host löst ihn auf:
 
-- **Register** resolves `schoolName` against the fixed tenant roster (`SEED_SCHOOLS`: the ops tenant plus the Guizhou middle/high-school list in `schools-data.ts`): unique exact `name`/`shortName` match wins, then unique substring match. An unmatched name is `SCHOOL_NOT_FOUND` — registration never mints a tenant, so spelling variants cannot fork one school into several. `SCHOOL_AMBIGUOUS` returns up to 16 `error.candidates` (region-labeled, shortest names first) for a disambiguation retry carrying `schoolId`.
-- **Login** resolves the account globally — verifies the password against every active `(school, username)` pair (bounded at 16 candidates). Zero matches is the uniform `INVALID_CREDENTIALS`; one match issues the session for that tenant; more than one match is the only `SCHOOL_REQUIRED` case and returns `error.candidates` so the client can retry with `schoolId`.
-- `schoolId` on register/login/forgot is therefore a disambiguation answer, never a field the user picks from a served list.
+- **Register** löst `schoolName` gegen die feste Mandantenliste auf (`SEED_SCHOOLS`: der Ops-Mandant plus die Liste der Mittel-/Oberschulen in Guizhou in `schools-data.ts`): ein eindeutiger exakter Treffer bei `name`/`shortName` gewinnt, danach ein eindeutiger Teilstring-Treffer. Ein nicht passender Name ergibt `SCHOOL_NOT_FOUND` – die Registrierung legt nie einen Mandanten an, sodass Schreibvarianten eine Schule nicht in mehrere aufspalten können. `SCHOOL_AMBIGUOUS` gibt bis zu 16 `error.candidates` zurück (mit Regionslabel, kürzeste Namen zuerst) für einen Wiederholungsversuch zur Disambiguierung mit `schoolId`.
+- **Login** löst das Konto global auf – verifiziert das Passwort gegen jedes aktive Paar `(school, username)` (begrenzt auf 16 Kandidaten). Null Treffer ergeben das einheitliche `INVALID_CREDENTIALS`; ein Treffer stellt die Sitzung für diesen Mandanten aus; mehr als ein Treffer ist der einzige Fall von `SCHOOL_REQUIRED` und gibt `error.candidates` zurück, damit der Client mit `schoolId` erneut versuchen kann.
+- `schoolId` bei register/login/forgot ist daher eine Antwort zur Disambiguierung, niemals ein Feld, das die Person aus einer ausgelieferten Liste wählt.
 
-## Security posture
+## Sicherheitshaltung
 
-- Passwords hash to self-describing argon2id PHC strings (`node:crypto.argon2`, Node ≥ 24.7); the plugin refuses to load on older runtimes.
-- The session cookie (`physicsos_session`) is `HttpOnly; SameSite=Lax; Path=/`, `Secure` over https; `rememberDevice` turns it into a 30-day persistent cookie, otherwise a browser-session cookie with a 12h server-side expiry.
-- `registrationMode` is `open` by default. `invite` requires a valid bound code and fails closed when it is absent; `closed` rejects every new account. Invite uses are atomically incremented on the storage-domain write chain; when `physicsosOnceLedger` is mounted, a short-lived lock extends the same serialization across instances.
-- TOTP is RFC 6238 SHA-1/6-digit/30-second with ±1 step drift; the login challenge expires after 5 minutes and is consumed once. Recovery codes are single-use and stored only as hashes.
-- Personal tokens use `Authorization: Bearer <token>`. `read` permits read-only `/api` methods, `write` permits mutating methods, revocation is effective on the next request, and all token calls reuse the account's existing model budget bucket.
-- New-device and new-IP first logins append an `auth.new_login` audit row; audit exports stream rows and never load the full table.
-- Login rejects collapse to `INVALID_CREDENTIALS`; a missing account still pays the argon2 cost through a dummy verify so timing does not enumerate users.
-- Fixed-window attempt buckets cap failures per account (5/10min), per source IP (20/10min), registration (60/10min), learning reports (120/10min per account), and forgot/reset attempts (10/10min by IP and subject).
-- Reset tokens are hashed with SHA-256 at rest, expire after 30 minutes, are single-use, and are invalidated by a newer issue, cancellation, account disable, admin reset, or successful redemption.
-- POSTs require `content-type: application/json` plus matching `Origin`/`Sec-Fetch-Site` when present — the cookie session carries no ambient authority cross-site.
-- Registration pins `role: 'STUDENT'`; `TEACHER`/`SCHOOL_ADMIN`/`SUPER_ADMIN` exist in the schema for future admin-driven enrolment only.
-- Proxy-derived client IP/scheme is trusted only when the direct peer is an exact literal in `trustedProxies`.
-- Generic `/api` fails closed when the identity host is absent, and account ownership is persisted rather than inferred from a client-supplied id.
+- Passwörter werden zu selbstbeschreibenden argon2id-PHC-Strings gehasht (`node:crypto.argon2`, Node ≥ 24.7); das Plugin weigert sich, auf älteren Runtimes zu laden.
+- Das Sitzungs-Cookie (`physicsos_session`) ist `HttpOnly; SameSite=Lax; Path=/`, `Secure` über https; `rememberDevice` macht daraus ein persistentes 30-Tage-Cookie, sonst ein Browsersitzungs-Cookie mit 12 h serverseitigem Ablauf.
+- `registrationMode` ist standardmäßig `open`. `invite` verlangt einen gültigen gebundenen Code und schlägt geschlossen fehl, wenn er fehlt; `closed` weist jedes neue Konto ab. Einladungsnutzungen werden atomar auf der Schreibkette der Storage-Domäne erhöht; ist `physicsosOnceLedger` eingehängt, erweitert eine kurzlebige Sperre dieselbe Serialisierung über Instanzen hinweg.
+- TOTP ist RFC 6238 SHA-1/6 Ziffern/30 Sekunden mit ±1 Schritt Drift; die Anmelde-Challenge läuft nach 5 Minuten ab und wird einmal verbraucht. Wiederherstellungscodes sind einmalig und nur als Hashes gespeichert.
+- Persönliche Tokens verwenden `Authorization: Bearer <token>`. `read` erlaubt lesende `/api`-Methoden, `write` erlaubt schreibende Methoden, der Widerruf wirkt ab der nächsten Anfrage, und alle Token-Aufrufe verwenden den bestehenden Modellbudget-Bucket des Kontos weiter.
+- Erste Anmeldungen von neuem Gerät und neuer IP hängen eine `auth.new_login`-Audit-Zeile an; Audit-Exporte streamen Zeilen und laden nie die gesamte Tabelle.
+- Login-Ablehnungen werden zu `INVALID_CREDENTIALS` zusammengefasst; ein fehlendes Konto zahlt über eine Dummy-Verifikation dennoch die argon2-Kosten, sodass das Timing keine Nutzer aufzählt.
+- Fixed-Window-Versuchs-Buckets begrenzen Fehlversuche pro Konto (5/10 min), pro Quell-IP (20/10 min), Registrierung (60/10 min), Lernmeldungen (120/10 min pro Konto) und forgot-/reset-Versuche (10/10 min nach IP und Subjekt).
+- Reset-Tokens werden im Ruhezustand mit SHA-256 gehasht, laufen nach 30 Minuten ab, sind einmalig und werden durch eine neuere Ausstellung, einen Abbruch, das Deaktivieren des Kontos, ein Admin-Zurücksetzen oder die erfolgreiche Einlösung ungültig.
+- POSTs verlangen `content-type: application/json` sowie passende `Origin`/`Sec-Fetch-Site`, sofern vorhanden – die Cookie-Sitzung trägt keine ambiente Autorität über Websites hinweg.
+- Die Registrierung pinnt `role: 'STUDENT'`; `TEACHER`/`SCHOOL_ADMIN`/`SUPER_ADMIN` existieren im Schema nur für eine künftige adminseitig gesteuerte Aufnahme.
+- Proxy-abgeleitete Client-IP/-Scheme wird nur vertraut, wenn der direkte Peer ein exaktes Literal in `trustedProxies` ist.
+- Die generische `/api` schlägt geschlossen fehl, wenn der Identity-Host fehlt, und der Kontobesitz wird persistiert statt aus einer vom Client gelieferten ID abgeleitet.
 
-## Config
+## Konfiguration
 
-All `AuthServiceConfig` fields (`sessionTtlMs`, `rememberTtlMs`,
+Alle `AuthServiceConfig`-Felder (`sessionTtlMs`, `rememberTtlMs`,
 `accountAttemptLimit`, `ipAttemptLimit`, `applyAttemptLimit`,
 `registrationAttemptLimit`, `learningAttemptLimit`, `passwordResetAttemptLimit`,
 `passwordResetTtlMs`, `registrationMode`, `totpAttemptLimit`,
 `totpChallengeTtlMs`, `apiTokenLimit`, `attemptWindowMs`, `attemptBucketLimit`,
-`trustedProxies`) are cordis.yml-configurable with secure defaults.
-`workspaceRoot` controls where account-private Harness workspaces are created
-(default `dshHomePath('physicsos-users')`).
+`trustedProxies`) sind mit sicheren Standardwerten in cordis.yml konfigurierbar.
+`workspaceRoot` steuert, wo kontoprivate Harness-Arbeitsbereiche angelegt werden
+(Standard `dshHomePath('physicsos-users')`).
 
-## Password-reset delivery
+## Zustellung beim Zurücksetzen von Passwörtern
 
-The default adapter is `admin-queue`: `POST /password/forgot` creates a pending
-row and no token. An administrator issues the token through
-`POST /physicsos/admin/password-resets/:id/issue`; the response is the only
-time the raw value exists, and the admin UI must deliver it out of band.
+Der Standardadapter ist `admin-queue`: `POST /password/forgot` legt eine ausstehende
+Zeile und kein Token an. Ein Administrator stellt das Token über
+`POST /physicsos/admin/password-resets/:id/issue` aus; die Antwort ist der einzige
+Zeitpunkt, an dem der Rohwert existiert, und die Admin-Oberfläche muss ihn
+außerhalb des Systems (out of band) zustellen.
 
-A deployment may provide a Cordis service named
-`physicsosPasswordResetDelivery`:
+Eine Bereitstellung kann einen Cordis-Service namens
+`physicsosPasswordResetDelivery` bereitstellen:
 
 ```ts
 export default {
@@ -146,31 +147,32 @@ export default {
 }
 ```
 
-The provider must be declared before `auth-host` in the composition. A direct
-delivery failure revokes the just-issued token and marks the request
-`delivery_failed`; it never leaves a token valid but undelivered.
+Der Provider muss in der Komposition vor `auth-host` deklariert werden. Ein
+Fehler bei der direkten Zustellung widerruft das soeben ausgestellte Token und
+markiert die Anfrage als `delivery_failed`; es bleibt nie ein gültiges, aber nicht
+zugestelltes Token zurück.
 
-## Shared limiter and Redis boundary
+## Gemeinsamer Limiter und Redis-Grenze
 
-`AuthService` consumes a `LimiterBackend`; the bundled
-`InMemoryLimiterBackend` is the reference for one process. A multi-instance
-deployment provides a Cordis service named `physicsosRateLimiter` before
-`auth-host`. The provider contract is:
+`AuthService` konsumiert ein `LimiterBackend`; das mitgelieferte
+`InMemoryLimiterBackend` ist die Referenz für einen Prozess. Eine
+Multi-Instanz-Bereitstellung liefert vor `auth-host` einen Cordis-Service namens
+`physicsosRateLimiter`. Der Provider-Vertrag lautet:
 
-1. key each bucket as `physicsos:limiter:<policy>:<sha256(rawKey)>` — raw IPs,
-   usernames, and tokens never appear in Redis keys;
-2. execute one atomic Lua script per decision (`INCR`; `PEXPIRE windowMs` only
-   for a new key; return count and PTTL);
-3. throw on Redis errors. `auth-host` translates that to
-   `503 DEPENDENCY_UNAVAILABLE`; there is no unlimited fallback.
+1. jeden Bucket als `physicsos:limiter:<policy>:<sha256(rawKey)>` schlüsseln – rohe IPs,
+   Benutzernamen und Tokens erscheinen nie in Redis-Schlüsseln;
+2. pro Entscheidung ein atomares Lua-Skript ausführen (`INCR`; `PEXPIRE windowMs` nur
+   für einen neuen Schlüssel; Zähler und PTTL zurückgeben);
+3. bei Redis-Fehlern werfen. `auth-host` übersetzt das in
+   `503 DEPENDENCY_UNAVAILABLE`; es gibt keinen Fallback ohne Limit.
 
-`snapshot()` is optional for remote providers because an exact cross-instance
-bucket count is not needed for authentication and may be expensive.
+`snapshot()` ist für Remote-Provider optional, weil ein exakter instanzübergreifender
+Bucket-Zähler für die Authentifizierung nicht nötig und möglicherweise teuer ist.
 
-## Ownership migration
+## Besitzmigration
 
-Legacy Harness sessions/workspaces without `api_resources` rows are migrated
-with an explicit manifest:
+Legacy-Harness-Sitzungen/-Arbeitsbereiche ohne `api_resources`-Zeilen werden mit einem
+ausdrücklichen Manifest migriert:
 
 ```json
 {
@@ -189,16 +191,17 @@ pnpm --filter @deepseek-ai/dsh-auth-host run migrate:ownership -- \
 # Re-run with --apply after reviewing the dry-run summary.
 ```
 
-Unknown owners or malformed entries abort before the first write. An existing
-resource with a different owner is reported as a conflict and is never
-rewritten; the command exits 2 when conflicts exist.
+Unbekannte Besitzer oder fehlerhafte Einträge brechen vor dem ersten Schreibvorgang
+ab. Eine bestehende Ressource mit einem anderen Besitzer wird als Konflikt gemeldet
+und nie überschrieben; der Befehl beendet sich mit 2, wenn Konflikte bestehen.
 
-## School tenant merge
+## Zusammenführung von Schul-Mandanten
 
-Two tenants that describe the same real school cannot be repaired through the
-registration/admin surface because every user, class, submission, and learning
-row is keyed by the tenant id. Use the operator-only merge CLI with the
-explicit source/target pair (the command never guesses a name mapping):
+Zwei Mandanten, die dieselbe reale Schule beschreiben, lassen sich nicht über die
+Registrierungs-/Admin-Oberfläche reparieren, weil jede Nutzer-, Klassen-, Abgabe- und
+Lernzeile nach der Mandanten-ID geschlüsselt ist. Verwenden Sie das Merge-CLI nur für
+Operatoren mit dem ausdrücklichen Paar aus Quelle/Ziel (der Befehl rät nie eine
+Namenszuordnung):
 
 ```sh
 pnpm --filter @deepseek-ai/dsh-auth-host run merge:schools -- \
@@ -218,46 +221,47 @@ pnpm --filter @deepseek-ai/dsh-auth-host run merge:schools -- \
   --apply
 ```
 
-The dry-run writes nothing. Apply refuses a missing/different `--confirm`,
-the platform tenant as source, a missing/disabled target, a source already
-merged elsewhere, destination-key collisions, prefix mismatches, unknown
-source references, unknown storage tables, and a per-table row cap (default
-10,000; lower it with `--max-rows-per-table`). Stop the service before apply:
-the merge journal makes a crash resumable, but it is not a cross-process lock.
-The journal is written before the first row is moved. A crash leaves an
-`applying` journal; a later dry-run reports `resume-required`, and a later
-apply resumes idempotently. A completed merge reports `already-merged` and
-leaves one `school.merge` audit row with `operatorKey`, tenant pair, timestamp,
-per-table counts, and total rows.
+Der Dry-Run schreibt nichts. Apply weist ein fehlendes/abweichendes `--confirm`,
+den Plattform-Mandanten als Quelle, ein fehlendes/deaktiviertes Ziel, eine bereits
+anderswohin zusammengeführte Quelle, Zielschlüssel-Kollisionen, Präfix-Abweichungen,
+unbekannte Quellreferenzen, unbekannte Storage-Tabellen und ein Zeilenlimit pro
+Tabelle zurück (Standard 10.000; mit `--max-rows-per-table` senken). Stoppen Sie den
+Dienst vor Apply: Das Merge-Journal macht einen Absturz wiederaufnehmbar, ist aber
+keine prozessübergreifende Sperre. Das Journal wird geschrieben, bevor die erste
+Zeile verschoben wird. Ein Absturz hinterlässt ein Journal im Zustand `applying`;
+ein späterer Dry-Run meldet `resume-required`, und ein späteres Apply setzt
+idempotent fort. Eine abgeschlossene Zusammenführung meldet `already-merged` und
+hinterlässt eine `school.merge`-Audit-Zeile mit `operatorKey`, Mandantenpaar,
+Zeitstempel, Zählern pro Tabelle und Gesamtzeilenzahl.
 
-`admin_audit` history is intentionally not rewritten. `school_requests` that
-reference the source tenant are deliberately refused rather than guessing
-whether they are historical or actionable. The source school row remains as a
-disabled tombstone with `mergedInto`/`mergedAt`; registration resolves the
-surviving active target.
+Die Historie von `admin_audit` wird bewusst nicht umgeschrieben. `school_requests`,
+die auf den Quellmandanten verweisen, werden bewusst abgelehnt, statt zu raten, ob
+sie historisch oder aktionsrelevant sind. Die Quell-Schulzeile bleibt als
+deaktivierter Grabstein mit `mergedInto`/`mergedAt` bestehen; die Registrierung löst
+auf das überlebende aktive Ziel auf.
 
-After an apply, verify the invariant by rerunning the command without
-`--apply`; it must print `status: "already-merged"`. If inspecting the JSON
-backend directly, check each unit's tables for keys beginning with the source
-id plus `:` or `|` and confirm the source school row has
-`"status": "disabled"`.
+Prüfen Sie nach einem Apply die Invariante, indem Sie den Befehl ohne `--apply`
+erneut ausführen; er muss `status: "already-merged"` ausgeben. Beim direkten
+Inspizieren des JSON-Backends prüfen Sie die Tabellen jeder Einheit auf Schlüssel,
+die mit der Quell-ID plus `:` oder `|` beginnen, und bestätigen, dass die
+Quell-Schulzeile `"status": "disabled"` hat.
 
-## Invariant
+## Invariante
 
-`auth-host-invariant` asserts every session row resolves to a live `(schoolId, username)` user key with a matching `userId`, and every user references an existing school — a violation means a write bypassed `AuthService`.
+`auth-host-invariant` stellt sicher, dass jede Sitzungszeile zu einem lebenden Nutzerschlüssel `(schoolId, username)` mit passender `userId` aufgelöst wird und dass jeder Nutzer auf eine existierende Schule verweist – eine Verletzung bedeutet, dass ein Schreibvorgang `AuthService` umgangen hat.
 
-## Model Experience
+## Modellerfahrung
 
-None, as the package serves browser REST surfaces and registers nothing model-facing.
+Keine, da das Paket Browser-REST-Oberflächen bedient und nichts modellseitig Sichtbares registriert.
 
-#### KV Cache effect
+#### KV-Cache-Wirkung
 
-None; this package neither assembles nor sends a provider request.
+Keine; dieses Paket stellt keine Provider-Anfrage zusammen und sendet auch keine.
 
-## Known Limitations and Deferred Work
+## Bekannte Einschränkungen und zurückgestellte Arbeit
 
-- Pending `/api/respond` ownership is process-local; a multi-instance deployment needs a shared one-time response ledger.
-- The bundled limiter is process-local; a multi-instance deployment must provide the documented Redis-compatible `physicsosRateLimiter` service.
-- Reset tokens are durable in the auth domain, but cross-process compare-and-set depends on the deployment's shared storage limits; ownership migration remains an explicit manifest-driven operation.
-- Server-side ownership of PhysicsOS scenes/questions/learning records is not wired; V1 scopes those client-side, and per-resource `userId`/`schoolId` columns remain deferred.
-- Roles beyond `STUDENT` have no enrolment or permission surface yet.
+- Der Besitz ausstehender `/api/respond`-Einträge ist prozesslokal; eine Multi-Instanz-Bereitstellung braucht ein gemeinsames Einmal-Antwort-Hauptbuch.
+- Der mitgelieferte Limiter ist prozesslokal; eine Multi-Instanz-Bereitstellung muss den dokumentierten Redis-kompatiblen Service `physicsosRateLimiter` bereitstellen.
+- Reset-Tokens sind in der Auth-Domäne dauerhaft, aber das prozessübergreifende Compare-and-Set hängt von den Limits des gemeinsamen Storage der Bereitstellung ab; die Besitzmigration bleibt eine ausdrückliche, manifestgesteuerte Operation.
+- Serverseitiger Besitz von PhysicsOS-Szenen/-Aufgaben/-Lernaufzeichnungen ist nicht verdrahtet; V1 begrenzt diese clientseitig, und Spalten `userId`/`schoolId` pro Ressource bleiben zurückgestellt.
+- Rollen jenseits von `STUDENT` haben noch keine Aufnahme- oder Berechtigungsoberfläche.

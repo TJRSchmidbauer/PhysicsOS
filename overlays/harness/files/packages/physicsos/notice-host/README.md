@@ -1,45 +1,45 @@
 # @deepseek-ai/dsh-notice-host
 
-PhysicsOS 反馈与公告 host plugin. One prefix (`/physicsos/notice`), two directions of travel:
+Host-Plugin für Feedback und Ankündigungen in PhysicsOS (反馈与公告). Ein Präfix (`/physicsos/notice`), zwei Laufrichtungen:
 
-| Surface | Who reads | Who writes |
+| Oberfläche | Wer liest | Wer schreibt |
 | --- | --- | --- |
-| `/feedback` | a student sees their OWN rows; a teacher and above see the tenant queue | any signed-in account |
-| `/feedback/:id/reply` | — | teacher and above, own tenant only |
-| `/announcements` | every signed-in account, tenant + platform scope | school admin and above |
-| `/platform-notice` | every signed-in account, together with that account's acknowledgement | platform `SUPER_ADMIN` only |
-| `/platform-notice/ack` | — | any signed-in account, current version only |
+| `/feedback` | Lernende sehen ihre EIGENEN Zeilen; Lehrkräfte und höher sehen die Mandanten-Warteschlange | jedes angemeldete Konto |
+| `/feedback/:id/reply` | — | Lehrkraft und höher, nur eigener Mandant |
+| `/announcements` | jedes angemeldete Konto, Mandanten- und Plattform-Geltungsbereich | Schul-Admin und höher |
+| `/platform-notice` | jedes angemeldete Konto, zusammen mit der Bestätigung dieses Kontos | nur Plattform-`SUPER_ADMIN` |
+| `/platform-notice/ack` | — | jedes angemeldete Konto, nur aktuelle Version |
 
-Identity comes from the session through the `physicsosIdentity` service that `auth-host` publishes. This host is declared BEFORE `auth-host` in the shipped patch, so the service is resolved per request rather than at load time — the failure mode is covered by `tests/composition.spec.ts`, which boots the real chain and asserts the gate answers on a live session.
+Die Identität stammt aus der Sitzung über den Service `physicsosIdentity`, den `auth-host` veröffentlicht. Dieser Host wird im ausgelieferten Patch VOR `auth-host` deklariert, daher wird der Service pro Anfrage statt beim Laden aufgelöst – der Fehlermodus wird von `tests/composition.spec.ts` abgedeckt, das die echte Kette bootet und prüft, dass das Gate bei einer Live-Sitzung antwortet.
 
-Reading feedback is row-filtered rather than door-filtered: a student calling the list endpoint is a legitimate screen ("what have I sent?"), so answering 403 would break it to enforce a rule about WHICH rows are visible.
+Das Lesen von Feedback wird zeilenweise statt türweise gefiltert: Eine lernende Person, die den Listen-Endpunkt aufruft, ist ein legitimer Bildschirm („Was habe ich gesendet?“); eine Antwort mit 403 würde ihn kaputt machen, nur um eine Regel darüber durchzusetzen, WELCHE Zeilen sichtbar sind.
 
-## Configuration
+## Konfiguration
 
-No config keys. The plugin injects `webServer` and `storageDomain`, and opens the `physicsos_notice` domain.
+Keine Konfigurationsschlüssel. Das Plugin injiziert `webServer` und `storageDomain` und öffnet die Domäne `physicsos_notice`.
 
-## Data
+## Daten
 
-`feedback` holds one row per report (author key resolved server-side, optional contact and page context, status, and the operator's attributed reply). `announcements` holds one row per notice, with `schoolId: null` meaning platform-wide and a retired row staying in the table while leaving the served list.
+`feedback` hält eine Zeile pro Meldung (serverseitig aufgelöster Autorenschlüssel, optionaler Kontakt und Seitenkontext, Status und die zugeordnete Antwort der betreuenden Person). `announcements` hält eine Zeile pro Mitteilung; `schoolId: null` bedeutet plattformweit, und eine zurückgezogene Zeile bleibt in der Tabelle, verlässt aber die ausgelieferte Liste.
 
-`platform_notice` is the singleton PhysicsOS internal-testing notice. Every admin save advances its version by one, and `platform_notice_acks` stores one acknowledgement per account. The acknowledgement deliberately lives here rather than in `ui-onboarding` settings: the Harness settings document is deployment-wide, so using it would let one account dismiss the notice for everyone.
+`platform_notice` ist die Singleton-Mitteilung zum internen Test von PhysicsOS. Jedes Speichern durch einen Admin erhöht ihre Version um eins, und `platform_notice_acks` speichert eine Bestätigung pro Konto. Die Bestätigung liegt bewusst hier und nicht in den `ui-onboarding`-Einstellungen: Das Einstellungsdokument des Harness gilt für die gesamte Bereitstellung, und seine Verwendung würde es einem Konto erlauben, die Mitteilung für alle zu verwerfen.
 
-## Verification
+## Verifikation
 
-- `tests/routes.spec.ts` — the rules over a real http server with a stubbed identity (18 cases: role floors, the student's own-rows filter, cross-tenant refusal, retirement, and the audit trail).
-- `tests/platform-notice.spec.ts` — default copy, SUPER_ADMIN-only writes, bounds, account-scoped acknowledgement, audit summary, and monotonic concurrent saves.
-- `tests/composition.spec.ts` — the real cordis chain, proving the gate is armed rather than merely present.
+- `tests/routes.spec.ts` – die Regeln über einem echten HTTP-Server mit gestubbter Identität (18 Fälle: Rollenuntergrenzen, der Filter auf eigene Zeilen für Lernende, mandantenübergreifende Ablehnung, Zurückziehen und die Audit-Spur).
+- `tests/platform-notice.spec.ts` – Standardtext, Schreibzugriffe nur für SUPER_ADMIN, Grenzen, kontobezogene Bestätigung, Audit-Zusammenfassung und monoton wachsende gleichzeitige Speicherungen.
+- `tests/composition.spec.ts` – die echte Cordis-Kette, die belegt, dass das Gate scharf geschaltet und nicht bloß vorhanden ist.
 
-## Model Experience
+## Modellerfahrung
 
-None, as the package serves browser REST surfaces and registers nothing model-facing.
+Keine, da das Paket Browser-REST-Oberflächen bedient und nichts modellseitig Sichtbares registriert.
 
-#### KV Cache effect
+#### KV-Cache-Wirkung
 
-None; this package neither assembles nor sends a provider request.
+Keine; dieses Paket stellt keine Provider-Anfrage zusammen und sendet auch keine.
 
-## Known Limitations and Deferred Work
+## Bekannte Einschränkungen und zurückgestellte Arbeit
 
-- Replies are pull-only: a student sees an operator's reply on their next `/feedback` read; nothing pushes it — no unread marker, no notification.
-- Feedback and announcements carry plain text only; there are no attachments and no rendered markup.
-- Retired announcements keep their rows (`retiredAt`); there is no hard delete.
+- Antworten sind nur per Pull: Eine lernende Person sieht die Antwort einer betreuenden Person beim nächsten Lesen von `/feedback`; nichts schiebt sie aktiv nach – keine Ungelesen-Markierung, keine Benachrichtigung.
+- Feedback und Ankündigungen enthalten nur Klartext; es gibt keine Anhänge und kein gerendertes Markup.
+- Zurückgezogene Ankündigungen behalten ihre Zeilen (`retiredAt`); es gibt kein hartes Löschen.
