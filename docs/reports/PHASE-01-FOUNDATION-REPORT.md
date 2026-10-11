@@ -1,99 +1,99 @@
 # PHASE-01 Foundation Report
 
-日期：2026-08-16  
-范围：PHASE-0 / PHASE-1 Foundation  
-结论：基础设施、Harness pin、Adapter 边界与 Web UI 壳层已落地。未进入 Physics Engine / 完整 Agent / Question Parser。
+Datum: 2026-08-16  
+Umfang: PHASE-0 / PHASE-1 Foundation  
+Fazit: Infrastruktur, Harness-Pin, Adapter-Grenze und Web-UI-Shell sind umgesetzt. Physics Engine / vollständiger Agent / Question Parser sind noch nicht begonnen.
 
-## 技能选择
+## Skill-Auswahl
 
-- must（已读 raw）：`screenshot-to-ui`、`react-development`、`typescript-development`、`javascript-typescript-development`（清单命中，本步按 TS/React 工具链执行）、`test-engineering`、`browser-automation`、`git-workflow`、`code-audit`
-- conditional（未读 raw）：`ui-design`（anti：1:1 还原，改走 screenshot-to-ui）、`web-security`、`ai-engineering`、`document-authoring`
-- skip：Spring / 支付 / 地图 / 逆向 / Tauri 实现 / Physics Engine
+- must (Rohfassung gelesen): `screenshot-to-ui`, `react-development`, `typescript-development`, `javascript-typescript-development` (Liste getroffen, dieser Schritt folgt der TS/React-Toolchain), `test-engineering`, `browser-automation`, `git-workflow`, `code-audit`
+- conditional (Rohfassung nicht gelesen): `ui-design` (anti: 1:1-Nachbau, stattdessen screenshot-to-ui), `web-security`, `ai-engineering`, `document-authoring`
+- skip: Spring / Zahlung / Karten / Reverse Engineering / Tauri-Implementierung / Physics Engine
 
-## 1. 项目审计结果
+## 1. Ergebnis der Projektprüfung
 
-开工时事实：
+Fakten bei Arbeitsbeginn:
 
-| 项                                   | 结果                                                        |
+| Punkt                                | Ergebnis                                                    |
 | ------------------------------------ | ----------------------------------------------------------- |
-| Git                                  | 不是 repository                                             |
-| 根目录                               | 仅 `docs/`、`UI/`                                           |
-| 源码 / package.json / pnpm workspace | 无                                                          |
-| Harness                              | 无                                                          |
+| Git                                  | Kein Repository                                             |
+| Wurzelverzeichnis                    | Nur `docs/`, `UI/`                                          |
+| Quellcode / package.json / pnpm workspace | Keine                                                  |
+| Harness                              | Keiner                                                      |
 | Node                                 | `v24.18.0`                                                  |
 | pnpm                                 | `11.9.0`                                                    |
-| 重复文件                             | `01-DEVELOPMENT-GUIDE.md` 与 `01-DEVELOPMENT_GUIDE.md` 并存 |
-| `00-PRODUCT-OVERVIEW.md`             | 缺失                                                        |
+| Doppelte Dateien                     | `01-DEVELOPMENT-GUIDE.md` und `01-DEVELOPMENT_GUIDE.md` liegen nebeneinander |
+| `00-PRODUCT-OVERVIEW.md`             | Fehlt                                                       |
 
-两份 `01` **不是同一文档**：
+Die beiden `01` sind **nicht dasselbe Dokument**:
 
-- 连字符版标题为「产品总览与系统架构」（40 738 bytes）
-- 下划线版标题为「开发指南」（35 577 bytes）
+- Die Version mit Bindestrich trägt den Titel „Produktübersicht und Systemarchitektur“ (40 738 Bytes)
+- Die Version mit Unterstrich trägt den Titel „Entwicklungsleitfaden“ (35 577 Bytes)
 
-未做空文件冒充恢复。
+Es wurde keine leere Datei als Wiederherstellung ausgegeben.
 
-## 2. docs 修复情况
+## 2. Stand der docs-Reparatur
 
-| 动作                                                         | 结果                             |
+| Aktion                                                       | Ergebnis                         |
 | ------------------------------------------------------------ | -------------------------------- |
-| 连字符 `01-DEVELOPMENT-GUIDE.md` → `00-PRODUCT-OVERVIEW.md`  | 已重命名，保留全部原文并补文件头 |
-| 下划线 `01-DEVELOPMENT_GUIDE.md` → `01-DEVELOPMENT-GUIDE.md` | 已重命名                         |
-| 交叉引用 `00-PRODUCT_OVERVIEW` / `01-DEVELOPMENT_GUIDE`      | 已统一为连字符规范               |
-| 合并                                                         | 无需合并：两份内容职责不同       |
+| `01-DEVELOPMENT-GUIDE.md` (Bindestrich) → `00-PRODUCT-OVERVIEW.md`  | Umbenannt, gesamter Originaltext erhalten und Dateikopf ergänzt |
+| `01-DEVELOPMENT_GUIDE.md` (Unterstrich) → `01-DEVELOPMENT-GUIDE.md` | Umbenannt                        |
+| Querverweise `00-PRODUCT_OVERVIEW` / `01-DEVELOPMENT_GUIDE`  | Auf die Schreibweise mit Bindestrich vereinheitlicht |
+| Zusammenführung                                              | Nicht nötig: Die Zuständigkeiten beider Inhalte sind verschieden |
 
-当前 docs 命名：`数字-大写英文-连字符.md`。
+Aktuelle Namensgebung in docs: `Zahl-GROSSBUCHSTABEN-Englisch-Bindestrich.md`.
 
-## 3. Harness upstream commit
+## 3. Upstream-Commit des Harness
 
-- repository：`https://github.com/deepseek-ai/deepseek-harness.git`
-- path：`vendor/deepseek-harness`（git submodule）
-- pinned SHA：`47f943859bef60e4160492346772ded9b24f765a`
-- branch：`master`
-- remote：`origin`
-- packageManager：`pnpm@11.7.0`
-- Node requirement：`^22.19.0 || >=24.0.0`
-- 记录文件：`docs/HARNESS-UPSTREAM.md`
+- repository: `https://github.com/deepseek-ai/deepseek-harness.git`
+- path: `vendor/deepseek-harness` (git submodule)
+- pinned SHA: `47f943859bef60e4160492346772ded9b24f765a`
+- branch: `master`
+- remote: `origin`
+- packageManager: `pnpm@11.7.0`
+- Node requirement: `^22.19.0 || >=24.0.0`
+- Aufzeichnungsdatei: `docs/HARNESS-UPSTREAM.md`
 
-## 4. Harness build 结果
+## 4. Ergebnis des Harness-Builds
 
-在 `vendor/deepseek-harness`：
+In `vendor/deepseek-harness`:
 
 ```text
 pnpm install --ignore-scripts
 pnpm run build
 ```
 
-`pnpm run build` **成功**（Host tsc + tsdown + Client + Web frontend，exit 0）。
+`pnpm run build` war **erfolgreich** (Host tsc + tsdown + Client + Web frontend, exit 0).
 
-默认 `pnpm install` 的 lefthook `postinstall` 在 **submodule** 下失败：
+Das lefthook-`postinstall` des Standard-`pnpm install` schlägt unter einem **Submodul** fehl:
 
 ```text
 cannot enable extensions.worktreeConfig while core.worktree is in the common config
 ```
 
-未修改 upstream 源码。改用 `--ignore-scripts` 完成依赖安装。这是 Windows + git submodule + lefthook 交互问题，不是业务源码缺陷。
+Der Upstream-Quellcode wurde nicht verändert. Die Installation der Abhängigkeiten wurde mit `--ignore-scripts` abgeschlossen. Das ist ein Problem der Wechselwirkung Windows + git submodule + lefthook, kein Defekt im Geschäfts-Quellcode.
 
-## 5. Harness startup 结果
+## 5. Ergebnis des Harness-Starts
 
 ```text
 pnpm dsh web
 ```
 
-实际地址：`http://127.0.0.1:3080`  
-未配置真实 API Key / 未提交 `.env`。
+Tatsächliche Adresse: `http://127.0.0.1:3080`  
+Kein echter API Key konfiguriert / keine `.env` committet.
 
-## 6. Harness 是否有本地 diff
+## 6. Hat der Harness lokale Diffs
 
-验证时：
+Zum Zeitpunkt der Verifikation:
 
 ```text
 git status --short
 git diff --stat
 ```
 
-均为空。未改 Harness Agent Loop / Session Store / Web UI / 业务源码。
+beide leer. Weder Agent Loop / Session Store / Web UI / Geschäfts-Quellcode des Harness wurden verändert.
 
-## 7. Monorepo 结构
+## 7. Monorepo-Struktur
 
 ```text
 apps/web
@@ -102,70 +102,70 @@ packages/shared
 packages/platform-bridge
 packages/agent-runtime
 packages/agent-dsh-adapter
-services/          （占位）
-tests/             （占位 + 说明）
+services/          (Platzhalter)
+tests/             (Platzhalter + Erläuterung)
 vendor/deepseek-harness
 docs/
 UI/
 ```
 
-> **追记（2026-09-27）**：`packages/agent-runtime` / `packages/agent-dsh-adapter` 自 PHASE-01 起即为**未接线（非生产链路）**骨架、**无生产消费者**；二者已于 2026-09-27 退役删除（ADR-0002 已采纳并执行），见 `docs/adr/0002-agent-runtime-adapter-disposition.md`。以下是当时的历史记录。
+> **Nachtrag (2026-09-27)**: `packages/agent-runtime` / `packages/agent-dsh-adapter` waren seit PHASE-01 ein **nicht verdrahtetes (keine Produktionskette)** Skelett **ohne Produktionskonsumenten**; beide wurden am 2026-09-27 stillgelegt und gelöscht (ADR-0002 angenommen und umgesetzt), siehe `docs/adr/0002-agent-runtime-adapter-disposition.md`. Das Folgende ist die historische Aufzeichnung von damals.
 
-技术锁定（npm 查询 + Harness 兼容，不是文档旧版本猜测）：
+Technische Festlegung (npm-Abfrage + Harness-Kompatibilität, keine Vermutung nach alter Dokumentversion):
 
-- React `19.2.8` / Vite `8.2.1` / TypeScript `6.0.3`（Harness 限制 `<7`）
+- React `19.2.8` / Vite `8.2.1` / TypeScript `6.0.3` (Harness beschränkt auf `<7`)
 - React Router `8.3.0` / Zustand `5.0.15` / TanStack Query `5.101.4`
 - Tailwind `4.3.3` / KaTeX `0.18.4` / Vitest `4.1.10` / Playwright `1.62.1`
-- pnpm workspace + Turborepo；`strict: true`
+- pnpm workspace + Turborepo; `strict: true`
 
-## 8. 已创建 packages
+## 8. Angelegte Packages
 
-| Package                        | 职责                                             | PHASE-01 状态          |
+| Package                        | Verantwortung                                    | PHASE-01-Stand         |
 | ------------------------------ | ------------------------------------------------ | ---------------------- |
-| `@physicsos/shared`            | Brand ID / 错误                                  | 完成                   |
-| `@physicsos/platform-bridge`   | Browser bridge；Tauri 预留抛 UnimplementedError  | 完成                   |
-| `@physicsos/agent-runtime`     | PhysicsAgentRuntime / Transport / Event Contract | 仅类型 + contract test |
-| `@physicsos/agent-dsh-adapter` | 唯一 Harness 边界；方法拒绝假成功                | 骨架                   |
-| `@physicsos/ui`                | tokens / primitives / domain components          | 完成                   |
-| `@physicsos/web`               | 产品 UI                                          | UI + fixture           |
+| `@physicsos/shared`            | Brand ID / Fehler                                | Fertig                 |
+| `@physicsos/platform-bridge`   | Browser Bridge; Tauri vorgehalten, wirft UnimplementedError | Fertig       |
+| `@physicsos/agent-runtime`     | PhysicsAgentRuntime / Transport / Event Contract | Nur Typen + Contract-Test |
+| `@physicsos/agent-dsh-adapter` | Einzige Harness-Grenze; Methoden lehnen vorgetäuschten Erfolg ab | Skelett |
+| `@physicsos/ui`                | tokens / primitives / domain components          | Fertig                 |
+| `@physicsos/web`               | Produkt-UI                                       | UI + Fixture           |
 
-> **追记（2026-09-27）**：上表中 `@physicsos/agent-runtime` 与 `@physicsos/agent-dsh-adapter` 始终**未接线（非生产链路）**、无生产消费者，已于 2026-09-27 退役删除（ADR-0002 已采纳并执行），见 `docs/adr/0002-agent-runtime-adapter-disposition.md`；后者方法均为 `Promise.reject(new UnimplementedError(...))` 骨架，无生产路径 import。真实生产 Agent 链路是 Harness 工具运行时 → `dsh-tool-physicsos` → `@physicsos/agent-tools` → 物理引擎 / verifier。
+> **Nachtrag (2026-09-27)**: `@physicsos/agent-runtime` und `@physicsos/agent-dsh-adapter` in der obigen Tabelle waren stets **nicht verdrahtet (keine Produktionskette)** und ohne Produktionskonsumenten, sie wurden am 2026-09-27 stillgelegt und gelöscht (ADR-0002 angenommen und umgesetzt), siehe `docs/adr/0002-agent-runtime-adapter-disposition.md`; die Methoden des Letzteren waren alle ein Skelett mit `Promise.reject(new UnimplementedError(...))`, ohne Produktionspfad-Import. Die reale Produktions-Agent-Kette ist Harness-Tool-Runtime → `dsh-tool-physicsos` → `@physicsos/agent-tools` → Physik-Engine / Verifier.
 
-业务组件未出现 `window.__TAURI__`。  
-`apps/web` 未 import `@deepseek-ai/*`。
+In Geschäftskomponenten kommt kein `window.__TAURI__` vor.  
+`apps/web` importiert kein `@deepseek-ai/*`.
 
-## 9. UI 页面完成度
+## 9. Fertigstellungsgrad der UI-Seiten
 
-| 页面                     | 路由                               | 完成度 | 说明                                                                         |
+| Seite                    | Route                              | Fertigstellungsgrad | Erläuterung                                                                  |
 | ------------------------ | ---------------------------------- | ------ | ---------------------------------------------------------------------------- |
-| 首页                     | `/`                                | 高     | Hero、双入口、最近继续 / 专题 / 文件、学习路径、学科                         |
-| Physics Workspace        | `/lab`                             | 高     | Scene Tree、Canvas 壳、Inspector、Observables、Timeline、Charts、Data、Agent |
-| Question Space           | `/questions`                       | 高     | 三栏、题目、可视化、AI 解析、在物理世界中打开                                |
-| Desktop Workspace        | `/desktop`                         | 中高   | Sidebar + Canvas + 参数 + Timeline；非 Web 主产品                            |
-| 学习记录 / 资源库 / 我的 | `/history` `/resources` `/profile` | 壳     | 明确写未实现，无假 API                                                       |
+| Startseite               | `/`                                | Hoch   | Hero, doppelter Einstieg, Zuletzt fortgesetzt / Themen / Dateien, Lernpfad, Fächer |
+| Physics Workspace        | `/lab`                             | Hoch   | Scene Tree, Canvas-Hülle, Inspector, Observables, Timeline, Charts, Data, Agent |
+| Question Space           | `/questions`                       | Hoch   | Drei Spalten, Aufgabe, Visualisierung, KI-Analyse, in der Physikwelt öffnen  |
+| Desktop Workspace        | `/desktop`                         | Mittel bis hoch | Sidebar + Canvas + Parameter + Timeline; nicht das Web-Hauptprodukt  |
+| Lernverlauf / Ressourcenbibliothek / Mein Bereich | `/history` `/resources` `/profile` | Hülle | Ausdrücklich als nicht umgesetzt vermerkt, keine gefälschte API |
 
-Canvas：grid / 坐标轴 / × 场符 / 粒子 / 轨迹 / 矢量 / viewport / toolbar / timeline。  
-数据来自 `apps/web/src/fixtures/prototype/`（文件头 PROTOTYPE ONLY）。  
-组件内未实现正式物理公式求解。
+Canvas: grid / Koordinatenachsen / ×-Feldsymbol / Teilchen / Trajektorie / Vektoren / viewport / toolbar / timeline.  
+Die Daten stammen aus `apps/web/src/fixtures/prototype/` (Dateikopf PROTOTYPE ONLY).  
+Die Komponenten implementieren keine formale Lösung physikalischer Formeln.
 
-## 10. 原型对应关系
+## 10. Zuordnung zu den Prototypen
 
-| 语义文件                                 | 原文件         | 页面         |
+| Semantische Datei                        | Originaldatei  | Seite        |
 | ---------------------------------------- | -------------- | ------------ |
-| `UI/原型图/01-home.png`                  | `11_49_34 (1)` | 首页         |
-| `UI/原型图/02-physics-lab-workspace.png` | `11_49_35 (2)` | 物理实验室   |
-| `UI/原型图/03-question-space.png`        | `11_49_35 (3)` | 试题空间     |
+| `UI/原型图/01-home.png`                  | `11_49_34 (1)` | Startseite   |
+| `UI/原型图/02-physics-lab-workspace.png` | `11_49_35 (2)` | Physiklabor  |
+| `UI/原型图/03-question-space.png`        | `11_49_35 (3)` | Aufgabenraum |
 | `UI/原型图/04-desktop-workspace.png`     | `11_49_35 (4)` | Desktop      |
-| `UI/组件图/01-navigation-components.png` | `12_32_45 (4)` | 导航         |
-| `UI/组件图/02-workspace-components.png`  | `12_32_45 (2)` | 工作区       |
-| `UI/组件图/03-question-components.png`   | `12_32_45 (3)` | 试题         |
-| `UI/组件图/04-content-components.png`    | `12_32_44 (1)` | 首页内容模块 |
+| `UI/组件图/01-navigation-components.png` | `12_32_45 (4)` | Navigation   |
+| `UI/组件图/02-workspace-components.png`  | `12_32_45 (2)` | Arbeitsbereich |
+| `UI/组件图/03-question-components.png`   | `12_32_45 (3)` | Aufgaben     |
+| `UI/组件图/04-content-components.png`    | `12_32_44 (1)` | Inhaltsmodule der Startseite |
 
-原图全部保留。映射见 `UI/README.md`。
+Alle Originalbilder bleiben erhalten. Zuordnung siehe `UI/README.md`.
 
-## 11. Screenshot 路径
+## 11. Screenshot-Pfade
 
-Playwright `pnpm test:e2e` **12/12 通过**（2026-08-16）。截图写入仓库根，磁盘已核对 12 个 PNG，合计 2 311 048 bytes：
+Playwright `pnpm test:e2e` **12/12 bestanden** (2026-08-16). Die Screenshots werden ins Repository-Root geschrieben, auf der Platte wurden 12 PNGs mit insgesamt 2 311 048 Bytes verifiziert:
 
 ```text
 docs/reports/screenshots/home-1440x900.png
@@ -182,20 +182,20 @@ docs/reports/screenshots/desktop-workspace-1600x900.png
 docs/reports/screenshots/desktop-workspace-1920x1080.png
 ```
 
-e2e 路径已改为相对仓库根的绝对解析（`apps/web/e2e` → `docs/reports/screenshots`），避免 cwd 写错目录。
+Der e2e-Pfad wurde auf eine absolute Auflösung relativ zum Repository-Root umgestellt (`apps/web/e2e` → `docs/reports/screenshots`), damit bei einem falschen cwd nicht in das falsche Verzeichnis geschrieben wird.
 
-与 `UI/原型图` 人工对比（主基准 1600×900；Workspace 另核 1920×1080）：
+Manueller Vergleich mit `UI/原型图` (Hauptbasis 1600×900; Workspace zusätzlich bei 1920×1080 geprüft):
 
-| 维度                                   | 首页                                                                     | Workspace                                                                                | Question                                          | Desktop                                                |
+| Dimension                              | Startseite                                                               | Workspace                                                                                | Question                                          | Desktop                                                |
 | -------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------ |
-| 顶栏 / 搜索 / Ctrl K / 铃铛 / 李明同学 | 对齐                                                                     | 对齐                                                                                     | 对齐                                              | Desktop 为侧栏壳，不是 Web 顶栏                        |
-| 主布局                                 | Hero + 双入口 + 三列内容 + 路径/学科                                     | 左树 + Canvas 核心 + Inspector + 底图表/表                                               | 左历史/题集 + 中题目 + 右 AI                      | 侧栏 + 对象树 + Canvas + 参数                          |
-| Canvas 占比                            | n/a                                                                      | 保持视觉核心；1920 出现独立 AI 第五列                                                    | 中栏可视化存在                                    | 中栏核心                                               |
-| 色板                                   | 雾白 + 自然蓝，无大面积紫 / 赛博黑                                       | 同左                                                                                     | 同左                                              | 同左                                                   |
-| 文案/数据                              | Hero 与统计卡对齐（`8,600+`）                                            | 场景名、q/m/B、轨迹/矢量语义对齐                                                         | 题干、已知条件、求解目标、绿 CTA 对齐             | 约束通过文案对齐                                       |
-| 明显差距                               | 缺原型 3D 资产（玻璃球/轨道/题卡）；专题是色块不是实拍；最近继续无缩略图 | 1600 下 AI 与 Observables 同列堆叠（符合 07 规格，原型更像独立列）；图层开关密度低于原型 | 可视化是 2D SVG，不是原型 3D 视口；缺题干几何附图 | 缺完整 Windows chrome、完整工具条、3D 视口控件、轨迹图 |
+| Kopfleiste / Suche / Ctrl K / Glocke / Schüler Li Ming | Übereinstimmend                                                  | Übereinstimmend                                                                          | Übereinstimmend                                   | Desktop ist eine Sidebar-Hülle, keine Web-Kopfleiste   |
+| Hauptlayout                            | Hero + doppelter Einstieg + drei Inhaltsspalten + Pfad/Fächer            | Linker Baum + Canvas-Kern + Inspector + unten Diagramme/Tabelle                          | Links Verlauf/Aufgabensammlung + Mitte Aufgabe + rechts KI | Sidebar + Objektbaum + Canvas + Parameter           |
+| Canvas-Anteil                          | n/a                                                                      | Bleibt visueller Kern; bei 1920 erscheint eine eigene fünfte KI-Spalte                   | Visualisierung in der mittleren Spalte vorhanden  | Kern der mittleren Spalte                              |
+| Farbpalette                            | Nebelweiß + natürliches Blau, kein großflächiges Violett / Cyberpunk-Schwarz | Wie links                                                                            | Wie links                                         | Wie links                                              |
+| Text/Daten                             | Hero und Statistikkarten stimmen überein (`8,600+`)                      | Szenenname, q/m/B, Semantik von Trajektorie/Vektoren stimmen überein                    | Aufgabenstellung, gegebene Bedingungen, gesuchte Größen, grüner CTA stimmen überein | Text zur bestandenen Zwangsbedingung stimmt überein |
+| Offensichtliche Lücken                 | 3D-Assets des Prototyps fehlen (Glaskugel/Bahn/Aufgabenkarte); Themen sind Farbflächen statt Fotos; „Zuletzt fortgesetzt“ ohne Vorschaubild | Bei 1600 stapeln sich KI und Observables in einer Spalte (entspricht der Spezifikation 07, im Prototyp eher als eigene Spalte); Dichte der Ebenenschalter geringer als im Prototyp | Visualisierung ist 2D-SVG, kein 3D-Viewport des Prototyps; geometrisches Aufgabenbild fehlt | Vollständiges Windows-Chrome, vollständige Werkzeugleiste, 3D-Viewport-Steuerung, Trajektoriendiagramm fehlen |
 
-**不能写成「已经高度还原」。** 信息架构、分栏、色板、关键文案已按原型落地；3D/实拍资产与 Desktop chrome 仍有像素级差距。
+**Es darf nicht als „weitgehend originalgetreu nachgebaut“ geschrieben werden.** Informationsarchitektur, Spalten, Farbpalette und zentrale Texte sind gemäß Prototyp umgesetzt; bei 3D-/Foto-Assets und dem Desktop-Chrome bestehen weiterhin Lücken auf Pixelebene.
 
 ## 12. typecheck
 
@@ -203,7 +203,7 @@ e2e 路径已改为相对仓库根的绝对解析（`apps/web/e2e` → `docs/rep
 pnpm typecheck
 ```
 
-通过（6 packages）。
+Bestanden (6 Packages).
 
 ## 13. lint
 
@@ -211,7 +211,7 @@ pnpm typecheck
 pnpm lint
 ```
 
-通过。
+Bestanden.
 
 ## 14. test
 
@@ -219,13 +219,13 @@ pnpm lint
 pnpm test
 ```
 
-通过：shared 1、ui 2、platform-bridge 2、agent-runtime 3、adapter 3、web route smoke 3。
+Bestanden: shared 1, ui 2, platform-bridge 2, agent-runtime 3, adapter 3, web route smoke 3.
 
 ```text
 pnpm test:e2e
 ```
 
-Playwright 12 passed。
+Playwright 12 passed.
 
 ## 15. build
 
@@ -233,39 +233,39 @@ Playwright 12 passed。
 pnpm build
 ```
 
-通过。`apps/web` Vite production build 成功。
+Bestanden. Der Vite-Production-Build von `apps/web` war erfolgreich.
 
-## 16. 未完成事项
+## 16. Nicht erledigte Punkte
 
-- Adapter 未接 Harness 公开 API（有意：只建边界，拒绝假成功）
+- Adapter nicht an die öffentliche API des Harness angebunden (absichtlich: nur die Grenze gebaut, vorgetäuschten Erfolg abgelehnt)
 - Physics Engine / Scene Runtime / Verifier
 - Question Parser / OCR / VLM
-- 真实 Agent Loop / Tools / Skills
-- Spring Boot 业务服务
-- 主仓库正式 git commit（submodule 已 add，未按你的要求自动 commit）
-- 原型 3D/实拍资产替换
-- 1366 折叠交互未单独截图验收（布局 CSS 已按 breakpoint 预留）
-- KaTeX `dangerouslySetInnerHTML` 仅用于受控 fixture；接入用户/Agent 文本前必须 sanitizer
+- Echter Agent Loop / Tools / Skills
+- Spring-Boot-Geschäftsservice
+- Formaler Git-Commit im Hauptrepository (Submodul wurde per add hinzugefügt, aber nicht wie von dir gewünscht automatisch committet)
+- Ersatz der 3D-/Foto-Assets des Prototyps
+- Interaktion des Einklappens bei 1366 nicht einzeln per Screenshot abgenommen (Layout-CSS ist gemäß Breakpoint vorgesehen)
+- KaTeX `dangerouslySetInnerHTML` nur für kontrollierte Fixtures; vor der Anbindung von Nutzer-/Agent-Text ist ein Sanitizer Pflicht
 
-## 17. 风险
+## 17. Risiken
 
-| 风险                    | 等级 | 说明                                                 |
+| Risiko                  | Stufe | Erläuterung                                          |
 | ----------------------- | ---- | ---------------------------------------------------- |
-| Harness 快速演进        | 高   | 已 pin SHA；升级必须走 Adapter + 本文档流程          |
-| submodule + lefthook    | 中   | Windows 下默认 postinstall 失败；不要为此改 upstream |
-| UI 资产缺口             | 中   | 无 3D/摄影素材时无法像素级对齐 Hero/入口卡           |
-| Fixture 被误当成 Engine | 中   | 已集中存放并标注 PROTOTYPE ONLY                      |
-| KaTeX HTML              | 低   | 当前 tex 来自仓库 fixture，不是用户输入              |
+| Schnelle Entwicklung des Harness | Hoch | SHA ist gepinnt; ein Upgrade muss über Adapter + diesen Dokumentenablauf laufen |
+| Submodul + lefthook     | Mittel | Das Standard-postinstall schlägt unter Windows fehl; deswegen nicht den Upstream ändern |
+| Lücke bei UI-Assets     | Mittel | Ohne 3D-/Foto-Material ist keine pixelgenaue Angleichung von Hero/Einstiegskarten möglich |
+| Fixture wird für Engine gehalten | Mittel | Zentral abgelegt und mit PROTOTYPE ONLY gekennzeichnet |
+| KaTeX HTML              | Niedrig | Aktuell stammt tex aus dem Repository-Fixture, nicht aus Nutzereingaben |
 
-code-audit 结论：**无架构阻断**。未宣称可上线。未 mock Physics Engine。
+code-audit-Ergebnis: **Kein architektonischer Blocker**. Es wird nicht behauptet, produktionsreif zu sein. Die Physics Engine wurde nicht gemockt.
 
-## 18. 下一阶段建议
+## 18. Empfehlung für die nächste Phase
 
-按 `docs/14-DEVELOPMENT-ROADMAP.md`，下一步应是 **Phase 2 Contract**，而不是继续堆页面：
+Gemäß `docs/14-DEVELOPMENT-ROADMAP.md` sollte der nächste Schritt **Phase 2 Contract** sein und nicht, weiter Seiten aufzutürmen:
 
-1. `Quantity` / `Vector` / `PhysicsScene` / Event / SimulationResult 的 TS + Zod
-2. Contract tests
-3. 再进入 Units / Scene Runtime
-4. 第一条 Vertical Slice 仍建议：带电粒子匀强磁场圆周运动
+1. TS + Zod für `Quantity` / `Vector` / `PhysicsScene` / Event / SimulationResult
+2. Contract-Tests
+3. Danach weiter zu Units / Scene Runtime
+4. Die erste Vertical Slice bleibt empfohlen: Kreisbewegung eines geladenen Teilchens im homogenen Magnetfeld
 
-本轮停止。不自动进入 Physics Engine 开发。
+Diese Runde endet hier. Es wird nicht automatisch in die Entwicklung der Physics Engine übergegangen.

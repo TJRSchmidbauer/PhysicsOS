@@ -1,105 +1,104 @@
-# PhysicsOS Harness Sync and Plugin Platform Design
+# Entwurf für Harness-Sync und Plugin-Plattform von PhysicsOS
 
-## Decision
+## Entscheidung
 
-PhysicsOS performs one controlled upgrade of its vendored DeepSeek Harness
-instead of continuously tracking upstream `master`. The target is the latest
-published release tag, `dsh-v0.1.7-rc.2`
+PhysicsOS führt ein einziges kontrolliertes Upgrade seines gevendorten DeepSeek Harness durch,
+statt dem Upstream-`master` laufend zu folgen. Das Ziel ist das neueste
+veröffentlichte Release-Tag `dsh-v0.1.7-rc.2`
 (`477b4f420553e8a52c2fbccc464d7561b239c443`).
 
-After the upgrade is validated and released, PhysicsOS pins the resulting
-upstream commit. Later upgrades are deliberate maintenance windows, not
-automatic production synchronization.
+Nachdem das Upgrade validiert und veröffentlicht ist, pinnt PhysicsOS den daraus
+entstandenen Upstream-Commit. Spätere Upgrades sind bewusste Wartungsfenster, keine
+automatische Produktionssynchronisation.
 
-## Required Outcomes
+## Erforderliche Ergebnisse
 
-1. The official Harness release is merged into the vendored tree.
-2. PhysicsOS overlays and compatibility patches are reapplied.
-3. Account isolation, session ownership, PostgreSQL persistence, Redis shared
-   state, model-pool routing, physics tools, and the Web Client retain their
-   existing contracts.
-4. Typecheck, lint, tests, production builds, and container readiness pass
-   before promotion.
-5. Administrator tabs share one page, toolbar, card, form, table, and empty
-   state system.
-6. The plugin center lists supported official plugins from the pinned release
-   and PhysicsOS plugins from a signed manifest.
-7. Plugin installation is allowlisted, signature-checked,
-   compatibility-checked, and constrained to declared capabilities. Arbitrary
-   uploaded code never executes directly in the production container.
+1. Das offizielle Harness-Release wird in den gevendorten Baum gemergt.
+2. Die PhysicsOS-Overlays und Kompatibilitäts-Patches werden erneut angewendet.
+3. Kontoisolation, Sitzungsbesitz, PostgreSQL-Persistenz, geteilter Redis-Zustand,
+   Routing des Modellpools, Physik-Tools und der Web Client behalten ihre
+   bestehenden Contracts.
+4. Typecheck, Lint, Tests, Produktions-Builds und Container-Readiness bestehen
+   vor der Beförderung.
+5. Administrator-Tabs teilen sich ein System aus Seite, Toolbar, Karte, Formular, Tabelle und Leerzustand.
+6. Das Plugin-Center listet unterstützte offizielle Plugins aus dem gepinnten Release
+   und PhysicsOS-Plugins aus einem signierten Manifest auf.
+7. Die Plugin-Installation ist per Allowlist, Signaturprüfung und
+   Kompatibilitätsprüfung eingeschränkt und auf deklarierte Fähigkeiten beschränkt. Beliebiger
+   hochgeladener Code wird niemals direkt im Produktions-Container ausgeführt.
 
-## Architecture
+## Architektur
 
-### Controlled Harness Synchronization
+### Kontrollierte Harness-Synchronisation
 
-The root repository keeps `vendor/deepseek-harness` as a pinned submodule.
-`overlays/harness/files` is the source of PhysicsOS-owned packages and assets.
-`overlays/harness/upstream-changes.patch` is the compatibility patch against
-the pinned revision.
+Das Root-Repository hält `vendor/deepseek-harness` als gepinntes Submodul.
+`overlays/harness/files` ist die Quelle der PhysicsOS-eigenen Packages und Assets.
+`overlays/harness/upstream-changes.patch` ist der Kompatibilitäts-Patch gegen
+die gepinnte Revision.
 
-Upgrades run in an isolated worktree:
+Upgrades laufen in einem isolierten Worktree:
 
-1. Check out the target release in the submodule.
-2. Reapply the PhysicsOS overlay.
-3. Rebase the compatibility patch.
-4. Resolve interface changes without weakening ownership, authentication, or
-   sandbox boundaries.
-5. Build and test the complete workspace.
-6. Commit the submodule pointer and root-side compatibility changes.
+1. Das Ziel-Release im Submodul auschecken.
+2. Das PhysicsOS-Overlay erneut anwenden.
+3. Den Kompatibilitäts-Patch rebasen.
+4. Schnittstellenänderungen auflösen, ohne Besitz, Authentifizierung oder
+   Sandbox-Grenzen abzuschwächen.
+5. Den vollständigen Workspace bauen und testen.
+6. Den Submodul-Zeiger und die Root-seitigen Kompatibilitätsänderungen committen.
 
-Production receives only a tested image. The previous image and database
-backup remain available for rollback.
+Die Produktion erhält nur ein getestetes Image. Das vorherige Image und das Datenbank-
+Backup bleiben für das Rollback verfügbar.
 
-### Administrator UI Consistency
+### Konsistenz der Administrator-UI
 
-Every administrator tab shares:
+Jeder Administrator-Tab teilt sich:
 
-- one page header and horizontal tab strip;
-- one summary/stat row when counts exist;
-- one filter and bulk-action toolbar;
-- one content region using a table, card list, or empty state;
-- shared spacing, typography, focus, radius, and responsive rules.
+- einen Seitenkopf und eine horizontale Tab-Leiste;
+- eine Zusammenfassungs-/Statistikzeile, sofern es Zähler gibt;
+- eine Toolbar für Filter und Massenaktionen;
+- einen Inhaltsbereich mit Tabelle, Kartenliste oder Leerzustand;
+- gemeinsame Regeln für Abstände, Typografie, Fokus, Radius und Responsivität.
 
-Tab components remain independently testable but stop defining competing
-outer page spacing and card systems.
+Die Tab-Komponenten bleiben einzeln testbar, definieren aber keine konkurrierenden
+äußeren Seitenabstände und Kartensysteme mehr.
 
-### Plugin Center
+### Plugin-Center
 
-The center has two catalogs:
+Das Center hat zwei Kataloge:
 
-- **Official catalog:** a generated inventory from the pinned Harness release,
-  listing package identity, version, compatibility, activation state, and
-  PhysicsOS support.
-- **PhysicsOS catalog:** a signed manifest for plugins built for PhysicsOS,
-  listing version, Harness range, capabilities, server/client entries,
-  integrity digest, and publisher.
+- **Offizieller Katalog:** ein aus dem gepinnten Harness-Release erzeugtes Inventar,
+  das Package-Identität, Version, Kompatibilität, Aktivierungszustand und
+  PhysicsOS-Unterstützung auflistet.
+- **PhysicsOS-Katalog:** ein signiertes Manifest für Plugins, die für PhysicsOS gebaut wurden
+  und Version, Harness-Bereich, Fähigkeiten, Server-/Client-Einstiege,
+  Integritäts-Digest und Herausgeber auflisten.
 
-The first release supports preinstalled verified plugins and administrator
-enable/disable controls. New third-party code requires a signed manifest and
-explicit administrator installation. Plugins receive only declared
-capabilities; unrestricted filesystem, process, and secret access are denied
-by default.
+Die erste Version unterstützt vorinstallierte verifizierte Plugins und
+Steuerelemente zum Aktivieren/Deaktivieren durch Administratoren. Neuer Code von Drittanbietern erfordert ein signiertes Manifest und
+eine ausdrückliche Installation durch Administratoren. Plugins erhalten nur
+deklarierte Fähigkeiten; uneingeschränkter Zugriff auf Dateisystem, Prozesse und Secrets wird
+standardmäßig verweigert.
 
-## Failure Handling
+## Fehlerbehandlung
 
-- Upgrade build or test failure: discard the isolated worktree; production is
-  unchanged.
-- Production readiness failure: restore the previous image and preserve
-  database migration state.
-- Plugin integrity failure: refuse activation and write an audit event.
-- Plugin compatibility failure: keep disabled and show required versus
-  installed Harness ranges.
+- Build- oder Testfehler beim Upgrade: den isolierten Worktree verwerfen; die Produktion
+  bleibt unverändert.
+- Readiness-Fehler in der Produktion: das vorherige Image wiederherstellen und den
+  Migrationszustand der Datenbank bewahren.
+- Fehler bei der Plugin-Integrität: Aktivierung verweigern und ein Audit-Ereignis schreiben.
+- Fehler bei der Plugin-Kompatibilität: deaktiviert lassen und erforderliche gegenüber
+  installierten Harness-Bereichen anzeigen.
 
-## Verification
+## Verifikation
 
-Verification includes root typecheck, lint, core/web/agent/deploy/desktop
-tests, host composition tests, account isolation, model-pool failover and
-streaming, PostgreSQL and Redis readiness, production Web build, container
-health, and rollback-image presence.
+Die Verifikation umfasst Root-Typecheck, Lint, Tests für core/web/agent/deploy/desktop,
+Host-Kompositionstests, Kontoisolation, Failover und Streaming des Modellpools,
+PostgreSQL- und Redis-Readiness, den Produktions-Web-Build, Container-
+Health und das Vorhandensein des Rollback-Images.
 
-## Release Policy
+## Release-Richtlinie
 
-The first public release uses the synchronized Harness revision and the
-PhysicsOS product shell. There is no automatic upstream updater in
-production. The administrator UI may show an informational upgrade notice,
-but promotion is a deliberate operator action.
+Das erste öffentliche Release verwendet die synchronisierte Harness-Revision und die
+PhysicsOS-Produkt-Shell. In der Produktion gibt es keinen automatischen Upstream-
+Updater. Die Administrator-UI darf einen informativen Upgrade-Hinweis zeigen,
+die Beförderung ist aber eine bewusste Handlung des Operators.

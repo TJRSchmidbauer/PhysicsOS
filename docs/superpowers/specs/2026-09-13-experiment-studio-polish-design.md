@@ -1,40 +1,40 @@
-# 实验模块整体体验升级
+# Gesamtes Upgrade der Erfahrung im Experimentmodul
 
-用户已确认参考粒子先生的实验体验，并要求“全部美化”。本次覆盖实验中心、共享实验工作台和当前所有实验领域的呈现；保留明亮、精密、克制的 PhysicsOS 视觉语言。
+Der Nutzer hat bestätigt, sich an der Experimenterfahrung von „Teilchen-Herr“ (粒子先生) zu orientieren, und „alles verschönern“ verlangt. Diese Runde umfasst das Experimentzentrum, den gemeinsamen Experiment-Arbeitsbereich und die Darstellung aller derzeitigen Experimentdomänen; die helle, präzise und zurückhaltende visuelle Sprache von PhysicsOS bleibt erhalten.
 
-## 目标与边界
+## Ziel und Grenzen
 
-- 实验装置是主角，工作台不再让多层面板、低对比文字和空白抢占视觉。
-- 保留现有全部实验模板、物理引擎、验证结果、场景命令、题目事实隔离及本地学习记录。
-- 不新增自由接线编辑器、后端接口、账号流程、依赖、求解器或伪造物理量。
-- 现有未提交改动属于用户。当前工作分支为 `codex/experiment-studio-polish`，不重置、不清理、不自动提交或推送。
-- 源码以 `overlays/harness/files/packages/client/ui-physicsos/` 为记录源；仅同步实际改动文件到 `vendor/deepseek-harness/packages/client/ui-physicsos/`。不运行会整目录删除的 overlay capture。
+- Die Experimentgeräte sind die Hauptdarsteller, der Arbeitsbereich lässt nicht mehr mehrlagige Panels, schwach kontrastierenden Text und Leerflächen das Bild dominieren.
+- Alle vorhandenen Experimentvorlagen, Physik-Engines, Verifikationsergebnisse, Szenenbefehle, die Faktenisolation der Aufgaben und die lokalen Lernverläufe bleiben erhalten.
+- Es werden kein freier Verdrahtungs-Editor, keine Backend-Schnittstelle, kein Kontoablauf, keine Abhängigkeit, kein Solver und keine gefälschten physikalischen Größen hinzugefügt.
+- Vorhandene uncommittete Änderungen gehören dem Nutzer. Der aktuelle Arbeitsbranch ist `codex/experiment-studio-polish`; nicht zurücksetzen, nicht aufräumen, nicht automatisch committen oder pushen.
+- Die Quelle der Aufzeichnung ist `overlays/harness/files/packages/client/ui-physicsos/`; nur die tatsächlich geänderten Dateien werden nach `vendor/deepseek-harness/packages/client/ui-physicsos/` synchronisiert. Kein Overlay-Capture ausführen, das ganze Verzeichnisse löscht.
 
-## 视觉与交互设计
+## Visuelles Design und Interaktion
 
-1. 实验中心：清晰的标题与实验数量、紧凑检索分类、统一图片比例、学科语义和清晰的主操作；保留推荐、继续实验、未支持状态。
-2. 共享工作台：紧凑工具栏、较轻的场景树与检查器、完整画布边界和更清晰的播放区。提供可逆的专注实验视图，不能令控制和数据不可达。
-3. 数据反馈：有曲线的实验默认显示简洁图表区域；无曲线的静态实验不能用空图表浪费画布。切换实验后按新场景重新初始化展示状态。
-4. 场景：所有领域共用清晰的坐标、字号、线宽、矢量、标注和材质规范；物理正确的线图和场线仍由代码绘制，不用生成图片代替物理过程。
-5. 电路器材：使用统一机位、比例、光照的新素材，精确数字、状态与接线仍由代码和引擎驱动。保留旧素材作回退，不随意覆盖源图。
-6. 电路直接操作：画布上的开关可点击/键盘切换；滑片可通过鼠标、触摸和键盘调节，复用现有 `setChoice`/`editParameter` 路径，保持原有元件移动不误触。
-7. 跨端：桌面、窄桌面和移动端不出现页面横向溢出，工具按钮保持可达，图层/检查器可收起；焦点可见，尊重 reduced-motion。
+1. Experimentzentrum: klarer Titel und Anzahl der Experimente, kompakte Suche und Kategorien, einheitliches Bildverhältnis, Fachsemantik und klare Hauptaktion; Empfehlungen, Fortsetzen von Experimenten und der Status „nicht unterstützt“ bleiben erhalten.
+2. Gemeinsamer Arbeitsbereich: kompakte Toolbar, leichterer Szenenbaum und Inspector, vollständige Canvas-Grenze und klarerer Wiedergabebereich. Es wird eine reversible Ansicht „Experiment fokussieren“ geboten, die Steuerung und Daten nicht unerreichbar machen darf.
+3. Datenrückmeldung: Experimente mit Kurven zeigen standardmäßig einen schlichten Diagrammbereich; statische Experimente ohne Kurven dürfen die Canvas-Fläche nicht mit einem leeren Diagramm verschwenden. Nach dem Wechsel des Experiments wird der Darstellungszustand für die neue Szene neu initialisiert.
+4. Szene: Alle Domänen teilen klare Koordinaten, Schriftgrößen, Linienbreiten, Vektoren, Beschriftungen und Materialvorgaben; physikalisch korrekte Liniendiagramme und Feldlinien werden weiterhin im Code gezeichnet und nicht durch erzeugte Bilder ersetzt.
+5. Schaltungsgeräte: Neue Assets mit einheitlicher Kameraposition, einheitlichem Maßstab und einheitlicher Beleuchtung; exakte Zahlen, Zustände und Verdrahtung werden weiterhin von Code und Engine getrieben. Alte Assets bleiben als Rückfall erhalten, Quellbilder werden nicht beliebig überschrieben.
+6. Direkte Bedienung von Schaltungen: Der Schalter im Canvas lässt sich per Klick/Tastatur umschalten; der Schleifer ist per Maus, Touch und Tastatur einstellbar; dabei werden die vorhandenen Pfade `setChoice`/`editParameter` wiederverwendet und das ursprüngliche Verschieben von Bauteilen wird nicht versehentlich ausgelöst.
+7. Geräteübergreifend: Desktop, schmaler Desktop und Mobil zeigen keinen horizontalen Seitenüberlauf, Toolbar-Schaltflächen bleiben erreichbar, Ebenen/Inspector sind einklappbar; der Fokus ist sichtbar, reduced-motion wird respektiert.
 
-## 视觉约束
+## Visuelle Randbedingungen
 
-- 使用现有语义 token、CSS Modules 和 `clsx`；不添加第二套全局主题或组件库。
-- 主调为现有浅色中性背景与科学蓝，学科颜色只用于识别和物理语义；不堆叠装饰渐变、模糊光团或无意义辉光。
-- 正文、单位、图例和交互提示必须清楚；生成素材不得承载动态数值。
-- 新生成的位图和图标只使用用户指定服务及 `gpt-image-2.5-sunburst`；密钥只在请求时注入，不能写入源码、文档、日志、元数据或浏览器。
+- Vorhandene semantische Tokens, CSS Modules und `clsx` verwenden; kein zweites globales Theme und keine Komponentenbibliothek hinzufügen.
+- Grundton sind der vorhandene helle neutrale Hintergrund und das wissenschaftliche Blau, Fachfarben dienen nur der Erkennung und der physikalischen Semantik; keine gestapelten Dekorationsverläufe, verschwommenen Lichtflecken oder sinnlosen Leuchteffekte.
+- Fließtext, Einheiten, Legenden und Interaktionshinweise müssen klar sein; erzeugte Assets dürfen keine dynamischen Zahlenwerte tragen.
+- Neu erzeugte Bitmaps und Icons nur mit dem vom Nutzer angegebenen Dienst und `gpt-image-2.5-sunburst`; der Schlüssel wird nur bei der Anfrage injiziert und darf nicht in Quellcode, Dokumentation, Logs, Metadaten oder den Browser geschrieben werden.
 
-## 验收
+## Abnahme
 
-- 真实模板创建、切换、播放/暂停、时间轴、数据图表、属性编辑、校验和报告入口保持可用。
-- 电路直接切换必须改变真实引擎读数，滑片边界为 0..1，移动元件不应切换电路状态。
-- 覆盖所有已支持领域的组件回归；代表性力学、电场、磁场、电路、光学、机械波、流体、热学、声学、杠杆、电磁感应页面进行浏览器检查。
-- 运行 `pnpm test:web`、`pnpm typecheck:web`、`pnpm lint:web`、`pnpm build:web`，记录真实结果与既有警告。
-- 保存代表性桌面与移动截图，独立代码审计复核状态归属、引擎路径、资产加载和影响面。
+- Erstellen echter Vorlagen, Wechsel, Wiedergabe/Pause, Zeitachse, Datendiagramme, Eigenschaftsbearbeitung, Prüfung und Einstieg in den Bericht bleiben nutzbar.
+- Das direkte Umschalten in Schaltungen muss die echten Engine-Messwerte ändern, die Grenzen des Schleifers sind 0..1, das Verschieben von Bauteilen darf den Schaltungszustand nicht umschalten.
+- Komponentenregression über alle unterstützten Domänen; repräsentative Seiten für Mechanik, Elektrik, Magnetfeld, Schaltung, Optik, mechanische Wellen, Fluide, Wärmelehre, Akustik, Hebel und elektromagnetische Induktion werden im Browser geprüft.
+- `pnpm test:web`, `pnpm typecheck:web`, `pnpm lint:web`, `pnpm build:web` ausführen und die echten Ergebnisse sowie vorhandene Warnungen festhalten.
+- Repräsentative Desktop- und Mobil-Screenshots speichern; ein unabhängiges Code-Audit prüft Zustandszuordnung, Engine-Pfad, Asset-Laden und Auswirkungsbereich erneut.
 
-## 已有基线
+## Vorhandene Baseline
 
-2026-09-13，Node v26.0.0、pnpm 11.9.0；`pnpm test:web` 为 32 个文件、473 个用例通过。既有输出包含 Vite tsconfig-paths 提示和 jsdom canvas getContext 提示，不是本次引入。
+2026-09-13, Node v26.0.0, pnpm 11.9.0; `pnpm test:web` bestand mit 32 Dateien und 473 Testfällen. Die vorhandene Ausgabe enthält Hinweise zu Vite tsconfig-paths und zu jsdom canvas getContext, die nicht durch diese Runde eingeführt wurden.

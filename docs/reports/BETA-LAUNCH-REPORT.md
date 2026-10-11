@@ -1,31 +1,31 @@
-# PhysicsOS 公测上线报告
+# PhysicsOS Bericht zum Start der öffentlichen Beta
 
-- 报告日期：2026-09-27
-- 应用运行时基线：`63c20e6e701b1dc1e4188e66903a82a18306f2cc`
-- 品牌与去班级化提交：`3d7e398a77c82209452224ee9770a46bbc8b4213`
-- 最新证据与截图提交：`543d7a57`
-- 正式地址：<https://physics.dongsiwei.com>
-- 部署目录：`/opt/physicsos`
-- 发布结论：**可以进入单副本、开放注册公测**。核心可用性、账号隔离、密钥权限、浏览器安全头和运维观测已经过实际生产复验；下文登记的项目仍不满足无限规模或长期无人值守生产的要求。
+- Berichtsdatum: 2026-09-27
+- Basis der Anwendungs-Runtime: `63c20e6e701b1dc1e4188e66903a82a18306f2cc`
+- Commit zu Branding und Entfernung des Klassenbezugs: `3d7e398a77c82209452224ee9770a46bbc8b4213`
+- Neuester Commit mit Nachweisen und Screenshots: `543d7a57`
+- Offizielle Adresse: <https://physics.dongsiwei.com>
+- Deployment-Verzeichnis: `/opt/physicsos`
+- Release-Schlussfolgerung: **Der Eintritt in eine öffentliche Beta mit einer einzelnen Replik und offener Registrierung ist möglich**. Grundlegende Nutzbarkeit, Kontoisolation, Berechtigungen für Schlüssel, Browser-Sicherheits-Header und betriebliche Beobachtung wurden in der Produktion tatsächlich erneut verifiziert; die unten aufgeführten Punkte erfüllen jedoch weiterhin nicht die Anforderungen an unbegrenzte Skalierung oder dauerhaft unbeaufsichtigten Produktionsbetrieb.
 
-> 本报告不记录任何明文密码、API key、Cookie、模型上游 key 或 secret 内容。管理员密码由 `/opt/physicsos/.env.admin_password` 经 Compose secret 注入应用。
+> Dieser Bericht enthält keine Klartext-Passwörter, API-Keys, Cookies, Upstream-Keys des Modells oder Secret-Inhalte. Das Administratorpasswort wird aus `/opt/physicsos/.env.admin_password` über ein Compose-Secret in die Anwendung injiziert.
 
-## 1. 交付范围
+## 1. Lieferumfang
 
-本次应用交付提交 `63c20e6` 共改动 `114` 个文件，新增 `13,528` 行、删除 `297` 行，交付范围覆盖：
+Der Anwendungs-Liefercommit `63c20e6` ändert insgesamt `114` Dateien, fügt `13.528` Zeilen hinzu und löscht `297`; der Lieferumfang umfasst:
 
-- 账户、租户、角色、会话、设备注销、密码重置、TOTP 与管理员审计面。
-- 个人学习作答和保存场景的服务端同步、幂等写、分页与跨设备读取。
-- 力学、光学、热学、流体、电路、电磁、复合场、机械波和近代物理等实验与题库能力。
-- `physics-student` Agent 预设和七个 PhysicsOS 物理工具，模型数值来自物理引擎而非自由生成。
-- 账号私有工作区、按账号分层的会话存储、普通角色宿主机文件系统访问拒绝。
-- 管理员运维控制面板、磁盘/会话/工作区/PostgreSQL/Redis 指标、15 秒缓存和告警阈值。
-- 平台模型号池、AES-GCM key 加密、加权轮询、故障转移、冷却恢复和本机 OpenAI 兼容代理。
-- PostgreSQL、Redis、Compose、健康检查、CI、备份/恢复/回滚文档、开源协作与安全文档。
-- PhysicsOS 轨道透镜品牌标志、浏览器 favicon 与 PWA 安装图标；产品定位为个人物理实验与学习平台，不包含班级或作业管理。
-- Web 为公测主入口；Tauri 桌面壳保留为可选形态，本轮不做签名、公证和商店发布。
+- Konten, Mandanten, Rollen, Sitzungen, Geräte-Abmeldung, Passwort-Reset, TOTP und die Admin-Audit-Oberfläche.
+- Serverseitige Synchronisation persönlicher Lernantworten und gespeicherter Szenen, idempotentes Schreiben, Paginierung und geräteübergreifendes Lesen.
+- Fähigkeiten für Experimente und Aufgabenbank in Mechanik, Optik, Wärmelehre, Fluiden, Schaltungen, Elektromagnetismus, zusammengesetzten Feldern, mechanischen Wellen und moderner Physik.
+- Das Agent-Preset `physics-student` und sieben PhysicsOS-Physik-Tools; die Zahlenwerte des Modells stammen aus der Physik-Engine und nicht aus freier Generierung.
+- Kontoprivater Workspace, nach Konten geschichtete Sitzungsspeicherung, Verweigerung des Dateisystemzugriffs auf den Host für normale Rollen.
+- Admin-Betriebsbedienfeld, Metriken für Festplatte/Sitzungen/Workspace/PostgreSQL/Redis, 15-Sekunden-Cache und Alarmschwellen.
+- Plattform-Modellpool, AES-GCM-Verschlüsselung der Keys, gewichtetes Round Robin, Failover, Cooldown-Wiederherstellung und lokaler OpenAI-kompatibler Proxy.
+- PostgreSQL, Redis, Compose, Health-Checks, CI, Dokumentation zu Backup/Wiederherstellung/Rollback, Dokumente zu Open-Source-Zusammenarbeit und Sicherheit.
+- Das Markenzeichen „Orbit-Linse“ von PhysicsOS, Browser-Favicon und PWA-Installationssymbol; das Produkt ist als persönliche Plattform für Physikexperimente und Lernen positioniert und enthält keine Klassen- oder Hausaufgabenverwaltung.
+- Das Web ist der Haupteinstieg der öffentlichen Beta; die Tauri-Desktop-Shell bleibt als optionale Form erhalten, in dieser Runde gibt es keine Signierung, Notarisierung und Store-Veröffentlichung.
 
-## 2. 部署拓扑与地址
+## 2. Deployment-Topologie und Adresse
 
 ```text
 Internet
@@ -37,37 +37,37 @@ nginx (38.76.190.3, Let's Encrypt)
   | 127.0.0.1:3080
   v
 PhysicsOS app container
-  |-- PostgreSQL container (Docker 内网，未公网发布)
-  |-- Redis container (Docker 内网，未公网发布)
-  `-- model-pool proxy 127.0.0.1:38972 (仅 app 容器内)
+  |-- PostgreSQL container (internes Docker-Netz, nicht öffentlich veröffentlicht)
+  |-- Redis container (internes Docker-Netz, nicht öffentlich veröffentlicht)
+  `-- model-pool proxy 127.0.0.1:38972 (nur im app-Container)
           |
           v
       upstream OpenAI-compatible gateway
 ```
 
-| 项目 | 当前实态 |
+| Punkt | Aktueller Ist-Zustand |
 | --- | --- |
-| 公网入口 | `https://physics.dongsiwei.com` |
-| HTTP 行为 | `http://physics.dongsiwei.com/` 返回 `301` 到 HTTPS |
-| 应用监听 | 主机回环 `127.0.0.1:3080`，未裸露容器端口 |
-| Compose 服务 | `app`、`postgres`、`redis` 三容器均为 `healthy` |
-| 持久数据 | `app_data`、`postgres_data`、`redis_data` 命名卷 |
-| 应用运行时基线 | `63c20e6e701b1dc1e4188e66903a82a18306f2cc` |
-| 品牌与产品边界 | `3d7e398a77c82209452224ee9770a46bbc8b4213`（生产增量镜像 `physicsos-app:brand-title-fix`） |
-| 最新证据与截图 | `543d7a57` |
-| 运维与文档 | 跟随 `origin/main`；后续文档、nginx 加固脚本更新不要求重建应用镜像 |
-| 管理员租户 | `PHYSICSOS-OPEN` |
-| 管理员账号 | `admin` |
-| 管理员密码来源 | `/opt/physicsos/.env.admin_password`，经 secret 注入，不在报告中记录明文 |
-| 模型代理 | `127.0.0.1:38972/v1`，实测 `/v1/models` 返回 `200` |
-| 号池后台状态 | 1 条启用通道、1 个 active key、`encryptionReady=true` |
-| 当前副本数 | 单 `app` 副本；扩容前必须共享 `PHYSICSOS_SESSIONS_ROOT` |
+| Öffentlicher Einstieg | `https://physics.dongsiwei.com` |
+| HTTP-Verhalten | `http://physics.dongsiwei.com/` liefert `301` auf HTTPS |
+| Anwendungs-Listener | Host-Loopback `127.0.0.1:3080`, Container-Port nicht offengelegt |
+| Compose-Services | Die drei Container `app`, `postgres`, `redis` sind alle `healthy` |
+| Persistente Daten | Benannte Volumes `app_data`, `postgres_data`, `redis_data` |
+| Basis der Anwendungs-Runtime | `63c20e6e701b1dc1e4188e66903a82a18306f2cc` |
+| Branding und Produktgrenze | `3d7e398a77c82209452224ee9770a46bbc8b4213` (inkrementelles Produktions-Image `physicsos-app:brand-title-fix`) |
+| Neueste Nachweise und Screenshots | `543d7a57` |
+| Betrieb und Dokumentation | Folgt `origin/main`; spätere Aktualisierungen von Dokumentation und nginx-Härtungsskript erfordern keinen Neubau des Anwendungs-Images |
+| Admin-Mandant | `PHYSICSOS-OPEN` |
+| Admin-Konto | `admin` |
+| Quelle des Admin-Passworts | `/opt/physicsos/.env.admin_password`, per Secret injiziert, Klartext wird im Bericht nicht festgehalten |
+| Modell-Proxy | `127.0.0.1:38972/v1`, gemessen liefert `/v1/models` `200` |
+| Status des Pool-Backends | 1 aktivierter Kanal, 1 aktiver Key, `encryptionReady=true` |
+| Aktuelle Replikenzahl | Einzelne `app`-Replik; vor einer Skalierung muss `PHYSICSOS_SESSIONS_ROOT` geteilt werden |
 
-## 3. 五项复验证据
+## 3. Nachweise der fünf erneuten Verifikationen
 
-### 3.1 部署、健康检查与版本一致性
+### 3.1 Deployment, Health-Check und Versionskonsistenz
 
-实测命令：
+Gemessene Befehle:
 
 ```sh
 ssh -i ~/.ssh/id_ed25519 root@38.76.190.3 \
@@ -78,19 +78,19 @@ curl -sS https://physics.dongsiwei.com/readyz
 curl -sS -D - -o /dev/null https://physics.dongsiwei.com/readyz
 ```
 
-实测结果：
+Gemessene Ergebnisse:
 
 ```text
-应用运行时提交：63c20e6e701b1dc1e4188e66903a82a18306f2cc
-app/postgres/redis：healthy
-GET /healthz：200 {"status":"ok"}
-GET /readyz：200 {"status":"ready","checks":{"postgres":{"status":"ok"},"redis":{"status":"ok"}}}
-HTTPS：有效，HTTP 入口 301 跳转到 HTTPS
+Commit der Anwendungs-Runtime: 63c20e6e701b1dc1e4188e66903a82a18306f2cc
+app/postgres/redis: healthy
+GET /healthz: 200 {"status":"ok"}
+GET /readyz: 200 {"status":"ready","checks":{"postgres":{"status":"ok"},"redis":{"status":"ok"}}}
+HTTPS: gültig, HTTP-Einstieg 301-Weiterleitung auf HTTPS
 ```
 
-### 3.2 主机、secret 与浏览器安全边界
+### 3.2 Sicherheitsgrenzen von Host, Secrets und Browser
 
-SSH 实测结果：
+Gemessene SSH-Ergebnisse:
 
 ```text
 PasswordAuthentication no
@@ -99,16 +99,16 @@ PubkeyAuthentication yes
 PermitRootLogin without-password
 ```
 
-secret 实测结果：
+Gemessene Secret-Ergebnisse:
 
 ```text
-app 身份：uid=999(physicsos) gid=999(physicsos)
-admin_password/database_url/deepseek_api_key/image_api_key/model_pool_secret/redis_url：
-  999:999，mode 0400，app 可读
-uid 1000 读取 model_pool_secret：DENIED
+app-Identität: uid=999(physicsos) gid=999(physicsos)
+admin_password/database_url/deepseek_api_key/image_api_key/model_pool_secret/redis_url:
+  999:999, mode 0400, von der app lesbar
+uid 1000 liest model_pool_secret: DENIED
 ```
 
-`scripts/deploy/install-nginx-security-headers.sh` 已在生产 nginx 应用并实测返回：
+`scripts/deploy/install-nginx-security-headers.sh` wurde auf dem Produktions-nginx angewandt und liefert gemessen:
 
 ```text
 Strict-Transport-Security: max-age=31536000; includeSubDomains
@@ -118,73 +118,73 @@ Referrer-Policy: strict-origin-when-cross-origin
 Permissions-Policy: camera=(), microphone=(), geolocation=()
 ```
 
-脚本重复执行后仍保持 `2` 个 server block；HTTP 入口继续 `301` 到 HTTPS。
+Nach wiederholter Ausführung des Skripts bleiben `2` Server-Blöcke bestehen; der HTTP-Einstieg liefert weiterhin `301` auf HTTPS.
 
-### 3.3 多用户、Agent 与工作区隔离
+### 3.3 Isolation von Mehrbenutzerbetrieb, Agent und Workspace
 
-2026-09-27 在生产环境复跑：
+Am 2026-09-27 in der Produktionsumgebung erneut ausgeführt:
 
 ```sh
 PHYSICSOS_AUDIT_ADMIN_PASSWORD='<secret-injected>' \
   node tests/acceptance/isolation.mjs
 ```
 
-结果为：
+Ergebnis:
 
 ```text
 SUMMARY pass=12 fail=0 blocked=0
 ```
 
-关键原始语义：
+Wichtige ursprüngliche Semantik:
 
-- 学生 B 创建的 session 返回 `agentPreset=physics-student`，`cwd` 被服务端绑定到
-  `/var/lib/physicsos/physicsos-users/794ffc...`，调用方传入的 `/etc` 等路径不会保留。
-- 学生 A 的 `session.list` 为空，不能读到学生 B 的 session。
-- 学习作答、场景和会话导出均按账号所有权拒绝跨账号读取；班级作业 API 已从生产 composition 移除。
-- 普通角色的 `host.listDirectory` / `host.pickDirectory` / `host.createDirectory`
-  返回 `403 HOST_FILESYSTEM_DENIED`。
+- Die von Schüler B angelegte Session liefert `agentPreset=physics-student`, `cwd` wird serverseitig an
+  `/var/lib/physicsos/physicsos-users/794ffc...` gebunden, vom Aufrufer übergebene Pfade wie `/etc` bleiben nicht erhalten.
+- Die `session.list` von Schüler A ist leer, er kann die Session von Schüler B nicht lesen.
+- Lernantworten, Szenen und Sitzungsexport verweigern kontoübergreifendes Lesen nach Kontobesitz; die Hausaufgaben-API der Klasse wurde aus der Produktionskomposition entfernt.
+- `host.listDirectory` / `host.pickDirectory` / `host.createDirectory` normaler Rollen
+  liefern `403 HOST_FILESYSTEM_DENIED`.
 
-`preset-composition.spec.ts` 补充证据为 `3/3` 通过：`physics-student` 只挂载
-`persona`、`tool-physicsos`、`tool-ask-user`，不包含 fs、shell、web 或 subagent；
-七个物理工具只进入学生 Agent 自己的 scope。
+Zusätzlicher Nachweis aus `preset-composition.spec.ts` ist `3/3` bestanden: `physics-student` hängt nur
+`persona`, `tool-physicsos`, `tool-ask-user` ein, ohne fs, shell, web oder subagent;
+die sieben Physik-Tools gelangen nur in den eigenen Scope des Schüler-Agents.
 
-同一 UID 的 fs 读取边界仍是上游 Agent 安全模型的理论残余：
-当前生产预设没有 fs/shell 工具，bash runner 又因 `SANDBOX_UNAVAILABLE` fail-closed，
-因此学生没有读到 `/run/secrets` 或他人会话的入口。后续若新增 fs/shell 预设，必须重新做
-per-session READ fence 和越权验收，不能把当前结论外推到所有预设。
+Die fs-Lesegrenze unter derselben UID ist weiterhin ein theoretischer Rest des Agent-Sicherheitsmodells von Upstream:
+Das aktuelle Produktions-Preset hat keine fs-/shell-Tools, und der bash runner schlägt wegen `SANDBOX_UNAVAILABLE` fail-closed fehl,
+daher hat ein Schüler keinen Zugang zu `/run/secrets` oder den Sitzungen anderer. Wird später ein fs-/shell-Preset ergänzt, ist erneut ein
+per-session READ fence mit Abnahme gegen Rechteüberschreitung durchzuführen; die aktuelle Schlussfolgerung darf nicht auf alle Presets übertragen werden.
 
-### 3.4 模型号池与运维控制面板
+### 3.4 Modellpool und Betriebs-Bedienfeld
 
-号池实测：
+Messung des Pools:
 
 ```sh
 docker compose exec -T app node -e \
   "fetch('http://127.0.0.1:38972/v1/models').then(async r => console.log(r.status, await r.text()))"
 ```
 
-结果：HTTP `200`，模型列表通过本机代理返回；管理员
-`/physicsos/model-pool/state` 返回 `200`，当前 `1` 条启用通道、`1` 个 active key，
-`encryptionReady=true`。上游 key 只以 tail 和脱敏状态展示。
+Ergebnis: HTTP `200`, die Modellliste wird über den lokalen Proxy zurückgegeben; der Admin-Aufruf
+`/physicsos/model-pool/state` liefert `200`, derzeit `1` aktivierter Kanal, `1` aktiver Key,
+`encryptionReady=true`. Upstream-Keys werden nur mit den letzten Stellen und bereinigtem Status angezeigt.
 
-管理员 `/physicsos/ops/metrics` 实测：
+Gemessen bei Admin-`/physicsos/ops/metrics`:
 
 ```text
 cache.ttlMs = 15000
-第一次 force=1：cache.hit=false
-第二次普通请求：cache.hit=true
+Erster Aufruf force=1: cache.hit=false
+Zweiter normaler Aufruf: cache.hit=true
 health.status = ok
 PostgreSQL = ok
 Redis = ok
 alerts = 0
-根盘 usedPercent = 55.29092308187761（2026-09-27T02:41:52Z 快照）
+Root-Platte usedPercent = 55.29092308187761 (Snapshot 2026-09-27T02:41:52Z)
 ```
 
-本次未重新消耗模型额度做 chat completion；真实回合 `pong` / `ok` 的原始证据见
-[`ISOLATION-AUDIT.md`](./ISOLATION-AUDIT.md) 的模型链路修复记录。
+In dieser Runde wurde kein Modellkontingent erneut für eine Chat-Completion verbraucht; die ursprünglichen Nachweise einer echten Runde `pong` / `ok` stehen im Eintrag zur Reparatur der Modellkette in
+[`ISOLATION-AUDIT.md`](./ISOLATION-AUDIT.md).
 
-### 3.5 公测界面与教师演示截图
+### 3.5 Oberfläche der öffentlichen Beta und Screenshots für Lehrer-Demonstration
 
-宣传截图脚本已以真实浏览器、真实生产站点端到端执行并 `exit 0`：
+Das Werbe-Screenshot-Skript wurde mit einem echten Browser gegen die echte Produktionsseite Ende-zu-Ende ausgeführt und endete mit `exit 0`:
 
 ```sh
 PHYSICSOS_SHOT_BASE='https://physics.dongsiwei.com' \
@@ -193,32 +193,32 @@ PHYSICSOS_SHOT_PASSWORD='<secret-injected>' \
 node tests/acceptance/promo-shots.mjs
 ```
 
-保留的八张 `1600x1000` 截图：
+Beibehaltene acht `1600x1000`-Screenshots:
 
-| 文件 | 用途 |
+| Datei | Zweck |
 | --- | --- |
-| [`01-home.png`](./screenshots/promo/01-home.png) | 平台首页与整体视觉 |
-| [`02-experiment-center.png`](./screenshots/promo/02-experiment-center.png) | 初中实验中心与领域选择 |
-| [`03-lab-series-circuit.png`](./screenshots/promo/03-lab-series-circuit.png) | 串联电路实验 |
-| [`04-lab-convex-lens.png`](./screenshots/promo/04-lab-convex-lens.png) | 凸透镜成像规律 |
-| [`05-lab-liquid-pressure.png`](./screenshots/promo/05-lab-liquid-pressure.png) | 探究液体内部压强 |
-| [`06-lab-melting.png`](./screenshots/promo/06-lab-melting.png) | 探究晶体熔化过程 |
-| [`07-library.png`](./screenshots/promo/07-library.png) | 资源库 |
-| [`08-learning-record.png`](./screenshots/promo/08-learning-record.png) | 学习记录与活动热力图（该账号尚未自测，故为空状态） |
-| [`09-solved-question.png`](./screenshots/promo/09-solved-question.png) | 已解题的卡片：引擎校验逐条通过 + 同一场景的可交互实验台 |
+| [`01-home.png`](./screenshots/promo/01-home.png) | Startseite der Plattform und Gesamtoptik |
+| [`02-experiment-center.png`](./screenshots/promo/02-experiment-center.png) | Experimentzentrum Mittelstufe und Domänenauswahl |
+| [`03-lab-series-circuit.png`](./screenshots/promo/03-lab-series-circuit.png) | Experiment Reihenschaltung |
+| [`04-lab-convex-lens.png`](./screenshots/promo/04-lab-convex-lens.png) | Abbildungsgesetze der Sammellinse |
+| [`05-lab-liquid-pressure.png`](./screenshots/promo/05-lab-liquid-pressure.png) | Untersuchung des Drucks im Inneren einer Flüssigkeit |
+| [`06-lab-melting.png`](./screenshots/promo/06-lab-melting.png) | Untersuchung des Schmelzvorgangs eines Kristalls |
+| [`07-library.png`](./screenshots/promo/07-library.png) | Ressourcenbibliothek |
+| [`08-learning-record.png`](./screenshots/promo/08-learning-record.png) | Lernverlauf und Aktivitäts-Heatmap (dieses Konto hat noch keinen Selbsttest gemacht, daher Leerzustand) |
+| [`09-solved-question.png`](./screenshots/promo/09-solved-question.png) | Karte einer gelösten Aufgabe: Engine-Prüfung bestanden Punkt für Punkt + interaktiver Experimentierplatz derselben Szene |
 
-## 4. 本地门禁与测试数
+## 4. Lokale Gates und Testzahlen
 
-当前提交的最近一次全量收口记录：
+Aufzeichnung des letzten vollständigen Abschlusses für den aktuellen Commit:
 
-| 门禁 | 结果 |
+| Gate | Ergebnis |
 | --- | --- |
 | `pnpm typecheck` | exit 0 |
 | `pnpm lint` | exit 0 |
 | `pnpm test` | exit 0 |
 | `pnpm build` | exit 0 |
 
-本次上线收口时重新执行的全部门禁：
+Beim Abschluss des Starts erneut ausgeführte Gates:
 
 ```sh
 pnpm typecheck
@@ -227,7 +227,7 @@ pnpm test
 pnpm build
 ```
 
-结果：
+Ergebnis:
 
 ```text
 typecheck: exit 0
@@ -243,12 +243,12 @@ desktop: 26 passed / 26
 build: exit 0
 ```
 
-其中 `preset-composition.spec.ts` 为 `3/3` 通过。全量门禁均在本轮最终提交前重新执行，
-完成后再冻结发布 SHA。
+Darunter besteht `preset-composition.spec.ts` mit `3/3`. Alle vollständigen Gates wurden vor dem letzten Commit dieser Runde erneut ausgeführt,
+danach wird die Release-SHA eingefroren.
 
-## 5. Overlay 幂等
+## 5. Idempotenz des Overlays
 
-当前 overlay 验收记录：
+Aktuelle Overlay-Abnahmeaufzeichnung:
 
 ```sh
 node scripts/overlay/harness-overlay.mjs apply
@@ -256,124 +256,124 @@ git -C vendor/deepseek-harness apply --reverse --check \
   ../../overlays/harness/upstream-changes.patch
 ```
 
-已记录结果：
+Festgehaltenes Ergebnis:
 
 ```text
 upstream-changes.patch already applied
-git apply --reverse --check：通过
-无 .rej / .orig 残留
-17 个 OVERLAY_PATHS 的 overlay 与 vendor 对应文件逐字节一致
+git apply --reverse --check: bestanden
+Keine Reste von .rej / .orig
+Overlay und vendor-Dateien der 17 OVERLAY_PATHS sind Byte für Byte identisch
 ```
 
-为避免修改 `vendor/deepseek-harness`，本报告编制轮没有再次执行 `apply` 或 `capture`。
+Um `vendor/deepseek-harness` nicht zu verändern, wurde in der Erstellungsrunde dieses Berichts weder `apply` noch `capture` erneut ausgeführt.
 
-## 6. 上线残余风险与明确不做项
+## 6. Restrisiken beim Start und ausdrücklich nicht Teil
 
-| 项目 | 当前状态 | 公测处理 | 明确不做 |
+| Punkt | Aktueller Stand | Behandlung in der öffentlichen Beta | Ausdrücklich nicht Teil |
 | --- | --- | --- | --- |
-| 桌面端签名、公证、商店发布 | 未执行 | Web 为唯一主推入口；桌面壳作为可选开发/自托管形态 | 本轮不做 |
-| Content-Security-Policy | 未启用 | 已启用 HSTS、nosniff、X-Frame-Options、Referrer-Policy、Permissions-Policy | CSP 暂缓，待 inline style、Worker、WebSocket 和生成资产 allowlist 有端到端测试后再启用 |
-| 多副本扩容 | 未做 | 单 `app` 副本运行 | 扩容前必须让 `PHYSICSOS_SESSIONS_ROOT` 指向共享文件系统，并验证跨副本会话可见与一次回执账本 |
-| `web_search` | 仍指向 DeepSeek 官方端点 | 不作为学生 `physics-student` 预设能力；管理员/标准 Agent 使用时需人工确认 | 本轮不迁移到第三方网关，也不承诺搜索可用性 |
-| 第三方网关敏感词过滤 | 命中时可能返回 `500 / new_api_error` | 已保留号池故障转移和管理员状态页 | 本轮不实现敏感词绕过或自动改写；上线后需用真实题库采样 |
-| 管理员 TOTP | 当前管理员登录直接签发会话，未启用 TOTP | 建议公测扩容前开启并保存恢复码 | 不把“支持 TOTP 代码”写成“管理员已启用 2FA” |
-| 完整灾难恢复演练 | PostgreSQL 定时备份已有记录 | 公测继续每日备份 | Redis + `app_data` 的异地加密备份、完整恢复、RPO/RTO 演练仍标为“待验证” |
-| 同 UID fs 读取模型 | 上游读模型仍允许同 UID 可读文件 | 当前生产学生预设无 fs/shell，bash runner fail-closed | 不在未增加 per-session READ fence 前重新装回 bwrap/landlock runner |
+| Desktop-Signierung, Notarisierung, Store-Veröffentlichung | Nicht durchgeführt | Das Web ist der einzige Haupteinstieg; die Desktop-Shell ist eine optionale Entwicklungs-/Self-Hosting-Form | In dieser Runde nicht Teil |
+| Content-Security-Policy | Nicht aktiviert | HSTS, nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy sind aktiviert | CSP vorerst zurückgestellt, bis Allowlists für Inline-Styles, Worker, WebSocket und generierte Assets Ende-zu-Ende getestet sind |
+| Multi-Replik-Skalierung | Nicht umgesetzt | Betrieb mit einer einzelnen `app`-Replik | Vor einer Skalierung muss `PHYSICSOS_SESSIONS_ROOT` auf ein gemeinsames Dateisystem zeigen und die replikaübergreifende Sichtbarkeit von Sessions sowie das Einmal-Quittungs-Ledger verifiziert werden |
+| `web_search` | Zeigt weiterhin auf den offiziellen DeepSeek-Endpunkt | Keine Fähigkeit des Schüler-Presets `physics-student`; bei Nutzung durch Admin/Standard-Agent ist manuelle Bestätigung nötig | In dieser Runde keine Migration auf ein Drittanbieter-Gateway und keine Zusage zur Verfügbarkeit der Suche |
+| Sensitivwortfilter des Drittanbieter-Gateways | Bei Treffer ggf. `500 / new_api_error` | Pool-Failover und Admin-Statusseite sind erhalten | In dieser Runde keine Umgehung oder automatische Umformulierung von Sensitivwörtern; nach dem Start Stichproben mit echter Aufgabenbank nötig |
+| Admin-TOTP | Der Admin-Login stellt derzeit direkt eine Session aus, TOTP nicht aktiviert | Empfohlen, vor der Beta-Skalierung zu aktivieren und Wiederherstellungscodes zu sichern | „TOTP-Code wird unterstützt“ nicht als „Administrator hat 2FA aktiviert“ schreiben |
+| Vollständige Disaster-Recovery-Übung | Geplantes PostgreSQL-Backup ist dokumentiert | Die öffentliche Beta führt täglich Backups fort | Verschlüsseltes Offsite-Backup von Redis + `app_data`, vollständige Wiederherstellung und RPO/RTO-Übung bleiben als „zu verifizieren“ markiert |
+| Dateisystem-Lesemodell unter derselben UID | Das Lesemodell von Upstream erlaubt weiterhin Dateien, die unter derselben UID lesbar sind | Das aktuelle Produktions-Schüler-Preset hat keine fs/shell-Tools, bash runner fail-closed | Den bwrap/landlock-Runner nicht wieder einbauen, bevor ein per-session READ fence hinzugefügt wurde |
 
-## 7. 运维手册索引
+## 7. Index des Betriebshandbuchs
 
-主手册：[`docs/13-DEPLOYMENT-OPERATIONS.md`](../13-DEPLOYMENT-OPERATIONS.md)
+Hauptleitfaden: [`docs/13-DEPLOYMENT-OPERATIONS.md`](../13-DEPLOYMENT-OPERATIONS.md)
 
-| 手册章节 | 内容 |
+| Kapitel des Handbuchs | Inhalt |
 | --- | --- |
-| §1 | 生产拓扑、单副本边界和持久卷 |
-| §2 | Docker、Compose、反向代理和 TLS 前置条件 |
-| §3 | secret 文件、受信代理、运行时环境契约 |
-| §3.3 | 模型 base URL、模型名和输出上限 |
-| §3.4 | 模型通道池、轮询、冷却、手工恢复、加密与备份 |
-| §4 | CI 门禁 |
-| §5 | 构建、镜像和发布记录 |
-| §6 | 部署、健康检查和认证写入冒烟 |
-| §7 | PostgreSQL 定时备份与 PostgreSQL + Redis + app_data 完整备份 |
-| §8 | 恢复步骤 |
-| §9 | 回滚原则 |
-| §10 | SSH、容器日志轮转、nginx 安全头和公网自检 |
-| §11 | 日常/每周运维检查和事故响应 |
-| §12 | 公测前检查清单 |
+| §1 | Produktionstopologie, Grenze der einzelnen Replik und persistente Volumes |
+| §2 | Voraussetzungen für Docker, Compose, Reverse Proxy und TLS |
+| §3 | Secret-Dateien, vertrauenswürdige Proxys, Vertrag der Laufzeitumgebung |
+| §3.3 | Base URL des Modells, Modellname und Ausgabelimit |
+| §3.4 | Modellkanal-Pool, Round Robin, Cooldown, manuelle Wiederherstellung, Verschlüsselung und Backup |
+| §4 | CI-Gates |
+| §5 | Build, Image und Release-Aufzeichnung |
+| §6 | Deployment, Health-Check und Smoke-Test mit authentifiziertem Schreiben |
+| §7 | Geplantes PostgreSQL-Backup und Vollbackup PostgreSQL + Redis + app_data |
+| §8 | Wiederherstellungsschritte |
+| §9 | Rollback-Grundsätze |
+| §10 | SSH, Rotation der Container-Logs, nginx-Sicherheits-Header und öffentliche Selbstprüfung |
+| §11 | Tägliche/wöchentliche Betriebsprüfungen und Incident Response |
+| §12 | Checkliste vor der öffentlichen Beta |
 
-隔离与安全复核：[`docs/reports/ISOLATION-AUDIT.md`](./ISOLATION-AUDIT.md)
+Prüfung zu Isolation und Sicherheit: [`docs/reports/ISOLATION-AUDIT.md`](./ISOLATION-AUDIT.md)
 
-## 8. 给初中物理老师的演示配图清单
+## 8. Liste der Demonstrationsbilder für Physiklehrkräfte der Mittelstufe
 
-建议演示顺序：
+Empfohlene Reihenfolge der Demonstration:
 
-1. 用 `01-home.png` 介绍平台入口和“物理引擎给事实、AI 负责讲解”的定位。
-2. 用 `02-experiment-center.png` 展示初中分类、实验选择和课堂主题覆盖。
-3. 用 `03-lab-series-circuit.png` 演示电路参数变化与读数联动。
-4. 用 `04-lab-convex-lens.png` 演示物距、像距、成像规律和主光路。
-5. 用 `05-lab-liquid-pressure.png` 演示液体深度与压强的关系。
-6. 用 `06-lab-melting.png` 演示晶体熔化过程中的温度平台与状态变化。
-7. 用 `07-library.png` 展示题库和实验资源。
-8. 用 `08-learning-record.png` 展示学习记录与活动热力图。注意这张取决账号状态：演示账号没做过自测时为**空状态**（0 次练习），要演示非空效果需先在该账号的解题卡片里完成一次自测。
-9. 用 `09-solved-question.png` 收尾：一道题的完整回答——结论由引擎给出并逐条校验（重力分量、支持力、场景结构），右侧是同一个 `PhysicsScene` 在实验台里的可交互形态。
+1. Mit `01-home.png` den Einstieg der Plattform und die Positionierung „die Physik-Engine liefert Fakten, die KI übernimmt die Erklärung“ vorstellen.
+2. Mit `02-experiment-center.png` die Kategorien der Mittelstufe, die Experimentauswahl und die abgedeckten Unterrichtsthemen zeigen.
+3. Mit `03-lab-series-circuit.png` Parameteränderungen der Schaltung und die Kopplung der Messwerte demonstrieren.
+4. Mit `04-lab-convex-lens.png` Gegenstandsweite, Bildweite, Abbildungsgesetze und den Hauptstrahlengang demonstrieren.
+5. Mit `05-lab-liquid-pressure.png` den Zusammenhang zwischen Flüssigkeitstiefe und Druck demonstrieren.
+6. Mit `06-lab-melting.png` das Temperaturplateau und die Zustandsänderung beim Schmelzen eines Kristalls demonstrieren.
+7. Mit `07-library.png` Aufgabenbank und Experimentressourcen zeigen.
+8. Mit `08-learning-record.png` Lernverlauf und Aktivitäts-Heatmap zeigen. Beachten: Dieses Bild hängt vom Kontozustand ab – hat das Demokonto keinen Selbsttest gemacht, ist es ein **Leerzustand** (0 Übungen); für einen nicht leeren Effekt muss auf der Lösungskarte dieses Kontos zuerst ein Selbsttest abgeschlossen werden.
+9. Mit `09-solved-question.png` abschließen: die vollständige Antwort auf eine Aufgabe – das Ergebnis wird von der Engine geliefert und Punkt für Punkt geprüft (Schwerkraftkomponente, Stützkraft, Szenenstruktur), rechts steht dieselbe `PhysicsScene` in interaktiver Form im Experimentierplatz.
 
-所有图片均取自真实生产站点，不包含管理员密码或后台 secret。
+Alle Bilder stammen von der echten Produktionsseite und enthalten weder das Administratorpasswort noch Backend-Secrets.
 
-## 9. 上线结论与待验证
+## 9. Schlussfolgerung zum Start und noch zu Verifizierendes
 
-**Go**：当前提交可以开始单副本、开放注册公测；生产 `PHYSICSOS_REGISTRATION_MODE`
-实测为 `open`。如出现滥用或模型成本异常，可无损切换为 `invite` / `closed` 并重启
-`app`。
+**Go**: Der aktuelle Commit kann den Betrieb einer öffentlichen Beta mit einer einzelnen Replik und offener Registrierung beginnen; der Produktionswert von `PHYSICSOS_REGISTRATION_MODE`
+wurde gemessen als `open`. Bei Missbrauch oder auffälligen Modellkosten lässt sich verlustfrei auf `invite` / `closed` umschalten und
+`app` neu starten.
 
-**待验证**：
+**Noch zu verifizieren**:
 
-- 本报告编制轮未重新消耗模型额度做真实 chat completion。
-- `web_search` 未做端到端验收，仍指向 DeepSeek 官方端点。
-- 第三方网关敏感词过滤未做完整题库采样。
-- 多副本扩容、共享 sessions root、Redis + app_data 异地恢复和完整灾备切换未演练。
-- 桌面端签名、公证、自动更新和安装包发布未执行。
-- CSP 未启用；仅在当前五类基础安全头基础上运行。
+- In der Erstellungsrunde dieses Berichts wurde kein Modellkontingent erneut für eine echte Chat-Completion verbraucht.
+- `web_search` wurde nicht Ende-zu-Ende abgenommen und zeigt weiterhin auf den offiziellen DeepSeek-Endpunkt.
+- Der Sensitivwortfilter des Drittanbieter-Gateways wurde nicht mit einer vollständigen Aufgabenbank per Stichprobe geprüft.
+- Multi-Replik-Skalierung, gemeinsames Sessions-Root, Offsite-Wiederherstellung von Redis + app_data und vollständiges Disaster-Recovery-Failover wurden nicht geübt.
+- Desktop-Signierung, Notarisierung, Auto-Update und Veröffentlichung des Installationspakets wurden nicht durchgeführt.
+- CSP ist nicht aktiviert; der Betrieb erfolgt nur mit den derzeitigen fünf grundlegenden Sicherheits-Headern.
 
-## 10. 追加记录：Harness `dsh-v0.1.7-rc.2` 受控升级与插件平台（分支待发布）
+## 10. Nachtrag: Kontrolliertes Upgrade auf Harness `dsh-v0.1.7-rc.2` und Plugin-Plattform (Branch zur Veröffentlichung ausstehend)
 
-本节记录 2026-09-27 同日的后续升级工作。它**尚未进入生产**：上面第 9 节的结论仍对应当前生产状态，本节内容位于分支 `codex/harness-sync-ui-plugins`，未经过 Task 6 门禁、也未正式提升，不计入“已发布”。
+Dieser Abschnitt hält die Folgearbeiten desselben Tages (2026-09-27) fest. Sie sind **noch nicht in der Produktion**: Die Schlussfolgerung aus Abschnitt 9 oben entspricht weiterhin dem aktuellen Produktionsstand, der Inhalt dieses Abschnitts liegt auf dem Branch `codex/harness-sync-ui-plugins`, hat die Gates aus Task 6 nicht durchlaufen und wurde nicht formal befördert, daher zählt er nicht als „veröffentlicht“.
 
-### 10.1 同步范围
+### 10.1 Umfang der Synchronisation
 
-- 一次性受控同步：Harness 子模块从 `47f943859bef60e4160492346772ded9b24f765a` 升级到 release tag `dsh-v0.1.7-rc.2`（`477b4f420553e8a52c2fbccc464d7561b239c443`）。
-- 明确**不是**自动跟踪上游 `master`：只做这一次升级，验证发布后即固定该上游提交；后续仅在检测到新版本时提示，人工在隔离 worktree 内升级、验证后再发布。
-- 分支关键提交：`05c554a`（插件目录）、`6b8b1ae`（统一管理后台壳）、`a4e0bf1`（管理后台插件页）、`0a2a6b1`（Harness 同步）、`bc080ed`（插件签名轮换）、`37377a8`（构建边界）、`94cc797`（0.1.7 协议迁移与门禁修复）。
+- Einmalige kontrollierte Synchronisation: Das Harness-Submodul wird von `47f943859bef60e4160492346772ded9b24f765a` auf das Release-Tag `dsh-v0.1.7-rc.2` (`477b4f420553e8a52c2fbccc464d7561b239c443`) angehoben.
+- Ausdrücklich **keine** automatische Verfolgung des Upstream-`master`: Es wird nur dieses eine Upgrade durchgeführt, nach der Verifikation der Veröffentlichung wird dieser Upstream-Commit fixiert; später wird nur bei neuen Versionen hingewiesen, manuell in einem isolierten Worktree upgegradet und nach Verifikation veröffentlicht.
+- Wichtige Commits des Branches: `05c554a` (Plugin-Verzeichnis), `6b8b1ae` (einheitliche Admin-Backend-Shell), `a4e0bf1` (Admin-Backend-Plugin-Seite), `0a2a6b1` (Harness-Sync), `bc080ed` (Rotation der Plugin-Signatur), `37377a8` (Build-Grenze), `94cc797` (Protokollmigration 0.1.7 und Gate-Korrekturen).
 
-### 10.2 产品获得的变更
+### 10.2 Änderungen, die das Produkt erhält
 
-- **统一管理后台壳**：所有管理页共用 `AdminPage` / `AdminToolbar` / `AdminStats` / `AdminCard` / `AdminEmpty` / `AdminTable`，页面头、工具栏、卡片与空态几何一致，不再有各页各自的外边距包裹。
-- **插件中心**：官方目录直接投影 Harness 的 `pluginInventory`，不重复实现包发现；PhysicsOS 侧从签名清单 `plugins/manifest.json` 读取 12 个预装插件，逐条做 Ed25519 签名校验、SHA-256 摘要校验、Harness 版本范围校验和封闭能力白名单校验。首个版本只描述预装包并持久化管理员的启用/停用状态，**没有运行时下载或执行任意代码的路径**；`class-host` 已从清单与目录投影中排除。
-- **0.1.7 协议对齐**：`api-policy` 同时接受旧的扁平 `namespace.method` 载荷和 0.1.7 的 `namespace/method` + `{ args }` 线格式，并把改写后的载荷写回信封原有形状，使 session / workspace 所有权改写在新旧两种面上都保持生效；桌面 sidecar 改走 0.1.7 的 `remote.mux` + `session/follow` 会话流。
-- **旧会话日志前向迁移**：0.1.7 带有 `v0 → v1 → v2 → v3 → v4` 的会话格式迁移链（`packages/session/session-format-v0-to-v1` … `-v3-to-v4`，`catalog-migration.ts` 对 `version <= 3` 选择 `historicalSessionFormatCatalog`），现存 v0 会话日志升级后可读。
+- **Einheitliche Admin-Backend-Shell**: Alle Admin-Seiten verwenden gemeinsam `AdminPage` / `AdminToolbar` / `AdminStats` / `AdminCard` / `AdminEmpty` / `AdminTable`, Seitenkopf, Toolbar, Karten und Leerzustand haben dieselbe Geometrie, es gibt nicht mehr je Seite eigene äußere Ränder.
+- **Plugin-Center**: Das offizielle Verzeichnis projiziert direkt das `pluginInventory` des Harness, ohne die Paketerkennung erneut zu implementieren; die PhysicsOS-Seite liest aus dem signierten Manifest `plugins/manifest.json` die 12 vorinstallierten Plugins und führt für jeden Eintrag eine Ed25519-Signaturprüfung, eine SHA-256-Digest-Prüfung, eine Prüfung des Harness-Versionsbereichs und eine Prüfung gegen die geschlossene Whitelist von Fähigkeiten durch. Die erste Version beschreibt nur die vorinstallierten Pakete und persistiert den Aktivierungs-/Deaktivierungszustand durch Administratoren, **es gibt keinen Pfad zum Herunterladen zur Laufzeit oder zum Ausführen beliebigen Codes**; `class-host` wurde aus Manifest und Verzeichnisprojektion ausgeschlossen.
+- **Protokollangleichung an 0.1.7**: `api-policy` akzeptiert zugleich die alte flache Payload `namespace.method` und das Wire-Format `namespace/method` + `{ args }` von 0.1.7 und schreibt die umgeschriebene Payload in die ursprüngliche Form des Umschlags zurück, sodass das Umschreiben des Besitzes von Session/Workspace in beiden Oberflächen wirksam bleibt; der Desktop-Sidecar wechselt auf den Sitzungsstrom `remote.mux` + `session/follow` von 0.1.7.
+- **Vorwärtsmigration alter Sitzungslogs**: 0.1.7 bringt eine Migrationskette des Sitzungsformats `v0 → v1 → v2 → v3 → v4` mit (`packages/session/session-format-v0-to-v1` … `-v3-to-v4`, wobei `catalog-migration.ts` für `version <= 3` den `historicalSessionFormatCatalog` wählt); vorhandene v0-Sitzungslogs sind nach dem Upgrade lesbar.
 
-### 10.3 现有验证证据（截至本节编制）
+### 10.3 Vorhandene Verifikationsnachweise (Stand der Erstellung dieses Abschnitts)
 
-分支 `94cc797` 上四个静态门禁通过并 `exit 0`：
+Auf dem Branch `94cc797` bestehen die vier statischen Gates mit `exit 0`:
 
-| 门禁                  | 结果                                                       |
+| Gate                  | Ergebnis                                                   |
 | --------------------- | ---------------------------------------------------------- |
 | `pnpm run typecheck`  | exit 0                                                     |
 | `pnpm run lint`       | exit 0                                                     |
-| `pnpm run test`       | exit 0（core + web 872 + agent 440 + deploy + desktop）    |
+| `pnpm run test`       | exit 0 (core + web 872 + agent 440 + deploy + desktop)     |
 | `pnpm run build`      | exit 0                                                     |
 
-### 10.4 未完成与延后项（诚实记录）
+### 10.4 Unvollständiges und Zurückgestelltes (ehrliche Aufzeichnung)
 
-- **真实浏览器验收尚未通过**：`pnpm run test:acceptance`（`node tests/acceptance/glass-surfaces.mjs`）在编制本节时仍未通过，正在修复中（owner: web boot fix）。这是 Task 6 门禁，必须在正式提升前通过；本节不声称它通过。
-- **Task 6 其余步骤全部未做**：生产镜像构建 + 隔离 compose 冒烟、账号隔离 / 号池冒烟、回滚镜像与备份、正式提升都未执行。
-- **提升前必须备份**：0.1.7 会把现存的 v0 会话日志前向迁移，因此提升前必须对 sessions 根目录（`/var/lib/physicsos/sessions`）做文件系统级备份并做一次 `pg_dump`；回滚镜像（上一版 `14157e1`，子模块 `47f9438`）只有配合该备份才是真正的回滚，回滚时不做就地降级而是从备份恢复。宿主磁盘 78G 中约剩 23G，够一次镜像重建，重建前应先清理旧镜像。
-- **延后代码迁移**：`overlays/harness/files/packages/physicsos/tool-physicsos/src/index.ts` 与 `src/invariant.ts` 两处已弃用的同步 `session.snapshotEvents()` 调用仍以 `// oxlint-disable-next-line typescript/no-deprecated ... migration deferred.` 抑制，未迁移到 0.1.7 异步事件 API，记为延后迁移而非已完成。
-- **其他说明**：`typecheck:web` 现以 `--force` 对整个 Harness 客户端聚合做类型检查（更慢，但正是它捕获边界破坏）；`scripts/overlay/harness-overlay.mjs` 写出 `upstream-changes.patch` 时会把单空格空上下文行规范化，使 `git diff --check` 保持干净（`git apply` 接受，已用 `git apply --reverse --check` 验证）。
+- **Die echte Browser-Abnahme ist noch nicht bestanden**: `pnpm run test:acceptance` (`node tests/acceptance/glass-surfaces.mjs`) besteht bei der Erstellung dieses Abschnitts noch nicht und wird derzeit repariert (owner: web boot fix). Das ist ein Gate von Task 6 und muss vor der formalen Beförderung bestehen; dieser Abschnitt behauptet nicht, dass es besteht.
+- **Alle übrigen Schritte von Task 6 sind nicht erledigt**: Produktions-Image-Build + isolierter Compose-Smoke-Test, Smoke-Tests zu Kontoisolation / Modellpool, Rollback-Image und Backup, formale Beförderung wurden alle nicht ausgeführt.
+- **Vor der Beförderung ist ein Backup nötig**: 0.1.7 migriert vorhandene v0-Sitzungslogs vorwärts, daher ist vor der Beförderung ein Backup des sessions-Root-Verzeichnisses (`/var/lib/physicsos/sessions`) auf Dateisystemebene sowie ein `pg_dump` zu erstellen; das Rollback-Image (die vorherige Version `14157e1`, Submodul `47f9438`) ist nur zusammen mit diesem Backup ein echtes Rollback, beim Rollback wird nicht an Ort und Stelle herabgestuft, sondern aus dem Backup wiederhergestellt. Von den 78G Hostplatte sind etwa 23G frei, was für einen Image-Neubau reicht; vor dem Neubau sind alte Images aufzuräumen.
+- **Zurückgestellte Code-Migration**: Die beiden veralteten synchronen Aufrufe `session.snapshotEvents()` in `overlays/harness/files/packages/physicsos/tool-physicsos/src/index.ts` und `src/invariant.ts` werden weiterhin mit `// oxlint-disable-next-line typescript/no-deprecated ... migration deferred.` unterdrückt und nicht auf die asynchrone Event-API von 0.1.7 migriert; sie sind als zurückgestellte Migration vermerkt, nicht als erledigt.
+- **Sonstige Hinweise**: `typecheck:web` prüft nun mit `--force` den gesamten Aggregat des Harness-Clients auf Typen (langsamer, fängt aber genau Grenzverletzungen ab); beim Schreiben von `upstream-changes.patch` normalisiert `scripts/overlay/harness-overlay.mjs` Kontextzeilen mit einem einzelnen Leerzeichen, damit `git diff --check` sauber bleibt (`git apply` akzeptiert das, mit `git apply --reverse --check` verifiziert).
 
-### 10.5 生产事实（编制本节时的只读复核）
+### 10.5 Produktionsfakten (schreibgeschützte Prüfung bei der Erstellung dieses Abschnitts)
 
-- 生产 HEAD：`14157e180a702d056909eabbdec0416bd21a279c`（即上述回滚版本）。
-- `app` / `postgres` / `redis`：均为 `healthy`。
-- `http://127.0.0.1:3080/readyz`：`{"status":"ready","checks":{"postgres":{"status":"ok"},"redis":{"status":"ok"}}}`。
-- 宿主磁盘：78G 中约剩 23G。
-- 生产 sessions 目录 `/var/lib/physicsos/sessions` 下存有 34 份会话日志，其中最新一份仍是最早的磁盘格式 `{"type":"session","version":0,...}`。
+- Produktions-HEAD: `14157e180a702d056909eabbdec0416bd21a279c` (also die oben genannte Rollback-Version).
+- `app` / `postgres` / `redis`: alle `healthy`.
+- `http://127.0.0.1:3080/readyz`: `{"status":"ready","checks":{"postgres":{"status":"ok"},"redis":{"status":"ok"}}}`.
+- Hostplatte: von 78G etwa 23G frei.
+- Im Produktions-Sessions-Verzeichnis `/var/lib/physicsos/sessions` liegen 34 Sitzungslogs, von denen das neueste noch im ältesten Disk-Format `{"type":"session","version":0,...}` vorliegt.

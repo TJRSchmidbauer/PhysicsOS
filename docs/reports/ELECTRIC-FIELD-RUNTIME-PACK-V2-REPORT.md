@@ -1,114 +1,114 @@
-# Electric Field Runtime Pack V2 — 多源点电荷 + 等势线
+# Electric Field Runtime Pack V2 — Mehrquellen-Punktladungen + Äquipotentiallinien
 
-> 文件：`docs/reports/ELECTRIC-FIELD-RUNTIME-PACK-V2-REPORT.md`
-> 验收日期：2026-08-22
-> 前置：`ELECTRIC_FIELD_RUNTIME_PACK_V1_COMPLETE`（见 `MILESTONES.md`）
+> Datei: `docs/reports/ELECTRIC-FIELD-RUNTIME-PACK-V2-REPORT.md`
+> Abnahmedatum: 2026-08-22
+> Vorgänger: `ELECTRIC_FIELD_RUNTIME_PACK_V1_COMPLETE` (siehe `MILESTONES.md`)
 
-## 1. 目标
+## 1. Ziel
 
-V1 已把点电荷静电场从 Domain Core → Scene → Engine → Verifier → Observation →
-Question → Lab → Agent 打通，但 Question 入口只能产**单源**。V2 不升级引擎——
-多源在 Scene/Engine/core/Observation/Renderer/Verifier 全链路自 V1 已就绪——而是：
+V1 hat das elektrostatische Feld von Punktladungen von Domain Core → Scene → Engine → Verifier → Observation →
+Question → Lab → Agent durchgängig verbunden, aber der Question-Einstieg konnte nur **eine einzelne Quelle** erzeugen. V2 rüstet die Engine nicht auf –
+mehrere Quellen sind in Scene/Engine/core/Observation/Renderer/Verifier seit V1 in der gesamten Kette bereit – sondern:
 
-1. **多源 Question 解析**：打通「等量同种/异种/电偶极子」文本 → 多源 Scene。
-2. **等势线可视化**：marching squares 提取等 V 等高线，作场拓扑示意渲染。
-3. **R1 修复 + Agent 多源解释**：probeId 硬编码 `source-1` → `probeParticleOf`；
-   Agent 多源 sign、电场线源头、合场叠加意图。
+1. **Mehrquellen-Question-Parsing**: Texte zu „gleich großen gleichnamigen/ungleichnamigen Ladungen / elektrischem Dipol“ werden in eine Mehrquellen-Scene überführt.
+2. **Visualisierung von Äquipotentiallinien**: Marching Squares extrahiert Höhenlinien gleichen V, die als Skizze der Feldtopologie gerendert werden.
+3. **R1-Korrektur + Agent-Erklärung für Mehrquellen**: hartkodiertes probeId `source-1` → `probeParticleOf`;
+   Agent-Intentionen zu Vorzeichen bei Mehrquellen, Ursprung der Feldlinien und Überlagerung des Gesamtfelds.
 
-## 2. 关键发现
+## 2. Zentrale Erkenntnis
 
-多源自 V1 day one 就是架构事实：
+Mehrquellen sind seit V1 von Tag eins eine Architekturtatsache:
 
-- `createPointChargeScene` 接受 `charges: PointChargeInput[]`（V1）。
-- `fieldAt(charges, at)` 用 `superposeElectricFields` 叠加（V1）。
-- `physics-verifier` 有 `electric_field_superposition` 校验（V1）。
-- `traceStreamline` 沿**合场**积分 → 多源流线自然弯曲（V1）。
-- `pointChargeSources` 是数组、Inspector 按 `sources.map` 展开（V1）。
+- `createPointChargeScene` akzeptiert `charges: PointChargeInput[]` (V1).
+- `fieldAt(charges, at)` überlagert mit `superposeElectricFields` (V1).
+- `physics-verifier` hat die Prüfung `electric_field_superposition` (V1).
+- `traceStreamline` integriert entlang des **Gesamtfelds** → Feldlinien bei Mehrquellen krümmen sich von selbst (V1).
+- `pointChargeSources` ist ein Array, der Inspector entfaltet über `sources.map` (V1).
 
-V1 没暴露多源，只因 Question IR/Parser/Scene Builder 只产单源。V2 只补这层。
+V1 hat Mehrquellen nur deshalb nicht offengelegt, weil Question IR/Parser/Scene Builder nur eine einzelne Quelle erzeugten. V2 ergänzt nur diese Schicht.
 
-## 3. 工作包
+## 3. Arbeitspakete
 
-### A. 多源 Question 解析与场景构建
+### A. Mehrquellen-Question-Parsing und Szenenaufbau
 
-| 文件                                                          | 改动                                                                                                                                                                 |
+| Datei                                                         | Änderung                                                                                                                                                             |
 | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/question-core/src/semantic-ir.ts`                   | `PhysicsSemanticIR` 增 `sourceCharges`/`samplePosition`；`SemanticRelation` 增 `multi_source_superposition`                                                          |
-| `packages/question-core/src/semantic-validator.ts`            | 多源分支：每源非零有限、需 samplePosition、多源方向 → 歧义「合场流线决定」                                                                                           |
-| `packages/question-core/src/deterministic-electric-parser.ts` | `MULTI_SOURCE_SIGNAL`、`isMultiSourceQuestionText`、`parseMultiSource`（±separation/2、中点场点）、`extractSourceCharges`（matchAll q1/q2、电荷A/B）；多源优先于单源 |
-| `packages/question-core/src/electric-scene-builder.ts`        | 多源分支：`sourceCharges.map` → source-1/source-2 + probe at samplePosition                                                                                          |
-| `packages/question-core/src/golden-questions.ts`              | 3 道多源题（electric-06 异种中点、electric-07 同种中点、electric-08 偶极子中点）                                                                                     |
-| `packages/question-core/src/question-runtime.ts`              | `buildSolution` 多源标题/描述/公式 `E = Σ kqᵢ/rᵢ²`、方向「合场流线决定」                                                                                             |
-| `packages/question-core/tests/electric-questions.test.ts`     | 3 道多源题：`sourceCharges.length===2`、verification passed、E 数值、superposition check                                                                             |
+| `packages/question-core/src/semantic-ir.ts`                   | `PhysicsSemanticIR` erhält `sourceCharges`/`samplePosition`; `SemanticRelation` erhält `multi_source_superposition`                                                  |
+| `packages/question-core/src/semantic-validator.ts`            | Mehrquellen-Zweig: jede Quelle ungleich null und endlich, samplePosition erforderlich, Richtung bei Mehrquellen → Ambiguity „vom Gesamtfeld entscheiden die Feldlinien“ |
+| `packages/question-core/src/deterministic-electric-parser.ts` | `MULTI_SOURCE_SIGNAL`, `isMultiSourceQuestionText`, `parseMultiSource` (±separation/2, Feldpunkt in der Mitte), `extractSourceCharges` (matchAll q1/q2, Ladung A/B); Mehrquellen haben Vorrang vor einer einzelnen Quelle |
+| `packages/question-core/src/electric-scene-builder.ts`        | Mehrquellen-Zweig: `sourceCharges.map` → source-1/source-2 + probe an samplePosition                                                                                 |
+| `packages/question-core/src/golden-questions.ts`              | 3 Mehrquellen-Aufgaben (electric-06 ungleichnamig Mittelpunkt, electric-07 gleichnamig Mittelpunkt, electric-08 Dipol Mittelpunkt)                                   |
+| `packages/question-core/src/question-runtime.ts`              | `buildSolution` mit Titel/Beschreibung/Formel `E = Σ kqᵢ/rᵢ²` für Mehrquellen, Richtung „vom Gesamtfeld entscheiden die Feldlinien“                                  |
+| `packages/question-core/tests/electric-questions.test.ts`     | 3 Mehrquellen-Aufgaben: `sourceCharges.length===2`, verification passed, E-Zahlenwert, Prüfung superposition                                                         |
 
-### B. 等势线可视化
+### B. Visualisierung von Äquipotentiallinien
 
-| 文件                                                            | 改动                                                                                                                                                                      |
+| Datei                                                           | Änderung                                                                                                                                                                  |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/engine-electric/src/field-solver.ts`                  | `PotentialGrid` 接口 + `samplePotentialGrid`（Float64Array、NaN 跳过源邻域）                                                                                              |
-| `packages/engine-electric/src/index.ts`                         | 导出 `samplePotentialGrid`、`PotentialGrid`                                                                                                                               |
-| `packages/physics-scene/src/electric/electric-scene-builder.ts` | 多源时 `observableDefinitions` 追加 `annotation: equipotential`                                                                                                           |
-| `vendor/.../scene-visual-model.ts`                              | `EquipotentialVisual`；`SceneVisualModel.equipotentials?`；`ObservableKey` 增 `equipotentials`                                                                            |
-| `vendor/.../electric-visual-bridge.ts`                          | `potentialAt`、`contourAtLevel`（marching squares 16 case + saddle）、`equipotentialsOf`（48×27 网格、自动 level、多源 only）、`visibilityOf` 读 equipotential annotation |
-| `vendor/.../renderers.module.css`                               | `.equipotentials` / `.equipotentialPath`（虚线、measurement 色）                                                                                                          |
-| `vendor/.../renderer-registry.tsx`                              | 等势线渲染块（streamlines 后、Vectors 前）                                                                                                                                |
-| `vendor/.../tests/electric-point-charge-visual.client.spec.tsx` | 多源等势线非空/闭合/visible；单源无；DOM 渲染                                                                                                                             |
-| `packages/engine-electric/tests/point-charge-runtime.test.ts`   | `samplePotentialGrid` 中点 V=0（1×1 网格精确采原点）、远点与 solvePotentialAt 一致                                                                                        |
+| `packages/engine-electric/src/field-solver.ts`                  | Schnittstelle `PotentialGrid` + `samplePotentialGrid` (Float64Array, NaN überspringt die Umgebung der Quellen)                                                            |
+| `packages/engine-electric/src/index.ts`                         | Exportiert `samplePotentialGrid`, `PotentialGrid`                                                                                                                         |
+| `packages/physics-scene/src/electric/electric-scene-builder.ts` | Bei Mehrquellen ergänzt `observableDefinitions` um `annotation: equipotential`                                                                                            |
+| `vendor/.../scene-visual-model.ts`                              | `EquipotentialVisual`; `SceneVisualModel.equipotentials?`; `ObservableKey` erhält `equipotentials`                                                                        |
+| `vendor/.../electric-visual-bridge.ts`                          | `potentialAt`, `contourAtLevel` (Marching Squares 16 Fälle + Sattel), `equipotentialsOf` (48×27-Gitter, automatisches Level, nur Mehrquellen), `visibilityOf` liest die Annotation equipotential |
+| `vendor/.../renderers.module.css`                               | `.equipotentials` / `.equipotentialPath` (gestrichelt, Farbe measurement)                                                                                                 |
+| `vendor/.../renderer-registry.tsx`                              | Rendering-Block für Äquipotentiallinien (nach den Feldlinien, vor den Vektoren)                                                                                           |
+| `vendor/.../tests/electric-point-charge-visual.client.spec.tsx` | Äquipotentiallinien bei Mehrquellen nicht leer/geschlossen/visible; bei einer Quelle keine; DOM-Rendering                                                                  |
+| `packages/engine-electric/tests/point-charge-runtime.test.ts`   | `samplePotentialGrid` Mittelpunkt V=0 (1×1-Gitter tastet genau den Ursprung ab), ferner Punkt stimmt mit solvePotentialAt überein                                         |
 
-### C. R1 修复 + Agent 多源解释
+### C. R1-Korrektur + Agent-Erklärung für Mehrquellen
 
-| 文件                                             | 改动                                                                                                                                                                                  |
+| Datei                                            | Änderung                                                                                                                                                                              |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vendor/.../QuestionWorkspace.tsx`               | R1：probeId `find(p=>p.id!=='source-1')` → `probeParticleOf`（排除所有 source）；`ELECTRIC_HIGHLIGHTS` 增 q1/q2/P → source-1/source-2/probe-1                                         |
-| `vendor/.../physics-agent.ts`                    | `sourceChargeSignsOf`（遍历所有 source parameter）；`chargeSigns` context；`resolveHighlightTarget` 支持 `*` 前缀通配；`field-line` → `source-*`                                      |
-| `vendor/.../physics-agent-answers.ts`            | `electric-field-direction` 多源处理（不谎称单值方向）；新 `electric-field-line-origin`（chargeSigns + 方向校验）；新 `electric-superposition`（superposition 校验）；matchIntent 规则 |
-| `vendor/.../tests/physics-agent.client.spec.tsx` | 7 个多源测试：chargeSigns、suggestions、superposition 校验、field-line-origin 不谎称方向、direction 多源、field-line 高亮 source id、R1 probeId                                       |
+| `vendor/.../QuestionWorkspace.tsx`               | R1: probeId `find(p=>p.id!=='source-1')` → `probeParticleOf` (schließt alle source aus); `ELECTRIC_HIGHLIGHTS` erhält q1/q2/P → source-1/source-2/probe-1                              |
+| `vendor/.../physics-agent.ts`                    | `sourceChargeSignsOf` (durchläuft alle source-Parameter); Kontext `chargeSigns`; `resolveHighlightTarget` unterstützt Wildcard mit Präfix `*`; `field-line` → `source-*`              |
+| `vendor/.../physics-agent-answers.ts`            | `electric-field-direction` für Mehrquellen (behauptet keine einzelne Richtung); neu `electric-field-line-origin` (chargeSigns + Richtungsprüfung); neu `electric-superposition` (Prüfung superposition); matchIntent-Regeln |
+| `vendor/.../tests/physics-agent.client.spec.tsx` | 7 Mehrquellen-Tests: chargeSigns, suggestions, Prüfung superposition, field-line-origin behauptet keine Richtung, direction bei Mehrquellen, field-line hebt source-ids hervor, R1 probeId |
 
-## 4. 浏览器验收 Case
+## 4. Browser-Abnahme-Cases
 
-| Case | 场景                                      | 验证点                                                                                            | 结果 |
-| ---- | ----------------------------------------- | ------------------------------------------------------------------------------------------------- | ---- |
-| J    | 等量异种点电荷中点求 E（Golden Question） | 题面解析 → 已知量高亮（q1/q2→source-1/source-2）→ 叠加步骤 → verified                             | PASS |
-| K    | 多源场景渲染 + Inspector 编辑             | 两个 source sphere + 弯曲流线 + 等势线；Inspector 多 source 可编辑；编辑后 revision+1 仍 verified | PASS |
-| L    | Agent「电场线为什么从正电荷出来」         | 高亮 stream（source-*）+ 引用 chargeSigns（正、负）+ 不谎称单值方向 + revision 不变               | PASS |
-| M    | Agent「合场是怎么来的」                   | 引用 `electric_field_superposition` 校验 + 叠加公式 + revision 不变                               | PASS |
+| Case | Szenario                                  | Prüfpunkte                                                                                        | Ergebnis |
+| ---- | ----------------------------------------- | ------------------------------------------------------------------------------------------------- | -------- |
+| J    | E am Mittelpunkt zweier gleich großer ungleichnamiger Punktladungen (Golden Question) | Aufgabenstellung parsen → Gegebenes hervorgehoben (q1/q2→source-1/source-2) → Überlagerungsschritte → verified | PASS |
+| K    | Mehrquellen-Szenerendering + Inspector-Bearbeitung | Zwei source-Kugeln + gekrümmte Feldlinien + Äquipotentiallinien; Inspector mit mehreren source bearbeitbar; nach Bearbeitung Revision+1 weiterhin verified | PASS |
+| L    | Agent „Warum gehen die Feldlinien von der positiven Ladung aus“ | Hebt stream (source-*) hervor + zitiert chargeSigns (positiv, negativ) + behauptet keine einzelne Richtung + Revision unverändert | PASS |
+| M    | Agent „Wie entsteht das resultierende Feld“ | Zitiert die Prüfung `electric_field_superposition` + Überlagerungsformel + Revision unverändert    | PASS |
 
-## 5. 门禁计数器
+## 5. Gate-Zähler
 
-| 门禁                 | 计数 |
-| -------------------- | ---- |
-| console errors       | 0    |
-| page errors          | 0    |
-| unhandled rejections | 0    |
-| failed requests      | 0    |
-| error responses      | 0    |
+| Gate                 | Anzahl |
+| -------------------- | ------ |
+| console errors       | 0      |
+| page errors          | 0      |
+| unhandled rejections | 0      |
+| failed requests      | 0      |
+| error responses      | 0      |
 
-## 6. 截图清单
+## 6. Screenshot-Liste
 
-| 文件                                        | 内容                                    |
+| Datei                                       | Inhalt                                  |
 | ------------------------------------------- | --------------------------------------- |
-| `question-dipole-field-1600x900.png`        | 等量异种中点题（已知量高亮）            |
-| `electric-equipotential-1600x900.png`       | 多源 Lab：两 source + 弯曲流线 + 等势线 |
-| `agent-field-line-origin-1600x900.png`      | Agent 电场线源头解释（stream 高亮）     |
-| `agent-superposition-1600x900.png`          | Agent 合场叠加解释                      |
-| `question-dipole-field-final-1600x900.png`  | 最终集：偶极子题                        |
-| `electric-equipotential-final-1600x900.png` | 最终集：等势线 Lab                      |
-| `agent-superposition-final-1600x900.png`    | 最终集：叠加 Agent                      |
+| `question-dipole-field-1600x900.png`        | Aufgabe zum Mittelpunkt gleich großer ungleichnamiger Ladungen (Gegebenes hervorgehoben) |
+| `electric-equipotential-1600x900.png`       | Mehrquellen-Lab: zwei source + gekrümmte Feldlinien + Äquipotentiallinien |
+| `agent-field-line-origin-1600x900.png`      | Agent erklärt den Ursprung der Feldlinien (stream hervorgehoben) |
+| `agent-superposition-1600x900.png`          | Agent erklärt die Überlagerung des Gesamtfelds |
+| `question-dipole-field-final-1600x900.png`  | Endsatz: Dipolaufgabe                   |
+| `electric-equipotential-final-1600x900.png` | Endsatz: Äquipotentiallinien-Lab        |
+| `agent-superposition-final-1600x900.png`    | Endsatz: Überlagerung durch den Agent   |
 
-## 7. 测试数据
+## 7. Testdaten
 
-- `test:core`：387 passed（含 question-core 多源题全链路 13 测试、engine-electric
-  `samplePotentialGrid` 17 测试、physics-electric-core 多源叠加 13 测试）。
-- `test:web`（ui-physicsos）：107 passed（含等势线 visual 9 测试、Agent 多源 27 测试）。
-- `typecheck:core` / `typecheck:web`：全绿。
-- 浏览器验收：`electric-acceptance-v2.mjs` 4 Case 全 PASS、5 门禁为 0。
-- 回归：`electric-acceptance.mjs`（V1）5 Case 全 PASS；`mechanics-acceptance.mjs` 全 PASS。
+- `test:core`: 387 passed (einschließlich 13 Tests der gesamten Kette der Mehrquellen-Aufgaben in question-core, 17 Tests zu engine-electric
+  `samplePotentialGrid`, 13 Tests zur Mehrquellen-Überlagerung in physics-electric-core).
+- `test:web` (ui-physicsos): 107 passed (einschließlich 9 Tests zum Visual der Äquipotentiallinien, 27 Mehrquellen-Tests des Agents).
+- `typecheck:core` / `typecheck:web`: alles grün.
+- Browser-Abnahme: `electric-acceptance-v2.mjs` 4 Cases alle PASS, 5 Gates bei 0.
+- Regression: `electric-acceptance.mjs` (V1) 5 Cases alle PASS; `mechanics-acceptance.mjs` alle PASS.
 
-## 8. 不做（明确边界）
+## 8. Nicht Teil (ausdrückliche Grenzen)
 
-- 匀强电场完善 / 平行板电容器 / 带电粒子轨迹积分（V3，需时间积分，风险大）。
-- Timeline 事件标记（backlog，需离散事件建模）。
-- Agent 接真实模型（backlog，契约已就位，替换 `matchIntent` 即可）。
-- 等势线数值断言（仅拓扑示意，不进 Observation/Verifier 契约）。
-- 不改 V1 已验收的流线渲染、charge_sign observation、叠加校验。
-- 不在 Lab 新建菜单加多源模板（与 V1 一致，仅 Question → Lab）。
+- Ausbau des homogenen elektrischen Feldes / Plattenkondensator / Integration von Teilchentrajektorien (V3, erfordert Zeitintegration, hohes Risiko).
+- Timeline-Ereignismarken (Backlog, erfordert die Modellierung diskreter Ereignisse).
+- Anbindung des Agents an ein echtes Modell (Backlog, Contract ist vorhanden, `matchIntent` wird ersetzt).
+- Zahlenwert-Assertions für Äquipotentiallinien (nur topologische Skizze, gehören nicht in den Contract von Observation/Verifier).
+- Keine Änderung am in V1 abgenommenen Feldlinien-Rendering, an der Observation charge_sign und der Überlagerungsprüfung.
+- Im Menü „Neu“ des Labors keine Mehrquellen-Vorlage (wie in V1 nur Question → Lab).

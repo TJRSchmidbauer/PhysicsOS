@@ -92,12 +92,12 @@
 - **Belege**: `overlays/.../physics/wave-visual-bridge.ts:55-71` (mappt zu `waveSpeed`, aber im gesamten Repo keine Lesestelle); `wave-renderer.tsx:115/232/318/338` (liest nur `waveform/nodes/superposition`); `wave-visual-bridge.ts:255-258` (`v = λf` Messwert bedingungslos in readout schreiben) und `PhysicsCanvas.tsx:516-553` (bedingungslos zeichnen); `packages/physics-scene/src/wave/wave-scene.ts:235-238` (dieses Observable Standard visible:true, deshalb drei Wellen-Stationen Checkbox erscheint).
 - **Auswirkung**: Ein sichtbarer Schalter ist tot, Klick ohne Reaktion (kein Fehler, kein Absturz, keine Datenänderung, nur Interaktionskonsistenz beeinträchtigt).
 - **Empfehlung**: Bevorzugte Lösung A — Bridge soll `visible.waveSpeed` jene Messwertzeile mit `v = λf` gating (Standard weiter true). **Lösung B vermeiden** „Element aus Szene entfernen“: würde Assertion auf Observable-ID-Liste in `packages/physics-scene/tests/wave-scene-runtime.test.ts:65-68` brechen.
-- **工作量**：S
+- **Arbeitsaufwand**: S
 
-#### P1-3 induction 学科「感应电动势」「磁通量」勾选对画布无效
+#### P1-3 Fach induction: Checkboxen „Induktionsspannung“ und „Magnetischer Fluss“ für Canvas wirkungslos
 
-- **现象**：勾选 emf/flux 时，场 box 与 `E/-dΦ/dt` 读数均不变；「双棒速度」是死标签。
-- **证据**：`packages/physics-scene/src/induction/induction-scene.ts:188-217`（emf/current/flux 默认 visible:true）；`overlays/.../physics/induction-workspace-runtime.ts:65-70,363-375`（树暴露 4 个勾选框）；`induction-renderer.tsx:162,298,341`（只读 `view.visible.barMotion` 与 `inductionCurrent`）；`induction-visual-bridge.ts:51-58`（写入 emf/flux 但无消费者，全模型无带 observable 的矢量）、`:44-47`（`keyOf` 不产 `barVelocity`，故 `:70` 标签永不使用）。
+- **Phänomen**: Beim Ankreuzen von emf/flux ändern sich weder die Feldbox noch die Messwerte `E/-dΦ/dt`; „Geschwindigkeit der beiden Stäbe“ ist ein totes Label.
+- **Belege**: `packages/physics-scene/src/induction/induction-scene.ts:188-217` (emf/current/flux Standard visible:true); `overlays/.../physics/induction-workspace-runtime.ts:65-70,363-375` (der Baum legt 4 Checkboxen offen); `induction-renderer.tsx:162,298,341` (liest nur `view.visible.barMotion` und `inductionCurrent`); `induction-visual-bridge.ts:51-58` (schreibt emf/flux, aber ohne Konsumenten, im gesamten Modell kein Vektor mit Observable), `:44-47` (`keyOf` erzeugt kein `barVelocity`, daher wird das Label in `:70` nie verwendet).
 - **Auswirkung**: Die zwei im Baum anwählbaren Schalter haben null Einfluss auf den Canvas; `docs/15-RUNTIME-ARCHITECTURE.md:130-133` verlangt, dass Ebenen-Schalter konsumiert werden müssen, keine absichtliche Lücke.
 - **Empfehlung**: Für emf/flux sichtbare Entitäten festlegen (Voltmeter-Messwerte/Flussdichte-Beschriftungen) und im Renderer per visible gaten; oder diese beiden observable-Definitionen aus Baum und Szene entfernen. Aktuelle Tests haben keine entsprechenden Testfälle, Gating bricht keine Tests.
 - **Arbeitsaufwand**: S–M

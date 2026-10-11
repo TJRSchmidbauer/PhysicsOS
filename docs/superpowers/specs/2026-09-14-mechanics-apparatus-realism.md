@@ -1,40 +1,40 @@
-# 力学器材实物化：机位与锚点契约
+# Realistische Mechanikgeräte: Vertrag für Kameraposition und Anker
 
-对标参考：粒子先生的物理实验室（器材是渲染出来的实物，而不是线稿）。
-电路域已经跑通这条管线（`scripts/design/generate-parts3d.mjs` + 量测 + catalog + 验收），
-力学复用同一套**流程**，但机位与锚点不同——照抄电路的正俯视会把器材拍扁。
+Vergleichsreferenz: das Physiklabor von „Teilchen-Herr“ (die Geräte sind gerenderte reale Objekte, keine Strichzeichnungen).
+Die Schaltungsdomäne hat diese Pipeline bereits durchlaufen (`scripts/design/generate-parts3d.mjs` + Vermessung + Katalog + Abnahme);
+die Mechanik verwendet denselben **Ablauf** wieder, aber Kameraposition und Anker sind anders – die senkrechte Draufsicht der Schaltungen einfach zu übernehmen würde die Geräte plattdrücken.
 
-## 机位（全批共用，缺一不可）
+## Kameraposition (für den gesamten Stapel gemeinsam, keine Auslassung erlaubt)
 
-- **正侧视正交**：从正侧方平视，无透视缩短、无 3/4 斜角。力学装置在台面上的
-  自然读法就是侧立面；俯视会让斜面、小车、钩码全部失去可辨认性。
-- 器材**立在一条水平地平线上**，该线在图中横贯全幅（量测的基准）。
-- 左上主光、无地面投影（只在底部留极淡的接触阴影）——投影会污染轮廓量测。
-- 全透明背景；以 **1 m 实验室米尺** 为统一比例基准，保证小车/钩码/木块之间
-  的相对大小为真。
+- **Orthogonale Seitenansicht von der Seite**: aus der Seite auf Augenhöhe, ohne perspektivische Verkürzung, ohne 3/4-Schrägwinkel. Die natürliche Lesart der Aufbauten der Mechanik
+  auf dem Tisch ist der Seitenaufriss; eine Draufsicht würde schiefe Ebene, Wagen und Gewichtsstücke alle unerkennbar machen.
+- Die Geräte **stehen auf einer waagerechten Bodenlinie**, die im Bild über die gesamte Breite verläuft (Bezugsgröße der Vermessung).
+- Hauptlicht von links oben, kein Schattenwurf auf den Boden (nur ein sehr schwacher Kontaktschatten unten) – ein Schattenwurf würde die Konturvermessung verunreinigen.
+- Vollständig transparenter Hintergrund; als einheitliche Maßstabsbasis dient ein **1-m-Labor-Maßstab**, damit die relative Größe zwischen
+  Wagen/Gewichtsstücken/Holzklotz stimmt.
 
-## 锚点契约
+## Ankervertrag
 
-器材必须能被**量出**至少一个锚点，渲染层才有依据把它摆到场景几何上。
+Ein Gerät muss mindestens einen Anker haben, der sich **vermessen** lässt, damit die Rendering-Schicht eine Grundlage hat, es auf die Szenengeometrie zu setzen.
 
-| 锚点    | 形状               | 用途                                         | 对应场景量                            |
-| ------- | ------------------ | -------------------------------------------- | ------------------------------------- |
-| `line`  | 归一化两端的直线段 | 长条器材的**上表面**：斜面木板顶面、平台台面 | 映射到场景线段 → 同时定出旋转角与缩放 |
-| `point` | 归一化单点         | 单个接地点/悬挂点/圆心                       | 映射到场景点 → 只定位置               |
+| Anker   | Form                         | Verwendung                                            | Entsprechende Szenengröße                            |
+| ------- | ---------------------------- | ----------------------------------------------------- | ---------------------------------------------------- |
+| `line`  | Gerade Strecke mit normierten Endpunkten | **Oberseite** langer Geräte: Oberseite des Schiefe-Ebene-Bretts, Tischplatte der Plattform | Abbildung auf eine Szenenstrecke → bestimmt zugleich Drehwinkel und Skalierung |
+| `point` | Normierter Einzelpunkt       | Einzelner Aufsetzpunkt/Aufhängepunkt/Kreismittelpunkt | Abbildung auf einen Szenenpunkt → bestimmt nur die Position |
 
-- `line` 是斜面的关键：木板是**矩形**，正交侧视下旋转矩形是精确变换，所以同一张
-  木板图可以贴到任意倾角的场景线段上；代码画的楔形支撑与地面排线继续保留
-  （设计文档明确：物理线图由代码绘制，不用图片代替物理过程）。
-- `point` 用于 `block` / `ball` / `cart`：量的是**接地基线中心**（轮子或底边与
-  地面接触的那条线的中点），这样 `Body.rotation` 现有的旋转逻辑不用改。
-- 量测方式与电路一致：在 alpha 轮廓上取（阈值 200），不用目视。
-- **判"是否拍平"必须量边缘斜率，不能量每行宽度**：一条 8° 斜放的窄板，每一行
-  依然满宽，只有逐列取顶点才能看出倾斜。实测里 `plank` 顶边斜率 −0.09°、
-  底边 −0.05°（平），而顶点峰谷差 57px 只是两端倒角——两个指标要一起看，
-  单看任一个都会误判。
-- 量上表面线取**列顶点中位数**，不取四分位或最小值：端头倒角会把端点拉偏。
+- `line` ist der Schlüssel der schiefen Ebene: Das Brett ist ein **Rechteck**, und in der orthogonalen Seitenansicht ist das Drehen eines Rechtecks eine exakte Transformation,
+  daher kann dasselbe Brettbild auf Szenenstrecken beliebiger Neigung geklebt werden; die vom Code gezeichneten Keilstützen und die Bodenschraffur bleiben erhalten
+  (das Entwurfsdokument sagt ausdrücklich: Physikalische Liniendiagramme werden vom Code gezeichnet, Bilder ersetzen nicht den physikalischen Vorgang).
+- `point` wird für `block` / `ball` / `cart` verwendet: Gemessen wird die **Mitte der Bodenkontaktlinie** (der Mittelpunkt der Linie, auf der Räder oder Unterkante den
+  Boden berühren), sodass die bestehende Drehlogik von `Body.rotation` nicht geändert werden muss.
+- Die Messweise entspricht der der Schaltungen: Auf der Alpha-Kontur genommen (Schwelle 200), nicht nach Augenmaß.
+- **Ob etwas „plattgedrückt“ ist, muss über die Kantensteigung beurteilt werden, nicht über die Breite jeder Zeile**: Ein schmales Brett, das um 8° geneigt liegt, hat in jeder Zeile
+  weiterhin die volle Breite; erst wenn man spaltenweise die Scheitelpunkte nimmt, sieht man die Neigung. In der Messung hatte `plank` an der Oberkante die Steigung −0,09°,
+  an der Unterkante −0,05° (eben), während die Spitzen-Tal-Differenz der Scheitelpunkte von 57px nur von den Abschrägungen an beiden Enden stammt – beide Kennzahlen müssen gemeinsam betrachtet werden,
+  jede allein führt zu Fehlurteilen.
+- Zur Messung der Linie der Oberseite wird der **Median der Spaltenscheitelpunkte** genommen, nicht Quartil oder Minimum: Die Abschrägungen an den Enden ziehen die Endpunkte verzerrt.
 
-## 不实物化的部分
+## Nicht realistisch gemachte Teile
 
-- `Ground`（地平线 + 排线）、矢量、轨迹、尺寸线、角度标注、关键点：全部留代码绘制。
-- 物理量、读数、单位：一律由代码与引擎给出，位图不承载任何数字。
+- `Ground` (Bodenlinie + Schraffur), Vektoren, Trajektorien, Maßlinien, Winkelbeschriftungen, Schlüsselpunkte: bleiben alle vom Code gezeichnet.
+- Physikalische Größen, Messwerte, Einheiten: werden durchweg von Code und Engine geliefert, die Bitmap trägt keinerlei Zahlen.

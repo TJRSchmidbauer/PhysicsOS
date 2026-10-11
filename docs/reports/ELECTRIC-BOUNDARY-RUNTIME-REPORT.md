@@ -1,226 +1,225 @@
-# PhysicsOS Phase 4 — 有界电场 / 平行板电场 Runtime 报告
+# PhysicsOS Phase 4 — Bericht zur Runtime für begrenzte elektrische Felder / Plattenkondensator-Felder
 
-> 里程碑：`ELECTRIC_BOUNDARY_RUNTIME_COMPLETE` → `PHYSICSOS_PHASE4_COMPLETE`
-> 日期：2026-08-23
-> 文件：`docs/reports/ELECTRIC-BOUNDARY-RUNTIME-REPORT.md`
+> Meilenstein: `ELECTRIC_BOUNDARY_RUNTIME_COMPLETE` → `PHYSICSOS_PHASE4_COMPLETE`
+> Datum: 2026-08-23
+> Datei: `docs/reports/ELECTRIC-BOUNDARY-RUNTIME-REPORT.md`
 
 ---
 
-## 1. 交付的能力
+## 1. Gelieferte Fähigkeiten
 
-高中物理电场部分的核心考点 —— **平行板电容器中带电粒子的偏转** —— 此前完全缺失。
-V1/V2/Phase 3 覆盖的是无界匀强电场与点电荷静电场，两者都没有"场只存在于某个
-区域内"的概念，因此也没有进入场区、离开场区、打到极板这些离散事件。
+Der Kernprüfungsstoff des elektrischen Feldes in der Oberstufenphysik – **die Ablenkung geladener Teilchen im Plattenkondensator** – fehlte bisher vollständig.
+V1/V2/Phase 3 deckten das unbegrenzte homogene elektrische Feld und das elektrostatische Feld von Punktladungen ab; beiden fehlte der Begriff
+„das Feld existiert nur innerhalb eines Bereichs“, und damit auch die diskreten Ereignisse Eintritt in den Feldbereich, Austritt aus dem Feldbereich und Aufprall auf die Platte.
 
-本阶段补齐的是一条完整的垂直切片：
+Diese Phase vervollständigt einen vollständigen vertikalen Slice:
 
-| 层       | 交付物                                                                                                          |
+| Schicht  | Liefergegenstand                                                                                                |
 | -------- | --------------------------------------------------------------------------------------------------------------- |
-| Scene    | `createParallelPlateScene` —— 1 粒子 + 1 区域绑定匀强场 + 1 矩形场区 + 2 极板边界                               |
-| IR       | `charged_particle_bounded_electric_field` 模型 + `plateSeparation` / `plateLength` / `enterPosition` 字段       |
-| Engine   | `@physicsos/engine-electric-region` —— 分段解析（场外 a=0、场内 a=qE/m）+ 三类离散事件 + 14 个派生量 + 5 项校验 |
-| Parser   | `parseParallelPlate` + 10 道 Golden Question（electric-10 ~ electric-19）                                       |
-| Runtime  | 平行板分支 + `SimulationResult.events` → `TimelineEvent` 映射 + 平行板专属 tree/inspector/editParameter         |
-| Renderer | `ElectricRegionRenderer` —— 金属质感极板 + clipPath 裁剪的有界场格 + 轨迹 + 向量                                |
-| Agent    | 10 个有界场教学意图，全部引用引擎已断言的 check 与派生量                                                        |
+| Scene    | `createParallelPlateScene` — 1 Teilchen + 1 Region mit gebundenem homogenem Feld + 1 rechteckiger Feldbereich + 2 Plattenränder |
+| IR       | Modell `charged_particle_bounded_electric_field` + Felder `plateSeparation` / `plateLength` / `enterPosition`   |
+| Engine   | `@physicsos/engine-electric-region` — abschnittsweise analytisch (außerhalb des Felds a=0, innerhalb a=qE/m) + drei Arten diskreter Ereignisse + 14 abgeleitete Größen + 5 Prüfungen |
+| Parser   | `parseParallelPlate` + 10 Golden Questions (electric-10 ~ electric-19)                                          |
+| Runtime  | Plattenkondensator-Zweig + Abbildung `SimulationResult.events` → `TimelineEvent` + plattenspezifischer tree/inspector/editParameter |
+| Renderer | `ElectricRegionRenderer` — metallisch wirkende Platten + per clipPath beschnittenes begrenztes Feldraster + Trajektorie + Vektoren |
+| Agent    | 10 Lehrintentionen zum begrenzten Feld, die alle von der Engine behauptete Prüfungen und abgeleitete Größen zitieren |
 
-物理正确性的关键点：**场只存在于板间矩形区域**。粒子在场外做匀速直线运动
-（a = 0，F = 0），进入场区后做类平抛（a = qE/m 恒定），离开后恢复匀速直线，
-或在偏转距离达到 d/2 时打到极板并停止。这不是把无界场裁一段来画 —— 引擎对每
-一相分别求解，区域外的 E、F、a 都严格为零。
+Der Schlüsselpunkt der physikalischen Korrektheit: **Das Feld existiert nur im rechteckigen Bereich zwischen den Platten**. Außerhalb des Felds bewegt sich das Teilchen
+gleichförmig geradlinig (a = 0, F = 0), nach dem Eintritt in den Feldbereich führt es eine Bewegung wie beim waagerechten Wurf aus (a = qE/m konstant), nach dem Austritt wird die gleichförmige geradlinige Bewegung wieder aufgenommen,
+oder es prallt auf die Platte und bleibt stehen, wenn die Ablenkung d/2 erreicht. Es wird nicht einfach ein Stück des unbegrenzten Feldes ausgeschnitten und gezeichnet – die Engine löst jede
+Phase einzeln, E, F, a außerhalb des Bereichs sind streng null.
 
 ---
 
-## 2. 架构遵循
+## 2. Einhaltung der Architektur
 
-沿用 `docs/15-RUNTIME-ARCHITECTURE.md` 的链路，未新增第二套 Runtime：
+Es folgt der Kette aus `docs/15-RUNTIME-ARCHITECTURE.md`, eine zweite Runtime wurde nicht hinzugefügt:
 
 ```
 Question → IR → Scene → PhysicsEngine → Verifier → Observation → Visual Bridge → UI → Agent
 ```
 
-新引擎实现的是同一个 `PhysicsEngine<PhysicsScene, PhysicsEventLike>` 接口，与
-`engine-magnetic` / `engine-mechanics` 同构。它与既有 `engine-electric` 通过
-`canHandle` **互斥**：
+Die neue Engine implementiert dieselbe Schnittstelle `PhysicsEngine<PhysicsScene, PhysicsEventLike>`, strukturgleich mit
+`engine-magnetic` / `engine-mechanics`. Sie schließt sich mit der bestehenden `engine-electric` über `canHandle`
+**gegenseitig aus**:
 
-- `engine-electric-region` 只接受 `regions.length > 0` 且 `fields[].regionId`
-  指向有效矩形区域的场景
-- `engine-electric` 明确拒绝任何带 `regions` / `boundaries` 的场景
+- `engine-electric-region` akzeptiert nur Szenen mit `regions.length > 0` und `fields[].regionId`,
+  das auf einen gültigen rechteckigen Bereich zeigt
+- `engine-electric` lehnt ausdrücklich jede Szene mit `regions` / `boundaries` ab
 
-因此不存在两个引擎同时声称能处理同一场景的情况，路由由 `engine-selector.ts`
-按 IR model 决定。
+Es gibt daher keinen Fall, in dem zwei Engines zugleich behaupten, dieselbe Szene bearbeiten zu können; das Routing wird in `engine-selector.ts`
+anhand des IR-Modells entschieden.
 
-离散事件走 `PhysicsEventLike`（`physics-core/simulation.ts`，开放 `type: string`），
-与 `scene-runtime.ts` 的 `PhysicsEvent`（SceneCommand 产生的命令事件）是两回事，
-后者未改动。
+Diskrete Ereignisse laufen über `PhysicsEventLike` (`physics-core/simulation.ts`, offener `type: string`),
+das etwas anderes ist als das `PhysicsEvent` in `scene-runtime.ts` (von SceneCommand erzeugte Befehlsereignisse),
+Letzteres wurde nicht verändert.
 
-Renderer 不 import 任何 engine，只消费 `SceneVisualModel`；极板几何、场方向、
-轨迹全部由 Visual Bridge 从场景与已验证的观察量产出。
-
----
-
-## 3. 浏览器验收
-
-`apps/web/e2e/electric-region-acceptance.mjs` —— 6 个 Case，全部 PASS：
-
-| Case | 验收内容                                                                             | 结果  |
-| ---- | ------------------------------------------------------------------------------------ | ----- |
-| A    | 点电荷回归：`electric-03` 仍 verified、源电荷仍绘制、**极板不泄漏到点电荷帧**        | ✓ 6/6 |
-| B    | 匀强场回归：`electric-01` 仍 verified、轨迹仍绘制、**无界场无极板无区域事件**        | ✓ 6/6 |
-| C    | 平行板全链路：`electric-10` READY → 解答步骤 → 实验室 verified → **两块极板** → 轨迹 | ✓ 9/9 |
-| D    | 事件时间轴：标记数 ≥ 2、点击标记 seek 时钟生效                                       | ✓ 2/2 |
-| E    | Agent 解释偏转：引用依据、**不引库仑 1/r²**、高亮命中、**revision 不变**             | ✓ 6/6 |
-| F    | Scene Branch：改参数 revision +1 且仍 verified、题目场景未被污染                     | ✓ 4/4 |
-
-5 项门禁全部为 0：console errors、page errors、unhandled rejections、
-failed requests、error responses。
-
-回归保护写进了断言本身 —— Case A 断言点电荷帧里 `plates === 0`，Case B 断言
-无界场帧里既无极板也无区域事件。新渲染分支若误劫持旧场景，验收会直接失败。
-
-**打板路径单独验证**：Case C/D 走的是 `electric-10`（穿过场区，产出
-enter + exit）。`HitPlate` 这条路径另外在浏览器里验过 `electric-13`（电子打到极板
-的时间）：workflow READY、verified、两块极板、事件标记为「进入电场 1.00e-9 秒」+
-「打到极板 5.77e-9 秒」、**没有「离开电场」**（粒子打板停止，物理正确）、0 错误。
-截图 `lab-plate-impact-1600x900.png`。
-
-**旧 acceptance 回归**：`electric-acceptance.mjs`（V1 匀强场 + 点电荷）、
-`electric-acceptance-v2.mjs`（多源点电荷 + 等势线）、`mechanics-acceptance.mjs`
-三份全部 ALL CHECKS PASSED、门禁为 0。
+Der Renderer importiert keine Engine, sondern konsumiert nur das `SceneVisualModel`; Plattengeometrie, Feldrichtung und
+Trajektorie werden alle von der Visual Bridge aus Szene und verifizierten Observationen erzeugt.
 
 ---
 
-## 4. 单元测试
+## 3. Browser-Abnahme
 
-| 范围                                     | 数量        |
+`apps/web/e2e/electric-region-acceptance.mjs` — 6 Cases, alle PASS:
+
+| Case | Abnahmeinhalt                                                                        | Ergebnis |
+| ---- | ------------------------------------------------------------------------------------ | -------- |
+| A    | Regression Punktladung: `electric-03` weiterhin verified, Quellladung weiterhin gezeichnet, **Platten lecken nicht in den Punktladungs-Frame** | ✓ 6/6 |
+| B    | Regression homogenes Feld: `electric-01` weiterhin verified, Trajektorie weiterhin gezeichnet, **unbegrenztes Feld ohne Platten und ohne Bereichsereignisse** | ✓ 6/6 |
+| C    | Gesamte Kette Plattenkondensator: `electric-10` READY → Lösungsschritte → Labor verified → **zwei Platten** → Trajektorie | ✓ 9/9 |
+| D    | Ereignis-Zeitachse: Anzahl der Marken ≥ 2, Klick auf eine Marke wirkt per seek auf die Uhr | ✓ 2/2 |
+| E    | Agent erklärt die Ablenkung: Belege zitiert, **kein Coulomb 1/r² zitiert**, Hervorhebung trifft, **Revision unverändert** | ✓ 6/6 |
+| F    | Scene Branch: Parameter ändern, Revision +1 und weiterhin verified, Aufgabenszene nicht verunreinigt | ✓ 4/4 |
+
+Alle 5 Gates sind 0: console errors, page errors, unhandled rejections,
+failed requests, error responses.
+
+Der Regressionsschutz steckt in den Assertions selbst – Case A prüft, dass im Punktladungs-Frame `plates === 0`, Case B prüft, dass
+im Frame des unbegrenzten Feldes weder Platten noch Bereichsereignisse sind. Kapert ein neuer Rendering-Zweig fälschlich alte Szenen, schlägt die Abnahme direkt fehl.
+
+**Der Pfad Aufprall auf die Platte wurde separat verifiziert**: Case C/D laufen über `electric-10` (durchquert den Feldbereich, erzeugt
+enter + exit). Der Pfad `HitPlate` wurde zusätzlich im Browser mit `electric-13` verifiziert (Zeit, bis das Elektron auf die Platte trifft):
+workflow READY, verified, zwei Platten, Ereignismarken „Eintritt ins elektrische Feld 1.00e-9 Sekunden“ +
+„Aufprall auf die Platte 5.77e-9 Sekunden“, **kein „Austritt aus dem elektrischen Feld“** (das Teilchen bleibt beim Aufprall stehen, physikalisch korrekt), 0 Fehler.
+Screenshot `lab-plate-impact-1600x900.png`.
+
+**Regression der alten Acceptance**: `electric-acceptance.mjs` (V1 homogenes Feld + Punktladung),
+`electric-acceptance-v2.mjs` (Mehrquellen-Punktladung + Äquipotentiallinien) und `mechanics-acceptance.mjs`
+alle drei ALL CHECKS PASSED, Gates 0.
+
+---
+
+## 4. Unit-Tests
+
+| Umfang                                   | Anzahl      |
 | ---------------------------------------- | ----------- |
-| `test:core`（17 个包）                   | 445 全绿    |
-| `test:web`（ui-physicsos）               | 163 全绿    |
-| 其中 `engine-electric-region`            | 16          |
-| 其中 `question-core`（含 10 道平行板题） | 146         |
-| 其中 region runtime / visual / agent     | 23 / 8 / 52 |
+| `test:core` (17 Packages)                | 445 grün    |
+| `test:web` (ui-physicsos)                | 163 grün    |
+| darunter `engine-electric-region`        | 16          |
+| darunter `question-core` (einschließlich 10 Plattenkondensator-Aufgaben) | 146 |
+| darunter region runtime / visual / agent | 23 / 8 / 52 |
 
-`typecheck:core` 与 `typecheck:web` 均零错误。bundle 已重建。
-
----
-
-## 5. 浏览器验收暴露的五个真实缺陷
-
-单元测试 608 项全绿，但浏览器一开就白屏 —— 这些缺陷没有任何单元测试能捕获，
-记录在此作为"未跑不报"的实证。其中 5.2 和 5.5 尤其说明问题：两者的相关断言当时
-都是**通过**的（DOM 元素存在、aria-label 与实现一致），只有看截图、读实际输出才
-发现功能不可用。
-
-### 5.1 试题空间白屏（致命）
-
-`QuestionWorkspace.tsx` 的 `useQuestionFrames` 用 `resolveUniformElectricModel`
-（旧引擎）为试题预览求解轨迹。平行板场景带 `regions`，旧引擎 `canHandle` 拒绝并
-抛 `EngineUnsupportedError: electric_force_only` —— 在 render 期间抛出，React 卸载
-整棵树，页面白屏。
-
-core runtime、实验室 runtime、visual bridge 三处都正确路由了新引擎，唯独试题空间
-的预览路径漏了。修复：加平行板分支，用 `electricRegionEngine.stateAtSeconds`。
-
-### 5.2 极板在画布上不可见
-
-`extentOf` 有硬编码下限 `Math.max(12, …)` / `Math.max(7, …)` 与 2 单位最小内边距 ——
-为米级场景（无界场、点电荷场）调的。平行板装置是厘米级（0.12 m × 0.04 m），被强行
-放大到 17.92 × 10.08 场景单位，极板压成不可见的一点；`vectorBase` 随之变成 7，
-E 与 v 箭头长到 1.3 m，飞出画布。
-
-值得注意的是 Case C 的 `plates === 2` 断言当时是**通过**的 —— DOM 元素确实存在，
-只是视觉上看不见。这类"测试过了但功能不可用"只能靠看截图发现。
-
-修复：给 region 分支写独立的 `regionVisualFrame`，内边距按内容比例而非绝对值；
-tick 步长、粒子半径、比例尺都改为从 frame 推导（`niceStep` 选 1/2/5×10ⁿ），
-所以从毫米到米都能正确取景。未改共用的 `extentOf`，Case A/B 零风险。
-
-### 5.3 场方向画错 + 极板极性标错
-
-`fieldDirection` 取自当前帧的 `electric_field` 观察量。有界场里粒子在板外时观察到
-的 E 严格为零，包括开场帧 —— 于是方向退化到 fallback `{x:1, y:0}`，场线画成水平
-向右（实际竖直向下），极板极性也跟着标反。
-
-修复：方向改从 **场景的场定义**取（电容器的恒定物理事实），而非某一瞬间的观察量。
-
-### 5.4 Inspector 与画布数值矛盾
-
-引擎在 `endTime` 计算 `derivedQuantities`，那时粒子已离开场区，E / F / a 全为零。
-Inspector 读的是这份终态，画布读的是当前帧 —— 学生 seek 进板间时，画布显示
-|E| = 2000 V/m，右侧 Inspector 却显示 0.00。
-
-修复：region Inspector 改读当前帧的 `state.derived`。其他域的场都是无界的，粒子
-始终在场中，所以这个矛盾只在有界场暴露。
-
-### 5.5 事件时间读作「0.00 秒」
-
-`TimelineMarkers` 与事件列表都用 `event.time.toFixed(2)` 格式化。力学场景是秒级
-（落地 2.02 s）没问题，但粒子穿过电容器只需纳秒 —— 每个电场事件都被四舍五入成
-「0.00 秒」，屏幕阅读器会报出错误的时刻。
-
-Agent 7 的测试断言 `aria-label` 等于 `` `${event.label} ${event.time.toFixed(2)} 秒` ``，
-把实现的格式化逻辑复制进了断言，所以测试镜像了实现、捕获不到这个错误。
-
-修复：`eventTimeText()` 在 10 ms 以下切换到指数形式（1.00e-9 秒），秒级行为不变；
-测试断言改为检查学生真正听到的内容 —— 非零事件不得读作 0.00 秒，且解析出的数值
-必须大于零。
+`typecheck:core` und `typecheck:web` beide ohne Fehler. Bundle wurde neu gebaut.
 
 ---
 
-## 6. Agent 教学闭环的一处设计修正
+## 5. Fünf echte Defekte, die die Browser-Abnahme aufgedeckt hat
 
-10 个有界场意图中，`bounded-field-enter` / `plate-deflection-direction` /
-`plate-energy` 原本要求 `electric-force-vector` 出现在 `drawnIds` 里。但开场帧
-粒子在板外，F = 0，bridge 跳过零长箭头 —— 于是学生刚打开场景时，这三个问题**不
-出现在建议里**，而"为什么会偏转"恰恰是打开场景最想问的第一个问题。
+608 Unit-Tests waren grün, aber sobald man den Browser öffnete, gab es einen weißen Bildschirm – diese Defekte hätte kein Unit-Test erkannt;
+sie werden hier als Beleg für „nicht ausgeführt, nicht gemeldet“ festgehalten. Besonders 5.2 und 5.5 zeigen das Problem: Die zugehörigen Assertions waren damals
+beide **bestanden** (DOM-Element vorhanden, aria-label stimmt mit der Implementierung überein), erst beim Betrachten der Screenshots und beim Lesen der tatsächlichen Ausgabe
+fiel auf, dass die Funktion nicht nutzbar war.
 
-修正：
+### 5.1 Weißer Bildschirm im Aufgabenraum (fatal)
 
-- 闸门改为要求 `electric-trajectory`（轨迹来自整段仿真，任何时刻都在画）
-- `forceHighlightTarget()` 动态选择高亮目标：场区内高亮力向量，场区外回退到轨迹 ——
-  高亮永远指向画布上真实存在的元素，不会弹"画布当前没有显示电场力"
-- `outsideFieldRegion()` 从已发布的派生量判断（不重算几何），场区外时回答补一句
-  "当前时刻粒子还在板外……板外无场因此不受力"，避免出现"为什么偏转"却答"F = 0"
-  的自相矛盾
+`useQuestionFrames` in `QuestionWorkspace.tsx` verwendet `resolveUniformElectricModel`
+(alte Engine), um die Trajektorie für die Aufgaben-Vorschau zu lösen. Plattenkondensator-Szenen tragen `regions`, die alte Engine lehnt in `canHandle` ab und
+wirft `EngineUnsupportedError: electric_force_only` – beim Rendern geworfen, React entlädt
+den gesamten Baum, die Seite wird weiß.
 
-3 个测试锁定这个行为：t=0 时 10 个意图全部可用、每个高亮都能 resolve、回答解释了
-零力的原因。
+Core-Runtime, Labor-Runtime und Visual Bridge routen alle drei korrekt zur neuen Engine, nur der Vorschaupfad im Aufgabenraum wurde vergessen. Behebung:
+Plattenkondensator-Zweig hinzugefügt, der `electricRegionEngine.stateAtSeconds` verwendet.
+
+### 5.2 Platten auf dem Canvas nicht sichtbar
+
+`extentOf` hat die hartkodierten Untergrenzen `Math.max(12, …)` / `Math.max(7, …)` und einen Mindestrand von 2 Einheiten –
+abgestimmt auf Szenen im Meterbereich (unbegrenztes Feld, Punktladungsfeld). Der Plattenkondensator-Aufbau ist im Zentimeterbereich (0,12 m × 0,04 m) und wurde
+gewaltsam auf 17,92 × 10,08 Szeneneinheiten vergrößert, die Platten zu einem unsichtbaren Punkt gestaucht; `vectorBase` wird dadurch zu 7,
+die Pfeile von E und v werden 1,3 m lang und fliegen aus dem Canvas.
+
+Bemerkenswert ist, dass die Assertion `plates === 2` in Case C damals **bestanden** war – das DOM-Element existierte tatsächlich,
+war aber optisch nicht zu sehen. Dieses „Test bestanden, aber Funktion nicht nutzbar“ lässt sich nur durch Betrachten der Screenshots entdecken.
+
+Behebung: Für den Region-Zweig wurde eine eigenständige `regionVisualFrame` geschrieben, deren Rand sich nach dem Inhalt richtet statt nach Absolutwerten;
+Tick-Schrittweite, Teilchenradius und Maßstab werden alle aus dem Frame abgeleitet (`niceStep` wählt 1/2/5×10ⁿ),
+so wird von Millimeter bis Meter korrekt der Ausschnitt gewählt. Das gemeinsame `extentOf` wurde nicht geändert, Case A/B sind ohne Risiko.
+
+### 5.3 Feldrichtung falsch gezeichnet + Plattenpolarität falsch beschriftet
+
+`fieldDirection` stammt aus der Observation `electric_field` des aktuellen Frames. Im begrenzten Feld ist das beobachtete E streng null, wenn das Teilchen außerhalb der Platten ist,
+einschließlich des Anfangsframes – die Richtung fällt dann auf den Fallback `{x:1, y:0}` zurück, die Feldlinien werden waagerecht nach rechts
+gezeichnet (tatsächlich senkrecht nach unten), und die Plattenpolarität wird mit verkehrt beschriftet.
+
+Behebung: Die Richtung wird aus der **Felddefinition der Szene** bezogen (eine konstante physikalische Tatsache des Kondensators), nicht aus der Observation eines einzelnen Augenblicks.
+
+### 5.4 Widerspruch zwischen Inspector und Canvas-Zahlen
+
+Die Engine berechnet `derivedQuantities` bei `endTime`, dann hat das Teilchen den Feldbereich bereits verlassen, E / F / a sind alle null.
+Der Inspector liest diesen Endzustand, der Canvas den aktuellen Frame – wenn der Schüler per seek zwischen die Platten springt,
+zeigt der Canvas |E| = 2000 V/m, während der Inspector rechts 0.00 zeigt.
+
+Behebung: Der Region-Inspector liest nun `state.derived` des aktuellen Frames. Die Felder in anderen Domänen sind unbegrenzt, das Teilchen
+befindet sich stets im Feld, deshalb tritt dieser Widerspruch nur beim begrenzten Feld zutage.
+
+### 5.5 Ereigniszeit wird als „0.00 Sekunden“ gelesen
+
+`TimelineMarkers` und die Ereignisliste formatieren beide mit `event.time.toFixed(2)`. Mechanikszenen liegen im Sekundenbereich
+(Aufprall 2,02 s), das ist unproblematisch, aber ein Teilchen durchquert den Kondensator in Nanosekunden – jedes elektrische Ereignis wird auf
+„0.00 Sekunden“ gerundet, und Screenreader würden einen falschen Zeitpunkt ansagen.
+
+Die Assertion von Agent 7 prüfte, dass `aria-label` gleich `` `${event.label} ${event.time.toFixed(2)} 秒` `` ist,
+und kopierte so die Formatierungslogik der Implementierung in die Assertion; der Test spiegelte also die Implementierung und konnte diesen Fehler nicht fangen.
+
+Behebung: `eventTimeText()` wechselt unter 10 ms auf die Exponentialform (1.00e-9 Sekunden), das Verhalten im Sekundenbereich bleibt unverändert;
+die Test-Assertion prüft nun, was der Schüler tatsächlich hört – ein Ereignis ungleich null darf nicht als 0.00 Sekunden gelesen werden, und der geparste Zahlenwert
+muss größer als null sein.
 
 ---
 
-## 7. 关闭的 backlog
+## 6. Eine Designkorrektur im Lehr-Kreislauf des Agents
 
-`ELECTRIC_TIMELINE_EVENT_MARKERS_BACKLOG` —— 开始条件（引擎产出进入/离开场区、
-打到极板的离散事件）已满足。BACKLOG 当初的预判也成立：**UI 侧零改动**。
-`TimelineMarkers` 的 class 是动态拼的（`css[\`eventMark_${event.kind}\`]`），
-新增三种 kind 自动生效，只补了三条 CSS 与 runtime 侧的 `eventsOf` 映射。
+Bei den 10 Intentionen zum begrenzten Feld verlangten `bounded-field-enter` / `plate-deflection-direction` /
+`plate-energy` ursprünglich, dass `electric-force-vector` in `drawnIds` vorkommt. Im Anfangsframe ist das Teilchen aber außerhalb der Platten,
+F = 0, die Bridge überspringt Pfeile der Länge null – somit **erscheinen diese drei Fragen
+nicht in den Vorschlägen**, wenn der Schüler die Szene gerade öffnet, obwohl „Warum wird es abgelenkt“ gerade die erste Frage ist, die man beim Öffnen der Szene stellen möchte.
 
-无界匀强场与点电荷场景的 `events` 仍为空数组，没有伪造 marker。
+Korrektur:
 
----
+- Das Gate verlangt nun `electric-trajectory` (die Trajektorie stammt aus der gesamten Simulation und wird zu jedem Zeitpunkt gezeichnet)
+- `forceHighlightTarget()` wählt das Hervorhebungsziel dynamisch: Im Feldbereich wird der Kraftvektor hervorgehoben, außerhalb fällt es auf die Trajektorie zurück –
+  die Hervorhebung zeigt immer auf ein tatsächlich auf dem Canvas vorhandenes Element, es erscheint nie „Der Canvas zeigt derzeit keine elektrische Kraft“
+- `outsideFieldRegion()` urteilt anhand der veröffentlichten abgeleiteten Größen (rechnet die Geometrie nicht neu); außerhalb des Feldbereichs ergänzt die Antwort einen Satz
+  „Zu diesem Zeitpunkt befindet sich das Teilchen noch außerhalb der Platten … außerhalb der Platten gibt es kein Feld, daher wirkt keine Kraft“, um den Widerspruch „Warum wird es abgelenkt“ – „F = 0“ zu vermeiden
 
-## 8. 不做（明确边界）
-
-- **不做电容/充放电电路**：那属于电路域。本阶段覆盖平行板几何 + 板间电场 + 偏转
-  物理，即电容器的力学部分。
-- **不做极板几何的 PhysicsEvent**：`setPlateGeometry` 走了 fork、revision +1、
-  `validateScene`、重新 simulate + verify，但场景自身的事件日志没记录这次改动。
-  完整审计链需要往 `scene-runtime.ts` 的冻结命令集加
-  `SetPlateSeparation` / `SetPlateLength`，那是 spec 变更，留待后续。
-- **不做 Question Space 视觉打磨**：无具体设计需求，且该表面已有 acceptance 覆盖，
-  在没有视觉验证手段的情况下改 CSS 是投机。
-- **不改共用的 `extentOf`**：region 用独立 frame 函数，避免影响已验收通过的
-  点电荷与无界场取景。
+3 Tests sichern dieses Verhalten ab: Bei t=0 sind alle 10 Intentionen verfügbar, jede Hervorhebung lässt sich auflösen, die Antwort erklärt den Grund
+für die Kraft null.
 
 ---
 
-## 9. 截图
+## 7. Geschlossener Backlog
 
-- `docs/reports/screenshots/question-parallel-plate-1600x900.png` —— 试题空间
-- `docs/reports/screenshots/lab-parallel-plate-1600x900.png` —— 实验室开场帧
-  （极板 + 有界场格 + 轨迹在场区内弯曲、出场后直线）
-- `docs/reports/screenshots/lab-parallel-plate-events-1600x900.png` —— seek 到板间
-  （E 向下、F 与 a 向上、Inspector 与画布数值一致）
-- `docs/reports/screenshots/agent-plate-deflection-1600x900.png` —— Agent 解释偏转方向
-- `docs/reports/screenshots/lab-plate-impact-1600x900.png` —— 打到极板路径
-  （`electric-13`，事件标记为进入电场 + 打到极板，无离开电场）
+`ELECTRIC_TIMELINE_EVENT_MARKERS_BACKLOG` — die Startbedingung (die Engine erzeugt diskrete Ereignisse Eintritt in / Austritt aus dem Feldbereich und
+Aufprall auf die Platte) ist erfüllt. Auch die damalige Prognose des BACKLOG traf zu: **null Änderungen auf der UI-Seite**.
+Die Klasse von `TimelineMarkers` wird dynamisch zusammengesetzt (`css[\`eventMark_${event.kind}\`]`),
+drei neue kinds greifen automatisch, ergänzt wurden nur drei CSS-Einträge und die `eventsOf`-Abbildung auf Runtime-Seite.
+
+Bei Szenen mit unbegrenztem homogenem Feld und Punktladungen bleiben die `events` ein leeres Array, es werden keine Marker gefälscht.
+
+---
+
+## 8. Nicht Teil (ausdrückliche Grenzen)
+
+- **Keine Kondensator-/Lade-Entlade-Schaltungen**: Diese gehören zur Schaltungsdomäne. Diese Phase deckt Plattengeometrie + Feld zwischen den Platten + Ablenkungs-
+  physik ab, also den mechanischen Teil des Kondensators.
+- **Kein PhysicsEvent für die Plattengeometrie**: `setPlateGeometry` läuft über fork, Revision +1,
+  `validateScene`, erneutes simulate + verify, aber das Ereignislog der Szene selbst hat diese Änderung nicht erfasst.
+  Eine vollständige Audit-Kette erfordert, den eingefrorenen Befehlssatz in `scene-runtime.ts` um
+  `SetPlateSeparation` / `SetPlateLength` zu erweitern, das ist eine Spec-Änderung und bleibt für später.
+- **Kein visueller Feinschliff im Question Space**: Es gibt keine konkrete Designanforderung, und diese Oberfläche hat bereits Acceptance-Abdeckung;
+  CSS ohne visuelle Verifikationsmittel zu ändern, wäre Spekulation.
+- **Das gemeinsame `extentOf` wird nicht geändert**: Der Region-Zweig verwendet eine eigenständige Frame-Funktion, um die bereits abgenommene Ausschnittswahl
+  für Punktladungen und unbegrenzte Felder nicht zu beeinflussen.
+
+---
+
+## 9. Screenshots
+
+- `docs/reports/screenshots/question-parallel-plate-1600x900.png` — Aufgabenraum
+- `docs/reports/screenshots/lab-parallel-plate-1600x900.png` — Anfangsframe im Labor
+  (Platten + begrenztes Feldraster + Trajektorie krümmt sich im Feldbereich, nach dem Austritt gerade)
+- `docs/reports/screenshots/lab-parallel-plate-events-1600x900.png` — per seek zwischen die Platten
+  (E nach unten, F und a nach oben, Zahlen von Inspector und Canvas stimmen überein)
+- `docs/reports/screenshots/agent-plate-deflection-1600x900.png` — Agent erklärt die Ablenkungsrichtung
+- `docs/reports/screenshots/lab-plate-impact-1600x900.png` — Pfad Aufprall auf die Platte
+  (`electric-13`, Ereignismarken Eintritt ins elektrische Feld + Aufprall auf die Platte, kein Austritt aus dem elektrischen Feld)

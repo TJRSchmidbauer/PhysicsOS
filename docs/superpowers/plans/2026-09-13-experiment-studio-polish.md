@@ -1,40 +1,40 @@
-# 实验模块整体美化实施计划
+# Umsetzungsplan zur Gesamtverschönerung des Experimentmoduls
 
-> 执行要求：使用 superpowers:subagent-driven-development，逐任务实现和评审；控制器同时处理独立的素材生成与视觉检查，不并行修改共享前端文件。
+> Ausführungsanforderung: superpowers:subagent-driven-development verwenden, Aufgaben einzeln umsetzen und reviewen; der Controller bearbeitet zugleich die unabhängige Asset-Erzeugung und visuelle Prüfung, ändert aber nicht parallel gemeinsam genutzte Frontend-Dateien.
 
-**目标：** 完成全部实验页面的统一视觉升级及已确认的电路直接操作。
+**Ziel:** Das einheitliche visuelle Upgrade aller Experimentseiten sowie die bestätigte direkte Bedienung von Schaltungen abschließen.
 
-**架构：** 保留 PhysicsScene → Engine → Verifier → Observation → PhysicsCanvas。改变共享呈现与用户手势适配，不在 React 中计算物理解答。
+**Architektur:** PhysicsScene → Engine → Verifier → Observation → PhysicsCanvas bleibt erhalten. Geändert werden die gemeinsame Darstellung und die Anpassung der Nutzergesten; Physiklösungen werden nicht in React berechnet.
 
-**技术栈：** React 18、TypeScript、CSS Modules、SVG/Canvas、Vitest、既有 Harness 插件。
+**Technologie-Stack:** React 18, TypeScript, CSS Modules, SVG/Canvas, Vitest, vorhandenes Harness-Plugin.
 
-**设计：** `docs/superpowers/specs/2026-09-13-experiment-studio-polish-design.md`
+**Entwurf:** `docs/superpowers/specs/2026-09-13-experiment-studio-polish-design.md`
 
-## 全局约束
+## Globale Randbedingungen
 
-- 保留用户现有未提交改动；不重置、不清理、不自动提交或推送。
-- 只修改正式实验插件、相应测试及任务指定素材；不修改废弃的根 `apps/web`。
-- 使用现有语义 token、CSS Modules 和 `clsx`，不添加依赖或第二套全局主题。
-- 不新增自由接线编辑器、后端接口、账号流程或求解器；禁止 UI 编造物理读数。
-- 用户可见文案走现有中英文 locale，默认中文；代码命名与代码注释用英文。
-- 行为变化先写失败用例、运行确认红灯，再实现并确认绿灯；纯样式用浏览器图像核验。
-- 仅同步本任务改动文件到 vendor 对应位置；不运行 overlay capture，不覆盖无关文件。
-- 所有生成素材只使用指定服务和 `gpt-image-2.5-sunburst`，不得记录密钥。
+- Bestehende uncommittete Änderungen des Nutzers erhalten; nicht zurücksetzen, nicht aufräumen, nicht automatisch committen oder pushen.
+- Nur das offizielle Experiment-Plugin, die zugehörigen Tests und die in der Aufgabe benannten Assets ändern; das veraltete `apps/web` im Wurzelverzeichnis nicht ändern.
+- Vorhandene semantische Tokens, CSS Modules und `clsx` verwenden, keine Abhängigkeit und kein zweites globales Theme hinzufügen.
+- Keinen freien Verdrahtungs-Editor, keine Backend-Schnittstelle, keinen Kontoablauf und keinen Solver hinzufügen; die UI darf keine physikalischen Messwerte erfinden.
+- Für Nutzer sichtbare Texte laufen über das vorhandene chinesisch-englische Locale, Standard Chinesisch; Code-Benennung und Code-Kommentare auf Englisch.
+- Bei Verhaltensänderungen zuerst fehlschlagende Testfälle schreiben, den roten Zustand bestätigen, dann implementieren und den grünen Zustand bestätigen; bei reinem Styling per Browserbild prüfen.
+- Nur die in dieser Aufgabe geänderten Dateien an die entsprechende Stelle in vendor synchronisieren; kein overlay capture ausführen, keine unbeteiligten Dateien überschreiben.
+- Alle erzeugten Assets nur mit dem angegebenen Dienst und `gpt-image-2.5-sunburst` erstellen, Schlüssel dürfen nicht protokolliert werden.
 
-### Task 1: 实验中心与共享工作台
+### Task 1: Experimentzentrum und gemeinsamer Arbeitsbereich
 
-**文件：**
+**Dateien:**
 
-- 修改 `overlays/harness/files/packages/client/ui-physicsos/src/client/ExperimentPicker.tsx`、`ExperimentPicker.module.css`、`LabEmptyState.tsx`、`LabEmptyState.module.css`。
-- 修改同目录 `PhysicsWorkspace.tsx`、`LabWorkspace.module.css`、`workspace-parts.tsx`、`locales.ts`。
-- 可新增一个小型工作台局部组件，避免继续膨胀主文件；不能新增插件公共导出。
-- 测试 `overlays/harness/files/packages/client/ui-physicsos/tests/overlay.client.spec.tsx`、`renderer-decoupling.client.spec.tsx`；新增行为测试放 `workspace-presentation.client.spec.tsx`。
+- Ändern: `overlays/harness/files/packages/client/ui-physicsos/src/client/ExperimentPicker.tsx`, `ExperimentPicker.module.css`, `LabEmptyState.tsx`, `LabEmptyState.module.css`.
+- Ändern: im selben Verzeichnis `PhysicsWorkspace.tsx`, `LabWorkspace.module.css`, `workspace-parts.tsx`, `locales.ts`.
+- Eine kleine lokale Arbeitsbereichskomponente darf neu angelegt werden, damit die Hauptdatei nicht weiter anschwillt; es darf kein neuer öffentlicher Plugin-Export hinzukommen.
+- Tests: `overlays/harness/files/packages/client/ui-physicsos/tests/overlay.client.spec.tsx`, `renderer-decoupling.client.spec.tsx`; neue Verhaltenstests kommen in `workspace-presentation.client.spec.tsx`.
 
-**接口：** 消费现有 `WorkspaceSnapshot`、`runtime.getSnapshot()`、`t`、场景模板与实验列表；不改变引擎和场景数据。专注模式属于组件本地 state，不能持久化到场景。
+**Schnittstelle:** Konsumiert das vorhandene `WorkspaceSnapshot`, `runtime.getSnapshot()`, `t`, Szenenvorlagen und Experimentliste; Engine und Szenendaten werden nicht geändert. Der Fokusmodus ist lokaler Komponentenzustand und darf nicht in der Szene persistiert werden.
 
-- [ ] 读取所有将改文件，搜索 CSS class、组件 props 与 locale 引用，核对正式入口。
-- [ ] 对新增展示行为编写真实 PhysicsSurface 组件测试：专注模式可进入退出且工具仍可用；有曲线场景默认可见数据区；无曲线场景不默认展开空图区。使用 `circuit.client.spec.tsx` 的 `createPhysicsSurfaceController()` + `PhysicsSurface` 挂载模式。
-- [ ] 用例核心断言采用真实可访问控件和数据，不断言 CSS 字符串。例如：
+- [ ] Alle zu ändernden Dateien lesen, CSS-Klassen, Komponenten-Props und Locale-Verweise durchsuchen und den offiziellen Einstieg abgleichen.
+- [ ] Für neu hinzukommendes Darstellungsverhalten echte PhysicsSurface-Komponententests schreiben: Der Fokusmodus lässt sich betreten und verlassen und die Werkzeuge bleiben nutzbar; Szenen mit Kurven zeigen den Datenbereich standardmäßig; Szenen ohne Kurven klappen keinen leeren Diagrammbereich standardmäßig auf. Dafür das Einhängemuster `createPhysicsSurfaceController()` + `PhysicsSurface` aus `circuit.client.spec.tsx` verwenden.
+- [ ] Die Kern-Assertions der Testfälle verwenden echte zugängliche Steuerelemente und Daten und prüfen keine CSS-Strings. Zum Beispiel:
 
 ```tsx
 fireEvent.click(screen.getByRole('button', { name: '专注实验' }))
@@ -43,45 +43,45 @@ fireEvent.click(screen.getByRole('button', { name: '退出专注' }))
 expect(screen.getByRole('button', { name: '专注实验' })).toBeVisible()
 ```
 
-- [ ] 运行聚焦测试，确认新行为尚不存在导致失败，并记录失败输出。
-- [ ] 实现紧凑清晰的实验中心、统一卡片图片比例和明确状态；保留筛选、推荐、继续、未支持模板行为。
-- [ ] 实现共享工作台的层级、间距、排版、可逆专注模式、数据区初始策略。`dataOpen` 初始化依据 `snapshot.charts.length > 0`；静态实验保留手动打开数据能力。
-- [ ] 检查移动端工具栏换行、面板抽屉、长标题与键盘焦点，不能使用隐藏溢出掩盖不可达控件。
-- [ ] 同步改动文件并运行聚焦测试、`pnpm typecheck:web`、`pnpm lint:web`。报告改动列表、红绿证据和剩余风险，交独立评审。
+- [ ] Die fokussierten Tests ausführen, bestätigen, dass sie fehlschlagen, weil das neue Verhalten noch nicht existiert, und die Fehlerausgabe festhalten.
+- [ ] Ein kompaktes, klares Experimentzentrum mit einheitlichem Kartenbildverhältnis und eindeutigen Zuständen umsetzen; Filter, Empfehlungen, Fortsetzen und das Verhalten nicht unterstützter Vorlagen bleiben erhalten.
+- [ ] Hierarchie, Abstände, Typografie, reversiblen Fokusmodus und die Anfangsstrategie des Datenbereichs des gemeinsamen Arbeitsbereichs umsetzen. Die Initialisierung von `dataOpen` richtet sich nach `snapshot.charts.length > 0`; statische Experimente behalten die Möglichkeit, den Datenbereich manuell zu öffnen.
+- [ ] Zeilenumbruch der mobilen Toolbar, Panel-Drawer, lange Titel und Tastaturfokus prüfen; unerreichbare Steuerelemente dürfen nicht durch verstecktes Overflow kaschiert werden.
+- [ ] Geänderte Dateien synchronisieren und die fokussierten Tests, `pnpm typecheck:web`, `pnpm lint:web` ausführen. Änderungsliste, Rot-/Grün-Nachweise und verbleibende Risiken berichten und zum unabhängigen Review geben.
 
-### Task 2: 所有领域的画布与器材呈现
+### Task 2: Canvas und Gerätedarstellung aller Domänen
 
-**文件：**
+**Dateien:**
 
-- 修改 `overlays/harness/files/packages/client/ui-physicsos/src/client/physics/PhysicsCanvas.module.css`、`primitives.module.css`、`renderers.module.css`。
-- 按需修改同目录 `PhysicsCanvas.tsx`、`renderer-registry.tsx`、`circuit-renderer.tsx`、各领域 `*-renderer.tsx`；每处只做呈现调整，禁止改物理模型。
-- 新素材接入 `parts3d-catalog.ts` 与 `overlays/harness/files/apps/web/public/physicsos/parts3d/manifest.json`。控制器准备资源，实施代理只更新消费方与渲染锚点。
-- 测试现有 `electric-point-charge-visual.client.spec.tsx`、`electric-region-visual.client.spec.tsx`、`circuit.client.spec.tsx` 及各领域测试。
+- Ändern: `overlays/harness/files/packages/client/ui-physicsos/src/client/physics/PhysicsCanvas.module.css`, `primitives.module.css`, `renderers.module.css`.
+- Bei Bedarf im selben Verzeichnis `PhysicsCanvas.tsx`, `renderer-registry.tsx`, `circuit-renderer.tsx`, die `*-renderer.tsx` der einzelnen Domänen ändern; an jeder Stelle nur die Darstellung anpassen, das Physikmodell darf nicht geändert werden.
+- Neue Assets in `parts3d-catalog.ts` und `overlays/harness/files/apps/web/public/physicsos/parts3d/manifest.json` einbinden. Der Controller bereitet die Ressourcen vor, der umsetzende Agent aktualisiert nur Konsumenten und Rendering-Anker.
+- Tests: die vorhandenen `electric-point-charge-visual.client.spec.tsx`, `electric-region-visual.client.spec.tsx`, `circuit.client.spec.tsx` sowie die Tests der einzelnen Domänen.
 
-**接口：** 保留 `RendererProps` 和 `SceneVisualModel` 的物理语义；若增加纯展示 props，更新所有实际调用方。新图片路径由控制器给出的真实素材清单提供，不预造不存在路径。
+**Schnittstelle:** Die physikalische Semantik von `RendererProps` und `SceneVisualModel` bleibt erhalten; werden reine Darstellungs-Props ergänzt, sind alle tatsächlichen Aufrufer zu aktualisieren. Die neuen Bildpfade stammen aus der vom Controller gelieferten echten Asset-Liste, es werden keine nicht existierenden Pfade vorab erfunden.
 
-- [ ] 按全部已注册领域建立检查清单：力学/碰撞、电场、磁场/复合场、电路、电磁感应、光学、机械波、声学、流体、热学、杠杆。
-- [ ] 统一坐标背景、轴/网格层级、线宽、标注、数字与单位的可读性。保留关键矢量颜色与图层开关语义。
-- [ ] 优化器材比例和定位，使物体可辨认、读数不碰撞；物理几何、接线与图表由现有真实数据驱动。
-- [ ] 接入新器材图，旧图和矢量 fallback 保留。测量图片尺寸与可见区域，更新 catalog/manifest 一致性；不旋转有固定机位的器材来冒充不同机位。
-- [ ] 对资源失败、端子/标签位置相关行为补真实组件测试后实现。静态 CSS 不增加源码匹配式测试。
-- [ ] 聚焦运行相应领域测试并检查 typecheck/lint；独立评审场景可读性与数据事实不变。
+- [ ] Eine Checkliste über alle registrierten Domänen anlegen: Mechanik/Stoß, Elektrik, Magnetfeld/zusammengesetzte Felder, Schaltung, elektromagnetische Induktion, Optik, mechanische Wellen, Akustik, Fluide, Wärmelehre, Hebel.
+- [ ] Koordinatenhintergrund, Hierarchie von Achsen/Raster, Linienbreite, Beschriftung sowie Lesbarkeit von Zahlen und Einheiten vereinheitlichen. Die Farben der Schlüsselvektoren und die Semantik der Ebenenschalter bleiben erhalten.
+- [ ] Proportionen und Positionierung der Geräte optimieren, damit Objekte erkennbar sind und Messwerte nicht kollidieren; physikalische Geometrie, Verdrahtung und Diagramme werden weiterhin von den vorhandenen echten Daten gespeist.
+- [ ] Die neuen Gerätebilder einbinden, alte Bilder und Vektor-Fallbacks bleiben erhalten. Bildgröße und sichtbaren Bereich messen und die Konsistenz von catalog/manifest aktualisieren; Geräte mit fester Kameraposition nicht drehen, um eine andere Kameraposition vorzutäuschen.
+- [ ] Für das Verhalten bei Ressourcenausfall und die Positionen von Anschlüssen/Beschriftungen zuerst echte Komponententests ergänzen und dann implementieren. Für statisches CSS keine quellcodeabgleichenden Tests hinzufügen.
+- [ ] Die zugehörigen Domänentests fokussiert ausführen und typecheck/lint prüfen; Lesbarkeit der Szenen und unveränderte Datenfakten unabhängig reviewen.
 
-### Task 3: 电路直接操作及回归
+### Task 3: Direkte Bedienung von Schaltungen und Regression
 
-**文件：**
+**Dateien:**
 
-- 修改 `PhysicsWorkspace.tsx`、`physics/PhysicsCanvas.tsx`、`physics/renderer-registry.tsx`、`physics/circuit-renderer.tsx`，必要时新增小型 `physics/circuit-interactions.ts`。
-- 修改 `physics/renderers.module.css`、`locales.ts` 和 `tests/circuit.client.spec.tsx`。
-- 只有确实需要 UI 手势桥接才修改 `physics/workspace-runtime.ts` 或 `circuit-workspace-runtime.ts`，不得改根 `packages/` 引擎。
+- Ändern: `PhysicsWorkspace.tsx`, `physics/PhysicsCanvas.tsx`, `physics/renderer-registry.tsx`, `physics/circuit-renderer.tsx`, bei Bedarf ein kleines neues `physics/circuit-interactions.ts`.
+- Ändern: `physics/renderers.module.css`, `locales.ts` und `tests/circuit.client.spec.tsx`.
+- `physics/workspace-runtime.ts` oder `circuit-workspace-runtime.ts` nur ändern, wenn für die Gestenanbindung der UI wirklich nötig; die Engine im Wurzelverzeichnis `packages/` darf nicht geändert werden.
 
-**接口：** 沿用 `runtime.setChoice('switch:sw', 'open' | 'closed')` 与真实滑片参数 id 的 `runtime.editParameter()`。操作通道与既有 `ComponentDragChannel` 分开，避免元件移动误触；通过纯数据/回调传递，不能注册新的全局 store。
+**Schnittstelle:** Es werden `runtime.setChoice('switch:sw', 'open' | 'closed')` und `runtime.editParameter()` mit der echten Parameter-ID des Schleifers weiterverwendet. Der Bedienkanal ist vom vorhandenen `ComponentDragChannel` getrennt, um versehentliches Auslösen beim Verschieben von Bauteilen zu vermeiden; die Weitergabe erfolgt über reine Daten/Callbacks, es darf kein neuer globaler Store registriert werden.
 
-- [ ] 查全元件 pointer、`setChoice`、滑片 parameter id 和 frame 更新引用。
-- [ ] 新用例先红：点击画布开关后电流为零且 Inspector 状态一致；键盘可切换；推滑片到中间/端点后真实读数变化；拖整个元件不切换开关；pointercancel 不遗留手势。
-- [ ] 使用现有 `createSeriesCircuitScene()` 的独立预期：闭合时 6V/(10Ω+20Ω)=0.2A；断开为0；恢复闭合仍为0.2A。
-- [ ] 使用 `createRheostatCircuitScene()` 的独立预期：滑片0/0.5/1时，6V/(10Ω+20Ω×位置)=0.6/0.3/0.2A。切换到手动位置后，原扫描播放不能悄悄覆盖手势结果。
-- [ ] 先运行这些测试确认失败，再实现可访问开关和滑片操作区域；保留器件拖动、焦点、触摸和键盘路径。
-- [ ] 同步文件，运行 `pnpm test:web`、`pnpm typecheck:web`、`pnpm lint:web`、`pnpm build:web`，记录所有警告和失败。
-- [ ] 控制器使用真实浏览器在桌面、窄桌面和手机尺寸检查所有领域、筛选、图表、专注模式和电路手势；保留截图与日志。
-- [ ] 最后执行 code-audit 与独立整体验收，更新交付报告，不自动提交/推送。
+- [ ] Alle Referenzen auf pointer von Bauteilen, `setChoice`, Parameter-ID des Schleifers und Frame-Updates durchsuchen.
+- [ ] Neue Testfälle zuerst rot: Ein Klick auf den Schalter im Canvas macht den Strom null und der Zustand im Inspector ist konsistent; per Tastatur umschaltbar; wird der Schleifer in die Mitte/an die Endpunkte geschoben, ändern sich die echten Messwerte; das Ziehen eines ganzen Bauteils schaltet den Schalter nicht; pointercancel hinterlässt keine Geste.
+- [ ] Unabhängige Erwartung mit dem vorhandenen `createSeriesCircuitScene()`: Geschlossen 6V/(10Ω+20Ω)=0,2A; geöffnet 0; erneut geschlossen wieder 0,2A.
+- [ ] Unabhängige Erwartung mit `createRheostatCircuitScene()`: Bei Schleifer 0/0,5/1 gilt 6V/(10Ω+20Ω×Position)=0,6/0,3/0,2A. Nach dem Umschalten auf manuelle Position darf die ursprüngliche Durchlaufwiedergabe das Ergebnis der Geste nicht stillschweigend überschreiben.
+- [ ] Zuerst diese Tests ausführen und das Fehlschlagen bestätigen, dann zugängliche Bedienbereiche für Schalter und Schleifer implementieren; Bauteil-Ziehen, Fokus, Touch- und Tastaturpfad bleiben erhalten.
+- [ ] Dateien synchronisieren, `pnpm test:web`, `pnpm typecheck:web`, `pnpm lint:web`, `pnpm build:web` ausführen und alle Warnungen und Fehlschläge festhalten.
+- [ ] Der Controller prüft mit einem echten Browser in Desktop-, schmaler Desktop- und Handy-Größe alle Domänen, Filter, Diagramme, den Fokusmodus und die Schaltungsgesten; Screenshots und Logs aufbewahren.
+- [ ] Abschließend code-audit und unabhängige Gesamtabnahme durchführen, den Lieferbericht aktualisieren, nicht automatisch committen/pushen.

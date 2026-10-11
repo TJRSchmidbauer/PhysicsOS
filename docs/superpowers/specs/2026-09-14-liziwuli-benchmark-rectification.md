@@ -1,172 +1,171 @@
-# 实验板块对标整改计划（对标 liziwuli.com）
+# Nachbesserungsplan für den Experimentbereich (Benchmark gegen liziwuli.com)
 
-日期：2026-09-14。范围：实验中心 → 工作台 → 单实验体验。本计划替代上轮整改计划中的 D 线
-（广度对齐），A/B/C 线已完成项不重述。
+Datum: 2026-09-14. Umfang: Experimentzentrum → Arbeitsbereich → Erfahrung eines einzelnen Experiments. Dieser Plan ersetzt die Linie D
+(Breitenangleichung) des Nachbesserungsplans der vorigen Runde; bereits abgeschlossene Punkte der Linien A/B/C werden nicht wiederholt.
 
-## 0. 竞品实证（2026-09-14 重新抓取，非转述）
+## 0. Empirische Wettbewerbsdaten (2026-09-14 erneut abgerufen, keine Wiedergabe aus zweiter Hand)
 
-来源：首页 HTML + 全部 20 个 JS chunk 实测（`/tmp/lzw/`）。
+Quelle: Start-HTML + alle 20 JS-Chunks gemessen (`/tmp/lzw/`).
 
-- **目录规模**：bundle 内 126 条实验记录，其中 `status:"implemented"` **106 条**
-  （首页对外宣称 82 个互动实验——目录数据比宣传更多）。
-- **组织**：12 个高中模块 + 13 个 `junior-*` 初中模块，共 25 个族。模块名与
-  人教版章节对应。
-- **每实验一个独立组件**：106 个实验各自懒加载独立 chunk
-  （`UniformLinearMotionExperiment`、`ChaseEncounterExperiment`…），不是
-  通用渲染器套参数——每个实验的可视化、交互、读数都是定制的。
-- **每实验结构化摘要**：`summary.{coreModel, parameters[], feedback[], errors[]}`，
-  工作台顶部渲染三张卡片「核心模型 / 关键参数 / 观察反馈」；数据里还有
-  `errors[]`（测量误差/模型近似）与 `textbookMapping`
-  （`人教版 / 高中物理 / 2019` + 必修/选择性必修册次 + 章节 + 主题）。
-- **搜索别名**：多数实验带 `searchAliases`（如斜抛：`斜上抛/射程/射高/互余角…`）。
-- **工具栏**：每实验「实验指南」「数据导出」按钮。
-- **器材全代码绘制**：全站图片资产仅 favicon 与微信二维码，器材为 CSS 模块
-  类名绘制——上轮已证伪"竞品靠位图"的假设。
-- **免费无登录**：82 个实验免费体验，无需登录无需会员。
+- **Katalogumfang**: Im Bundle 126 Experimenteinträge, davon `status:"implemented"` **106**
+  (die Startseite wirbt nach außen mit 82 interaktiven Experimenten – die Katalogdaten enthalten mehr als die Werbung).
+- **Organisation**: 12 Module der Oberstufe + 13 `junior-*`-Module der Mittelstufe, insgesamt 25 Familien. Die Modulnamen
+  entsprechen den Kapiteln des Lehrbuchs der PEP (人教版).
+- **Pro Experiment eine eigene Komponente**: Jedes der 106 Experimente wird als eigener Chunk lazy geladen
+  (`UniformLinearMotionExperiment`, `ChaseEncounterExperiment` …), es ist kein
+  generischer Renderer mit Parametern – Visualisierung, Interaktion und Messwerte jedes Experiments sind maßgeschneidert.
+- **Pro Experiment eine strukturierte Zusammenfassung**: `summary.{coreModel, parameters[], feedback[], errors[]}`,
+  oben im Arbeitsbereich werden drei Karten „Kernmodell / Wichtige Parameter / Beobachtungsrückmeldung“ gerendert; in den Daten gibt es außerdem
+  `errors[]` (Messfehler/Modellnäherung) und `textbookMapping`
+  (`人教版 / 高中物理 / 2019` + Pflicht-/Wahlpflichtband + Kapitel + Thema).
+- **Suchaliase**: Die meisten Experimente tragen `searchAliases` (z. B. schräger Wurf: `斜上抛/射程/射高/互余角…`).
+- **Toolbar**: Pro Experiment die Schaltflächen „Experimentanleitung“ und „Datenexport“.
+- **Geräte vollständig im Code gezeichnet**: Die einzigen Bild-Assets der ganzen Seite sind das Favicon und der WeChat-QR-Code, die Geräte sind per CSS-Modul-
+  Klassennamen gezeichnet – die Annahme der vorigen Runde „der Wettbewerber stützt sich auf Bitmaps“ ist damit widerlegt.
+- **Kostenlos ohne Anmeldung**: 82 Experimente sind kostenlos nutzbar, ohne Anmeldung und ohne Mitgliedschaft.
 
-## 1. 我方现状（同日实测）
+## 1. Unser Ist-Zustand (am selben Tag gemessen)
 
-- **43 个可选实验**（44 模板，cyclotron `comingSoon`），11 个 domain 族。
-- **架构差异**：我们走 `PhysicsScene → Engine → Verifier → Observation →
-runtime → renderer` 通用管线，13 个 runtime；对方每实验独立组件。
-  我方优势：一处引擎修正全实验受益、场景可序列化可分享、试题空间复用同
-  一引擎；劣势：单实验"定制感"弱（无实验专属面板/步骤/指南）。
-- **已具备对方没有的**：画布直接操作（拖器材/拨开关/推滑片走正式命令）、
-  引擎验证徽标、逐步回放、报告页签、AI 助教、试题空间联动。
-- **缺的结构化数据**：模板只有 `label/hint/tags`，无
-  `coreModel/parameters/feedback/errors/textbookMapping/searchAliases`。
-- **公式排版**：自绘 `MathText` 只支持上下标；对方 KaTeX（分式/根式/积分）。
-- **器材路线**：我们刚接入位图精灵（电路 19 件 + 力学 5 件全过质检），
-  对方纯代码绘制。两条路线各有成本——此为决策点而非既定结论。
+- **43 wählbare Experimente** (44 Vorlagen, cyclotron `comingSoon`), 11 Domänenfamilien.
+- **Architekturunterschied**: Wir gehen über die generische Pipeline `PhysicsScene → Engine → Verifier → Observation →
+runtime → renderer` mit 13 Runtimes; die Gegenseite hat pro Experiment eine eigene Komponente.
+  Unsere Stärken: Eine Engine-Korrektur an einer Stelle nützt allen Experimenten, Szenen sind serialisierbar und teilbar, der Aufgabenraum verwendet dieselbe
+  Engine; Schwäche: Das Gefühl der Maßschneiderung pro Experiment ist schwach (keine experimentspezifischen Panels/Schritte/Anleitungen).
+- **Bereits vorhanden, was die Gegenseite nicht hat**: direkte Bedienung auf dem Canvas (Geräte ziehen/Schalter umlegen/Schleifer schieben über offizielle Befehle),
+  Engine-Verifikationsabzeichen, schrittweise Wiedergabe, Berichts-Tab, KI-Assistent, Kopplung mit dem Aufgabenraum.
+- **Fehlende strukturierte Daten**: Die Vorlagen haben nur `label/hint/tags`, aber keine
+  `coreModel/parameters/feedback/errors/textbookMapping/searchAliases`.
+- **Formelsatz**: Das selbst gezeichnete `MathText` unterstützt nur Hoch- und Tiefstellung; die Gegenseite hat KaTeX (Brüche/Wurzeln/Integrale).
+- **Geräteweg**: Wir haben gerade Bitmap-Sprites eingebunden (Schaltung 19 Teile + Mechanik 5 Teile, alle mit bestandener Qualitätskontrolle),
+  die Gegenseite zeichnet rein per Code. Beide Wege haben ihre Kosten – das ist ein Entscheidungspunkt, keine feststehende Schlussfolgerung.
 
-## 2. 差距矩阵（族级）
+## 2. Lückenmatrix (auf Familienebene)
 
-| 竞品族（implement 数） | 我方覆盖                                     | 缺口                                                                                                                                 |
+| Familie des Wettbewerbers (Anzahl implementiert) | Unsere Abdeckung                             | Lücke                                                                                                                                |
 | ---------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 运动学基础 (5)         | 匀速/匀变速/自由落体/平均速度 4              | 追及相遇、v-t 面积微元法                                                                                                             |
-| 相互作用与牛二 (11)    | 牛二、斜面、杠杆 3                           | 胡克、静/动摩擦、力的合成分解、共点力平衡、超重失重、传送带、板块、瞬时性、平行四边形、滑轮结、测 μ —— **缺 8**                      |
-| 曲线运动与万有引力 (7) | 平抛、斜抛 2                                 | 运动合成分解、向心力临界、天体运动、卫星变轨、双星 —— **缺 5**                                                                       |
-| 功和机械能 (4)         | 0                                            | 势能、动能定理、机械能守恒、机车启动 —— **全缺**                                                                                     |
-| 电场与电荷 (9)         | 点电荷/多点电荷/匀强场/平行板 4              | 电场线等势面、示波管、辐向场、静电感应屏蔽、直线加速器 —— **缺 5**                                                                   |
-| 恒定电流 (6)           | 串/并/混/滑变/伏安/功率/EMF 7                | 量具读数、电阻率、电容充放电 —— **缺 3，其余已超**                                                                                   |
-| 磁场与电磁感应 (15)    | 磁场圆周、速度选择器、质谱、单棒/双棒/磁通 6 | 磁感线、安培力方向、楞次、交变电流、变压器、远距离输电、回旋、三场复合细节、辐向磁场表头、电流磁场 —— **缺 ~9**                      |
-| 动量与碰撞 (7)         | 弹性/非弹/完全非弹 3                         | 动量冲量、验证守恒实验、反冲火箭、二维碰撞、球槽、弹簧连接体 —— **缺 4**                                                             |
-| 机械振动与波 (5)       | 行波/干涉/驻波 3                             | 弹簧振子、单摆、受迫振动共振、波形成 —— **缺 4**                                                                                     |
-| 光学 (5)               | 平面镜/凸透镜/凹面镜/凸面镜 4                | 折射全反射、双缝干涉、单缝衍射、薄膜干涉 —— **缺 4**                                                                                 |
-| 热学与气体 (4)         | 熔化/比热容 2                                | 布朗运动、速率分布、等温变化、状态方程 —— **缺 4**                                                                                   |
-| 近代物理 (4)           | 0                                            | 光电效应、核式结构、能级光谱、半衰期 —— **全缺**                                                                                     |
-| 初中族合计 (~34)       | 声学 1、浮力 1、杠杆(力学)1                  | 声 1、物态 1、光 3、透镜已覆盖、质量密度 2、力与运动 4、压强 4、浮力 1、功与简单机械 4、内能 6、电流电路 2、电压电阻 1 —— **缺 ~28** |
+| Grundlagen der Kinematik (5) | Gleichförmig/gleichmäßig beschleunigt/freier Fall/Durchschnittsgeschwindigkeit 4 | Verfolgung und Begegnung, v-t-Flächen-Infinitesimalmethode                                                                |
+| Wechselwirkungen und Newton II (11) | Newton II, schiefe Ebene, Hebel 3 | Hooke, Haft-/Gleitreibung, Zusammensetzen und Zerlegen von Kräften, Gleichgewicht konkurrierender Kräfte, Über-/Schwerelosigkeit, Förderband, Brett-Klotz, Momentanität, Parallelogramm, Seilrollen-Knoten, Messung von μ —— **8 fehlen** |
+| Kurvenbewegung und Gravitation (7) | Waagerechter Wurf, schräger Wurf 2 | Zusammensetzung/Zerlegung von Bewegungen, kritische Zentripetalkraft, Himmelsmechanik, Satellitenbahnwechsel, Doppelstern —— **5 fehlen** |
+| Arbeit und mechanische Energie (4) | 0                                     | Potenzielle Energie, Arbeitssatz der kinetischen Energie, mechanische Energieerhaltung, Anfahren einer Lokomotive —— **alle fehlen** |
+| Elektrisches Feld und Ladung (9) | Punktladung/mehrere Punktladungen/homogenes Feld/Plattenkondensator 4 | Feldlinien und Äquipotentialflächen, Oszilloskop-Röhre, Radialfeld, elektrostatische Influenz und Abschirmung, Linearbeschleuniger —— **5 fehlen** |
+| Gleichstrom (6)       | Reihe/Parallel/Gemischt/Schiebewiderstand/Strom-Spannungs-Kennlinie/Leistung/EMK 7 | Ablesen von Messgeräten, spezifischer Widerstand, Laden und Entladen eines Kondensators —— **3 fehlen, der Rest bereits übertroffen** |
+| Magnetfeld und elektromagnetische Induktion (15) | Kreisbewegung im Magnetfeld, Geschwindigkeitsselektor, Massenspektrometer, Einzelstab/Doppelstab/Fluss 6 | Magnetfeldlinien, Richtung der Ampèrekraft, Lenzsche Regel, Wechselstrom, Transformator, Fernübertragung, Zyklotron, Details zum Dreifeld-Verbund, Radialmagnetfeld-Messwerk, Magnetfeld eines Stroms —— **~9 fehlen** |
+| Impuls und Stoß (7)   | Elastisch/inelastisch/vollständig inelastisch 3 | Impuls und Kraftstoß, Experiment zur Erhaltung, Rückstoß-Rakete, zweidimensionaler Stoß, Kugelrinne, Federkopplung —— **4 fehlen** |
+| Mechanische Schwingungen und Wellen (5) | Wanderwelle/Interferenz/stehende Welle 3 | Federpendel, Fadenpendel, erzwungene Schwingung und Resonanz, Wellenentstehung —— **4 fehlen** |
+| Optik (5)             | Planspiegel/Sammellinse/Hohlspiegel/Wölbspiegel 4 | Brechung und Totalreflexion, Doppelspalt-Interferenz, Einzelspalt-Beugung, Dünnschicht-Interferenz —— **4 fehlen** |
+| Wärmelehre und Gase (4) | Schmelzen/spezifische Wärmekapazität 2    | Brownsche Bewegung, Geschwindigkeitsverteilung, isotherme Zustandsänderung, Zustandsgleichung —— **4 fehlen** |
+| Moderne Physik (4)    | 0                                            | Photoeffekt, Kernmodell, Energieniveaus und Spektren, Halbwertszeit —— **alle fehlen** |
+| Familien der Mittelstufe insgesamt (~34) | Akustik 1, Auftrieb 1, Hebel (Mechanik) 1 | Schall 1, Aggregatzustände 1, Licht 3, Linse bereits abgedeckt, Masse und Dichte 2, Kraft und Bewegung 4, Druck 4, Auftrieb 1, Arbeit und einfache Maschinen 4, innere Energie 6, Stromkreis 2, Spannung und Widerstand 1 —— **~28 fehlen** |
 
-**结论**：106 中我方实质覆盖约 35–40，缺口 ~65 个实验，大头在初中族
-（~28）、相互作用（8）、磁场感应（9）、近代物理（4 全缺）、
-振动波（4）、热学（4）、功和能（4 全缺）。
+**Fazit**: Von 106 decken wir tatsächlich etwa 35–40 ab, die Lücke beträgt ~65 Experimente, der Großteil liegt bei den Familien der Mittelstufe
+(~28), Wechselwirkungen (8), Magnetfeld-Induktion (9), moderner Physik (4 fehlen alle),
+Schwingungen und Wellen (4), Wärmelehre (4), Arbeit und Energie (4 fehlen alle).
 
-## 3. 整改工作流（按依赖排序）
+## 3. Nachbesserungs-Workstreams (nach Abhängigkeit geordnet)
 
-### P0 · 每实验结构化摘要（纯数据+渲染，所有后续批次的承载面）
+### P0 · Strukturierte Zusammenfassung pro Experiment (reine Daten + Rendering, die Trägerfläche aller späteren Chargen)
 
-竞品每张工作台顶部的三卡片是其"教学感"的核心来源，且是纯数据工作，
-风险最低、收益立竿见影。
+Die drei Karten oben in jedem Arbeitsbereich des Wettbewerbers sind die Hauptquelle seiner „didaktischen Anmutung“; sie sind reine Datenarbeit,
+mit dem geringsten Risiko und sofort sichtbarem Nutzen.
 
-- **P0-1 数据模型**：`ExperimentTemplate` 增 `summary` 字段
+- **P0-1 Datenmodell**: `ExperimentTemplate` erhält das Feld `summary`
   `{ coreModel: PhysicsosKey, parameters: PhysicsosKey[], feedback:
 PhysicsosKey[], errors: PhysicsosKey[] }` + `textbookMapping?:
-{ edition, volume, chapter, topics[] }` + `searchAliases?: string[]`。
-  文案走 locales（ zh 先行，en 同步键值）。
-- **P0-2 渲染**：工作台场景与对象面板下方（或画布上方信息条）渲染三卡片；
-  实验中心卡片加教材映射角标。
-- **P0-3 填充**：44 个现有模板逐个填 `coreModel/parameters/feedback/errors`
-  —— 每个字段的内容**必须与引擎实际求解模型一致**（coreModel 写的公式
-  必须是引擎在算的，违者同审计 P0 同罪）。
-- **验收**：44 模板全部有 summary；卡片渲染测试；任一 coreModel 与引擎
-  行为不符即为失败。
+{ edition, volume, chapter, topics[] }` + `searchAliases?: string[]`.
+  Die Texte laufen über locales (zh zuerst, en synchrone Schlüsselwerte).
+- **P0-2 Rendering**: Die drei Karten werden unter Szenen- und Objektpanel des Arbeitsbereichs (oder in einer Infoleiste über dem Canvas) gerendert;
+  die Karten im Experimentzentrum erhalten ein Eck-Abzeichen mit der Lehrbuchzuordnung.
+- **P0-3 Befüllung**: Die 44 vorhandenen Vorlagen erhalten einzeln `coreModel/parameters/feedback/errors`
+  — der Inhalt jedes Feldes **muss mit dem tatsächlich von der Engine gelösten Modell übereinstimmen** (die in coreModel geschriebene Formel
+  muss die sein, die die Engine rechnet; ein Verstoß ist so schwerwiegend wie P0 des Audits).
+- **Abnahme**: Alle 44 Vorlagen haben eine summary; Test zum Rendern der Karten; jede Abweichung eines coreModel vom
+  Engine-Verhalten gilt als Fehlschlag.
 
-### P1 · 工作台工具栏补齐
+### P1 · Toolbar des Arbeitsbereichs vervollständigen
 
-- **P1-1 实验指南**：每实验 `guide` 字段（步骤列表 + 误差说明），模态展示；
-  数据来自 P0 的 errors + 新增 steps。
-- **P1-2 数据导出**：把 runtime 已有的 `data` 页签表格导出 CSV
-  （时间序列表已在 snapshot 里，纯前端 Blob 下载，零依赖）。
-- **P1-3 搜索**：实验中心加搜索框，匹配 `label` + `searchAliases` +
-  `tags`（中文别名全量进 locales 之外的 plain string 字段即可）。
+- **P1-1 Experimentanleitung**: Pro Experiment ein Feld `guide` (Schrittliste + Fehlererläuterung), modal angezeigt;
+  die Daten stammen aus den errors von P0 + neuen steps.
+- **P1-2 Datenexport**: Die bereits in der Runtime vorhandene Tabelle des Tabs `data` wird als CSV exportiert
+  (die Zeitreihentabelle liegt bereits im Snapshot, reiner Frontend-Blob-Download, ohne Abhängigkeit).
+- **P1-3 Suche**: Das Experimentzentrum erhält ein Suchfeld, das auf `label` + `searchAliases` +
+  `tags` passt (chinesische Aliase insgesamt als einfache Stringfelder außerhalb von locales).
 
-### P2 · 公式排版升级（决策点）
+### P2 · Upgrade des Formelsatzes (Entscheidungspunkt)
 
-- 自研扩展 `MathText` 到分式/根式（估 M 体量，无新依赖）；或引入 KaTeX
-  （需批准依赖例外 + ~270KB）。**先按自研方案出样品**（v = v₀ + at、
-  x = ½at² 两个分式/根式场景），达标则不引依赖。
+- Eigene Erweiterung von `MathText` auf Brüche/Wurzeln (geschätzt Umfang M, keine neue Abhängigkeit); oder Einführung von KaTeX
+  (erfordert eine Abhängigkeitsausnahme mit Genehmigung + ~270KB). **Zunächst Muster nach der Eigenlösung erstellen** (v = v₀ + at,
+  x = ½at², zwei Bruch-/Wurzelszenarien); wird der Standard erreicht, wird keine Abhängigkeit eingeführt.
 
-### P3 · 广度补齐（分 6 批，每批可独立验收发布）
+### P3 · Breite ergänzen (in 6 Chargen, jede einzeln abnehmbar und veröffentlichbar)
 
-每批统一工序：模板 + `createScene` 接真实引擎/新 runtime → summary 填充
-（P0 契约）→ 数值测试 → 浏览器实测 → 截图。引擎不支持的模型**宁可
-comingSoon 标注，不得 fake**。
+Einheitlicher Arbeitsablauf pro Charge: Vorlage + `createScene` an echte Engine/neue Runtime anbinden → summary befüllen
+(Vertrag aus P0) → Zahlenwerttest → Browser-Test → Screenshot. Von der Engine nicht unterstützte Modelle werden **lieber
+als comingSoon gekennzeichnet, nicht gefälscht**.
 
-| 批次            | 内容                                                                        | 新增            | 引擎依赖                                                          |
+| Charge          | Inhalt                                                                      | Neu             | Engine-Abhängigkeit                                               |
 | --------------- | --------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------- |
-| P3-a 力学补强   | 追及相遇、胡克定律、静/动摩擦、力的合成分解、共点力平衡、超重失重、v-t 面积 | 7               | 现有 mechanics 引擎可解，多数是新 scene builder                   |
-| P3-b 振动与波   | 弹簧振子、单摆、受迫振动共振、机械波形成                                    | 4               | 需简谐振动模型（新 module 或 mechanics 扩展）                     |
-| P3-c 动量与能量 | 动量冲量、验证动量守恒、反冲火箭、动能定理、机械能守恒                      | 5               | collision 引擎已有，energy 需派生量                               |
-| P3-d 电磁补强   | 电场线等势面可视化、楞次定律演示、交变电流、安培力方向、磁感线              | 5               | electric/induction 现有 + 场线采样器                              |
-| P3-e 热学与近代 | 布朗运动、速率分布、等温变化、光电效应、半衰期                              | 5               | 需 2 个新小引擎（统计物理/量子示意，允许定性模型但 summary 注明） |
-| P3-f 初中族     | 按缺口清单分批：光折射色散、压强浮力、功与简单机械、内能、声特性、质量密度  | ~20 分 2–3 子批 | 多为定性/简单定量模型，复用现有 runtime 模式                      |
+| P3-a Mechanik ausbauen | Verfolgung und Begegnung, Hookesches Gesetz, Haft-/Gleitreibung, Zusammensetzen und Zerlegen von Kräften, Gleichgewicht konkurrierender Kräfte, Über-/Schwerelosigkeit, v-t-Fläche | 7 | Die vorhandene mechanics-Engine kann es lösen, meist neue Scene Builder |
+| P3-b Schwingungen und Wellen | Federpendel, Fadenpendel, erzwungene Schwingung und Resonanz, Wellenentstehung | 4          | Braucht ein Modell harmonischer Schwingung (neues Modul oder Erweiterung von mechanics) |
+| P3-c Impuls und Energie | Impuls und Kraftstoß, Verifikation der Impulserhaltung, Rückstoß-Rakete, Arbeitssatz der kinetischen Energie, mechanische Energieerhaltung | 5 | Die collision-Engine ist vorhanden, Energie braucht abgeleitete Größen |
+| P3-d Elektromagnetik ausbauen | Visualisierung von Feldlinien/Äquipotentialflächen, Demonstration der Lenzschen Regel, Wechselstrom, Richtung der Ampèrekraft, Magnetfeldlinien | 5 | electric/induction vorhanden + Feldlinien-Sampler |
+| P3-e Wärmelehre und Moderne | Brownsche Bewegung, Geschwindigkeitsverteilung, isotherme Zustandsänderung, Photoeffekt, Halbwertszeit | 5 | Braucht 2 neue kleine Engines (statistische Physik/Quantenskizze, qualitative Modelle sind erlaubt, aber summary vermerkt es) |
+| P3-f Familien der Mittelstufe | Nach der Lückenliste chargenweise: Lichtbrechung und Dispersion, Druck und Auftrieb, Arbeit und einfache Maschinen, innere Energie, Schalleigenschaften, Masse und Dichte | ~20 in 2–3 Unterchargen | Meist qualitative/einfache quantitative Modelle, das vorhandene Runtime-Muster wiederverwenden |
 
-每批完成判据：模板可创建 + 引擎真实可解 + summary 四件套齐全 +
-图表读数正确 + 数值断言测试 + 浏览器实测零错误 + 截图入库。
+Abschlusskriterium jeder Charge: Vorlage erstellbar + Engine löst tatsächlich + die vier summary-Teile vollständig +
+Diagrammwerte korrekt + Test mit Zahlenwert-Assertions + Browser-Test ohne Fehler + Screenshots abgelegt.
 
-### P4 · 器材路线终局决策（承接 C4）
+### P4 · Endgültige Entscheidung zum Geräteweg (Fortsetzung von C4)
 
-现状：电路 19 件 + 力学 5 件位图已接入并通过验收；竞品纯代码绘制。
+Ist-Zustand: Bitmaps für Schaltung 19 Teile + Mechanik 5 Teile sind eingebunden und abgenommen; der Wettbewerber zeichnet rein per Code.
 
-- **选项 A 继续位图**：优势是质感真实；代价是每个新领域都要生成-质检-
-  锚点测量一轮，~65 个新实验器材量不小。
-- **选项 B 代码绘制**（向竞品看齐）：`primitives.tsx` 矢量画法升级
-  （等距/侧视规范 + 统一光照渐变），无资产管线，器材可参数化
-  （滑变长度随阻值变——位图做不到）。
-- **选项 C 混合**：器材体代码绘制（参数化），仅复杂质感件（表盘、
-  光源）用位图。
-- **建议**：B 或 C。参数化是代码绘制的杀手级优势（竞品滑块、
-  弹簧伸长、液面高度全是几何参数驱动）。P3 首批开工前需定案，
-  避免给错误路线继续加仓。
+- **Option A Bitmaps beibehalten**: Vorteil ist die realistische Anmutung; Kosten: Jede neue Domäne braucht eine Runde Erzeugen-Qualitätskontrolle-
+  Ankermessung, bei ~65 neuen Experimenten ist die Menge an Geräten nicht klein.
+- **Option B Zeichnen per Code** (in Richtung Wettbewerber): Die Vektorzeichnung von `primitives.tsx` wird aufgewertet
+  (isometrisch/Seitenansicht-Vorgabe + einheitlicher Beleuchtungsverlauf), keine Asset-Pipeline, Geräte sind parametrisierbar
+  (Länge des Schiebewiderstands folgt dem Widerstandswert – mit Bitmaps nicht machbar).
+- **Option C Hybrid**: Gerätekörper per Code gezeichnet (parametrisiert), nur komplexe Materialanmutungsteile (Zifferblatt,
+  Lichtquelle) mit Bitmaps.
+- **Empfehlung**: B oder C. Parametrisierung ist der Killer-Vorteil des Zeichnens per Code (Schieber, Federdehnung,
+  Flüssigkeitshöhe des Wettbewerbers sind alle geometrisch parametergesteuert). Vor dem Start der ersten Charge von P3 ist zu entscheiden,
+  um nicht weiter in den falschen Weg zu investieren.
 
-### P5 · 单实验定制感（对标"每实验一组件"的合理部分）
+### P5 · Maßgeschneidertes Gefühl pro Experiment (der sinnvolle Teil von „eine Komponente pro Experiment“)
 
-不照搬 106 个组件的做法（违背我方引擎优先架构），但吸收其**呈现层**
-定制：
+Das Vorgehen mit 106 Komponenten wird nicht kopiert (es widerspricht unserer Architektur mit Vorrang der Engine), aber die **Darstellungs-
+schicht** wird übernommen:
 
-- **P5-1 场景装饰层**：`SceneVisualModel` 增可选 `decorations`（如斜面的
-  楔形支撑已是代码绘制——推广为每实验可声明的背景器材层）。
-- **P5-2 专属读数面板**：runtime 已有 readouts，允许模板声明
-  `featuredReadouts`（首屏大数字，如追及相遇的"相距距离"）。
-- **P5-3 步骤引导**：实验指南（P1-1）与画布联动的分步高亮。
+- **P5-1 Dekorationsschicht der Szene**: `SceneVisualModel` erhält optionale `decorations` (z. B. die Keilstütze der schiefen Ebene
+  ist bereits per Code gezeichnet – verallgemeinert zu einer je Experiment deklarierbaren Schicht von Hintergrundgeräten).
+- **P5-2 Eigenes Anzeigepanel**: Die Runtime hat bereits readouts, Vorlagen dürfen
+  `featuredReadouts` deklarieren (große Zahlen auf dem ersten Bildschirm, z. B. der „Abstand“ bei Verfolgung und Begegnung).
+- **P5-3 Schrittweise Anleitung**: Die Experimentanleitung (P1-1) wird mit der schrittweisen Hervorhebung auf dem Canvas gekoppelt.
 
-## 4. 执行顺序与体量
+## 4. Ausführungsreihenfolge und Umfang
 
-1. **第一批**：P0（结构化摘要，全 44 模板）+ P1-3 搜索 + P4 决策点
-2. **第二批**：P1-1/P1-2 工具栏 + P3-a 力学补强（引擎现成，最快出量）
-3. **第三批起**：P3-b→f 按批推进；P2 公式在第一批试用后定案；P5 穿插
-   在各批中做样板实验（建议追及相遇/弹簧振子/光电效应各一个）
+1. **Erste Charge**: P0 (strukturierte Zusammenfassung, alle 44 Vorlagen) + P1-3 Suche + P4 Entscheidungspunkt
+2. **Zweite Charge**: P1-1/P1-2 Toolbar + P3-a Mechanik ausbauen (Engine vorhanden, liefert am schnellsten Menge)
+3. **Ab der dritten Charge**: P3-b→f chargenweise voranbringen; P2 Formeln werden nach dem Test in der ersten Charge entschieden; P5 wird
+   in den Chargen mit Musterexperimenten eingestreut (empfohlen je eines: Verfolgung und Begegnung / Federpendel / Photoeffekt)
 
-体量粗估：P0 = M（44×4 字段纯数据 + 渲染）；P1 = S–M；P3 每批 = M–L
-（瓶颈在新引擎，非模板）；P5 = M。
+Grobe Umfangsschätzung: P0 = M (44×4 Felder reine Daten + Rendering); P1 = S–M; P3 je Charge = M–L
+(der Engpass liegt bei neuen Engines, nicht bei Vorlagen); P5 = M.
 
-## 5. 边界与风控
+## 5. Grenzen und Risikokontrolle
 
-- 引擎不支持的模型一律 `comingSoon`，**禁止假实现**（审计 P0 的教训：
-  cyclotron 标对了，比较类题没标）。
-- `summary.coreModel` 字段引入"文案必须等于引擎行为"的新诚实面——
-  加一条 parity 测试：coreModel 中出现的符号量必须在该实验的
-  derived/parameters 里存在。
-- 不引入新依赖；KaTeX 例外需单独批准。
-- 新增实验的中文标题/别名避免与竞品逐字雷同（模型名属公共物理术语
-  没问题，但 `searchAliases` 文案不照抄）。
-- 初中族模板进库前复核学段标注（P2-5 的教训）。
-- QuestionWorkspace 保持只读，新模板的场景同样受 `FACT_COMMANDS`
-  约束。
+- Von der Engine nicht unterstützte Modelle sind durchweg `comingSoon`, **gefälschte Implementierungen sind verboten**
+  (Lehre aus P0 des Audits: cyclotron war richtig gekennzeichnet, Aufgaben vom Vergleichstyp nicht).
+- Das Feld `summary.coreModel` führt die neue Ehrlichkeitsfläche „Text muss dem Engine-Verhalten entsprechen“ ein –
+  ein Parity-Test wird ergänzt: Die in coreModel vorkommenden symbolischen Größen müssen in derived/parameters dieses Experiments existieren.
+- Keine neue Abhängigkeit; die KaTeX-Ausnahme erfordert eine gesonderte Genehmigung.
+- Chinesische Titel/Aliase neuer Experimente vermeiden Wort-für-Wort-Übereinstimmung mit dem Wettbewerber (Modellnamen sind öffentliche physikalische
+  Fachbegriffe, das ist unproblematisch, aber die Texte von `searchAliases` werden nicht abgeschrieben).
+- Vor dem Aufnehmen von Vorlagen der Mittelstufe in die Bibliothek wird die Schulstufenkennzeichnung erneut geprüft (Lehre aus P2-5).
+- QuestionWorkspace bleibt schreibgeschützt, die Szenen neuer Vorlagen unterliegen ebenfalls
+  `FACT_COMMANDS`.
 
-## 6. 验收口径
+## 6. Abnahmekriterium
 
-每批结束：typecheck / test:web / test:core / lint / build:web 全绿 +
-localhost:3080 实测（含暗色）+ 截图。全部完成后产出
-`EXPERIMENT-BENCHMARK-PARITY-REPORT.md`：106 条竞品实验逐条对照
-（覆盖/不覆盖/comingSoon），不允许"估摸着覆盖了"。
+Am Ende jeder Charge: typecheck / test:web / test:core / lint / build:web alle grün +
+Praxistest auf localhost:3080 (einschließlich dunkel) + Screenshots. Nach Abschluss wird
+`EXPERIMENT-BENCHMARK-PARITY-REPORT.md` erstellt: Die 106 Wettbewerber-Experimente werden einzeln gegenübergestellt
+(abgedeckt/nicht abgedeckt/comingSoon), „vermutlich abgedeckt“ ist nicht zulässig.
