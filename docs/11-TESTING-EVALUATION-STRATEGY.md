@@ -1,29 +1,29 @@
-# PhysicsOS Testing & Evaluation Strategy
+# PhysicsOS Test- und Evaluierungsstrategie
 
-> 文件：`docs/11-TESTING-EVALUATION-STRATEGY.md`  
-> 文档定位：PhysicsOS 代码、物理、Agent、试题解析、UI 与系统质量验证体系
+> Datei: `docs/11-TESTING-EVALUATION-STRATEGY.md`  
+> Dokumentzweck: Qualitätssicherungssystem für Code, Physik, Agent, Aufgabenanalyse, UI und System von PhysicsOS
 
 ---
 
-# 1. 核心目标
+# 1. Kernziel
 
-PhysicsOS 不仅要测试“代码能不能跑”。
+PhysicsOS muss nicht nur testen, „ob der Code läuft“.
 
-必须同时证明：
+Es muss zugleich nachweisen:
 
 ```text
-物理算得对
-Scene 可重放
-题目解析得对
-Agent 选 Tool 得对
-Tutor 没有教错
-UI 与原型一致
-服务可恢复
+Die Physik wird richtig berechnet
+Scenes sind wiederholbar abspielbar
+Aufgaben werden richtig analysiert
+Der Agent wählt die richtigen Tools
+Der Tutor lehrt nichts Falsches
+Die UI entspricht dem Prototyp
+Services sind wiederherstellbar
 ```
 
 ---
 
-# 2. 测试层级
+# 2. Testebenen
 
 ```text
 Unit Test
@@ -45,7 +45,7 @@ Reliability
 
 # 3. Unit Test
 
-重点：
+Schwerpunkte:
 
 ```text
 Vector
@@ -63,7 +63,7 @@ Tool Guard
 
 # 4. Contract Test
 
-必须覆盖：
+Muss abdecken:
 
 ```text
 PhysicsScene
@@ -79,9 +79,9 @@ API
 
 # 5. Physics Golden Test
 
-这是 PhysicsOS 最重要测试资产之一。
+Dies ist eines der wichtigsten Test-Assets von PhysicsOS.
 
-每个 Case：
+Jeder Case:
 
 ```text
 Input Scene
@@ -96,22 +96,22 @@ Expected Invariants
 
 # 6. Mechanics Golden
 
-至少：
+Mindestens:
 
 ```text
-匀速直线
-匀变速
-自由落体
-竖直上抛
-平抛
-斜抛
-斜面静止
-斜面滑动
-弹簧
-连接体
-动量守恒
-弹性碰撞
-完全非弹性碰撞
+Gleichförmige geradlinige Bewegung
+Gleichmäßig beschleunigte Bewegung
+Freier Fall
+Senkrechter Wurf nach oben
+Waagerechter Wurf
+Schräger Wurf
+Ruhe auf der schiefen Ebene
+Gleiten auf der schiefen Ebene
+Feder
+Verbundene Körper
+Impulserhaltung
+Elastischer Stoß
+Vollständig inelastischer Stoß
 ```
 
 ---
@@ -119,11 +119,11 @@ Expected Invariants
 # 7. Electric Golden
 
 ```text
-两点电荷
-多点叠加
-匀强电场
-电势
-带电粒子偏转
+Zwei Punktladungen
+Mehrfache Überlagerung
+Homogenes elektrisches Feld
+Potenzial
+Ablenkung geladener Teilchen
 ```
 
 ---
@@ -133,14 +133,14 @@ Expected Invariants
 ```text
 v ∥ B
 v ⟂ B
-正电荷
-负电荷
-半径
-周期
-半圆
-矩形区域
-圆形区域
-临界问题
+Positive Ladung
+Negative Ladung
+Radius
+Periode
+Halbkreis
+Rechteckiger Bereich
+Kreisförmiger Bereich
+Kritische Probleme
 ```
 
 ---
@@ -148,15 +148,15 @@ v ⟂ B
 # 9. Circuit Golden
 
 ```text
-串联
-并联
-混联
-闭合电路
-内阻
-滑动变阻器
-理想电表
-非理想电表
-开关
+Reihenschaltung
+Parallelschaltung
+Gemischte Schaltung
+Geschlossener Stromkreis
+Innenwiderstand
+Schiebewiderstand
+Ideale Messgeräte
+Nicht-ideale Messgeräte
+Schalter
 ```
 
 ---
@@ -164,18 +164,18 @@ v ⟂ B
 # 10. Induction Golden
 
 ```text
-运动导体
-线框进入
-线框离开
-导轨
-双棒
+Bewegter Leiter
+Leiterrahmen tritt ein
+Leiterrahmen tritt aus
+Schiene
+Zwei Stäbe
 ```
 
 ---
 
 # 11. Property-based Test
 
-适合：
+Geeignet für:
 
 ```text
 Unit Conversion
@@ -189,7 +189,7 @@ Conservation
 
 # 12. Metamorphic Test
 
-例：匀强磁场圆周运动。
+Beispiel: Kreisbewegung im homogenen Magnetfeld.
 
 ```text
 v × 2 → r × 2
@@ -198,13 +198,13 @@ m × 2 → r × 2
 |q| × 2 → r ÷ 2
 ```
 
-这种关系测试比只测几个固定数更强。
+Solche Relationstests sind aussagekräftiger, als nur einige feste Zahlen zu testen.
 
 ---
 
 # 13. Boundary Test
 
-必须覆盖：
+Muss abdecken:
 
 ```text
 zero
@@ -222,7 +222,7 @@ very large
 
 # 14. Numerical Test
 
-检查：
+Prüfen:
 
 ```text
 NaN
@@ -236,7 +236,7 @@ Step Stability
 
 # 15. Integration Test
 
-Physics：
+Physics:
 
 ```text
 PhysicsScene
@@ -272,7 +272,7 @@ Physics Result
 
 # 17. Question Golden Dataset
 
-每道题保存：
+Pro Aufgabe wird gespeichert:
 
 ```text
 Original Source
@@ -285,9 +285,9 @@ Expected Answer
 
 ---
 
-# 18. OCR 指标
+# 18. OCR-Metriken
 
-例如：
+Zum Beispiel:
 
 ```text
 CER
@@ -297,7 +297,7 @@ Reading Order Accuracy
 
 ---
 
-# 19. Parser 指标
+# 19. Parser-Metriken
 
 ```text
 Question Segmentation Accuracy
@@ -323,19 +323,19 @@ Boundary Geometry Accuracy
 
 # 21. Scene Build Eval
 
-比较的是：
+Verglichen wird:
 
 ```text
 Scene Semantics
 ```
 
-而不是 JSON 字段顺序。
+und nicht die Reihenfolge der JSON-Felder.
 
 ---
 
 # 22. Agent Contract Test
 
-至少：
+Mindestens:
 
 ```text
 Role Tool Scope
@@ -353,7 +353,7 @@ Fork
 
 # 23. Agent Golden Cases
 
-例如：
+Zum Beispiel:
 
 ```text
 magnetic-particle-basic
@@ -366,7 +366,7 @@ induction-rail
 
 ---
 
-# 24. Agent Eval 维度
+# 24. Agent-Eval-Dimensionen
 
 ```text
 Intent Routing
@@ -385,34 +385,34 @@ Context Stability
 
 # 25. Tool Selection Eval
 
-检查：
+Prüfen:
 
 ```text
-是否正确
-是否重复
-是否越权
-是否漏掉必要 Verify
+Ob korrekt
+Ob wiederholt
+Ob Befugnisse überschritten
+Ob ein notwendiges Verify ausgelassen wurde
 ```
 
 ---
 
 # 26. Tutor Eval
 
-检查：
+Prüfen:
 
 ```text
-是否过早给答案
-是否正确使用 Observation
-是否和 Physics Result 一致
-是否匹配学生水平
-是否制造错误概念
+Ob die Antwort zu früh verraten wird
+Ob Observation korrekt verwendet wird
+Ob es mit dem Physics Result übereinstimmt
+Ob es zum Niveau des Schülers passt
+Ob falsche Konzepte erzeugt werden
 ```
 
 ---
 
 # 27. Diagnostic Eval
 
-需要：
+Erforderlich:
 
 ```text
 Ground Truth Misconception
@@ -420,13 +420,13 @@ Evidence
 Confidence
 ```
 
-避免过度诊断。
+Überdiagnose vermeiden.
 
 ---
 
 # 28. Long Context Regression
 
-场景：
+Szenarien:
 
 ```text
 10 turns
@@ -434,7 +434,7 @@ Confidence
 100 turns
 ```
 
-包含：
+Enthalten:
 
 ```text
 Compaction
@@ -443,7 +443,7 @@ Fork
 Scene Revision Change
 ```
 
-必须检查：
+Zu prüfen ist, dass
 
 ```text
 sceneId
@@ -453,23 +453,23 @@ confirmed facts
 misconceptions
 ```
 
-不漂移。
+nicht driften.
 
 ---
 
 # 29. E2E
 
-核心实验链：
+Zentrale Experimentkette:
 
 ```text
-进入实验室
-创建场景
-修改参数
-运行
-暂停
+Labor betreten
+Szene erstellen
+Parameter ändern
+Ausführen
+Pausieren
 Timeline Seek
-打开 Observable
-询问 Agent
+Observable öffnen
+Agent fragen
 ```
 
 ---
@@ -477,39 +477,39 @@ Timeline Seek
 # 30. Question E2E
 
 ```text
-上传题目
-解析
-确认条件
-生成 Scene
-可视化
-查看解析
-在物理世界中打开
+Aufgabe hochladen
+Analysieren
+Bedingungen bestätigen
+Scene erzeugen
+Visualisieren
+Lösung ansehen
+In der Physikwelt öffnen
 ```
 
 ---
 
 # 31. Teacher E2E
 
-后续：
+Später:
 
 ```text
-创建 Scene
-发布实验
-生成题目
-布置作业
+Scene erstellen
+Experiment veröffentlichen
+Aufgaben erzeugen
+Hausaufgabe zuweisen
 ```
 
 ---
 
 # 32. Playwright
 
-Web E2E 统一采用 Playwright 或项目确定的等价方案。
+Web-E2E verwendet einheitlich Playwright oder eine vom Projekt festgelegte gleichwertige Lösung.
 
 ---
 
 # 33. Visual Regression
 
-重点：
+Schwerpunkte:
 
 ```text
 Home
@@ -526,30 +526,30 @@ Chart
 
 ---
 
-# 34. Visual 不替代 Physics
+# 34. Visual ersetzt nicht Physics
 
-截图一样：
+Identische Screenshots:
 
-> 不代表物理结果正确。
+> bedeuten nicht, dass das physikalische Ergebnis korrekt ist.
 
 ---
 
 # 35. UI Fidelity
 
-可以使用截图 Diff 检查：
+Per Screenshot-Diff prüfbar:
 
 ```text
-布局
-尺寸
-颜色
-状态
+Layout
+Maße
+Farben
+Zustände
 ```
 
 ---
 
 # 36. Performance Test
 
-至少：
+Mindestens:
 
 ```text
 Canvas FPS
@@ -564,19 +564,19 @@ Memory
 
 # 37. Performance Baseline
 
-在固定硬件 / 浏览器 / Scene 建立基准。
+Eine Baseline wird auf fester Hardware / festem Browser / fester Scene aufgebaut.
 
-避免模糊写：
+Vermeiden Sie vage Formulierungen wie:
 
 ```text
-“感觉挺流畅”
+„fühlt sich ziemlich flüssig an“
 ```
 
 ---
 
 # 38. Load Test
 
-服务：
+Services:
 
 ```text
 API
@@ -589,7 +589,7 @@ Simulation Jobs
 
 # 39. Reliability
 
-故障注入：
+Fehlerinjektion:
 
 ```text
 LLM Timeout
@@ -603,7 +603,7 @@ Network Disconnect
 
 # 40. Recovery Test
 
-测试：
+Testen:
 
 ```text
 Agent Resume
@@ -616,7 +616,7 @@ Job Retry
 
 # 41. Security Test
 
-覆盖：
+Abdecken:
 
 ```text
 Authentication
@@ -631,15 +631,15 @@ Rate Limit
 
 # 42. Regression Policy
 
-修复 Bug：
+Beim Beheben eines Bugs:
 
-> **先写一个会失败的回归测试，再修改实现。**
+> **Zuerst einen fehlschlagenden Regressionstest schreiben, dann die Implementierung ändern.**
 
 ---
 
 # 43. CI Gate
 
-普通 PR：
+Normaler PR:
 
 ```text
 format
@@ -655,7 +655,7 @@ build
 
 # 44. Core PR
 
-核心架构变更追加：
+Bei Änderungen an der Kernarchitektur zusätzlich:
 
 ```text
 integration
@@ -669,53 +669,53 @@ visual
 
 # 45. Skip Policy
 
-禁止：
+Verboten:
 
 ```text
-删除失败测试
-修改预期为错误结果
-随意 .skip
+Fehlschlagende Tests löschen
+Erwartungen auf falsche Ergebnisse ändern
+Willkürliches .skip
 ```
 
-来让 CI 变绿。
+um CI grün zu bekommen.
 
 ---
 
 # 46. Mock Policy
 
-允许：
+Erlaubt:
 
 ```text
-外部模型
-外部网络
-第三方存储
+Externe Modelle
+Externes Netzwerk
+Drittanbieter-Speicher
 ```
 
-在单测中 Mock。
+in Unit-Tests zu mocken.
 
-禁止：
+Verboten:
 
 ```text
 Physics Engine
 Tool Handler
-核心业务
+Zentrale Geschäftslogik
 ```
 
-未实现却用 Mock 冒充完成。
+durch Mocks zu ersetzen und so Nicht-Implementiertes als fertig auszugeben.
 
 ---
 
 # 47. Test Data Version
 
-Golden Dataset 必须版本化。
+Das Golden Dataset muss versioniert sein.
 
 ---
 
 # 48. Model Eval
 
-非确定模型不做纯字符串匹配。
+Nichtdeterministische Modelle werden nicht per reinem String-Abgleich bewertet.
 
-使用：
+Verwendet werden:
 
 ```text
 Structured Output
@@ -728,13 +728,13 @@ Score Rubric
 
 # 49. Human Evaluation
 
-Tutor / 教学解释需要教师人工评测样本。
+Tutor- / didaktische Erklärungen benötigen Stichproben mit manueller Bewertung durch Lehrkräfte.
 
 ---
 
 # 50. Release Gate
 
-正式版本前至少：
+Vor einer offiziellen Version mindestens:
 
 ```text
 Physics Golden
@@ -750,7 +750,7 @@ Performance Smoke
 
 # 51. Test Report
 
-记录：
+Festhalten:
 
 ```text
 commit
@@ -765,31 +765,31 @@ failures
 
 # 52. Coverage
 
-Coverage 是辅助指标。
+Coverage ist eine Hilfskennzahl.
 
-不能因为行覆盖高就认为物理正确。
+Aus hoher Zeilenabdeckung darf nicht geschlossen werden, dass die Physik stimmt.
 
 ---
 
 # 53. Test Ownership
 
-每个核心 package 自带测试。
+Jedes zentrale Package bringt seine eigenen Tests mit.
 
 ---
 
 # 54. Definition of Done
 
-功能完成必须：
+Eine fertige Funktion muss:
 
 ```text
-有正确层级测试
-核心 Golden 不退化
-真实 E2E 可运行
-无假 Mock
+Tests auf der richtigen Ebene haben
+Zentrale Golden-Tests dürfen nicht regredieren
+Echtes E2E lauffähig sein
+Keine falschen Mocks enthalten
 ```
 
 ---
 
-# 55. 一句话测试原则
+# 55. Testprinzip in einem Satz
 
-> **PhysicsOS 的测试不是证明“页面能打开”，而是证明物理世界算得对、题目理解得对、Agent 操作得对，并且这些正确性能够在长期迭代中被自动守住。**
+> **Die Tests von PhysicsOS sollen nicht beweisen, dass „die Seite sich öffnen lässt“, sondern dass die physikalische Welt richtig berechnet, die Aufgabe richtig verstanden und der Agent richtig bedient wird – und dass diese Korrektheit über lange Iterationen automatisch gehalten wird.**

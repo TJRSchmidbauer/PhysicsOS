@@ -1,36 +1,36 @@
-# PhysicsOS Question Pipeline Architecture
+# PhysicsOS Question-Pipeline-Architektur
 
-> 文件：`docs/08-QUESTION-PIPELINE-ARCHITECTURE.md`
-
----
-
-# 1. 目标
-
-Question Space 不是 AI 搜题。
-
-目标：
-
-> **把静态题目转换成可以验证、运行、观察和交互的 PhysicsScene。**
+> Datei: `docs/08-QUESTION-PIPELINE-ARCHITECTURE.md`
 
 ---
 
-# 2. 输入
+# 1. Ziel
+
+Question Space ist keine KI-Aufgabensuche.
+
+Ziel:
+
+> **Statische Aufgaben in eine PhysicsScene umzuwandeln, die sich verifizieren, ausführen, beobachten und interaktiv bedienen lässt.**
+
+---
+
+# 2. Eingaben
 
 ```text
-文本
-图片
-截图
-拍照
+Text
+Bild
+Screenshot
+Foto
 PDF
-扫描 PDF
-整套试卷
-题库
-教师上传
+Gescanntes PDF
+Gesamte Klausur
+Aufgabenbank
+Lehrer-Upload
 ```
 
 ---
 
-# 3. 总流程
+# 3. Gesamtablauf
 
 ```text
 Input
@@ -70,15 +70,15 @@ Visualization
 
 # 4. Document Ingest
 
-负责：
+Zuständig für:
 
 ```text
-文件校验
+Dateiprüfung
 MIME
-大小
+Größe
 Hash
-页数
-元数据
+Seitenzahl
+Metadaten
 Object Storage
 ```
 
@@ -86,35 +86,35 @@ Object Storage
 
 # 5. Normalization
 
-图片：
+Bilder:
 
 ```text
-方向校正
-裁边
-去噪
-对比度优化
+Ausrichtungskorrektur
+Rand beschneiden
+Entrauschen
+Kontrastoptimierung
 ```
 
-PDF：
+PDF:
 
 ```text
-文本层检测
-页面渲染
-图片提取
+Textebenen-Erkennung
+Seiten rendern
+Bilder extrahieren
 ```
 
 ---
 
 # 6. OCR
 
-优先：
+Priorität:
 
 ```text
-有文本层 → 提取
-无文本层 → OCR
+Textebene vorhanden → extrahieren
+Keine Textebene → OCR
 ```
 
-保存：
+Gespeichert werden:
 
 ```text
 text
@@ -128,40 +128,40 @@ reading order
 
 # 7. VLM
 
-用于：
+Verwendet für:
 
 ```text
-复杂版面
-题图
-符号关系
-几何关系
-表格
-公式
+Komplexe Layouts
+Aufgabenbilder
+Symbolbeziehungen
+Geometrische Beziehungen
+Tabellen
+Formeln
 ```
 
-不能直接成为领域事实。
+Darf nicht direkt zum Domänenfakt werden.
 
 ---
 
 # 8. Question Segmentation
 
-识别：
+Erkennt:
 
 ```text
-题号
-题干
-选项
-子问
-题图
-答案区
-解析区
+Aufgabennummer
+Aufgabenstellung
+Antwortoptionen
+Teilfragen
+Aufgabenbild
+Antwortbereich
+Lösungsbereich
 ```
 
 ---
 
-# 9. 题图归属
+# 9. Zuordnung der Aufgabenbilder
 
-必须关联：
+Muss verknüpft sein mit:
 
 ```text
 questionId
@@ -173,7 +173,7 @@ boundingBox
 
 # 10. Formula Recognition
 
-输出：
+Ausgabe:
 
 ```text
 LaTeX
@@ -183,19 +183,19 @@ normalized symbolic form
 
 ---
 
-# 11. Diagram 分类
+# 11. Diagram-Klassifikation
 
 ```text
-受力图
-斜面图
-磁场区域
-电场区域
-电路图
-光路图
-坐标图
+Kräftediagramm
+Schiefe-Ebene-Diagramm
+Magnetfeldbereich
+Elektrofeldbereich
+Schaltplan
+Strahlengang
+Koordinatendiagramm
 v-t
 x-t
-实验装置
+Versuchsaufbau
 ```
 
 ---
@@ -238,7 +238,7 @@ CircuitGraph
 
 # 14. Physics Semantic Parser
 
-输入：
+Eingabe:
 
 ```text
 normalized text
@@ -247,7 +247,7 @@ Diagram IR
 metadata
 ```
 
-输出：
+Ausgabe:
 
 ```text
 Physics IR
@@ -278,7 +278,7 @@ evidence
 
 # 16. Evidence First
 
-关键条件保留：
+Für Schlüsselbedingungen werden festgehalten:
 
 ```text
 text range
@@ -291,19 +291,19 @@ diagram element
 
 # 17. Confidence
 
-低于阈值：
+Unterhalb des Schwellenwerts:
 
 ```text
 needs_review
 ```
 
-UI 要求用户确认。
+Die UI verlangt eine Bestätigung durch den Nutzer.
 
 ---
 
-# 18. 禁止静默猜测
+# 18. Kein stilles Raten
 
-关键条件只能：
+Schlüsselbedingungen dürfen nur sein:
 
 ```text
 confirmed
@@ -328,7 +328,7 @@ Domain Consistency
 
 # 20. Scene Builder
 
-映射：
+Abbildung:
 
 ```text
 IR Object → Scene Object
@@ -343,7 +343,7 @@ Diagram Geometry → Geometry
 
 # 21. SceneBuildMapping
 
-保留：
+Bewahrt:
 
 ```text
 IR object ↔ Scene object
@@ -354,19 +354,19 @@ IR object ↔ Scene object
 # 22. Scene Validation
 
 ```text
-引用
-单位
-模型
-边界
-电路拓扑
-支持能力
+Referenzen
+Einheiten
+Modelle
+Randbedingungen
+Schaltungstopologie
+Unterstützte Fähigkeiten
 ```
 
 ---
 
 # 23. Scene Repair
 
-路径：
+Pfad:
 
 ```text
 Parser Repair
@@ -378,7 +378,7 @@ User Review
 
 # 24. Capability Check
 
-Scene Build 前检查：
+Vor dem Scene Build wird geprüft:
 
 ```text
 PhysicsCapabilityRegistry
@@ -388,13 +388,13 @@ PhysicsCapabilityRegistry
 
 # 25. Simulation / Verification
 
-Scene Valid 后才：
+Erst nach gültiger Szene (Scene Valid):
 
 ```text
 Simulation
 ```
 
-验证：
+Verifikation:
 
 ```text
 Dimensional
@@ -408,7 +408,7 @@ Conservation
 
 # 26. QuestionSolution
 
-基于：
+Aufgebaut auf:
 
 ```text
 Physics IR
@@ -418,13 +418,11 @@ Formula
 Verification
 ```
 
-组织。
-
 ---
 
-# 27. Tutor 联动
+# 27. Tutor-Kopplung
 
-解析步骤可以：
+Lösungsschritte können:
 
 ```text
 Step 1 → show force
@@ -434,7 +432,7 @@ Step 3 → seek exit
 
 ---
 
-# 28. 整卷并行
+# 28. Parallelisierung ganzer Klausuren
 
 ```text
 Segmentation
@@ -448,7 +446,7 @@ Aggregate
 
 ---
 
-# 29. Job 状态
+# 29. Job-Status
 
 ```text
 queued
@@ -461,41 +459,41 @@ cancelled
 
 ---
 
-# 30. 进度 UI
+# 30. Fortschritts-UI
 
 ```text
-正在读取文档
-正在识别 8/20
-正在解析第 8 题
-正在验证
+Dokument wird gelesen
+Erkennung 8/20
+Aufgabe 8 wird analysiert
+Verifikation läuft
 ```
 
 ---
 
-# 31. 人工校正
+# 31. Manuelle Korrektur
 
-允许：
+Erlaubt:
 
 ```text
-OCR 文本
-题图范围
-数值
-单位
-对象
-边界
+OCR-Text
+Bereich des Aufgabenbilds
+Zahlenwerte
+Einheiten
+Objekte
+Randbedingungen
 ```
 
 ---
 
 # 32. Question Revision
 
-解析结果必须版本化。
+Analyseergebnisse müssen versioniert werden.
 
 ---
 
-# 33. 持久化
+# 33. Persistenz
 
-保存：
+Gespeichert werden:
 
 ```text
 original document
@@ -512,7 +510,7 @@ diagnostic
 
 # 34. Parser Version
 
-记录：
+Festgehalten werden:
 
 ```text
 ocrVersion
@@ -526,13 +524,13 @@ sceneBuilderVersion
 
 # 35. Reprocess
 
-允许新版 Parser 重新处理，保留旧结果。
+Eine neue Parser-Version darf neu verarbeiten; die alten Ergebnisse bleiben erhalten.
 
 ---
 
 # 36. Evaluation
 
-Ground Truth：
+Ground Truth:
 
 ```text
 Text
@@ -542,7 +540,7 @@ Scene
 Answer
 ```
 
-指标：
+Metriken:
 
 ```text
 OCR CER
@@ -559,7 +557,7 @@ Physics Accuracy
 
 # 37. Security
 
-上传文件隔离解析并限制资源。
+Hochgeladene Dateien werden isoliert geparst und ressourcenbegrenzt.
 
 ---
 
@@ -581,23 +579,23 @@ traceId
 
 # 39. Question → Experiment
 
-按钮：
+Schaltfläche:
 
 ```text
-在物理世界中打开
+In der Physikwelt öffnen
 ```
 
 ---
 
 # 40. Experiment → Question
 
-通过 Question Engine。
+Über die Question Engine.
 
 ---
 
 # 41. Dynamic Question
 
-基于：
+Erzeugt auf Basis von:
 
 ```text
 Scene
@@ -606,10 +604,8 @@ Variable Policy
 Difficulty
 ```
 
-生成。
-
 ---
 
-# 42. 一句话试题链路
+# 42. Aufgabenkette in einem Satz
 
-> **PhysicsOS 不让模型“看图猜动画”，而是把题目逐层转换成可追溯、可验证的 Physics IR 与 PhysicsScene，再由真实 Physics Engine 运行。**
+> **PhysicsOS lässt das Modell nicht „Animationen nach dem Bild raten“, sondern wandelt die Aufgabe Schicht für Schicht in nachvollziehbare, verifizierbare Physics IR und PhysicsScene um, die dann von einer echten Physics Engine ausgeführt werden.**

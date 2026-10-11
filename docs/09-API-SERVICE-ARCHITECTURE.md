@@ -1,27 +1,27 @@
-# PhysicsOS API & Service Architecture
+# PhysicsOS API- und Service-Architektur
 
-> 文件：`docs/09-API-SERVICE-ARCHITECTURE.md`  
-> 文档定位：PhysicsOS 服务边界、API 规范、跨服务通信与运行职责
+> Datei: `docs/09-API-SERVICE-ARCHITECTURE.md`  
+> Dokumentzweck: Service-Grenzen, API-Spezifikation, serviceübergreifende Kommunikation und Laufzeitverantwortlichkeiten von PhysicsOS
 
 ---
 
-# 1. 目标
+# 1. Ziel
 
-PhysicsOS 不为了“微服务数量”而拆服务，而是围绕明确领域职责设计可演进边界。
+PhysicsOS teilt Services nicht der „Anzahl der Microservices“ zuliebe auf, sondern entwirft entwicklungsfähige Grenzen entlang klarer fachlicher Verantwortlichkeiten.
 
-初期可以：
+Anfangs kann es sein:
 
 ```text
-模块化单体
+Modularer Monolith
 +
-独立 Agent / Math / Document Runtime
+Eigenständige Agent- / Math- / Document-Runtime
 ```
 
-后续根据负载和团队规模拆部署。
+Später wird je nach Last und Teamgröße getrennt deployt.
 
 ---
 
-# 2. 逻辑服务
+# 2. Logische Services
 
 ```text
 API Service
@@ -35,13 +35,13 @@ Document Service
 
 # 3. API Service
 
-推荐：
+Empfohlen:
 
 ```text
 Spring Boot
 ```
 
-负责：
+Zuständig für:
 
 ```text
 Auth
@@ -62,7 +62,7 @@ Scene Metadata
 Job Metadata
 ```
 
-不负责：
+Nicht zuständig für:
 
 ```text
 Agent Loop
@@ -75,7 +75,7 @@ Symbolic Math
 
 # 4. Agent Service
 
-负责：
+Zuständig für:
 
 ```text
 PhysicsAgentRuntime
@@ -98,7 +98,7 @@ Trace
 
 # 5. Simulation Service
 
-负责：
+Zuständig für:
 
 ```text
 Server-side Physics Simulation
@@ -109,19 +109,19 @@ Simulation Artifact
 Physics Verification
 ```
 
-浏览器可运行的轻量实时 Physics Engine 不要求全部走服务端。
+Die im Browser lauffähige leichte Echtzeit-Physics-Engine muss nicht vollständig über den Server laufen.
 
 ---
 
 # 6. Math Service
 
-推荐：
+Empfohlen:
 
 ```text
 Python + FastAPI
 ```
 
-负责：
+Zuständig für:
 
 ```text
 Symbolic
@@ -138,7 +138,7 @@ Numerical
 
 # 7. Document Service
 
-负责：
+Zuständig für:
 
 ```text
 PDF
@@ -154,7 +154,7 @@ Document Job
 
 # 8. Gateway
 
-统一暴露：
+Einheitlich bereitgestellt:
 
 ```text
 /api/v1/*
@@ -168,20 +168,20 @@ Document Job
 
 # 9. Authentication
 
-所有服务共享统一用户身份。
+Alle Services teilen eine einheitliche Nutzeridentität.
 
-禁止：
+Verboten:
 
 ```text
-Agent Service 自建账号
-Simulation Service 自建账号
+Agent Service legt eigene Konten an
+Simulation Service legt eigene Konten an
 ```
 
 ---
 
 # 10. Authorization Context
 
-跨服务传递：
+Serviceübergreifend weitergegeben:
 
 ```text
 userId
@@ -194,19 +194,19 @@ traceId
 
 # 11. Trace
 
-推荐 Header：
+Empfohlener Header:
 
 ```text
 X-Trace-Id
 ```
 
-如果上游未提供，则入口生成。
+Wird vom Upstream keiner mitgeliefert, erzeugt ihn der Einstiegspunkt.
 
 ---
 
-# 12. REST 设计
+# 12. REST-Design
 
-推荐：
+Empfohlen:
 
 ```text
 GET    /api/v1/questions/{id}
@@ -217,7 +217,7 @@ GET    /api/v1/scenes/{id}
 POST   /api/v1/scenes
 ```
 
-禁止 RPC 风格乱命名：
+Verboten ist willkürliche Benennung im RPC-Stil:
 
 ```text
 /getQuestion
@@ -228,7 +228,7 @@ POST   /api/v1/scenes
 
 # 13. Agent API
 
-推荐：
+Empfohlen:
 
 ```text
 POST /agent/v1/sessions
@@ -246,13 +246,13 @@ POST /agent/v1/sessions/{id}/fork
 
 # 14. Agent Streaming
 
-优先：
+Bevorzugt:
 
 ```text
 SSE
 ```
 
-事件：
+Ereignisse:
 
 ```text
 run_started
@@ -293,7 +293,7 @@ POST /document/v1/jobs/{id}/cancel
 
 # 17. Math API
 
-推荐：
+Empfohlen:
 
 ```text
 POST /math/v1/symbolic/simplify
@@ -306,9 +306,9 @@ POST /math/v1/geometry/intersections
 
 # 18. Request / Response DTO
 
-外部接口只暴露 DTO。
+Externe Schnittstellen legen nur DTOs offen.
 
-禁止：
+Verboten ist, dass
 
 ```text
 JPA Entity
@@ -317,13 +317,13 @@ Harness Internal Object
 Engine Internal Object
 ```
 
-直接出现在 API。
+direkt in der API erscheinen.
 
 ---
 
 # 19. API Error
 
-统一：
+Einheitlich:
 
 ```json
 {
@@ -340,7 +340,7 @@ Engine Internal Object
 
 # 20. HTTP Status
 
-约定：
+Vereinbarung:
 
 ```text
 200 Query Success
@@ -361,7 +361,7 @@ Engine Internal Object
 
 # 21. Validation
 
-入口至少：
+Am Einstieg mindestens:
 
 ```text
 Schema Validation
@@ -374,13 +374,13 @@ Domain Validation
 
 # 22. Idempotency
 
-任务型接口支持：
+Aufgabenartige Schnittstellen unterstützen:
 
 ```text
 Idempotency-Key
 ```
 
-例如：
+Zum Beispiel:
 
 ```text
 Document Parse
@@ -392,7 +392,7 @@ Bulk Generate
 
 # 23. Timeout
 
-所有跨服务请求必须设：
+Alle serviceübergreifenden Anfragen müssen setzen:
 
 ```text
 connect timeout
@@ -404,15 +404,15 @@ job timeout
 
 # 24. Retry
 
-自动 Retry 仅用于：
+Automatischer Retry nur für:
 
 ```text
-网络瞬时错误
-短暂 5xx
-可重试 Rate Limit
+Vorübergehende Netzwerkfehler
+Kurzzeitige 5xx
+Wiederholbares Rate Limit
 ```
 
-以下不 Retry：
+Kein Retry bei:
 
 ```text
 INVALID_PARAMETER
@@ -420,13 +420,13 @@ SCENE_REVISION_CONFLICT
 PHYSICS_CONSTRAINT_VIOLATION
 ```
 
-除非上层有明确修复流程。
+Es sei denn, die obere Ebene hat einen ausdrücklichen Reparaturablauf.
 
 ---
 
 # 25. Circuit Breaker
 
-对以下依赖建议建立：
+Für folgende Abhängigkeiten empfohlen:
 
 ```text
 Model Provider
@@ -439,7 +439,7 @@ Object Storage
 
 # 26. Rate Limit
 
-重点：
+Schwerpunkte:
 
 ```text
 LLM
@@ -454,7 +454,7 @@ Export
 
 # 27. Queue
 
-长任务：
+Langläufer:
 
 ```text
 Exam Parse
@@ -463,13 +463,13 @@ Long Simulation
 Bulk Question Generation
 ```
 
-进入 Queue。
+kommen in die Queue.
 
 ---
 
 # 28. Job Contract
 
-统一：
+Einheitlich:
 
 ```text
 queued
@@ -484,20 +484,20 @@ cancelled
 
 # 29. WebSocket
 
-仅用于真正双向实时：
+Nur für wirklich bidirektionale Echtzeit:
 
 ```text
-多人 Scene Collaboration
-高频 Shared Scene Event
+Mehrbenutzer-Scene-Collaboration
+Hochfrequente Shared Scene Events
 ```
 
-普通 Agent Streaming 优先 SSE。
+Für normales Agent Streaming wird SSE bevorzugt.
 
 ---
 
 # 30. Service-to-Service Security
 
-后续生产可采用：
+Später in Produktion einsetzbar:
 
 ```text
 Service Token
@@ -509,61 +509,61 @@ Network Policy
 
 # 31. OpenAPI
 
-API Service 必须维护正式 OpenAPI。
+Der API Service muss eine formale OpenAPI pflegen.
 
-客户端从 OpenAPI 生成 typed client。
+Clients erzeugen daraus einen typisierten Client.
 
 ---
 
 # 32. Contract Source of Truth
 
-禁止：
+Verboten ist:
 
 ```text
-OpenAPI 一份
-TS Type 一份
-Java DTO 一份
+OpenAPI einmal
+TS Type einmal
+Java DTO einmal
 ```
 
-长期人工各自维护并漂移。
+die dauerhaft manuell getrennt gepflegt werden und auseinanderdriften.
 
-公共 Contract 应有单一来源或自动验证机制。
+Öffentliche Contracts sollten eine einzige Quelle oder einen automatischen Prüfmechanismus haben.
 
 ---
 
 # 33. Client Generation
 
-Web：
+Web:
 
 ```text
 packages/api-client
 ```
 
-统一访问后端。
+greift einheitlich auf das Backend zu.
 
-禁止页面散落 fetch。
+Verstreute fetch-Aufrufe in Seiten sind verboten.
 
 ---
 
 # 34. API Compatibility
 
-Minor：
+Minor:
 
 ```text
 backward compatible
 ```
 
-Breaking：
+Breaking:
 
 ```text
-新 API version
+Neue API-Version
 ```
 
 ---
 
 # 35. Health
 
-每个服务：
+Jeder Service:
 
 ```text
 /health
@@ -574,7 +574,7 @@ Breaking：
 
 # 36. Metrics
 
-至少：
+Mindestens:
 
 ```text
 request count
@@ -589,7 +589,7 @@ active jobs
 
 # 37. File Upload
 
-推荐流程：
+Empfohlener Ablauf:
 
 ```text
 Init Upload
@@ -601,25 +601,25 @@ Object Storage
 Confirm
 ```
 
-避免大文件全部经过 API Service。
+Große Dateien sollen nicht vollständig über den API Service laufen.
 
 ---
 
 # 38. Download
 
-使用：
+Verwendet:
 
 ```text
 Signed URL
 ```
 
-或受控流式下载。
+oder kontrollierten Streaming-Download.
 
 ---
 
-# 39. Scene API 边界
+# 39. Grenze der Scene API
 
-API Service 管：
+Der API Service verwaltet:
 
 ```text
 Scene Metadata
@@ -628,7 +628,7 @@ Share
 Listing
 ```
 
-Physics Runtime 管：
+Die Physics Runtime verwaltet:
 
 ```text
 Scene State
@@ -639,17 +639,17 @@ Snapshot
 
 ---
 
-# 40. Agent 修改 Scene
+# 40. Agent ändert Scene
 
-禁止：
+Verboten:
 
 ```text
 Agent Service
 ↓
-直接 UPDATE scene_json
+direkt UPDATE scene_json
 ```
 
-必须：
+Erforderlich:
 
 ```text
 Agent Tool
@@ -661,7 +661,7 @@ Physics Runtime
 
 # 41. Simulation Input
 
-必须锁定：
+Festzulegen sind:
 
 ```text
 sceneId
@@ -673,17 +673,17 @@ options
 
 # 42. Document → Question
 
-Document Service 产出解析结果。
+Der Document Service liefert Analyseergebnisse.
 
-Question 正式资源归 Business API 管理。
+Die formale Question-Ressource wird von der Business API verwaltet.
 
 ---
 
 # 43. Resource Owner
 
-每种核心资源必须唯一 Owner。
+Jede Kernressource muss genau einen Owner haben.
 
-例如：
+Zum Beispiel:
 
 ```text
 Question → API Service
@@ -694,13 +694,13 @@ Document Job → Document Service
 
 ---
 
-# 44. 禁止跨数据库读私有表
+# 44. Kein datenbankübergreifendes Lesen privater Tabellen
 
-服务拆分后：
+Nach der Aufteilung der Services gilt:
 
-> A 服务不得直接查询 B 服务的私有数据库表。
+> Service A darf nicht direkt private Datenbanktabellen von Service B abfragen.
 
-通过：
+Zusammenarbeit erfolgt über:
 
 ```text
 API
@@ -708,13 +708,11 @@ Event
 Shared Contract
 ```
 
-协作。
-
 ---
 
 # 45. Async Event
 
-未来可引入：
+Künftig einführbar:
 
 ```text
 QuestionParsed
@@ -723,13 +721,13 @@ AssignmentSubmitted
 LearningStateUpdated
 ```
 
-用于异步解耦。
+zur asynchronen Entkopplung.
 
 ---
 
 # 46. Service Package
 
-每个服务应包含：
+Jeder Service sollte enthalten:
 
 ```text
 README
@@ -745,7 +743,7 @@ Dockerfile
 
 # 47. Contract Test
 
-跨服务必须测试：
+Serviceübergreifend zu testen:
 
 ```text
 request schema
@@ -759,29 +757,29 @@ version compatibility
 
 # 48. Graceful Degradation
 
-Agent Service 不可用：
+Agent Service nicht verfügbar:
 
 ```text
-已有 Physics Lab 仍可手工使用
+Das bestehende Physics Lab bleibt manuell nutzbar
 ```
 
-Document Service 不可用：
+Document Service nicht verfügbar:
 
 ```text
-文本题仍可手工录入
+Textaufgaben können weiterhin manuell erfasst werden
 ```
 
-Physics Engine 失败：
+Physics Engine schlägt fehl:
 
 ```text
-不能伪装成功
+Darf keinen Erfolg vortäuschen
 ```
 
 ---
 
 # 49. Definition of Done
 
-新接口必须具备：
+Eine neue Schnittstelle muss besitzen:
 
 ```text
 Contract
@@ -797,6 +795,6 @@ Documentation
 
 ---
 
-# 50. 一句话服务架构
+# 50. Service-Architektur in einem Satz
 
-> **PhysicsOS 的服务边界围绕领域事实和计算职责划分，使业务、Agent、物理仿真、数学和文档理解可以独立演进，而不通过数据库和隐式状态互相绑死。**
+> **Die Service-Grenzen von PhysicsOS werden entlang von Domänenfakten und Berechnungsverantwortung gezogen, sodass Business, Agent, Physiksimulation, Mathematik und Dokumentverständnis unabhängig weiterentwickelt werden können, ohne sich über Datenbanken und implizite Zustände gegenseitig festzuketten.**

@@ -1,24 +1,24 @@
-# ADR-NNNN：<决策标题>
+# ADR-NNNN: <Titel der Entscheidung>
 
-- 状态：提议 | 已接受 | 已废弃 | 已被 ADR-XXXX 取代
-- 日期：YYYY-MM-DD
-- 决策人：<GitHub 账号或角色>
-- 相关文档 / PR：<链接>
+- Status: vorgeschlagen | akzeptiert | verworfen | ersetzt durch ADR-XXXX
+- Datum: JJJJ-MM-TT
+- Entscheider: <GitHub-Konto oder Rolle>
+- Zugehörige Dokumente / PRs: <Link>
 
-## 背景
+## Kontext
 
-要解决什么问题？有哪些约束（技术、教学场景、部署环境、许可证、成本）？现在不决策会付出什么代价？
+Welches Problem soll gelöst werden? Welche Randbedingungen gibt es (Technik, Unterrichtsszenario, Deployment-Umgebung, Lizenz, Kosten)? Was kostet es, wenn jetzt nicht entschieden wird?
 
-## 决定
+## Entscheidung
 
-我们决定做什么。写清边界：适用范围、关键参数、以及明确不做什么。
+Was wir entscheiden. Die Grenzen klar benennen: Geltungsbereich, wichtige Parameter und was ausdrücklich nicht getan wird.
 
-## 后果
+## Konsequenzen
 
-- 正面：解决了什么，带来哪些能力。
-- 负面：新增的维护成本、迁移成本、性能或安全代价。
-- 需要跟进的事项：迁移步骤、监控、回滚方式。
+- Positiv: Was wird gelöst, welche Fähigkeiten entstehen?
+- Negativ: Zusätzlicher Wartungs- und Migrationsaufwand, Kosten bei Performance oder Sicherheit.
+- Nachzuverfolgende Punkte: Migrationsschritte, Monitoring, Rollback-Weg.
 
-## 替代方案
+## Alternativen
 
-考虑过哪些方案，各自为什么被放弃。至少要写出一条真实考虑过的替代方案，而不是只写「不这么做」。
+Welche Varianten wurden erwogen und warum wurde jede verworfen? Mindestens eine tatsächlich erwogene Alternative muss genannt werden, nicht nur „es nicht tun“.

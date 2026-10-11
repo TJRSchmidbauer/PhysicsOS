@@ -1,15 +1,15 @@
-# PhysicsOS Development Roadmap
+# PhysicsOS Entwicklungs-Roadmap
 
-> 文件：`docs/14-DEVELOPMENT-ROADMAP.md`  
-> 文档定位：PhysicsOS 完整产品工程实现顺序、依赖、阶段目标与验收标准
+> Datei: `docs/14-DEVELOPMENT-ROADMAP.md`  
+> Dokumentzweck: Umsetzungsreihenfolge, Abhängigkeiten, Phasenziele und Abnahmekriterien für das vollständige Produkt-Engineering von PhysicsOS
 >
-> **本 Roadmap 是实现顺序，不是 MVP 产品裁剪。最终产品范围仍以 `00-PRODUCT-OVERVIEW.md` 为准。**
+> **Diese Roadmap ist eine Umsetzungsreihenfolge, keine Beschneidung des Produkts auf ein MVP. Der endgültige Produktumfang richtet sich weiterhin nach `00-PRODUCT-OVERVIEW.md`.**
 
 ---
 
-# 0. 当前工程落点
+# 0. Aktueller Stand der Umsetzung
 
-正式产品唯一 Web 入口：
+Der einzige offizielle Web-Einstieg des Produkts:
 
 ```text
 vendor/deepseek-harness/apps/web
@@ -17,33 +17,33 @@ vendor/deepseek-harness/apps/web
 vendor/deepseek-harness/packages/client/ui-physicsos
 ```
 
-根目录 `apps/web` 是已废弃的独立原型，只保留作迁移参考。
+Das `apps/web` im Wurzelverzeichnis ist ein veralteter, eigenständiger Prototyp und dient nur noch als Migrationsreferenz.
 
-截至当前代码基线，已经形成可运行链路：
+Zum aktuellen Code-Stand ist bereits eine lauffähige Kette entstanden:
 
 ```text
-Harness Web Shell + PhysicsOS 导航与响应式工作区
-磁场 Vertical Slice：Engine → Verifier → Observation → PhysicsCanvas
-五类力学场景：Engine stateAt → Observation → PhysicsCanvas
-Question Space：16 道确定性题目 → Question Runtime → Question → Lab
-requestAnimationFrame 展示时钟、暂停、倍速、单步与终点重播
+Harness Web Shell + PhysicsOS-Navigation und responsiver Arbeitsbereich
+Magnetfeld Vertical Slice: Engine → Verifier → Observation → PhysicsCanvas
+Fünf mechanische Szenentypen: Engine stateAt → Observation → PhysicsCanvas
+Question Space: 16 deterministische Aufgaben → Question Runtime → Question → Lab
+requestAnimationFrame-Anzeigeuhr, Pause, Geschwindigkeitsfaktor, Einzelschritt und Wiederholung bis zum Endpunkt
 ```
 
-以下仍属于 Roadmap 未完成范围，不得以现有按钮或占位界面视为完成：
+Folgendes gehört weiterhin zum nicht abgeschlossenen Umfang der Roadmap und darf nicht aufgrund vorhandener Buttons oder Platzhalteroberflächen als fertig gelten:
 
 ```text
-图片/PDF/OCR/VLM 试题识别
-AI 助教与保存/更多菜单业务闭环
-模板库、学习记录与持久化
+Aufgabenerkennung aus Bild/PDF/OCR/VLM
+Geschäftsabläufe des KI-Assistenten sowie der Menüs Speichern/Mehr
+Vorlagenbibliothek, Lernverlauf und Persistenz
 Electric / Circuit / Induction / Optics / Wave
-教师端、发布协作与 Desktop
+Lehrerseite, kollaboratives Veröffentlichen und Desktop
 ```
 
 ---
 
-# 1. 开发原则
+# 1. Entwicklungsprinzipien
 
-统一：
+Einheitlich:
 
 ```text
 Contract First
@@ -53,17 +53,17 @@ Real Integration
 Continuous Verification
 ```
 
-禁止：
+Verboten:
 
 ```text
-先把所有页面画完
+Zuerst alle Seiten fertig zeichnen
 ↓
-最后再想物理引擎怎么接
+Erst am Ende überlegen, wie die Physik-Engine angebunden wird
 ```
 
 ---
 
-# 2. 总依赖图
+# 2. Gesamt-Abhängigkeitsgraph
 
 ```text
 Repository Foundation
@@ -101,7 +101,7 @@ Desktop
 
 # 3. Phase 0 — Repository Foundation
 
-目标：
+Ziel:
 
 ```text
 Monorepo
@@ -115,7 +115,7 @@ CI
 Docs
 ```
 
-建立：
+Aufbau von:
 
 ```text
 apps/
@@ -126,7 +126,7 @@ tests/
 docs/
 ```
 
-验收：
+Abnahme:
 
 ```text
 pnpm install
@@ -136,13 +136,13 @@ pnpm test
 pnpm build
 ```
 
-全部通过。
+Alle bestehen.
 
 ---
 
 # 4. Phase 1 — UI Foundation
 
-建立：
+Aufbau von:
 
 ```text
 packages/ui
@@ -151,7 +151,7 @@ primitives
 domain components
 ```
 
-先完成：
+Zuerst fertigstellen:
 
 ```text
 Top Navigation
@@ -166,7 +166,7 @@ Table
 Toolbar
 ```
 
-并搭出：
+Und aufbauen:
 
 ```text
 Home Shell
@@ -174,7 +174,7 @@ Workspace Shell
 Question Shell
 ```
 
-验收：
+Abnahme:
 
 ```text
 1440×900
@@ -182,13 +182,13 @@ Question Shell
 1920×1080
 ```
 
-与原型高度一致。
+Hohe Übereinstimmung mit dem Prototyp.
 
 ---
 
 # 5. Phase 2 — Core Contracts
 
-实现：
+Umsetzung von:
 
 ```text
 PhysicsScene
@@ -202,7 +202,7 @@ Tool Contract
 Agent Context
 ```
 
-输出：
+Ausgabe:
 
 ```text
 TS Types
@@ -215,7 +215,7 @@ Contract Tests
 
 # 6. Phase 3 — Units / Math / Geometry
 
-实现：
+Umsetzung von:
 
 ```text
 Unit Registry
@@ -226,7 +226,7 @@ Basic Geometry
 Math Runtime Interface
 ```
 
-验收：
+Abnahme:
 
 ```text
 Unit Tests
@@ -238,7 +238,7 @@ Geometry Tests
 
 # 7. Phase 4 — PhysicsScene Runtime
 
-实现：
+Umsetzung von:
 
 ```text
 SceneGraph
@@ -253,7 +253,7 @@ Branch
 Query
 ```
 
-验收：
+Abnahme:
 
 ```text
 Create
@@ -268,9 +268,9 @@ Revision Conflict
 
 ---
 
-# 8. Phase 5 — 第一批 Physics Engine
+# 8. Phase 5 — Erste Physics Engines
 
-优先：
+Vorrang:
 
 ```text
 Kinematics
@@ -278,20 +278,20 @@ Mechanics
 Magnetic
 ```
 
-原因：
+Gründe:
 
 ```text
-覆盖当前核心原型
-适合形成第一条完整系统链
+Deckt die derzeit zentralen Prototypen ab
+Eignet sich, die erste vollständige Systemkette zu bilden
 ```
 
-不是意味着其他领域不做。
+Das bedeutet nicht, dass andere Domänen nicht umgesetzt werden.
 
 ---
 
 # 9. Phase 6 — Physics Verifier
 
-实现：
+Umsetzung von:
 
 ```text
 Schema
@@ -307,7 +307,7 @@ Trajectory
 
 # 10. Phase 7 — Observation Runtime
 
-先：
+Zuerst:
 
 ```text
 Force
@@ -323,7 +323,7 @@ Graph
 
 # 11. Phase 8 — Renderer
 
-实现：
+Umsetzung von:
 
 ```text
 Coordinate Transform
@@ -341,7 +341,7 @@ Chart Adapter
 
 # 12. Phase 9 — Physics Workspace
 
-真实接通：
+Echt angebunden:
 
 ```text
 Scene Tree
@@ -353,17 +353,17 @@ Data
 Chart
 ```
 
-禁止 Mock Scene 作为最终实现。
+Mock-Scenes als Endimplementierung sind verboten.
 
 ---
 
-# 13. Phase 10 — 第一条完整 Vertical Slice
+# 13. Phase 10 — Erste vollständige Vertical Slice
 
-推荐：
+Empfohlen:
 
-> **带电粒子在匀强磁场中做圆周运动**
+> **Kreisbewegung eines geladenen Teilchens im homogenen Magnetfeld**
 
-它覆盖：
+Sie deckt ab:
 
 ```text
 Particle
@@ -379,28 +379,28 @@ Renderer
 Verifier
 ```
 
-验收：
+Abnahme:
 
 ```text
-修改 B
-修改 q
-修改 m
-修改 v
-轨迹实时更新
-公式与数值一致
-Timeline 可回放
-Golden Test 通过
+B ändern
+q ändern
+m ändern
+v ändern
+Trajektorie aktualisiert sich in Echtzeit
+Formel und Zahlenwert stimmen überein
+Timeline kann wiedergegeben werden
+Golden Test besteht
 ```
 
 ---
 
-# 14. Phase 11 — 第二条 Vertical Slice
+# 14. Phase 11 — Zweite Vertical Slice
 
 ```text
-平抛运动
+Waagerechter Wurf
 ```
 
-覆盖：
+Deckt ab:
 
 ```text
 Kinematics
@@ -415,7 +415,7 @@ a-t
 
 # 15. Phase 12 — Electric Engine
 
-实现：
+Umsetzung von:
 
 ```text
 Coulomb
@@ -428,7 +428,7 @@ Particle Deflection
 
 # 16. Phase 13 — Circuit Engine
 
-实现：
+Umsetzung von:
 
 ```text
 CircuitGraph
@@ -445,7 +445,7 @@ Internal Resistance
 
 # 17. Phase 14 — Induction / EM Composite
 
-实现：
+Umsetzung von:
 
 ```text
 Motional EMF
@@ -459,7 +459,7 @@ Electric + Magnetic
 
 # 18. Phase 15 — Agent Runtime Foundation
 
-实现：
+Umsetzung von:
 
 ```text
 PhysicsAgentRuntime Contract
@@ -476,7 +476,7 @@ Fork
 
 # 19. Phase 16 — Tool Runtime
 
-先实现：
+Zuerst umsetzen:
 
 ```text
 physics.scene.*
@@ -492,7 +492,7 @@ physics.verify.*
 
 # 20. Phase 17 — Agent Context / Workflow
 
-实现：
+Umsetzung von:
 
 ```text
 L0-L6
@@ -506,7 +506,7 @@ Context Budget
 
 # 21. Phase 18 — Agent Roles
 
-依次：
+Der Reihe nach:
 
 ```text
 Orchestrator
@@ -522,7 +522,7 @@ Diagnostic
 
 # 22. Phase 19 — Skills
 
-第一批：
+Erste Charge:
 
 ```text
 kinematics
@@ -530,7 +530,7 @@ mechanics
 magnetic
 ```
 
-每个 Skill 完整包含：
+Jeder Skill enthält vollständig:
 
 ```text
 concept
@@ -545,7 +545,7 @@ question patterns
 
 # 23. Phase 20 — Context Compaction
 
-实现：
+Umsetzung von:
 
 ```text
 Physics-aware Structured Compaction
@@ -558,7 +558,7 @@ Recovery
 
 # 24. Phase 21 — Memory
 
-实现：
+Umsetzung von:
 
 ```text
 Learning Memory
@@ -570,7 +570,7 @@ Preference Memory
 
 # 25. Phase 22 — Question Ingest
 
-实现：
+Umsetzung von:
 
 ```text
 Upload
@@ -585,33 +585,33 @@ Document Job
 
 # 26. Phase 23 — Question Segmentation
 
-实现：
+Umsetzung von:
 
 ```text
-整卷拆题
-题图归属
-子问
-选项
+Zerlegung ganzer Klausuren in Aufgaben
+Zuordnung der Aufgabenbilder
+Teilfragen
+Antwortoptionen
 ```
 
 ---
 
 # 27. Phase 24 — Diagram IR
 
-第一批支持：
+Erste unterstützte Charge:
 
 ```text
-磁场区域图
-受力图
-电路图
-坐标图
+Magnetfeldbereich-Diagramme
+Kräftediagramme
+Schaltpläne
+Koordinatendiagramme
 ```
 
 ---
 
 # 28. Phase 25 — Physics IR Parser
 
-实现：
+Umsetzung von:
 
 ```text
 Question
@@ -619,7 +619,7 @@ Question
 Physics IR
 ```
 
-带：
+Mit:
 
 ```text
 Evidence
@@ -631,7 +631,7 @@ Assumption
 
 # 29. Phase 26 — Scene Builder
 
-实现：
+Umsetzung von:
 
 ```text
 Physics IR
@@ -647,36 +647,36 @@ PhysicsScene
 
 # 30. Phase 27 — Question Space
 
-真实接通原型：
+Prototyp echt angebunden:
 
 ```text
-上传
-历史
-题目正文
-已知条件
-求解目标
-解析步骤
-可视化
-相关题
+Upload
+Verlauf
+Aufgabentext
+Gegebene Bedingungen
+Gesuchte Größen
+Lösungsschritte
+Visualisierung
+Verwandte Aufgaben
 ```
 
 ---
 
 # 31. Phase 28 — Question → Experiment
 
-正式实现：
+Formal umsetzen:
 
 ```text
-在物理世界中打开
+In der Physikwelt öffnen
 ```
 
-直接打开同一个 PhysicsScene Runtime。
+Öffnet direkt dieselbe PhysicsScene Runtime.
 
 ---
 
 # 32. Phase 29 — Dynamic Question
 
-实现：
+Umsetzung von:
 
 ```text
 Scene Branch
@@ -694,7 +694,7 @@ Question Generate
 
 # 33. Phase 30 — Learning Model
 
-实现：
+Umsetzung von:
 
 ```text
 Knowledge Mastery
@@ -708,7 +708,7 @@ Diagnostic Update
 
 # 34. Phase 31 — Teacher Studio Foundation
 
-实现：
+Umsetzung von:
 
 ```text
 Scene Builder
@@ -721,7 +721,7 @@ Classroom Presentation
 
 # 35. Phase 32 — Teacher Business
 
-扩展：
+Erweitern um:
 
 ```text
 Class
@@ -734,7 +734,7 @@ Learning Analytics
 
 # 36. Phase 33 — Remaining Physics Domains
 
-扩展：
+Erweitern um:
 
 ```text
 Gravity Advanced
@@ -749,7 +749,7 @@ Modern Physics
 
 # 37. Phase 34 — Curriculum Coverage
 
-建立初高中完整：
+Vollständigen Aufbau für Mittel- und Oberstufe:
 
 ```text
 Skills
@@ -762,7 +762,7 @@ Golden Cases
 
 # 38. Phase 35 — Desktop Shell
 
-建立：
+Aufbau von:
 
 ```text
 Tauri
@@ -777,7 +777,7 @@ Auto Update
 
 # 39. Phase 36 — Local Runtime
 
-后续：
+Später:
 
 ```text
 Local Physics Runtime
@@ -788,9 +788,9 @@ Local File Project
 
 ---
 
-# 40. 每阶段任务模板
+# 40. Aufgabenvorlage pro Phase
 
-每个开发阶段都必须有：
+Jede Entwicklungsphase muss besitzen:
 
 ```text
 Goal
@@ -805,18 +805,18 @@ Risks
 
 ---
 
-# 41. 多 Agent 协作
+# 41. Zusammenarbeit mehrerer Agents
 
-适合并行：
+Parallelisierbar:
 
 ```text
 UI Components
-独立 Engine
+Eigenständige Engine
 Test Dataset
 Docs
 ```
 
-不适合多人同时改：
+Nicht geeignet für gleichzeitige Änderungen durch mehrere:
 
 ```text
 PhysicsScene Contract
@@ -829,54 +829,54 @@ SimulationResult
 
 # 42. Shared Contract Lock
 
-核心公共 Contract 修改需要：
+Änderungen an zentralen öffentlichen Contracts erfordern:
 
 ```text
-单一 Owner
-串行 Review
-同步所有 Consumer
+Einen einzigen Owner
+Serielles Review
+Synchrone Anpassung aller Consumer
 ```
 
 ---
 
-# 43. AI Worker 开工前
+# 43. Vor Arbeitsbeginn eines AI Workers
 
-必须读：
+Zu lesen sind:
 
 ```text
 00
 01
 02
 03
-相关专项文档
+Zugehörige Spezialdokumente
 Package README
 Tests
 ```
 
 ---
 
-# 44. AI Worker 交付
+# 44. Lieferung eines AI Workers
 
-必须汇报：
+Zu berichten sind:
 
 ```text
-完成内容
-修改文件
-关键设计
-测试
-风险
+Erledigte Inhalte
+Geänderte Dateien
+Wichtige Designentscheidungen
+Tests
+Risiken
 Contract Change
 ```
 
 ---
 
-# 45. 第一条系统级验收链
+# 45. Erste systemweite Abnahmekette
 
 ```text
-磁场带电粒子
+Geladenes Teilchen im Magnetfeld
 ```
 
-必须真正打通：
+Muss tatsächlich durchgängig verbunden sein:
 
 ```text
 UI
@@ -892,56 +892,56 @@ Agent
 
 ---
 
-# 46. 第二条系统级验收链
+# 46. Zweite systemweite Abnahmekette
 
 ```text
-平抛
+Waagerechter Wurf
 ```
 
 ---
 
-# 47. 第三条系统级验收链
+# 47. Dritte systemweite Abnahmekette
 
 ```text
-动态电路
+Dynamischer Schaltkreis
 ```
 
 ---
 
-# 48. 第四条系统级验收链
+# 48. Vierte systemweite Abnahmekette
 
 ```text
-电磁感应导轨
+Elektromagnetische Induktion an Schienen
 ```
 
 ---
 
-# 49. 不允许 Fake Demo
+# 49. Keine Fake-Demos
 
-任何 Phase 禁止：
+In keiner Phase darf Folgendes:
 
 ```text
-固定 JSON
-写死结果
-Agent 假回复
+Festes JSON
+Fest verdrahtete Ergebnisse
+Gefälschte Agent-Antworten
 Mock Simulation
 ```
 
-冒充正式完成。
+als offizielle Fertigstellung ausgegeben werden.
 
 ---
 
 # 50. UI Skeleton
 
-早期允许 Skeleton。
+In frühen Phasen sind Skeletons erlaubt.
 
-但功能验收时必须接真实 Runtime。
+Bei der Funktionsabnahme muss jedoch die echte Runtime angebunden sein.
 
 ---
 
 # 51. Contract First
 
-跨模块能力：
+Modulübergreifende Fähigkeiten:
 
 ```text
 Contract
@@ -957,7 +957,7 @@ Consumer
 
 # 52. Golden First
 
-Physics 新模型：
+Neues Physikmodell:
 
 ```text
 Golden Case
@@ -969,7 +969,7 @@ Implementation
 
 # 53. Milestone A — Physics World Foundation
 
-达到：
+Erreicht:
 
 ```text
 PhysicsScene
@@ -987,7 +987,7 @@ Workspace
 
 # 54. Milestone B — Physics Agent
 
-达到：
+Erreicht:
 
 ```text
 Agent Runtime
@@ -1002,7 +1002,7 @@ Tutor
 
 # 55. Milestone C — Question World
 
-达到：
+Erreicht:
 
 ```text
 Document
@@ -1018,7 +1018,7 @@ Question → Experiment
 
 # 56. Milestone D — Complete Core Domains
 
-达到：
+Erreicht:
 
 ```text
 Electric
@@ -1033,20 +1033,20 @@ Learning Model
 
 # 57. Milestone E — Teacher / Curriculum
 
-达到：
+Erreicht:
 
 ```text
 Teacher Studio
-完整 Skills
-实验模板
-题型模板
+Vollständige Skills
+Experimentvorlagen
+Aufgabentyp-Vorlagen
 ```
 
 ---
 
 # 58. Milestone F — Desktop
 
-达到：
+Erreicht:
 
 ```text
 Tauri Shell
@@ -1058,9 +1058,9 @@ Optional Local Runtime
 
 ---
 
-# 59. 产品级验收指标
+# 59. Abnahmekennzahlen auf Produktebene
 
-持续关注：
+Fortlaufend im Blick:
 
 ```text
 Physics Accuracy
@@ -1075,33 +1075,33 @@ Recovery
 
 ---
 
-# 60. 永久不可牺牲
+# 60. Dauerhaft nicht verhandelbar
 
-任何进度压力下都不能牺牲：
+Unter keinem Termindruck zu opfern:
 
 ```text
-PhysicsScene 单一事实源
-Physics Engine 决定结果
+PhysicsScene als einzige Faktenquelle
+Physics Engine entscheidet das Ergebnis
 Tool Guard
 Contract
 Golden Test
-真实集成
+Echte Integration
 ```
 
 ---
 
-# 61. 文档完成后的第一工程任务
+# 61. Erste Engineering-Aufgabe nach Abschluss der Dokumentation
 
 ```text
-初始化 Monorepo
+Monorepo initialisieren
 ↓
-建立 UI / Contracts / Core Skeleton
+UI / Contracts / Core Skeleton aufbauen
 ↓
-建立第一条 Magnetic Vertical Slice
+Erste Magnetic Vertical Slice aufbauen
 ```
 
 ---
 
-# 62. 一句话路线原则
+# 62. Roadmap-Prinzip in einem Satz
 
-> **PhysicsOS 必须从稳定 Contract 与真实 Physics Runtime 向上生长，每个阶段都形成可测试、可复现、可继续扩展的真实工程资产，而不是堆叠看起来完成的页面和 Mock。**
+> **PhysicsOS muss von stabilen Contracts und einer echten Physics Runtime aus nach oben wachsen; jede Phase soll testbare, reproduzierbare und weiter ausbaubare echte Engineering-Assets hervorbringen, statt Seiten und Mocks aufzutürmen, die nur fertig aussehen.**

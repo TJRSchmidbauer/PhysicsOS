@@ -1,18 +1,18 @@
-# PhysicsOS 本地开发手册
+# PhysicsOS Handbuch für die lokale Entwicklung
 
-> 文件：`docs/DEVELOPMENT.md`
-> 文档定位：可以照着敲命令的操作手册；流程与协作规范见 [`CONTRIBUTING.md`](../CONTRIBUTING.md)，工程规范见 [`02-ENGINEERING-STANDARDS.md`](./02-ENGINEERING-STANDARDS.md)。
+> Datei: `docs/DEVELOPMENT.md`
+> Dokumentzweck: Ein Handbuch, dessen Befehle man einfach nachtippen kann; Ablauf und Zusammenarbeit siehe [`CONTRIBUTING.md`](../CONTRIBUTING.md), technische Standards siehe [`02-ENGINEERING-STANDARDS.md`](./02-ENGINEERING-STANDARDS.md).
 
-## 1. 前置条件
+## 1. Voraussetzungen
 
-| 依赖    | 版本 / 说明                                                                   |
-| ------- | ----------------------------------------------------------------------------- |
-| Node.js | `>= 24`（当前验证基线 `24.x`）                                                |
-| pnpm    | 由仓库 `packageManager` 固定；根 `11.9.0`，`vendor/deepseek-harness` `11.7.0` |
-| Git LFS | `UI/`、`docs/` 下的大图走 LFS；未安装时这些 PNG 只是 pointer 文件             |
-| Docker  | 只有跑 Compose / 容器部署验证时需要                                           |
+| Abhängigkeit | Version / Hinweis                                                             |
+| ------------ | ----------------------------------------------------------------------------- |
+| Node.js      | `>= 24` (aktuelle Verifikationsbasis `24.x`)                                  |
+| pnpm         | Vom `packageManager` des Repositorys festgelegt; Root `11.9.0`, `vendor/deepseek-harness` `11.7.0` |
+| Git LFS      | Große Bilder unter `UI/` und `docs/` laufen über LFS; ohne Installation sind diese PNGs nur Pointer-Dateien |
+| Docker       | Nur nötig, um Compose / Container-Deployment zu verifizieren                  |
 
-## 2. 首次克隆
+## 2. Erstes Klonen
 
 ```sh
 git clone <your-fork>
@@ -22,88 +22,88 @@ git submodule update --init --recursive
 node scripts/overlay/harness-overlay.mjs apply
 ```
 
-`apply` 把 `overlays/harness/files/**` 叠加进 `vendor/deepseek-harness`，并把 `overlays/harness/upstream-changes.patch` 打到上游已跟踪文件上。没有这一步，正式 Web 入口跑不起来。
+`apply` legt `overlays/harness/files/**` auf `vendor/deepseek-harness` und wendet `overlays/harness/upstream-changes.patch` auf die vom Upstream verfolgten Dateien an. Ohne diesen Schritt läuft der offizielle Web-Einstieg nicht.
 
-## 3. 安装依赖
+## 3. Abhängigkeiten installieren
 
-根工作区（`apps/*`、`packages/*`、`tests/*`）与 `vendor/deepseek-harness` 是两个独立工作区，需要分别安装：
+Der Root-Workspace (`apps/*`, `packages/*`, `tests/*`) und `vendor/deepseek-harness` sind zwei getrennte Workspaces und müssen jeweils separat installiert werden:
 
 ```sh
-# 仓库根
+# Repository-Root
 pnpm install
 
-# Harness 子模块（lefthook 的 postinstall 在 submodule 下会失败，官方绕法是关掉脚本）
+# Harness-Submodul (das postinstall von lefthook schlägt im Submodul fehl, der offizielle Umweg ist, die Skripte abzuschalten)
 pnpm -C vendor/deepseek-harness install --ignore-scripts
 ```
 
-Linux / 容器环境里 `node-pty` 没有预编译产物，需要本地编译：
+In Linux- / Container-Umgebungen gibt es für `node-pty` keine vorkompilierten Artefakte, es muss lokal kompiliert werden:
 
 ```sh
 pnpm -C vendor/deepseek-harness rebuild node-pty
 ```
 
-Docker 镜像里的做法见仓库根 `Dockerfile`：安装 `python3 make g++`，再用 `onlyBuiltDependencies: [node-pty]` 重建。
+Das Vorgehen im Docker-Image steht im `Dockerfile` im Repository-Root: `python3 make g++` installieren und danach mit `onlyBuiltDependencies: [node-pty]` neu bauen.
 
-## 4. overlay 工作回路
+## 4. Arbeitszyklus mit dem Overlay
 
-`overlays/harness/files/**` 是 Harness 侧 PhysicsOS 代码的源真值，`vendor/deepseek-harness/**` 里的 `lib/`、`dist/`、`node_modules/` 是生成物。
+`overlays/harness/files/**` ist die Quelle der Wahrheit für den PhysicsOS-Code auf der Harness-Seite; `lib/`, `dist/` und `node_modules/` in `vendor/deepseek-harness/**` sind generierte Artefakte.
 
 ```sh
-# 源真值 → vendor（改完 overlay 里的代码后执行）
+# Quelle der Wahrheit → vendor (nach Änderungen am Code im Overlay auszuführen)
 node scripts/overlay/harness-overlay.mjs apply
 
-# vendor → overlay（在 vendor 里改了上游已跟踪文件后，由维护者执行）
+# vendor → Overlay (nachdem im vendor vom Upstream verfolgte Dateien geändert wurden, von den Maintainern auszuführen)
 node scripts/overlay/harness-overlay.mjs capture
 ```
 
-只在 vendor 里手改代码、不 `capture` 回写，下一次 `apply` 就会覆盖它。升级 upstream pin 的流程见 [`HARNESS-UPSTREAM.md`](./HARNESS-UPSTREAM.md)。
+Wer Code nur von Hand im vendor ändert und nicht per `capture` zurückschreibt, dessen Änderung wird beim nächsten `apply` überschrieben. Den Ablauf zum Aktualisieren des Upstream-Pins siehe [`HARNESS-UPSTREAM.md`](./HARNESS-UPSTREAM.md).
 
-## 5. 常用脚本
+## 5. Häufig genutzte Skripte
 
-| 命令                               | 作用                                                          |
+| Befehl                             | Wirkung                                                       |
 | ---------------------------------- | ------------------------------------------------------------- |
-| `pnpm dev`                         | 启动正式 Web 入口（`dsh web`，默认 `http://127.0.0.1:3080/`） |
-| `pnpm build`                       | 构建 core 包 + Agent 工具 + hosts + Client Plugin + 前端      |
-| `pnpm typecheck`                   | core / web / agent 三段类型检查                               |
-| `pnpm lint`                        | core / web / agent 三段 lint                                  |
-| `pnpm test`                        | core / web / agent / deploy / desktop 测试                    |
-| `pnpm run test:web`                | 只跑 `ui-physicsos` 客户端测试                                |
-| `pnpm run test:agent`              | 只跑 `packages/physicsos/**` 宿主插件测试                     |
-| `pnpm run test:acceptance`         | 浏览器验收（脚本自己拉起隔离服务器，默认端口 3095）           |
-| `pnpm run test:desktop`            | 桌面端打包脚本与 sidecar bridge 测试                          |
-| `pnpm run desktop:dev`             | 本地开发模式启动桌面壳                                        |
-| `pnpm run desktop:build`           | 本地构建（Development fallback，不用于发布）                  |
-| `pnpm run desktop:sidecar`         | 构建并收集 sidecar 运行时资源                                 |
-| `pnpm run desktop:release`         | 正式发布构建（需要签名与 updater 配置）                       |
-| `pnpm run format` / `format:write` | Prettier 检查 / 写入                                          |
+| `pnpm dev`                         | Startet den offiziellen Web-Einstieg (`dsh web`, standardmäßig `http://127.0.0.1:3080/`) |
+| `pnpm build`                       | Baut Core-Packages + Agent-Tools + Hosts + Client-Plugin + Frontend |
+| `pnpm typecheck`                   | Typprüfung in den drei Abschnitten core / web / agent         |
+| `pnpm lint`                        | Lint in den drei Abschnitten core / web / agent               |
+| `pnpm test`                        | Tests für core / web / agent / deploy / desktop               |
+| `pnpm run test:web`                | Nur die `ui-physicsos`-Clienttests                            |
+| `pnpm run test:agent`              | Nur die Host-Plugin-Tests unter `packages/physicsos/**`       |
+| `pnpm run test:acceptance`         | Browser-Abnahme (das Skript startet selbst einen isolierten Server, Standardport 3095) |
+| `pnpm run test:desktop`            | Tests für Desktop-Paketierungsskripte und die Sidecar-Bridge  |
+| `pnpm run desktop:dev`             | Startet die Desktop-Shell im lokalen Entwicklungsmodus        |
+| `pnpm run desktop:build`           | Lokaler Build (Development-Fallback, nicht für Releases)      |
+| `pnpm run desktop:sidecar`         | Baut und sammelt die Sidecar-Laufzeitressourcen               |
+| `pnpm run desktop:release`         | Offizieller Release-Build (erfordert Signatur- und Updater-Konfiguration) |
+| `pnpm run format` / `format:write` | Prettier-Prüfung / -Schreiben                                 |
 
-## 6. 账户会话存储与迁移
+## 6. Kontobasierte Sitzungsspeicherung und Migration
 
-JSONL 会话在启用 `physicsosSessionOwnership` 解析服务后写入
-`<root>/<schoolId>/<encoded-userKey>/<encoded-sessionId>/`。解析服务的权威数据源是
-`physicsos_auth` 存储域的 `api_resources`；工作区路径的哈希摘要不能反推账号，不能拿它当 owner。
+JSONL-Sitzungen werden, sobald der Auflösungsdienst `physicsosSessionOwnership` aktiviert ist, nach
+`<root>/<schoolId>/<encoded-userKey>/<encoded-sessionId>/` geschrieben. Die maßgebliche Datenquelle des Auflösungsdienstes ist
+`api_resources` der Speicherdomäne `physicsos_auth`; der Hash-Digest des Workspace-Pfads lässt sich nicht auf das Konto zurückführen und darf nicht als Owner verwendet werden.
 
-旧 `<root>/<project>/<sessionId>/` 布局仍可读取。新布局和旧布局同时存在同一 session 时，backend 会拒绝
-加载并报告 layout conflict，不会替调用方选择一份。
+Das alte Layout `<root>/<project>/<sessionId>/` bleibt lesbar. Existiert dieselbe Sitzung im neuen und im alten Layout, verweigert das Backend
+das Laden und meldet einen Layout-Konflikt; es wählt nicht für den Aufrufer eine Variante aus.
 
-迁移脚本默认只做 dry-run：
+Das Migrationsskript führt standardmäßig nur einen Dry-Run aus:
 
 ```sh
 node scripts/migrate/sessions-to-account-layout.mjs --root "$DSH_HOME/sessions"
 
-# 核对 plans / skipped 后执行：
+# Nach Prüfung von plans / skipped ausführen:
 node scripts/migrate/sessions-to-account-layout.mjs --root "$DSH_HOME/sessions" --apply
 
 node --test scripts/migrate/sessions-to-account-layout.test.mjs
 ```
 
-归属来源可用 `--ownership <physicsos_auth.json-or-manifest>` 覆盖；默认读取
-`<sessions-root>/../storages/physicsos_auth.json`。没有归属、归属冲突、非法 header 或目标文件已存在的条目只进入
-`skipped`，脚本不会猜测归属。PostgreSQL 存储部署需要由后续 composition 提供同等的 ownership provider。
+Die Zuordnungsquelle kann mit `--ownership <physicsos_auth.json-or-manifest>` überschrieben werden; standardmäßig wird
+`<sessions-root>/../storages/physicsos_auth.json` gelesen. Einträge ohne Zuordnung, mit widersprüchlicher Zuordnung, ungültigem Header oder bereits vorhandener Zieldatei landen nur in
+`skipped`, das Skript errät keine Zuordnung. Bei Deployments mit PostgreSQL-Speicher muss eine spätere Composition einen gleichwertigen Ownership-Provider bereitstellen.
 
-## 7. 只跑一个包或一个 spec
+## 7. Nur ein Package oder eine Spec ausführen
 
-领域包各自带脚本，可以直接定点执行：
+Die Domänen-Packages bringen jeweils eigene Skripte mit und lassen sich gezielt ausführen:
 
 ```sh
 pnpm -C packages/engine-wave test
@@ -111,36 +111,36 @@ pnpm -C packages/engine-wave typecheck
 pnpm -C packages/engine-wave exec vitest run tests/wave-model.spec.ts
 ```
 
-Overlay 里的宿主插件在 vendor 工作区执行：
+Host-Plugins im Overlay werden im vendor-Workspace ausgeführt:
 
 ```sh
 pnpm -C vendor/deepseek-harness exec vitest run packages/physicsos/auth-host/tests
 pnpm -C vendor/deepseek-harness exec tsc -b packages/physicsos/auth-host/tsconfig.json --pretty false
 ```
 
-根脚本偶尔会因为 `verify-deps-before-run` 的依赖状态检查直接失败，此时可以在单条命令前加：
+Die Root-Skripte schlagen gelegentlich wegen der Abhängigkeitsstatus-Prüfung von `verify-deps-before-run` direkt fehl; in diesem Fall kann man vor den einzelnen Befehl setzen:
 
 ```sh
 pnpm_config_verify_deps_before_run=false pnpm -C vendor/deepseek-harness --filter <pkg> run build
 ```
 
-这是排查用的旁路，不是常态；如果它成为常态，说明依赖状态需要重新 `pnpm install`。
+Das ist ein Umweg für die Fehlersuche, nicht der Normalfall; wird es zum Normalfall, muss der Abhängigkeitsstatus mit `pnpm install` neu hergestellt werden.
 
-## 8. 桌面端
+## 8. Desktop
 
 ```sh
-pnpm run desktop:dev        # 本地开发
-pnpm run desktop:build      # 本地构建（开发配置）
-pnpm run desktop:sidecar    # 产出 resources/agent-sidecar
-pnpm run desktop:release    # 正式打包（macOS/Windows 安装包）
-pnpm run test:desktop       # 打包脚本 + bridge 测试
+pnpm run desktop:dev        # Lokale Entwicklung
+pnpm run desktop:build      # Lokaler Build (Entwicklungskonfiguration)
+pnpm run desktop:sidecar    # Erzeugt resources/agent-sidecar
+pnpm run desktop:release    # Offizielle Paketierung (macOS-/Windows-Installationspakete)
+pnpm run test:desktop       # Paketierungsskripte + Bridge-Tests
 ```
 
-正式发布前需要提供 updater 公钥与 endpoint、`TAURI_SIGNING_PRIVATE_KEY` 及 Apple / Windows 签名材料；`desktop:config` 与 `desktop:release-config` 会校验配置文件，发布配置会拒绝开发 key、`example.invalid` 之类的占位 endpoint，以及仍指向占位页的构建。桌面端细节见 [`../apps/desktop/README.md`](../apps/desktop/README.md)。
+Vor dem offiziellen Release sind der öffentliche Updater-Schlüssel samt Endpoint, `TAURI_SIGNING_PRIVATE_KEY` sowie Apple- / Windows-Signaturmaterial bereitzustellen; `desktop:config` und `desktop:release-config` prüfen die Konfigurationsdateien, die Release-Konfiguration lehnt Entwicklungsschlüssel, Platzhalter-Endpoints wie `example.invalid` und Builds ab, die noch auf eine Platzhalterseite zeigen. Details zum Desktop siehe [`../apps/desktop/README.md`](../apps/desktop/README.md).
 
-## 9. 用 Docker Compose 起本地服务器
+## 9. Lokalen Server mit Docker Compose starten
 
-Compose 需要 7 个 secret 文件，默认路径都在仓库根（`.gitignore` 已忽略）：
+Compose benötigt 7 Secret-Dateien, deren Standardpfade alle im Repository-Root liegen (von `.gitignore` ignoriert):
 
 ```text
 .env.postgres_password   .env.redis_password
@@ -149,41 +149,41 @@ Compose 需要 7 个 secret 文件，默认路径都在仓库根（`.gitignore` 
 .env.image_api_key
 ```
 
-文件名可用 `PHYSICSOS_*_FILE` 环境变量覆盖，清单与轮换说明见 [`13-DEPLOYMENT-OPERATIONS.md`](./13-DEPLOYMENT-OPERATIONS.md)。
+Die Dateinamen lassen sich mit den Umgebungsvariablen `PHYSICSOS_*_FILE` überschreiben; Liste und Hinweise zur Rotation siehe [`13-DEPLOYMENT-OPERATIONS.md`](./13-DEPLOYMENT-OPERATIONS.md).
 
 ```sh
-docker compose config --quiet     # 先校验配置
-docker compose up --build         # 起 app + postgres + redis
+docker compose config --quiet     # Zuerst die Konfiguration validieren
+docker compose up --build         # Startet app + postgres + redis
 ```
 
-app 默认只监听 `127.0.0.1:3080`（可用 `PHYSICSOS_HTTP_PORT` 改端口），健康检查走 `/readyz`。TLS 反代后需要把 `PHYSICOS_TRUSTED_PROXIES` 设为反代的**精确 IP 字面量**（CIDR 与主机名会被拒绝）。
+Die App lauscht standardmäßig nur auf `127.0.0.1:3080` (der Port lässt sich mit `PHYSICSOS_HTTP_PORT` ändern), die Health-Prüfung läuft über `/readyz`. Hinter einem TLS-Reverse-Proxy muss `PHYSICOS_TRUSTED_PROXIES` auf das **exakte IP-Literal** des Reverse Proxy gesetzt werden (CIDR und Hostnamen werden abgelehnt).
 
-## 10. 故障排查
+## 10. Fehlerbehebung
 
-### pnpm 版本冲突
+### pnpm-Versionskonflikt
 
-症状：`ERR_PNPM_BAD_PM_VERSION`、lockfile 被改写、CI 与本地行为不一致。
+Symptom: `ERR_PNPM_BAD_PM_VERSION`, Lockfile wird umgeschrieben, CI und lokales Verhalten weichen ab.
 
-处理：用 Corepack 让 pnpm 按各目录 `packageManager` 字段取版本，不要用全局 pnpm 覆盖；根与 vendor 是两个版本（`11.9.0` / `11.7.0`），跨目录执行时用 `pnpm -C <dir>` 而不是先 `cd` 再复用同一个 shell 的 pnpm。
+Behebung: Mit Corepack pnpm die Version aus dem Feld `packageManager` des jeweiligen Verzeichnisses ziehen lassen, nicht mit einem globalen pnpm überschreiben; Root und vendor haben zwei Versionen (`11.9.0` / `11.7.0`), beim Arbeiten über Verzeichnisgrenzen hinweg `pnpm -C <dir>` verwenden, statt erst `cd` auszuführen und dann dasselbe pnpm der Shell weiterzuverwenden.
 
-### overlay patch 不干净
+### Overlay-Patch nicht sauber
 
-症状：`apply` 报 patch 无法应用，或 vendor 里出现 `.rej` / `.orig`。
+Symptom: `apply` meldet, dass der Patch sich nicht anwenden lässt, oder im vendor erscheinen `.rej` / `.orig`.
 
-处理：
+Behebung:
 
 ```sh
 git -C vendor/deepseek-harness status --short
 ```
 
-先确认 vendor 里没有未回写的上游文件改动（有就先 `capture`），确认没有 `.rej` / `.orig` 残留后再重跑 `node scripts/overlay/harness-overlay.mjs apply`。`apply` 是幂等的：已应用的补丁会跳过。
+Zuerst bestätigen, dass im vendor keine nicht zurückgeschriebenen Änderungen an vom Upstream verfolgten Dateien liegen (falls doch, zuerst `capture`), sicherstellen, dass keine `.rej` / `.orig` übrig sind, und dann `node scripts/overlay/harness-overlay.mjs apply` erneut ausführen. `apply` ist idempotent: Bereits angewendete Patches werden übersprungen.
 
-### 容器里 node-pty 编译失败
+### Kompilierung von node-pty im Container schlägt fehl
 
-症状：`docker compose up --build` 阶段 `node-gyp` 报缺少 `python3`、`make` 或 `g++`。
+Symptom: In der Phase `docker compose up --build` meldet `node-gyp` fehlendes `python3`, `make` oder `g++`.
 
-处理：镜像构建阶段必须带上 `python3 make g++`，并只对 `node-pty` 放行安装脚本（其余依赖保持 `--ignore-scripts`）。如果是在本机 Linux 复现，执行 `pnpm -C vendor/deepseek-harness rebuild node-pty`。
+Behebung: In der Image-Build-Phase müssen `python3 make g++` enthalten sein, und Installationsskripte werden nur für `node-pty` freigegeben (die übrigen Abhängigkeiten bleiben bei `--ignore-scripts`). Bei Reproduktion auf einem lokalen Linux-Rechner `pnpm -C vendor/deepseek-harness rebuild node-pty` ausführen.
 
-### 改了代码但浏览器 / 测试没变化
+### Code geändert, aber Browser / Tests zeigen keine Änderung
 
-先确认改的是 `overlays/harness/files/**` 并在 vendor 里重新构建（`lib/`、`dist/` 是生成物）；再确认 `apply` 之后没有旧产物残留。历史上 `link:` 桥接就是为了避免 browser bundle 与测试读到两份源码，相关说明见 [`HARNESS-UI-OVERLAY.md`](./HARNESS-UI-OVERLAY.md)。
+Zuerst bestätigen, dass `overlays/harness/files/**` geändert und im vendor neu gebaut wurde (`lib/`, `dist/` sind generierte Artefakte); dann bestätigen, dass nach `apply` keine alten Artefakte übrig sind. Die `link:`-Brücke gibt es historisch genau deshalb, damit Browser-Bundle und Tests nicht zwei Kopien des Quellcodes lesen; Erläuterungen dazu siehe [`HARNESS-UI-OVERLAY.md`](./HARNESS-UI-OVERLAY.md).

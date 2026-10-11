@@ -1,61 +1,61 @@
-# 电路 Question Space 与 Agent 电路意图切片报告
+# Bericht zum Slice Schaltungs-Question-Space und Agent-Schaltungsintentionen
 
-> 日期：2026-09-08
-> 状态：`CIRCUIT_QUESTION_AGENT_SLICE_COMPLETE`（已完成）
-> 范围：`CIRCUIT_RUNTIME_PACK_V1` 报告「不做」清单点名的下一切片 —— Question Space 电路题全链路核实 + Agent 电路意图补齐。
-> 电路引擎 / 场景 / 模板 / 可视化 / 实验室（MNA 直流引擎、21→38 模板、原理图画布）已在 `CIRCUIT_RUNTIME_PACK_V1_COMPLETE` 验收，本轮不重复。
+> Datum: 2026-09-08
+> Status: `CIRCUIT_QUESTION_AGENT_SLICE_COMPLETE` (abgeschlossen)
+> Umfang: Der im Bericht `CIRCUIT_RUNTIME_PACK_V1` in der „Nicht-Ziele“-Liste genannte nächste Slice – Überprüfung der gesamten Kette der Schaltungsaufgaben im Question Space + Ergänzung der Agent-Schaltungsintentionen.
+> Schaltungs-Engine / Szene / Vorlagen / Visualisierung / Labor (MNA-Gleichstrom-Engine, 21→38 Vorlagen, Schaltplan-Canvas) wurden bereits in `CIRCUIT_RUNTIME_PACK_V1_COMPLETE` abgenommen und werden in dieser Runde nicht wiederholt.
 
 ---
 
-## 1. 目标与现状核实
+## 1. Ziel und Prüfung des Ist-Zustands
 
-`CIRCUIT_RUNTIME_PACK_V1` 收口时明确「不做：Question Space 电路题与 Agent 电路意图（下一切片）」。本切片开工前先核实题目管线现状：
+Beim Abschluss von `CIRCUIT_RUNTIME_PACK_V1` wurde ausdrücklich festgehalten: „Nicht Teil: Schaltungsaufgaben im Question Space und Agent-Schaltungsintentionen (nächster Slice)“. Vor Beginn dieses Slices wurde zunächst der Stand der Aufgaben-Pipeline geprüft:
 
-- **Question Space 电路题已就位**：`deterministic-circuit-parser`（`isCircuitQuestionText` 电路信号 + 电动势/内阻/电阻/电流/电压/功率提取 + 串联/并联/混联/滑变拓扑判定）、`circuit-scene-builder`（IR → `physics-scene/1.0` 场景）、`question-runtime` 电路分派（优先于电学判定）、`engine-selector` 路由 `CircuitEngine`、`golden-questions` 6 道黄金题（串联电流 / 并联总电阻 / 滑变电流 / 总功率与外功率 / 电流与路端电压 / 内阻题），QuestionWorkspace 经 `resolveCircuitOperatingPoint` + `circuitSceneVisualAt` 渲染可验证原理图 —— question-core 402 用例全绿覆盖。
-- **Agent 侧缺口确认**：`physics-agent-answers.ts` 对 `domain === 'circuit'` 无任何意图；实验室 AI 助教对电路帧只能回「答不了」。本切片补齐 Agent 电路意图。
+- **Schaltungsaufgaben im Question Space sind bereits vorhanden**: `deterministic-circuit-parser` (Schaltungssignale via `isCircuitQuestionText` + Extraktion von EMK/Innenwiderstand/Widerstand/Strom/Spannung/Leistung + Topologieerkennung Reihen-/Parallel-/Gemischt-/Schiebewiderstand), `circuit-scene-builder` (IR → Szene `physics-scene/1.0`), Schaltungs-Dispatch in `question-runtime` (vor der Elektrik-Erkennung), `engine-selector` routet zu `CircuitEngine`, `golden-questions` mit 6 Golden-Aufgaben (Strom in Reihenschaltung / Gesamtwiderstand der Parallelschaltung / Strom mit Schiebewiderstand / Gesamtleistung und Außenleistung / Strom und Klemmenspannung / Aufgabe zum Innenwiderstand), QuestionWorkspace rendert über `resolveCircuitOperatingPoint` + `circuitSceneVisualAt` einen verifizierbaren Schaltplan – abgedeckt durch alle 402 Testfälle von question-core in grün.
+- **Lücke auf Agent-Seite bestätigt**: `physics-agent-answers.ts` hat für `domain === 'circuit'` keinerlei Intention; der KI-Assistent im Labor kann bei Schaltungsframes nur „kann ich nicht beantworten“ sagen. Dieser Slice ergänzt die Agent-Schaltungsintentionen.
 
-## 2. 交付物
+## 2. Liefergegenstände
 
-| 路径                                                       | 内容                                                                                               |
+| Pfad                                                       | Inhalt                                                                                             |
 | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `ui-physicsos/src/client/physics/physics-agent-answers.ts` | 8 个电路意图 + 4 个辅助函数 + `matchIntent` 电路规则（置于复合场规则后、力学规则前，域闸门防串场） |
-| `ui-physicsos/tests/physics-agent.client.spec.tsx`         | +10 电路意图用例（事实发布 / 拓扑分派 / 具名校验引用 / 路由 / 高亮可解析 / 域隔离）                |
+| `ui-physicsos/src/client/physics/physics-agent-answers.ts` | 8 Schaltungsintentionen + 4 Hilfsfunktionen + Schaltungsregel in `matchIntent` (nach der Regel für zusammengesetzte Felder, vor der Mechanikregel; Domänen-Gate verhindert Übergriffe) |
+| `ui-physicsos/tests/physics-agent.client.spec.tsx`         | +10 Testfälle zu Schaltungsintentionen (Faktenveröffentlichung / Topologie-Dispatch / Verweis auf benannte Prüfungen / Routing / Hervorhebung auflösbar / Domänenisolation) |
 
-高亮标签表（`HIGHLIGHT_LABELS`）在既有电路条目（bat / am / vm / sw / rv / r0-r3）已具备，本轮零改动；`CircuitAgentFacts`（内阻 / 滑变 / 结点数）与 `physicsAgentContext` 已随 `CIRCUIT_RUNTIME_PACK_V1` 就位，本轮只消费。
+Die Hervorhebungs-Beschriftungstabelle (`HIGHLIGHT_LABELS`) enthält die vorhandenen Schaltungseinträge (bat / am / vm / sw / rv / r0-r3) bereits, in dieser Runde unverändert; `CircuitAgentFacts` (Innenwiderstand / Schiebewiderstand / Knotenzahl) und `physicsAgentContext` kamen bereits mit `CIRCUIT_RUNTIME_PACK_V1`, in dieser Runde werden sie nur konsumiert.
 
-## 3. 意图设计
+## 3. Entwurf der Intentionen
 
-八个意图全部遵守「答案只复述运行时已产出的事实」：
+Alle acht Intentionen halten sich daran, dass „die Antwort nur Fakten wiedergibt, die die Runtime bereits erzeugt hat“:
 
-| 意图                                                   | 闸门              | 引用的运行时事实                                                            |
+| Intention                                              | Gate              | Zitierte Runtime-Fakten                                                     |
 | ------------------------------------------------------ | ----------------- | --------------------------------------------------------------------------- |
-| `circuit-ohm-current`（这个电流是怎么来的）            | domain=circuit    | 派生量「干路电流 I」+ `kcl_current_conservation` 校验，公式 I = E/(R外 + r) |
-| `circuit-terminal-voltage`（路端电压为什么比电动势小） | domain=circuit    | 派生量「路端电压 U」+ `terminal_voltage_law:<id>` 校验（U = E − I·r）       |
-| `circuit-internal-resistance`（内阻有什么用）          | r > 0             | 派生量「内阻耗散功率」+ 路端电压定律校验，P内 = I²·r                        |
-| `circuit-series-loop`（串联电流处处相等）              | junctionCount = 0 | 派生量「干路电流 I」+ KCL 校验                                              |
-| `circuit-parallel-split`（电流在结点怎么分）           | junctionCount > 0 | 派生量「干路电流 I」+ KCL 校验，I支 = U/R支 反比分流                        |
-| `circuit-rheostat-sweep`（滑片移动电流怎么变）         | hasSlider         | 派生量「接入电阻 R滑」+「干路电流 I」，R滑 = p·R全                          |
-| `circuit-power-balance`（电源的功率去哪了）            | domain=circuit    | `power_balance` 校验 + 总/输出/内阻功率三派生量，P总 = P外 + P内            |
-| `circuit-meters-ideal`（理想电表为什么不影响电路）     | 画布有 am/vm 符号 | `ideal_meters_non_intrusive` 校验                                           |
+| `circuit-ohm-current` (Woher kommt dieser Strom?)      | domain=circuit    | Abgeleitete Größe „Hauptstrom I“ + Prüfung `kcl_current_conservation`, Formel I = E/(R_außen + r) |
+| `circuit-terminal-voltage` (Warum ist die Klemmenspannung kleiner als die EMK?) | domain=circuit | Abgeleitete Größe „Klemmenspannung U“ + Prüfung `terminal_voltage_law:<id>` (U = E − I·r) |
+| `circuit-internal-resistance` (Wozu dient der Innenwiderstand?) | r > 0     | Abgeleitete Größe „Verlustleistung am Innenwiderstand“ + Prüfung zum Klemmenspannungsgesetz, P_innen = I²·r |
+| `circuit-series-loop` (Der Strom ist in Reihenschaltung überall gleich) | junctionCount = 0 | Abgeleitete Größe „Hauptstrom I“ + KCL-Prüfung               |
+| `circuit-parallel-split` (Wie teilt sich der Strom am Knoten?) | junctionCount > 0 | Abgeleitete Größe „Hauptstrom I“ + KCL-Prüfung, I_Zweig = U/R_Zweig, umgekehrt proportionale Stromteilung |
+| `circuit-rheostat-sweep` (Wie ändert sich der Strom beim Verschieben des Schleifers?) | hasSlider | Abgeleitete Größen „eingeschalteter Widerstand R_Schieber“ und „Hauptstrom I“, R_Schieber = p·R_gesamt |
+| `circuit-power-balance` (Wohin geht die Leistung der Quelle?) | domain=circuit | Prüfung `power_balance` + drei abgeleitete Größen Gesamt-/Ausgangs-/Innenwiderstandsleistung, P_gesamt = P_außen + P_innen |
+| `circuit-meters-ideal` (Warum beeinflussen ideale Messgeräte die Schaltung nicht?) | Canvas hat am/vm-Symbol | Prüfung `ideal_meters_non_intrusive`                       |
 
-设计要点：
+Entwurfspunkte:
 
-1. **拓扑分派读 `CircuitAgentFacts`，不猜标题。** `junctionCount`（并联结点）/ `hasSlider`（滑变符号）/ `internalResistance`（电源内阻）全部来自 Inspector 与画布投影 —— 串联帧永远不会声称结点分流，r = 0 的帧永远不会答「内阻有什么用」。
-2. **校验按前缀匹配。** `terminal_voltage_law` 是每电源一条的 `terminal_voltage_law:<componentId>`，Agent 用 `startsWith` 找到这条「运行时的判定」，而不是自己重算 U = E − I·r。
-3. **高亮目标动态取自画布。** `circuitComponentTarget` 优先当前帧真实绘制的电源 id（bat），其次电阻，再其次任一组件 —— 高亮永不指向不存在的东西；`resolveHighlightTarget` 对不绘制的 id 返回空集，工具层如实报告「画布当前没有显示」。
-4. **域闸门防串场。** 电路规则在 `matchIntent` 中位于复合场规则后、力学/电学规则前，但每条意图的 `available` 都以 `domain === 'circuit'` 收口 —— 电磁感应题「求感应电流」、点电荷题「电流」都不会被电路意图截胡（有测试断言）。
+1. **Der Topologie-Dispatch liest `CircuitAgentFacts`, rät nicht anhand des Titels.** `junctionCount` (Parallelknoten) / `hasSlider` (Schiebewiderstand-Symbol) / `internalResistance` (Innenwiderstand der Quelle) stammen alle aus Inspector und Canvas-Projektion – ein Reihenschaltungs-Frame behauptet nie eine Knotenverzweigung, ein Frame mit r = 0 beantwortet nie „Wozu dient der Innenwiderstand“.
+2. **Prüfungen werden nach Präfix zugeordnet.** `terminal_voltage_law` ist je Quelle eine Prüfung `terminal_voltage_law:<componentId>`; der Agent findet mit `startsWith` dieses „Urteil der Runtime“, statt U = E − I·r selbst nachzurechnen.
+3. **Hervorhebungsziele werden dynamisch vom Canvas bezogen.** `circuitComponentTarget` bevorzugt die im aktuellen Frame tatsächlich gezeichnete Quellen-ID (bat), dann einen Widerstand, dann irgendein Bauteil – die Hervorhebung zeigt nie auf etwas Nicht-Existentes; `resolveHighlightTarget` liefert für nicht gezeichnete IDs eine leere Menge, die Tool-Schicht meldet wahrheitsgemäß „Der Canvas zeigt derzeit nicht …“.
+4. **Das Domänen-Gate verhindert Übergriffe.** Die Schaltungsregel steht in `matchIntent` nach der Regel für zusammengesetzte Felder und vor den Mechanik-/Elektrikregeln, aber das `available` jeder Intention wird auf `domain === 'circuit'` begrenzt – die Aufgabe zur elektromagnetischen Induktion „Induktionsstrom berechnen“ oder eine Punktladungsaufgabe „Strom“ werden nicht von Schaltungsintentionen abgefangen (per Test belegt).
 
-## 4. 验收数据
+## 4. Abnahmedaten
 
-- `pnpm typecheck:web` 零错误。
-- `pnpm lint:web`（oxlint）零错误。
-- `pnpm test:web`：30 文件 **376 用例全绿**。`physics-agent.client.spec.tsx` 62 用例（此前 52，+10 电路）；其中覆盖：四类电路模板的事实与 drawnIds 发布、按 facts 的拓扑分派、`circuit-ohm-current`/`circuit-terminal-voltage` 引用具名校验与派生量、内阻意图的 r > 0 闸门（r = 0 帧按 id 与关键词都被拒）、六条学生问法路由到正确意图、四帧 × 全部可用意图的高亮目标都能解析到真实绘制的符号、电路高亮为纯视图（revision 不变）、力学/电学帧完全不提供电路意图。
-- `pnpm test:core`：全绿（question-core 402 含电路黄金题全链路；引擎/场景/校验无改动）。
-- Agent 端到端 `headless-physics-acceptance` 与其余 acceptance 不受影响（本轮未触碰引擎、工具运行时与题库）。
+- `pnpm typecheck:web` ohne Fehler.
+- `pnpm lint:web` (oxlint) ohne Fehler.
+- `pnpm test:web`: 30 Dateien, **376 Testfälle, alle grün**. `physics-agent.client.spec.tsx` mit 62 Testfällen (zuvor 52, +10 Schaltung); abgedeckt sind: Veröffentlichung von Fakten und drawnIds der vier Schaltungsvorlagen, Topologie-Dispatch nach facts, Verweis von `circuit-ohm-current`/`circuit-terminal-voltage` auf benannte Prüfungen und abgeleitete Größen, das r-> 0-Gate der Innenwiderstandsintention (ein Frame mit r = 0 wird sowohl per ID als auch per Schlüsselwort abgewiesen), Routing von sechs Schülerfragen auf die richtige Intention, alle Hervorhebungsziele der verfügbaren Intentionen über vier Frames lassen sich auf tatsächlich gezeichnete Symbole auflösen, Schaltungshervorhebung ist reine Ansicht (Revision unverändert), Mechanik-/Elektrik-Frames bieten überhaupt keine Schaltungsintentionen an.
+- `pnpm test:core`: alles grün (question-core 402, einschließlich der kompletten Kette der Schaltungs-Golden-Aufgaben; Engine/Szene/Prüfungen unverändert).
+- Das Agent-Ende-zu-Ende-`headless-physics-acceptance` und die übrigen Acceptance-Tests sind nicht betroffen (in dieser Runde wurden Engine, Tool-Runtime und Aufgabenbank nicht angefasst).
 
-## 5. 明确不做 / 边界
+## 5. Ausdrücklich nicht Teil / Grenzen
 
-- **Question Space 电路题本体**：解析器 / 场景构建 / 运行时 / 6 道黄金题此前已交付并有测试，本轮仅核实未改动。
-- **模型化 Agent 回答**：`AGENT_MODEL_BACKED_ANSWERS_BACKLOG` 不变 —— 接真实模型时仍只替换 `matchIntent`，本批意图的引用契约（派生量 + 具名校验 + highlight 工具调用）原样保留。
-- **电路引擎 / 校验 / 模板扩展**：交流瞬态、电容电感、多电源仍按 `CIRCUIT_RUNTIME_PACK_V1` 边界由 `canHandle` 拒识。
-- 未触碰：`packages/` 全部包、`apps/web`、Harness 上游历史。
+- **Die Schaltungsaufgaben selbst im Question Space**: Parser / Szenenaufbau / Runtime / 6 Golden-Aufgaben wurden zuvor geliefert und getestet, in dieser Runde nur geprüft und nicht geändert.
+- **Modellbasierte Agent-Antworten**: `AGENT_MODEL_BACKED_ANSWERS_BACKLOG` unverändert – beim Anbinden eines echten Modells wird weiterhin nur `matchIntent` ersetzt, der Verweisvertrag dieser Intentionen (abgeleitete Größen + benannte Prüfungen + highlight-Tool-Aufruf) bleibt unverändert erhalten.
+- **Schaltungs-Engine / Prüfungen / Erweiterung der Vorlagen**: Wechselstrom-Transienten, Kondensatoren/Induktivitäten und mehrere Quellen werden gemäß der Grenze von `CIRCUIT_RUNTIME_PACK_V1` weiterhin durch `canHandle` abgelehnt.
+- Nicht angefasst: alle Packages unter `packages/`, `apps/web`, die Upstream-Historie des Harness.

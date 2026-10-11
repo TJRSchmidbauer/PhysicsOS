@@ -1,22 +1,22 @@
-# PhysicsOS 核心领域契约
+# PhysicsOS Zentrale Domänen-Contracts
 
-> 文件：`docs/03-DOMAIN-CONTRACTS.md`  
-> 文档定位：PhysicsOS 跨模块核心 Contract / Schema 总规范  
-> 上游文档：`00-PRODUCT-OVERVIEW.md`、`01-DEVELOPMENT-GUIDE.md`、`02-ENGINEERING-STANDARDS.md`
+> Datei: `docs/03-DOMAIN-CONTRACTS.md`  
+> Dokumentzweck: Gesamtspezifikation der modulübergreifenden zentralen Contracts / Schemas von PhysicsOS  
+> Vorgelagerte Dokumente: `00-PRODUCT-OVERVIEW.md`, `01-DEVELOPMENT-GUIDE.md`, `02-ENGINEERING-STANDARDS.md`
 >
-> 本文档定义 PhysicsOS 中跨应用、跨 package、跨服务、跨语言共享的数据契约。
+> Dieses Dokument definiert die Datenverträge, die in PhysicsOS über Anwendungen, Packages, Services und Sprachen hinweg gemeinsam genutzt werden.
 >
-> **Contract 的稳定性高于单个模块内部实现。**
+> **Die Stabilität eines Contracts steht über der internen Implementierung einzelner Module.**
 
 ---
 
-# 1. 文档目标
+# 1. Ziel des Dokuments
 
-本文档回答一个问题：
+Dieses Dokument beantwortet eine Frage:
 
-> **PhysicsOS 的不同模块之间究竟使用什么数据结构进行协作？**
+> **Welche Datenstrukturen verwenden die verschiedenen Module von PhysicsOS tatsächlich, um zusammenzuarbeiten?**
 
-PhysicsOS 包含：
+PhysicsOS umfasst:
 
 ```text
 Web UI
@@ -30,46 +30,46 @@ Agent Runtime
 DeepSeek Harness Adapter
 Spring Boot API
 Python Math Runtime
-未来 Tauri Desktop
+Künftiger Tauri Desktop
 ```
 
-这些模块不能各自定义一套对象。
+Diese Module dürfen nicht jeweils eigene Objekte definieren.
 
-必须共享统一 Contract。
+Sie müssen einheitliche Contracts teilen.
 
 ---
 
 # 2. Contract First
 
-跨模块功能开发必须遵守：
+Die modulübergreifende Funktionsentwicklung muss folgende Reihenfolge einhalten:
 
 ```text
-先定义 Contract
+Zuerst den Contract definieren
 ↓
-定义 Schema
+Schema definieren
 ↓
-写 Contract Test
+Contract Test schreiben
 ↓
-实现 Producer
+Producer implementieren
 ↓
-实现 Consumer
+Consumer implementieren
 ```
 
-禁止：
+Verboten:
 
 ```text
-前端先写一个 JSON
-后端再猜字段
-Agent 又返回另一套结构
+Das Frontend schreibt zuerst ein JSON
+Das Backend rät dann die Felder
+Der Agent liefert wieder eine andere Struktur
 ```
 
 ---
 
-# 3. Contract 表达形式
+# 3. Ausdrucksform von Contracts
 
-TypeScript Interface 只是参考实现。
+Ein TypeScript-Interface ist nur eine Referenzimplementierung.
 
-正式 Contract 应能够生成或映射：
+Ein formaler Contract sollte folgende erzeugen oder darauf abbildbar sein:
 
 ```text
 JSON Schema
@@ -80,7 +80,7 @@ Python Pydantic Model
 TypeScript Type
 ```
 
-推荐：
+Empfohlen:
 
 ```text
 Schema Source of Truth
@@ -94,13 +94,13 @@ Multiple Runtimes
 
 # 4. Schema Version
 
-所有关键顶层 Contract 必须包含：
+Alle wichtigen Top-Level-Contracts müssen enthalten:
 
 ```text
 schemaVersion
 ```
 
-例如：
+Zum Beispiel:
 
 ```text
 physics-scene/1.0
@@ -114,37 +114,37 @@ agent-context/1.0
 
 # 5. Breaking Change
 
-以下属于 Breaking Change：
+Folgendes gilt als Breaking Change:
 
 ```text
-删除字段
-修改字段语义
-修改单位语义
-修改 ID 含义
-修改 Event 含义
-修改 Tool 输入输出
-修改必填/可选关系
-修改枚举语义
-修改 PhysicsScene Invariant
+Feld löschen
+Feldsemantik ändern
+Einheitensemantik ändern
+Bedeutung einer ID ändern
+Bedeutung eines Events ändern
+Tool-Eingabe/-Ausgabe ändern
+Beziehung zwischen Pflicht-/optionalen Feldern ändern
+Enum-Semantik ändern
+PhysicsScene-Invariante ändern
 ```
 
-Breaking Change 必须：
+Ein Breaking Change muss:
 
 ```text
-升级 schemaVersion
-增加 Migration
-增加兼容测试
-更新本文档
-更新 Consumer
+schemaVersion erhöhen
+Migration hinzufügen
+Kompatibilitätstests hinzufügen
+Dieses Dokument aktualisieren
+Consumer aktualisieren
 ```
 
 ---
 
 # 6. ID Contract
 
-所有领域对象拥有稳定 ID。
+Alle Domänenobjekte besitzen eine stabile ID.
 
-逻辑类型：
+Logische Typen:
 
 ```ts
 type SceneId = string
@@ -177,7 +177,7 @@ type TraceId = string
 type UserId = string
 ```
 
-实际 TypeScript 推荐使用 Brand。
+In TypeScript wird tatsächlich die Verwendung von Brands empfohlen.
 
 ```ts
 type Brand<T, B extends string> = T & {
@@ -191,43 +191,43 @@ type FieldId = Brand<string, 'FieldId'>
 
 ---
 
-# 7. ID 规则
+# 7. ID-Regeln
 
-ID 必须：
+IDs müssen:
 
 ```text
-全局唯一或领域内稳定唯一
-不可根据展示名称生成
-不可因为 Rename 改变
-不可复用被删除对象的 ID
+Global eindeutig oder innerhalb der Domäne stabil eindeutig sein
+Nicht aus dem Anzeigenamen erzeugt werden
+Sich durch Rename nicht ändern
+Die ID gelöschter Objekte nicht wiederverwenden
 ```
 
-建议：
+Empfohlen:
 
 ```text
 UUIDv7
 ULID
 ```
 
-任选一种统一。
+Eine davon einheitlich wählen.
 
 ---
 
-# 8. 时间 Contract
+# 8. Zeit-Contract
 
-跨服务时间使用：
+Serviceübergreifende Zeit verwendet:
 
 ```text
 ISO 8601 UTC
 ```
 
-例如：
+Zum Beispiel:
 
 ```text
 2026-08-16T03:24:00.000Z
 ```
 
-TypeScript：
+TypeScript:
 
 ```ts
 type IsoDateTime = string
@@ -237,7 +237,7 @@ type IsoDateTime = string
 
 # 9. PhysicalDimension
 
-统一物理量纲。
+Einheitliche physikalische Dimensionen.
 
 ```ts
 type PhysicalDimension =
@@ -268,13 +268,13 @@ type PhysicalDimension =
   | 'density'
 ```
 
-后续扩展统一修改 Contract。
+Spätere Erweiterungen erfolgen einheitlich durch Änderung des Contracts.
 
 ---
 
 # 10. Quantity
 
-所有具有物理意义的标量统一使用：
+Alle Skalare mit physikalischer Bedeutung verwenden einheitlich:
 
 ```ts
 interface Quantity<D extends PhysicalDimension = PhysicalDimension> {
@@ -286,7 +286,7 @@ interface Quantity<D extends PhysicalDimension = PhysicalDimension> {
 }
 ```
 
-示例：
+Beispiel:
 
 ```json
 {
@@ -300,7 +300,7 @@ interface Quantity<D extends PhysicalDimension = PhysicalDimension> {
 
 # 11. CanonicalQuantity
 
-Physics Engine 内部可以使用 Canonical SI：
+Die Physics Engine kann intern kanonisches SI verwenden:
 
 ```ts
 interface CanonicalQuantity<D extends PhysicalDimension = PhysicalDimension> {
@@ -309,15 +309,15 @@ interface CanonicalQuantity<D extends PhysicalDimension = PhysicalDimension> {
 }
 ```
 
-UI-facing Contract 可以保留 display unit。
+UI-seitige Contracts können die Anzeigeeinheit beibehalten.
 
 ---
 
 # 12. Unit Contract
 
-所有 Unit 必须来自统一 Unit Registry。
+Alle Einheiten müssen aus einer einheitlichen Unit Registry stammen.
 
-禁止：
+Verboten ist es, folgende:
 
 ```text
 "tesla"
@@ -326,9 +326,9 @@ UI-facing Contract 可以保留 display unit。
 "Tesla"
 ```
 
-同时作为系统内部 Unit ID。
+gleichzeitig als systeminterne Unit ID zu verwenden.
 
-推荐：
+Empfohlen:
 
 ```text
 m
@@ -348,13 +348,13 @@ rad
 Hz
 ```
 
-显示层可以本地化。
+Die Anzeigeschicht darf lokalisieren.
 
 ---
 
 # 13. Scalar Precision
 
-重要计算结果可以附带：
+Wichtige Rechenergebnisse können mitliefern:
 
 ```ts
 interface NumericMetadata {
@@ -364,7 +364,7 @@ interface NumericMetadata {
 }
 ```
 
-不要把展示小数位等同于计算精度。
+Angezeigte Dezimalstellen sind nicht mit der Rechengenauigkeit gleichzusetzen.
 
 ---
 
@@ -381,7 +381,7 @@ interface Vector2 {
 
 # 15. Vector3
 
-PhysicsOS 统一领域向量使用：
+PhysicsOS verwendet für Domänenvektoren einheitlich:
 
 ```ts
 interface Vector3 {
@@ -391,7 +391,7 @@ interface Vector3 {
 }
 ```
 
-2D 世界：
+2D-Welt:
 
 ```text
 z = 0
@@ -415,19 +415,19 @@ interface QuantityVector<D extends PhysicalDimension = PhysicalDimension> {
 
 # 17. Angle
 
-角度内部推荐：
+Winkel intern empfohlen:
 
 ```text
 rad
 ```
 
-UI 可显示：
+Die UI kann anzeigen:
 
 ```text
 °
 ```
 
-Contract：
+Contract:
 
 ```ts
 type AngleQuantity = Quantity<'angle'>
@@ -437,7 +437,7 @@ type AngleQuantity = Quantity<'angle'>
 
 # 18. ActorRef
 
-任何修改 Scene 的主体都必须标明来源。
+Jeder Akteur, der eine Scene verändert, muss seine Herkunft angeben.
 
 ```ts
 interface ActorRef {
@@ -451,7 +451,7 @@ interface ActorRef {
 
 # 19. TraceContext
 
-跨模块 Trace：
+Modulübergreifender Trace:
 
 ```ts
 interface TraceContext {
@@ -574,7 +574,7 @@ interface SceneMetadata {
 
 # 26. PhysicsScene
 
-PhysicsOS 最核心 Contract：
+Der zentralste Contract von PhysicsOS:
 
 ```ts
 interface PhysicsScene {
@@ -610,17 +610,17 @@ interface PhysicsScene {
 
 ---
 
-# 27. Scene Revision Invariant
+# 27. Scene-Revision-Invariante
 
-`revision` 必须：
+`revision` muss:
 
 ```text
-整数
+Ganzzahl sein
 >= 0
-单调递增
+Monoton steigen
 ```
 
-每次成功 Scene Mutation：
+Bei jeder erfolgreichen Scene Mutation:
 
 ```text
 revision + 1
@@ -652,7 +652,7 @@ interface PhysicsObjectBase {
 type ShapeDefinition = CircleShape | RectangleShape | PolygonShape | SegmentShape | PointShape
 ```
 
-示例：
+Beispiel:
 
 ```ts
 interface CircleShape {
@@ -725,16 +725,16 @@ interface Particle extends PhysicsObjectBase {
 
 ---
 
-# 33. Body / Particle Invariant
+# 33. Body- / Particle-Invariante
 
-必须：
+Erforderlich:
 
 ```text
 mass > 0
 position finite
 velocity finite
-所有 Unit 有效
-ID 唯一
+Alle Units gültig
+ID eindeutig
 ```
 
 ---
@@ -803,7 +803,7 @@ interface PointChargeField extends FieldBase {
 type Field = UniformElectricField | UniformMagneticField | GravityField | PointChargeField
 ```
 
-未来扩展必须通过新 discriminated type。
+Künftige Erweiterungen müssen über einen neuen discriminated type erfolgen.
 
 ---
 
@@ -847,7 +847,7 @@ interface Force extends PhysicsObjectBase {
 
 # 42. Derived Force
 
-例如：
+Zum Beispiel:
 
 ```text
 Lorentz Force
@@ -855,15 +855,15 @@ Gravity
 Normal Force
 ```
 
-可以由 Engine 动态计算。
+können von der Engine dynamisch berechnet werden.
 
-`vector` 可以不持久化。
+`vector` muss nicht persistiert werden.
 
-如果 `derived = true`：
+Wenn `derived = true`:
 
 ```text
-PhysicsScene 保存模型关系
-SimulationResult 保存某时刻结果
+PhysicsScene speichert die Modellbeziehung
+SimulationResult speichert das Ergebnis zu einem Zeitpunkt
 ```
 
 ---
@@ -888,14 +888,14 @@ interface Region extends PhysicsObjectBase {
 }
 ```
 
-Region 可表示：
+Eine Region kann darstellen:
 
 ```text
-磁场区域
-电场区域
-介质区域
-碰撞区域
-光学介质
+Magnetfeldbereich
+Elektrofeldbereich
+Medienbereich
+Kollisionsbereich
+Optisches Medium
 ```
 
 ---
@@ -1110,7 +1110,7 @@ interface VariableResistor extends CircuitComponentBase {
 }
 ```
 
-`sliderPosition`：
+`sliderPosition`:
 
 ```text
 0 <= sliderPosition <= 1
@@ -1233,7 +1233,7 @@ interface ObservableDefinition {
 
 # 67. ObservationStyle
 
-领域 Contract 只保存语义化 Style，不保存 Pixi/Three 对象。
+Der Domänen-Contract speichert nur semantische Styles, keine Pixi-/Three-Objekte.
 
 ```ts
 interface ObservationStyle {
@@ -1247,7 +1247,7 @@ interface ObservationStyle {
 }
 ```
 
-`token` 对应 UI Design Token。
+`token` entspricht einem UI Design Token.
 
 ---
 
@@ -1301,7 +1301,7 @@ interface SceneCommand<TType extends SceneCommandType = SceneCommandType, TPaylo
 }
 ```
 
-当前 Magnetic Runtime 的 payload 锁定为：
+Die Payloads der aktuellen Magnetic Runtime sind festgelegt auf:
 
 ```ts
 interface SceneCommandPayloadMap {
@@ -1390,9 +1390,9 @@ interface PhysicsEvent<TPayload = unknown> {
 
 ---
 
-# 72. Physics Event 类型
+# 72. Physics-Event-Typen
 
-核心事件包括：
+Zu den zentralen Events gehören:
 
 ```text
 SceneCreated
@@ -1471,13 +1471,13 @@ interface SceneSnapshot {
 
 # 74. Snapshot Hash
 
-推荐：
+Empfohlen:
 
 ```text
 SHA-256
 ```
 
-用于：
+Verwendet für:
 
 ```text
 Integrity
@@ -1595,9 +1595,9 @@ interface DerivedQuantity {
 }
 ```
 
-`SimulationResult` 的模型假设不另建重复字段。Engine 必须把实际采用的假设写入
-`derivedQuantities[].assumptions`；Verifier 从这些 Physics Fact 聚合并验证。当前
-Magnetic Runtime 至少携带：
+Die Modellannahmen von `SimulationResult` erhalten kein doppeltes Feld. Die Engine muss die tatsächlich verwendeten Annahmen in
+`derivedQuantities[].assumptions` schreiben; der Verifier aggregiert und verifiziert sie aus diesen Physics Facts. Die aktuelle
+Magnetic Runtime führt mindestens mit:
 
 ```text
 uniform magnetic field
@@ -1607,7 +1607,7 @@ ignore electric field
 ignore gravity
 ```
 
-例如：
+Zum Beispiel:
 
 ```text
 net_force
@@ -1796,23 +1796,23 @@ interface VerificationResult {
 
 ---
 
-# 90. Physics IR 定位
+# 90. Rolle von Physics IR
 
-Physics IR 是：
+Physics IR ist:
 
-> **自然语言 / 试卷世界 → PhysicsScene 世界的正式中间层。**
+> **Die formale Zwischenschicht von der Welt der natürlichen Sprache / Klausur zur Welt von PhysicsScene.**
 
-禁止：
+Verboten:
 
 ```text
 Question
 ↓
 LLM
 ↓
-直接 Canvas
+Direkt Canvas
 ```
 
-必须：
+Erforderlich:
 
 ```text
 Question
@@ -2068,31 +2068,29 @@ interface PhysicsAssumptionIR {
 
 # 102. Confidence
 
-统一：
+Einheitlich:
 
 ```text
 0 <= confidence <= 1
 ```
 
-不得：
+Nicht vermischen:
 
 ```text
 95
 ```
 
-和：
+und:
 
 ```text
 0.95
 ```
 
-混用。
-
 ---
 
 # 103. EvidenceRef
 
-Physics IR 中关键判断尽量可追溯。
+Zentrale Beurteilungen in Physics IR sollen möglichst nachvollziehbar sein.
 
 ```ts
 interface EvidenceRef {
@@ -2119,7 +2117,7 @@ interface EvidenceRef {
 
 # 104. BoundingBox
 
-统一使用归一化坐标：
+Einheitlich normalisierte Koordinaten:
 
 ```ts
 interface BoundingBox {
@@ -2130,7 +2128,7 @@ interface BoundingBox {
 }
 ```
 
-约束：
+Einschränkung:
 
 ```text
 0 <= x,y,width,height <= 1
@@ -2138,20 +2136,20 @@ interface BoundingBox {
 
 ---
 
-# 105. Diagram IR 定位
+# 105. Rolle von Diagram IR
 
-Diagram IR 用于把：
+Diagram IR wandelt:
 
 ```text
-斜面图
-电路图
-磁场区域图
-光路图
-坐标图
-受力图
+Schiefe-Ebene-Diagramme
+Schaltpläne
+Magnetfeldbereich-Diagramme
+Strahlengänge
+Koordinatendiagramme
+Kräftediagramme
 ```
 
-转成结构化图形。
+in strukturierte Grafiken um.
 
 ---
 
@@ -2711,7 +2709,7 @@ interface VariablePolicy {
 
 # 134. Physics Tool Definition
 
-所有 Tool 使用统一 Contract。
+Alle Tools verwenden einen einheitlichen Contract.
 
 ```ts
 interface PhysicsToolDefinition<TInput = unknown, TOutput = unknown> {
@@ -2838,13 +2836,13 @@ type ToolErrorCode =
 
 # 140. Tool Naming
 
-统一：
+Einheitlich:
 
 ```text
 physics.<domain>.<action>
 ```
 
-例如：
+Zum Beispiel:
 
 ```text
 physics.scene.create
@@ -2885,7 +2883,7 @@ type AgentRole =
 
 # 143. SceneReference
 
-Agent Context 不直接保存完整 Scene。
+Der Agent Context speichert nicht die vollständige Scene.
 
 ```ts
 interface SceneReference {
@@ -2977,7 +2975,7 @@ interface PhysicsAgentContext {
 
 ---
 
-# 147. Context Layer 对应 Contract
+# 147. Zum Context Layer gehörender Contract
 
 ```text
 L0 Constitution
@@ -3037,9 +3035,9 @@ interface CompactionResult {
 }
 ```
 
-`summaryText` 只是补充。
+`summaryText` ist nur eine Ergänzung.
 
-结构化字段才是主要事实。
+Die strukturierten Felder sind die eigentlichen Fakten.
 
 ---
 
@@ -3105,7 +3103,7 @@ interface KnowledgeMastery {
 }
 ```
 
-约束：
+Einschränkung:
 
 ```text
 0 <= score <= 1
@@ -3178,7 +3176,7 @@ interface MemoryRecord {
 
 # 155. Error Memory
 
-用于记录可复用错误模式。
+Dient zur Erfassung wiederverwendbarer Fehlermuster.
 
 ```ts
 interface ErrorMemory extends MemoryRecord {
@@ -3278,7 +3276,7 @@ interface QuestionPattern {
 
 # 159. ObservationPlan
 
-Agent Observation Planner 输出统一结构。
+Die Ausgabe des Agent Observation Planner hat eine einheitliche Struktur.
 
 ```ts
 interface ObservationPlan {
@@ -3338,11 +3336,11 @@ interface TimelinePausePoint {
 
 ---
 
-# 162. VisualSceneModel 定位
+# 162. Rolle von VisualSceneModel
 
-VisualSceneModel 是 Observation → Renderer 的中间层。
+VisualSceneModel ist die Zwischenschicht von Observation → Renderer.
 
-它可以包含：
+Es kann enthalten:
 
 ```text
 VisualPrimitive
@@ -3354,17 +3352,17 @@ Field Glyphs
 Graph Data
 ```
 
-但：
+Aber:
 
-> **不属于 PhysicsScene Contract。**
+> **Es gehört nicht zum PhysicsScene Contract.**
 
-Renderer Contract 单独维护，不允许反向污染 PhysicsScene。
+Der Renderer Contract wird separat gepflegt und darf PhysicsScene nicht rückwirkend verunreinigen.
 
 ---
 
 # 163. DomainError
 
-所有领域服务统一错误基础结构。
+Einheitliche Basisstruktur für Fehler aller Domänenservices.
 
 ```ts
 interface DomainError {
@@ -3385,7 +3383,7 @@ interface DomainError {
 
 # 164. API Error
 
-对外：
+Nach außen:
 
 ```ts
 interface ApiErrorResponse {
@@ -3405,7 +3403,7 @@ interface ApiErrorResponse {
 
 # 165. Pagination
 
-统一：
+Einheitlich:
 
 ```ts
 interface PageRequest {
@@ -3414,7 +3412,7 @@ interface PageRequest {
 }
 ```
 
-返回：
+Rückgabe:
 
 ```ts
 interface PageResponse<T> {
@@ -3432,7 +3430,7 @@ interface PageResponse<T> {
 
 # 166. Cursor Pagination
 
-高频 Event / Log 推荐 Cursor。
+Für hochfrequente Events / Logs wird Cursor empfohlen.
 
 ```ts
 interface CursorPage<T> {
@@ -3446,7 +3444,7 @@ interface CursorPage<T> {
 
 # 167. DocumentParseJob
 
-长任务统一 Job Contract。
+Langläufer verwenden einen einheitlichen Job Contract.
 
 ```ts
 interface DocumentParseJob {
@@ -3570,9 +3568,9 @@ interface ToolCallRecord {
 
 ---
 
-# 172. 双 Event Stream Link
+# 172. Link zwischen den zwei Event Streams
 
-Agent Event 与 Physics Event 通过：
+Agent Event und Physics Event werden verknüpft über:
 
 ```text
 traceId
@@ -3584,8 +3582,6 @@ sceneId
 sceneRevision
 physicsEventId
 ```
-
-关联。
 
 ---
 
@@ -3613,40 +3609,40 @@ interface EventTraceLink {
 
 ---
 
-# 174. PhysicsScene Invariants
+# 174. PhysicsScene-Invarianten
 
-任何持久化 Scene 都必须满足：
+Jede persistierte Scene muss erfüllen:
 
 ```text
-schemaVersion 可识别
-scene id 有效
+schemaVersion erkennbar
+Scene-ID gültig
 revision >= 0
-对象 ID 唯一
-所有引用存在
-Quantity 单位合法
-Quantity 量纲合法
+Objekt-IDs eindeutig
+Alle Referenzen existieren
+Quantity-Einheit zulässig
+Quantity-Dimension zulässig
 Vector finite
 mass > 0
-Timeline 合法
-Circuit Connection 有效
-Region Geometry 有效
+Timeline gültig
+Circuit Connection gültig
+Region Geometry gültig
 ```
 
 ---
 
-# 175. Magnetic Invariants
+# 175. Magnetic-Invarianten
 
-例如纯匀强磁场圆周模型：
+Zum Beispiel für das reine Kreisbewegungsmodell im homogenen Magnetfeld:
 
 ```text
 Particle charge != 0
 Particle mass > 0
 B != 0
 v perpendicular B
-无额外做功力
+Keine zusätzliche arbeitsverrichtende Kraft
 ```
 
-满足这些条件才可以应用：
+Nur wenn diese Bedingungen erfüllt sind, darf angewendet werden:
 
 ```text
 r = mv / |q|B
@@ -3655,9 +3651,9 @@ T = 2πm / |q|B
 
 ---
 
-# 176. Electric Invariants
+# 176. Electric-Invarianten
 
-匀强电场粒子模型至少验证：
+Das Teilchenmodell im homogenen elektrischen Feld verifiziert mindestens:
 
 ```text
 field uniform
@@ -3668,9 +3664,9 @@ field vector valid
 
 ---
 
-# 177. Circuit Invariants
+# 177. Circuit-Invarianten
 
-至少验证：
+Mindestens zu verifizieren:
 
 ```text
 node id unique
@@ -3687,13 +3683,13 @@ slider position in [0,1]
 
 # 178. Scene Builder Contract
 
-输入：
+Eingabe:
 
 ```text
 PhysicsIR
 ```
 
-输出：
+Ausgabe:
 
 ```ts
 interface SceneBuildResult {
@@ -3777,15 +3773,15 @@ interface ParserWarning {
 
 ---
 
-# 183. OCR / VLM Contract 边界
+# 183. Grenze des OCR- / VLM-Contracts
 
-OCR / VLM 原始输出：
+Rohausgabe von OCR / VLM:
 
 ```text
-不得作为 Physics IR 本身
+Darf nicht selbst Physics IR sein
 ```
 
-必须经过：
+Sie muss durchlaufen:
 
 ```text
 Normalization
@@ -3793,13 +3789,13 @@ Semantic Parsing
 Validation
 ```
 
-后才成为领域 Contract。
+und wird erst danach zum Domänen-Contract.
 
 ---
 
 # 184. Math Runtime Contract
 
-所有数学服务通过统一请求。
+Alle Mathematik-Services werden über eine einheitliche Anfrage angesprochen.
 
 ```ts
 interface MathRequest<TInput = unknown> {
@@ -3813,7 +3809,7 @@ interface MathRequest<TInput = unknown> {
 }
 ```
 
-返回：
+Rückgabe:
 
 ```ts
 interface MathResult<TOutput = unknown> {
@@ -3835,7 +3831,7 @@ interface MathResult<TOutput = unknown> {
 
 # 185. Symbolic Expression
 
-推荐统一：
+Empfohlen einheitlich:
 
 ```ts
 interface SymbolicExpression {
@@ -3849,9 +3845,9 @@ interface SymbolicExpression {
 
 # 186. Renderer Interaction Contract
 
-Renderer 用户交互不能直接 Mutation Scene。
+Nutzerinteraktionen des Renderers dürfen die Scene nicht direkt mutieren.
 
-输出：
+Ausgabe:
 
 ```ts
 interface RendererInteraction {
@@ -3863,13 +3859,13 @@ interface RendererInteraction {
 }
 ```
 
-Application 层将其转换 Scene Command。
+Die Application-Schicht wandelt sie in ein Scene Command um.
 
 ---
 
 # 187. Platform FileRef
 
-Web / Desktop 统一：
+Web / Desktop einheitlich:
 
 ```ts
 interface FileRef {
@@ -3889,7 +3885,7 @@ interface FileRef {
 }
 ```
 
-浏览器不应假设存在本地 path。
+Der Browser sollte nicht davon ausgehen, dass ein lokaler path existiert.
 
 ---
 
@@ -3911,7 +3907,7 @@ interface ExportRequest {
 
 # 189. Contract Test
 
-每个公共 Contract 至少测试：
+Jeder öffentliche Contract wird mindestens getestet auf:
 
 ```text
 Valid Example
@@ -3928,15 +3924,15 @@ Required Fields
 
 # 190. Schema Registry
 
-推荐建立：
+Empfohlen einzurichten:
 
 ```text
 packages/contracts/
 ```
 
-或由现有领域 packages 暴露 Schema。
+oder die vorhandenen Domänen-Packages legen Schemas offen.
 
-但必须有统一 Registry：
+Es muss aber eine einheitliche Registry geben:
 
 ```text
 Schema ID
@@ -3951,9 +3947,9 @@ Migration
 
 # 191. Contract Owner
 
-每个 Contract 必须有唯一 Owner。
+Jeder Contract muss genau einen Owner haben.
 
-例如：
+Zum Beispiel:
 
 ```text
 PhysicsScene
@@ -3975,13 +3971,13 @@ Agent Context
 → agent-context
 ```
 
-其他模块只能消费，不得复制定义。
+Andere Module dürfen ihn nur konsumieren, nicht kopiert definieren.
 
 ---
 
-# 192. Contract 文件位置
+# 192. Speicherort der Contract-Dateien
 
-推荐：
+Empfohlen:
 
 ```text
 packages/physics-scene/src/contracts/
@@ -3994,9 +3990,9 @@ packages/agent-context/src/contracts/
 
 ---
 
-# 193. 禁止重复类型
+# 193. Keine doppelten Typen
 
-禁止出现：
+Verboten sind
 
 ```text
 PhysicsSceneDto
@@ -4005,23 +4001,23 @@ SceneModel
 SceneSchema
 ```
 
-四套语义近似结构互相手写转换。
+vier semantisch ähnliche Strukturen, die von Hand ineinander umgewandelt werden.
 
-必要的 Transport DTO 应明确命名：
+Notwendige Transport-DTOs sollten eindeutig benannt werden:
 
 ```text
 PhysicsSceneApiResponse
 ```
 
-并直接映射统一 Domain Contract。
+und direkt auf den einheitlichen Domain Contract abbilden.
 
 ---
 
 # 194. Persistence Model
 
-数据库表结构可以与 Domain Contract 不完全相同。
+Die Tabellenstruktur der Datenbank muss nicht vollständig mit dem Domain Contract übereinstimmen.
 
-但必须存在明确 Mapper：
+Es muss aber einen eindeutigen Mapper geben:
 
 ```text
 Persistence
@@ -4031,64 +4027,64 @@ Mapper
 Domain Contract
 ```
 
-禁止 ORM Entity 渗透到整个系统。
+Es ist verboten, dass ORM-Entities in das gesamte System eindringen.
 
 ---
 
-# 195. Public Contract 与 Internal Model
+# 195. Public Contract und Internal Model
 
-允许内部模型不同。
+Interne Modelle dürfen abweichen.
 
-例如 Engine 内部：
+Zum Beispiel innerhalb der Engine:
 
 ```text
 CanonicalParticleState
 ```
 
-但跨 package 公开输入输出必须回到公共 Contract。
+Die öffentlichen Ein- und Ausgaben über Package-Grenzen hinweg müssen jedoch auf den öffentlichen Contract zurückgeführt werden.
 
 ---
 
 # 196. Contract Compatibility
 
-消费者至少保证：
+Consumer müssen mindestens sicherstellen:
 
 ```text
-读取当前版本
-读取上一兼容 Minor 版本
+Die aktuelle Version lesen
+Die vorherige kompatible Minor-Version lesen
 ```
 
-Breaking Major Version 通过 Migration 转换。
+Breaking Major Versions werden per Migration umgewandelt.
 
 ---
 
 # 197. Minor Version
 
-可以在兼容情况下：
+Bei Kompatibilität erlaubt:
 
 ```text
-新增 optional 字段
-新增 enum 但 Consumer 有 fallback
-新增 metadata
+Neue optionale Felder
+Neue Enums, sofern der Consumer einen Fallback hat
+Neue Metadaten
 ```
 
-具体仍需 Contract Test。
+Im Einzelnen sind weiterhin Contract Tests erforderlich.
 
 ---
 
 # 198. Major Version
 
-需要：
+Erforderlich bei:
 
 ```text
-字段删除
-语义改变
-默认单位改变
-必填条件改变
-Event 解释改变
+Feld löschen
+Semantikänderung
+Änderung der Standardeinheit
+Änderung der Pflichtbedingungen
+Änderung der Interpretation eines Events
 ```
 
-升级 Major。
+Die Major-Version wird erhöht.
 
 ---
 
@@ -4108,7 +4104,7 @@ interface ContractMigration<TFrom, TTo> {
 
 # 200. Scene Import
 
-导入旧 Scene：
+Import alter Scenes:
 
 ```text
 Detect Schema Version
@@ -4120,13 +4116,13 @@ Validate
 Load PhysicsScene
 ```
 
-禁止旧 JSON 直接强转最新 Type。
+Altes JSON darf nicht direkt auf den neuesten Typ gecastet werden.
 
 ---
 
-# 201. Export Scene 包
+# 201. Export-Paket für Scenes
 
-未来 `.physics` / `.scene` 文件建议包含：
+Künftige `.physics`- / `.scene`-Dateien sollten enthalten:
 
 ```text
 manifest.json
@@ -4136,7 +4132,7 @@ snapshot.json
 assets/
 ```
 
-Manifest：
+Manifest:
 
 ```ts
 interface ScenePackageManifest {
@@ -4156,27 +4152,27 @@ interface ScenePackageManifest {
 
 ---
 
-# 202. Domain Contract 与 UI 文案分离
+# 202. Trennung von Domain Contract und UI-Texten
 
-Contract 使用稳定英文 Key：
+Contracts verwenden stabile englische Keys:
 
 ```text
 magnetic_flux_density
 ```
 
-UI 中文显示：
+Die UI zeigt auf Chinesisch:
 
 ```text
 磁感应强度
 ```
 
-禁止使用中文字段名作为跨服务 Schema。
+Chinesische Feldnamen als serviceübergreifendes Schema sind verboten.
 
 ---
 
-# 203. Domain Contract 与 Model Provider 分离
+# 203. Trennung von Domain Contract und Model Provider
 
-Contract 中禁止出现：
+In Contracts dürfen nicht vorkommen:
 
 ```text
 deepseek_message_id
@@ -4184,15 +4180,15 @@ claude_tool
 openai_response
 ```
 
-等 Provider 特定结构。
+oder andere Provider-spezifische Strukturen.
 
-这些只能存在 Adapter 内。
+Diese dürfen nur innerhalb des Adapters existieren.
 
 ---
 
-# 204. Domain Contract 与 Renderer 分离
+# 204. Trennung von Domain Contract und Renderer
 
-PhysicsScene 禁止出现：
+In PhysicsScene dürfen nicht vorkommen:
 
 ```text
 pixiSprite
@@ -4202,7 +4198,7 @@ cssClass
 domId
 ```
 
-可视化语义通过：
+Visuelle Semantik wird verwaltet durch:
 
 ```text
 Observable
@@ -4210,13 +4206,11 @@ Visual Model
 Design Token
 ```
 
-管理。
-
 ---
 
-# 205. Domain Contract 与 Database 分离
+# 205. Trennung von Domain Contract und Database
 
-PhysicsScene 不出现：
+In PhysicsScene dürfen nicht vorkommen:
 
 ```text
 hibernateLazyProxy
@@ -4224,26 +4218,26 @@ rowVersion
 databaseId
 ```
 
-等 persistence-specific 内容。
+oder andere persistenzspezifische Inhalte.
 
 ---
 
-# 206. Domain Contract 与 Platform 分离
+# 206. Trennung von Domain Contract und Platform
 
-File Contract 不应假设：
+Der File Contract sollte nicht voraussetzen:
 
 ```text
 Windows path
 Browser Blob
 ```
 
-统一通过 `FileRef` 与 PlatformBridge。
+Einheitlich über `FileRef` und PlatformBridge.
 
 ---
 
-# 207. 最关键 Contract 链
+# 207. Die wichtigste Contract-Kette
 
-PhysicsOS 最核心链路：
+Die zentrale Kette von PhysicsOS:
 
 ```text
 QuestionDocument
@@ -4267,7 +4261,7 @@ ObservationPlan
 Visual Scene Model
 ```
 
-Agent：
+Agent:
 
 ```text
 PhysicsAgentContext
@@ -4285,7 +4279,7 @@ Scene Revision
 
 # 208. Contract Debugging
 
-任何跨模块异常优先检查：
+Bei jeder modulübergreifenden Anomalie zuerst prüfen:
 
 ```text
 schemaVersion
@@ -4298,39 +4292,39 @@ unit
 evidence
 ```
 
-不要第一时间在 Consumer 写临时兼容代码。
+Nicht als Erstes im Consumer provisorischen Kompatibilitätscode schreiben.
 
 ---
 
-# 209. Contract 修改流程
+# 209. Ablauf zur Änderung eines Contracts
 
-任何公共 Contract 修改：
+Jede Änderung an einem öffentlichen Contract:
 
 ```text
-提出 Change
+Change vorschlagen
 ↓
-确认 Owner
+Owner bestätigen
 ↓
-评估 Breaking
+Breaking bewerten
 ↓
-修改 Schema
+Schema ändern
 ↓
-增加 Migration
+Migration hinzufügen
 ↓
-更新 Contract Tests
+Contract Tests aktualisieren
 ↓
-更新 Producer
+Producer aktualisieren
 ↓
-更新 Consumer
+Consumer aktualisieren
 ↓
-更新本文档
+Dieses Dokument aktualisieren
 ```
 
 ---
 
-# 210. AI Agent 修改 Contract 规则
+# 210. Regeln für Contract-Änderungen durch AI Agents
 
-Codex / Cursor / Claude Code / 自动 Agent 不得自行修改：
+Codex / Cursor / Claude Code / automatische Agents dürfen nicht eigenmächtig ändern:
 
 ```text
 PhysicsScene
@@ -4342,30 +4336,30 @@ Tool Schema
 Agent Context
 ```
 
-除非任务明确授权。
+es sei denn, die Aufgabe erlaubt es ausdrücklich.
 
 ---
 
 # 211. Contract Review
 
-Review 必须检查：
+Das Review muss prüfen:
 
 ```text
-字段是否重复
-字段语义是否明确
-是否携带单位
-是否可序列化
-是否包含 Provider-specific 数据
-是否破坏已有 Consumer
-是否需要 Migration
-是否有 Contract Test
+Ob Felder doppelt vorkommen
+Ob die Feldsemantik eindeutig ist
+Ob Einheiten mitgeführt werden
+Ob es serialisierbar ist
+Ob Provider-spezifische Daten enthalten sind
+Ob bestehende Consumer beschädigt werden
+Ob eine Migration nötig ist
+Ob es einen Contract Test gibt
 ```
 
 ---
 
 # 212. Contract Definition of Done
 
-新的公共 Contract 只有同时满足以下条件才完成：
+Ein neuer öffentlicher Contract ist erst fertig, wenn alle folgenden Bedingungen gleichzeitig erfüllt sind:
 
 ```text
 TypeScript Type
@@ -4382,85 +4376,85 @@ Migration Strategy
 
 ---
 
-# 213. PhysicsScene 最终原则
+# 213. Abschließendes Prinzip zu PhysicsScene
 
-PhysicsScene 表达：
+PhysicsScene drückt aus:
 
-> **世界是什么。**
+> **Was die Welt ist.**
 
-不是：
+Nicht:
 
 ```text
-页面怎么画
-Agent 怎么说
-数据库怎么存
+Wie die Seite zeichnet
+Was der Agent sagt
+Wie die Datenbank speichert
 ```
 
 ---
 
-# 214. Physics IR 最终原则
+# 214. Abschließendes Prinzip zu Physics IR
 
-Physics IR 表达：
+Physics IR drückt aus:
 
-> **题目在物理语义上说了什么。**
+> **Was die Aufgabe physikalisch-semantisch sagt.**
 
-不是：
+Nicht:
 
 ```text
-答案
-动画
-最终 Simulation
+Die Antwort
+Die Animation
+Die endgültige Simulation
 ```
 
 ---
 
-# 215. SimulationResult 最终原则
+# 215. Abschließendes Prinzip zu SimulationResult
 
-SimulationResult 表达：
+SimulationResult drückt aus:
 
-> **在某一个明确 Scene Revision 与 Engine Version 下，物理世界如何演化。**
+> **Wie sich die physikalische Welt unter einer eindeutigen Scene Revision und Engine Version entwickelt.**
 
-必须可追溯、可复现。
-
----
-
-# 216. Tool Contract 最终原则
-
-Tool 表达：
-
-> **Agent 被允许对 PhysicsOS 做什么结构化动作。**
-
-不是万能 Prompt 通道。
+Muss nachvollziehbar und reproduzierbar sein.
 
 ---
 
-# 217. Agent Context 最终原则
+# 216. Abschließendes Prinzip zu Tool Contract
 
-Agent Context 保存：
+Ein Tool drückt aus:
 
-> **完成当前任务所需的最小结构化认知状态。**
+> **Welche strukturierten Aktionen dem Agent an PhysicsOS erlaubt sind.**
 
-不能代替 PhysicsScene。
+Kein Allzweck-Prompt-Kanal.
 
 ---
 
-# 218. 最终跨模块原则
+# 217. Abschließendes Prinzip zu Agent Context
 
-任何跨模块传输的数据都应该能够回答：
+Der Agent Context speichert:
+
+> **Den minimalen strukturierten kognitiven Zustand, der zur Erledigung der aktuellen Aufgabe nötig ist.**
+
+Er kann PhysicsScene nicht ersetzen.
+
+---
+
+# 218. Abschließendes modulübergreifendes Prinzip
+
+Alle modulübergreifend übertragenen Daten sollten beantworten können:
 
 ```text
-它是什么？
-谁拥有它？
-哪个版本？
-使用什么单位？
-来自哪里？
-当前 Scene Revision 是什么？
-能否验证？
-能否追踪？
+Was ist es?
+Wem gehört es?
+Welche Version?
+Welche Einheit wird verwendet?
+Woher stammt es?
+Was ist die aktuelle Scene Revision?
+Ist es verifizierbar?
+Ist es nachverfolgbar?
 ```
 
 ---
 
-# 219. 一句话领域契约原则
+# 219. Domänen-Contract-Prinzip in einem Satz
 
-> **PhysicsOS 的所有模块必须通过明确、版本化、可验证的 Contract 协作；任何模块不得通过共享隐式状态、自由文本猜测或重复定义领域对象来耦合。**
+> **Alle Module von PhysicsOS müssen über klare, versionierte, verifizierbare Contracts zusammenarbeiten; kein Modul darf über gemeinsam genutzten impliziten Zustand, das Raten aus Freitext oder doppelte Definition von Domänenobjekten gekoppelt sein.**

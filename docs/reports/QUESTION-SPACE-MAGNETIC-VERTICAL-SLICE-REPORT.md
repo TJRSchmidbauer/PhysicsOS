@@ -1,45 +1,45 @@
-# 试题空间 — 磁场垂直切片报告
+# Aufgabenraum — Bericht zur vertikalen Slice Magnetfeld
 
-> 文件：`docs/reports/QUESTION-SPACE-MAGNETIC-VERTICAL-SLICE-REPORT.md`
-> 任务编号：`QUESTION_SPACE_VERTICAL_SLICE_V1`
+> Datei: `docs/reports/QUESTION-SPACE-MAGNETIC-VERTICAL-SLICE-REPORT.md`
+> Aufgabennummer: `QUESTION_SPACE_VERTICAL_SLICE_V1`
 
 ---
 
 ## 1. Question Domain
 
-新建 `packages/question-core`，实现全部 Question Domain Contract：
+Neu angelegt wurde `packages/question-core`, das alle Question-Domain-Contracts umsetzt:
 
-- `QuestionId`、`QuestionDocument`、`QuestionSource`、`QuestionContent`、`QuestionStatus`、`QuestionMetadata`
-- `QuestionKnown`、`QuestionUnknown`、`QuestionConstraint`
-- `QuestionSemanticCandidate`、`PhysicsSemanticIR`
-- `QuestionSolution`、`QuestionSolutionStep`
-- `QuestionDiagnostic`、`QuestionParseIssue`、`QuestionAmbiguity`
-- `QuestionWorkflowState`（16 个状态：INPUT_RECEIVED → READY + 失败态）
-- `QuestionIngestProvider`（Text / Image-Stub / PDF-Stub）
+- `QuestionId`, `QuestionDocument`, `QuestionSource`, `QuestionContent`, `QuestionStatus`, `QuestionMetadata`
+- `QuestionKnown`, `QuestionUnknown`, `QuestionConstraint`
+- `QuestionSemanticCandidate`, `PhysicsSemanticIR`
+- `QuestionSolution`, `QuestionSolutionStep`
+- `QuestionDiagnostic`, `QuestionParseIssue`, `QuestionAmbiguity`
+- `QuestionWorkflowState` (16 Zustände: INPUT_RECEIVED → READY + Fehlerzustände)
+- `QuestionIngestProvider` (Text / Image-Stub / PDF-Stub)
 
-所有类型服从 `docs/03-DOMAIN-CONTRACTS.md` 和 `docs/08-QUESTION-PIPELINE-ARCHITECTURE.md`。
+Alle Typen folgen `docs/03-DOMAIN-CONTRACTS.md` und `docs/08-QUESTION-PIPELINE-ARCHITECTURE.md`.
 
 ---
 
 ## 2. QuestionDocument
 
-- 支持来源：`text`、`image`、`pdf`
-- 文本输入完整可用
-- 图片/PDF 建立 Provider Boundary，状态显示 `UNAVAILABLE`，不假装识别成功
+- Unterstützte Quellen: `text`, `image`, `pdf`
+- Texteingabe vollständig nutzbar
+- Für Bild/PDF wurde eine Provider Boundary eingerichtet, der Zustand zeigt `UNAVAILABLE`, ohne eine erfolgreiche Erkennung vorzutäuschen
 
 ---
 
 ## 3. Parser
 
-- 实现 `DeterministicMagneticQuestionParser`（确定性磁场题解析器）
-- 识别：科学计数法（`2.0×10^6`、`2.0e6`）、单位（`C`、`kg`、`m/s`、`T`）、中文方向（垂直纸面向里/外）、电荷正负（质子/电子/正/负）、求解目标（力/半径/周期/方向/轨迹）
-- 不依赖公网 LLM
+- Umgesetzt wurde `DeterministicMagneticQuestionParser` (deterministischer Parser für Magnetfeldaufgaben)
+- Erkannt werden: wissenschaftliche Notation (`2.0×10^6`, `2.0e6`), Einheiten (`C`, `kg`, `m/s`, `T`), chinesische Richtungsangaben (senkrecht zur Papierebene hinein/heraus), Vorzeichen der Ladung (Proton/Elektron/positiv/negativ), gesuchte Größen (Kraft/Radius/Periode/Richtung/Trajektorie)
+- Keine Abhängigkeit von einem öffentlichen LLM
 
 ---
 
 ## 4. Semantic IR
 
-`PhysicsSemanticIR` 包含：
+`PhysicsSemanticIR` enthält:
 
 - `domain: magnetic`
 - `model: charged_particle_uniform_magnetic_field`
@@ -53,10 +53,10 @@
 
 ## 5. Validation
 
-`validateSemanticIR` 检查：
+`validateSemanticIR` prüft:
 
-- 必要实体是否齐全（charge / mass / velocity / B）
-- 电荷正负是否明确 → `AMBIGUOUS`
+- Ob die nötigen Entitäten vollständig sind (charge / mass / velocity / B)
+- Ob das Vorzeichen der Ladung eindeutig ist → `AMBIGUOUS`
 - B = 0 → `INVALID_SEMANTICS`
 - v ∥ B → `UNSUPPORTED_MODEL`
 
@@ -64,104 +64,104 @@
 
 ## 6. Scene Builder
 
-`buildSceneFromIR` 将 IR 映射为 `PhysicsScene`：
+`buildSceneFromIR` bildet die IR auf `PhysicsScene` ab:
 
-- 直接使用 `@physicsos/physics-scene` 的 `createMagneticScene` 等价构建
-- 构建粒子、匀强磁场、Observable 定义
-- Scene Builder 不计算 R、T、ω、F — Physics Fact 全部来自 `engine-magnetic`
+- Verwendet direkt den äquivalenten Aufbau von `createMagneticScene` aus `@physicsos/physics-scene`
+- Baut Teilchen, homogenes Magnetfeld und Observable-Definitionen
+- Der Scene Builder berechnet R, T, ω, F nicht – alle Physics Facts stammen aus `engine-magnetic`
 
 ---
 
 ## 7. Engine Selector
 
-`selectEngine` 根据 IR `model` 选择引擎：
+`selectEngine` wählt die Engine anhand des IR-`model`:
 
 - `charged_particle_uniform_magnetic_field` → `engine-magnetic`
-- 预留其他领域接口
+- Schnittstellen für andere Domänen sind vorgehalten
 
 ---
 
 ## 8. Magnetic Engine Integration
 
-- 使用现有 `MagneticEngine` 执行 simulation
-- `processQuestion` 调用 `engine.simulate(scene, request)`
-- 输出 `SimulationResult`，包含 derivedQuantities
+- Die vorhandene `MagneticEngine` führt die Simulation aus
+- `processQuestion` ruft `engine.simulate(scene, request)` auf
+- Ausgabe ist ein `SimulationResult` einschließlich derivedQuantities
 
 ---
 
 ## 9. Verifier
 
-- 验证由 `MagneticEngine` 内置 verification 和外部 `verifyMagneticScene` 完成
-- Question UI 显示验证状态：`passed` / `failed`
-- 验证来源为 Physics Verifier，不是 Agent
+- Die Verifikation erfolgt durch die in der `MagneticEngine` eingebaute Verifikation und das externe `verifyMagneticScene`
+- Die Question UI zeigt den Verifikationsstatus: `passed` / `failed`
+- Die Verifikationsquelle ist der Physics Verifier, nicht der Agent
 
 ---
 
 ## 10. Observation
 
-- 使用 `observeMagneticScene` 将 SimulationResult 映射为 renderer-neutral observations
-- Question Canvas 和 Lab Canvas 共享同一 Observation 模型
+- `observeMagneticScene` bildet das SimulationResult auf renderer-neutrale Observations ab
+- Question Canvas und Lab Canvas teilen sich dasselbe Observation-Modell
 
 ---
 
 ## 11. Solution
 
-`QuestionSolution` 结构化：
+`QuestionSolution` strukturiert:
 
-- 5 个推导步骤
-- 结果读取自 `SimulationResult.derivedQuantities`（不重新计算）
-- 包含 F、R、T、方向
+- 5 Herleitungsschritte
+- Ergebnisse werden aus `SimulationResult.derivedQuantities` gelesen (nicht neu berechnet)
+- Enthalten F, R, T, Richtung
 
 ---
 
 ## 12. Question UI
 
-在 Harness Shell 内构建 `QuestionWorkspace` 组件：
+Im Harness Shell wird die Komponente `QuestionWorkspace` aufgebaut:
 
-- 左栏：题目输入 + Golden Question 列表 + 已知条件 + 求解目标
-- 中栏：复用 `LabCanvas` 渲染 Physics Visualization + Timeline
-- 右栏：解题过程 / 验证详情 Tabs
-- AI 助教 Drawer
+- Linke Spalte: Aufgabeneingabe + Liste der Golden Questions + gegebene Bedingungen + gesuchte Größen
+- Mittlere Spalte: Wiederverwendung von `LabCanvas` zum Rendern von Physics Visualization + Timeline
+- Rechte Spalte: Tabs für Lösungsweg / Verifikationsdetails
+- Drawer des KI-Assistenten
 
 ---
 
 ## 13. Open In Physics World
 
-- "在物理世界中打开" 按钮将 Question Scene 传递给 Lab
-- `surface-store.ts` 支持 `questionScene` 传递
-- Question 和 Lab 共享同一 `PhysicsScene`（同一 sceneId / revision）
-- 不重新生成 Scene
+- Die Schaltfläche „In der Physikwelt öffnen“ übergibt die Question Scene an das Lab
+- `surface-store.ts` unterstützt die Übergabe per `questionScene`
+- Question und Lab teilen sich dieselbe `PhysicsScene` (gleiche sceneId / revision)
+- Die Scene wird nicht neu erzeugt
 
 ---
 
 ## 14. Harness Agent
 
-- 当前 Agent Parser Provider 标记为 `AGENT_PARSER_PROVIDER_PENDING`
-- Deterministic Pipeline 完整可用，不阻塞
+- Der aktuelle Agent Parser Provider ist als `AGENT_PARSER_PROVIDER_PENDING` markiert
+- Die deterministische Pipeline ist vollständig nutzbar und blockiert nicht
 
 ---
 
 ## 15. Tests
 
-- 49 个测试全部通过
-- 10 个 Golden Question 场景覆盖：基本质子、电子、场方向向外、仅半径、仅周期、缺电荷正负、零场、平行速度、单位转换（预期 INVALID_SEMANTICS）、科学计数法
-- 01-proton-basic 完整 Pipeline 断言：IR → Scene → Engine → R ≈ 4.18cm, T ≈ 1.31e-7s, F ≈ 1.6e-13N → Verifier PASS → Solution → Observation
-- Question ↔ Lab 一致性测试：同一 sceneId / revision，同一 derivedQuantities
+- 49 Tests bestehen alle
+- 10 Golden-Question-Szenarien: Standard-Proton, Elektron, Feldrichtung nach außen, nur Radius, nur Periode, fehlendes Vorzeichen der Ladung, Nullfeld, parallele Geschwindigkeit, Einheitenumrechnung (erwartet INVALID_SEMANTICS), wissenschaftliche Notation
+- Vollständige Pipeline-Assertion für 01-proton-basic: IR → Scene → Engine → R ≈ 4,18 cm, T ≈ 1,31e-7 s, F ≈ 1,6e-13 N → Verifier PASS → Solution → Observation
+- Konsistenztest Question ↔ Lab: gleiche sceneId / revision, gleiche derivedQuantities
 
 ---
 
 ## 16. Screenshots
 
-浏览器截图需要起 Harness dev server 后执行，当前代码已完成，截图待浏览器验收。
+Browser-Screenshots erfordern das Starten des Harness Dev Servers; der Code ist fertig, die Screenshots stehen noch zur Browser-Abnahme aus.
 
 ---
 
 ## 17. Known Issues
 
-- Golden Question 09（单位转换 km/s, mT）当前解析器不支持非标准单位，预期 `INVALID_SEMANTICS`
-- 图片/PDF Ingest Provider 为 Stub，状态 `UNAVAILABLE`
-- Agent Parser Provider 待接入
-- Harness Windows Replay Gate 已 DEFERRED
+- Golden Question 09 (Einheitenumrechnung km/s, mT): Der aktuelle Parser unterstützt keine nicht standardisierten Einheiten, erwartet wird `INVALID_SEMANTICS`
+- Der Ingest Provider für Bild/PDF ist ein Stub, Zustand `UNAVAILABLE`
+- Agent Parser Provider muss noch angebunden werden
+- Das Harness Windows Replay Gate wurde DEFERRED
 
 ---
 
@@ -171,30 +171,30 @@
 HARNESS_WINDOWS_REPLAY_GATE_DEFERRED
 ```
 
-以下工作留到后续 RELEASE GATE 统一处理：
+Die folgenden Arbeiten bleiben dem späteren RELEASE GATE vorbehalten:
 
-- 串行跑 Baseline / PhysicsOS Replay
-- 修 bash/pwsh / PID cleanup
-- 逐个排 59 个失败文件
-- 为 Replay 修改 Physics Runtime
+- Baseline / PhysicsOS Replay seriell ausführen
+- bash/pwsh / PID-Cleanup beheben
+- 59 fehlgeschlagene Dateien einzeln aufarbeiten
+- Physics Runtime für das Replay ändern
 
 ---
 
-## 完成状态
+## Abschlussstatus
 
-- 文字题可以真实输入 ✓
-- QuestionDocument 创建 ✓
-- Semantic IR 创建 ✓
-- PhysicsScene 创建 ✓
-- Magnetic Engine 求解 ✓
+- Textaufgaben können tatsächlich eingegeben werden ✓
+- QuestionDocument erzeugt ✓
+- Semantic IR erzeugt ✓
+- PhysicsScene erzeugt ✓
+- Magnetic Engine löst ✓
 - Verifier PASS ✓
-- Solution 生成 ✓
-- Physics Canvas 展示 ✓
-- Open In Physics World 实现 ✓
-- Physics Lab 共享同一 Scene ✓
+- Solution erzeugt ✓
+- Physics Canvas zeigt an ✓
+- Open In Physics World umgesetzt ✓
+- Physics Lab teilt dieselbe Scene ✓
 - root typecheck PASS ✓
 - root tests PASS ✓
-- Question UI smoke（待浏览器验收）
-- browser runtime gate（待浏览器验收）
+- Question UI Smoke (steht zur Browser-Abnahme aus)
+- browser runtime gate (steht zur Browser-Abnahme aus)
 
 QUESTION_SPACE_MAGNETIC_VERTICAL_SLICE_COMPLETE

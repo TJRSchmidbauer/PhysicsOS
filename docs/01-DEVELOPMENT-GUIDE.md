@@ -1,61 +1,61 @@
-# PhysicsOS 开发指南
+# PhysicsOS Entwicklungsleitfaden
 
-> 文件：`docs/01-DEVELOPMENT-GUIDE.md`  
-> 文档定位：PhysicsOS 工程实现总指南  
-> 产品总览：`00-PRODUCT-OVERVIEW.md`  
-> 工程规范：`02-ENGINEERING-STANDARDS.md`  
-> 领域契约：`03-DOMAIN-CONTRACTS.md`
-
----
-
-# 1. 文档目的
-
-本文档回答一个问题：
-
-> **PhysicsOS 应该如何被真正开发出来？**
-
-它负责定义：
-
-- 技术栈；
-- Monorepo 组织方式；
-- Web First 开发策略；
-- 前端应用架构；
-- Physics World Runtime；
-- PhysicsScene Runtime；
-- Physics Engine；
-- Observation / Renderer；
-- Question Space；
-- Physics IR / Diagram IR；
-- Agent Runtime；
-- DeepSeek Harness Adapter；
-- Tools / Skills / Context / Memory；
-- 后端服务边界；
-- 数据存储；
-- 测试体系；
-- Web → Windows EXE 复用策略；
-- 本地开发、构建与部署方式。
-
-本文件不负责详细定义字段级 Contract。字段级定义以 `03-DOMAIN-CONTRACTS.md` 为准。
+> Datei: `docs/01-DEVELOPMENT-GUIDE.md`  
+> Dokumentzweck: Gesamtleitfaden zur Engineering-Umsetzung von PhysicsOS  
+> Produktübersicht: `00-PRODUCT-OVERVIEW.md`  
+> Engineering-Standards: `02-ENGINEERING-STANDARDS.md`  
+> Domänen-Contracts: `03-DOMAIN-CONTRACTS.md`
 
 ---
 
-# 2. 总体开发目标
+# 1. Zweck des Dokuments
 
-PhysicsOS 是一个 **Web First 的初高中物理数字世界 + AI Agent 平台**。
+Dieses Dokument beantwortet eine Frage:
 
-当前第一主产品：
+> **Wie soll PhysicsOS tatsächlich entwickelt werden?**
+
+Es legt fest:
+
+- den Technologie-Stack;
+- die Organisation des Monorepos;
+- die Web-First-Entwicklungsstrategie;
+- die Frontend-Anwendungsarchitektur;
+- die Physics World Runtime;
+- die PhysicsScene Runtime;
+- die Physics Engine;
+- Observation / Renderer;
+- den Question Space;
+- Physics IR / Diagram IR;
+- die Agent Runtime;
+- den DeepSeek Harness Adapter;
+- Tools / Skills / Context / Memory;
+- die Grenzen der Backend-Services;
+- die Datenspeicherung;
+- das Testsystem;
+- die Wiederverwendungsstrategie Web → Windows EXE;
+- lokale Entwicklung, Build und Deployment.
+
+Dieses Dokument definiert nicht im Detail die Contracts auf Feldebene. Maßgeblich für Definitionen auf Feldebene ist `03-DOMAIN-CONTRACTS.md`.
+
+---
+
+# 2. Gesamtziele der Entwicklung
+
+PhysicsOS ist eine **Web-First-Plattform aus digitaler Physikwelt für Mittel- und Oberstufe + KI-Agent**.
+
+Das derzeitige erste Hauptprodukt:
 
 ```text
 PhysicsOS Web
 ```
 
-未来在不复制业务代码的前提下扩展：
+In Zukunft wird erweitert, ohne Geschäftscode zu kopieren:
 
 ```text
 PhysicsOS Windows Desktop
 ```
 
-总体目标：
+Gesamtziel:
 
 ```text
                     PhysicsOS
@@ -63,7 +63,7 @@ PhysicsOS Windows Desktop
           ┌─────────────┴─────────────┐
           │                           │
      Physics Lab                Question Space
-      物理实验室                  试题空间
+      Physiklabor                 Aufgabenraum
           │                           │
           └─────────────┬─────────────┘
                         ↓
@@ -82,79 +82,75 @@ PhysicsOS Windows Desktop
 
 ---
 
-# 3. 最高技术原则
+# 3. Oberste technische Prinzipien
 
-开发过程中始终遵守以下原则。
+Bei der Entwicklung sind stets folgende Prinzipien einzuhalten.
 
 ## 3.1 Web First
 
-优先完整实现：
+Vorrangig vollständig umsetzen:
 
 ```text
 Web
 ```
 
-之后通过 Tauri 包装成：
+Danach über Tauri verpacken zu:
 
 ```text
 Windows EXE
 ```
 
-不维护两套前端。
+Es werden nicht zwei Frontends gepflegt.
 
 ---
 
-## 3.2 PhysicsScene 是物理事实源
+## 3.2 PhysicsScene ist die Faktenquelle der Physik
 
-物理世界当前是什么状态，只能由：
+Welchen Zustand die physikalische Welt gerade hat, darf nur bestimmt werden von:
 
 ```text
 PhysicsScene Runtime
 ```
 
-决定。
+Es darf nicht ersetzt werden durch:
 
-不能由：
-
-- React State；
-- Agent 聊天上下文；
-- LLM 输出文本；
-- Renderer 内部状态；
-
-代替。
+- React State;
+- den Chat-Kontext des Agents;
+- Textausgaben des LLM;
+- den internen Zustand des Renderers.
 
 ---
 
-## 3.3 LLM 不决定物理结果
+## 3.3 Das LLM bestimmt keine physikalischen Ergebnisse
 
 ```text
 LLM
-├── 理解
-├── 规划
-├── 调用 Tools
-├── 解释
-└── 教学
+├── Verstehen
+├── Planen
+├── Tools aufrufen
+├── Erklären
+└── Unterrichten
 ```
 
-真正的：
+Die tatsächlichen:
 
 ```text
-轨迹
-受力
-速度
-加速度
-场
-能量
-电路状态
+Trajektorien
+Kräfte
+Geschwindigkeiten
+Beschleunigungen
+Felder
+Energien
+Schaltungszustände
 ```
 
-由 Physics Engine 计算。
+werden von der Physics Engine berechnet.
 
 ---
 
-## 3.4 Physics Engine 与 UI 解耦
+## 3.4 Physics Engine und UI sind entkoppelt
 
-Physics Engine 不允许依赖：
+Die Physics Engine darf nicht abhängen von:
 
 ```text
 React
@@ -162,26 +158,26 @@ DOM
 Canvas
 Three.js
 DeepSeek Harness
-数据库
+Datenbank
 ```
 
 ---
 
-## 3.5 Renderer 不负责求解
+## 3.5 Der Renderer löst nichts
 
-Renderer 只把已经得到的物理状态绘制出来。
+Der Renderer zeichnet nur den bereits ermittelten physikalischen Zustand.
 
 ---
 
-## 3.6 Agent Runtime 与 Harness 隔离
+## 3.6 Agent Runtime und Harness sind isoliert
 
-Harness 是 Agent 宿主；PhysicsOS 不自建独立 Agent runtime。模型与 Harness 提供理解与操作：
+Der Harness ist der Agent-Host; PhysicsOS baut keine eigenständige Agent-Runtime. Modell und Harness liefern Verstehen und Bedienen:
 
 ```text
 DeepSeek Harness
 ```
 
-业务代码通过集成层接入，而不是自有的 Agent runtime：
+Geschäftscode bindet sich über eine Integrationsschicht an, nicht über eine eigene Agent-Runtime:
 
 ```text
 PhysicsOS
@@ -189,13 +185,13 @@ PhysicsOS
 DeepSeek Harness
 ```
 
-> **已退役（ADR-0002，2026-09-27）**：链中曾有的 `PhysicsAgentRuntime` / `DSH Adapter`（对应已删除的 `@physicsos/agent-runtime` / `@physicsos/agent-dsh-adapter`）已退役，见 `docs/adr/0002-agent-runtime-adapter-disposition.md`。我们自己的 runtime 是物理世界 runtime（Scene → Engine → Verifier），不是 agent loop。真实生产链路是 Harness 工具运行时 → `dsh-tool-physicsos` → `@physicsos/agent-tools` → 物理引擎 / verifier。
+> **Stillgelegt (ADR-0002, 2026-09-27)**: `PhysicsAgentRuntime` / `DSH Adapter` (entsprechend den gelöschten `@physicsos/agent-runtime` / `@physicsos/agent-dsh-adapter`), die früher in der Kette standen, sind stillgelegt, siehe `docs/adr/0002-agent-runtime-adapter-disposition.md`. Unsere eigene Runtime ist die Runtime der physikalischen Welt (Scene → Engine → Verifier), keine Agent-Schleife. Die reale Produktionskette ist Harness-Tool-Runtime → `dsh-tool-physicsos` → `@physicsos/agent-tools` → Physik-Engine / Verifier.
 
 ---
 
-# 4. 总体工程结构
+# 4. Gesamtstruktur des Engineerings
 
-推荐 Monorepo：
+Empfohlenes Monorepo:
 
 ```text
 physics-os/
@@ -211,13 +207,13 @@ physics-os/
 └── scripts/
 ```
 
-包管理：
+Paketverwaltung:
 
 ```text
 pnpm workspace
 ```
 
-任务编排建议：
+Empfohlene Task-Orchestrierung:
 
 ```text
 Turborepo
@@ -225,7 +221,7 @@ Turborepo
 
 ---
 
-# 5. 推荐完整目录
+# 5. Empfohlene vollständige Verzeichnisstruktur
 
 ```text
 physics-os/
@@ -315,15 +311,15 @@ physics-os/
 └── scripts/
 ```
 
-> **已退役（ADR-0002，2026-09-27）**：结构中原有的 `agent-runtime/` 与 `agent-dsh-adapter/` 设计稿包位（`@physicsos/agent-runtime` / `@physicsos/agent-dsh-adapter`）已退役删除，见 `docs/adr/0002-agent-runtime-adapter-disposition.md`。Harness 是 Agent 宿主，PhysicsOS 不自建独立 Agent runtime；真实在线的是 `agent-tools/`（`@physicsos/agent-tools` → 物理引擎 / verifier）。
+> **Stillgelegt (ADR-0002, 2026-09-27)**: Die ursprünglich in der Struktur vorgesehenen Package-Plätze `agent-runtime/` und `agent-dsh-adapter/` (`@physicsos/agent-runtime` / `@physicsos/agent-dsh-adapter`) aus dem Entwurf wurden stillgelegt und gelöscht, siehe `docs/adr/0002-agent-runtime-adapter-disposition.md`. Der Harness ist der Agent-Host, PhysicsOS baut keine eigenständige Agent-Runtime; real produktiv ist `agent-tools/` (`@physicsos/agent-tools` → Physik-Engine / Verifier).
 
 ---
 
-# 6. 客户端架构
+# 6. Client-Architektur
 
-## 6.1 正式 Web：vendor/deepseek-harness/apps/web
+## 6.1 Offizielles Web: vendor/deepseek-harness/apps/web
 
-当前唯一正式 Web Runtime Host：
+Der derzeit einzige offizielle Web Runtime Host:
 
 ```text
 vendor/deepseek-harness/apps/web
@@ -331,90 +327,90 @@ vendor/deepseek-harness/apps/web
 vendor/deepseek-harness/packages/client/ui-physicsos
 ```
 
-旧版独立原型 `apps/web` 已删除（git 历史可查）；浏览器端正式入口是 vendor harness 的 `dsh-client-ui-physicsos`。
+Der alte eigenständige Prototyp `apps/web` wurde gelöscht (in der Git-Historie nachvollziehbar); der offizielle Browser-Einstieg ist `dsh-client-ui-physicsos` des vendor Harness.
 
-主要页面：
+Hauptseiten:
 
 ```text
-首页
-物理实验室
-实验模板库
+Startseite
+Physiklabor
+Experimentvorlagen-Bibliothek
 Physics Workspace
-试题空间
-试题解析
-错题本
-学习记录
-资源库
-个人中心
+Aufgabenraum
+Aufgabenanalyse
+Fehlerheft
+Lernverlauf
+Ressourcenbibliothek
+Persönlicher Bereich
 ```
 
-职责：
+Verantwortlichkeiten:
 
 ```text
-Harness Web Shell：路由、会话、布局与客户端插件装配
-ui-physicsos：PhysicsOS 页面、用户交互与工作区组合
-共享 Runtime：PhysicsScene、Engine、Verifier、Observation
-PhysicsCanvas：统一渲染磁场与力学视觉模型
+Harness Web Shell: Routing, Sitzungen, Layout und Zusammenstellung der Client-Plugins
+ui-physicsos: PhysicsOS-Seiten, Nutzerinteraktion und Zusammenstellung des Arbeitsbereichs
+Gemeinsame Runtime: PhysicsScene, Engine, Verifier, Observation
+PhysicsCanvas: Einheitliches Rendern der visuellen Modelle für Magnetfeld und Mechanik
 ```
 
-禁止：
+Verboten:
 
 ```text
-在 React 组件中实现物理核心计算
+Die Kernberechnungen der Physik in React-Komponenten implementieren
 ```
 
 ---
 
 ## 6.2 apps/teacher-web
 
-教师工作台。
+Arbeitsplatz für Lehrkräfte.
 
-主要能力：
+Hauptfähigkeiten:
 
 ```text
 Teacher Studio
 Scene Builder
-实验制作
-试题制作
-课堂演示
-作业
-班级
-学情分析
-内容发布
+Experimente erstellen
+Aufgaben erstellen
+Unterrichtsdemonstration
+Hausaufgaben
+Klassen
+Lernstandsanalyse
+Inhalte veröffentlichen
 ```
 
 ---
 
 ## 6.3 apps/admin-web
 
-平台运营后台。
+Betriebs-Backend der Plattform.
 
-包括：
+Umfasst:
 
 ```text
-用户
-角色权限
-课程体系
-题库
-试卷
+Nutzer
+Rollen und Berechtigungen
+Curriculum-System
+Aufgabenbank
+Klausuren
 Physics Skills
-实验模板
-模型配置
-Agent 配置
-内容审核
-运营数据
-系统配置
+Experimentvorlagen
+Modellkonfiguration
+Agent-Konfiguration
+Inhaltsprüfung
+Betriebsdaten
+Systemkonfiguration
 ```
 
 ---
 
 ## 6.4 apps/desktop
 
-未来 Windows 客户端。
+Der künftige Windows-Client.
 
-桌面端不重新开发业务 UI。
+Der Desktop entwickelt die Geschäfts-UI nicht neu.
 
-只提供：
+Er bietet nur:
 
 ```text
 Tauri Runtime
@@ -430,9 +426,9 @@ Offline Capability
 
 ---
 
-# 7. Web 技术栈
+# 7. Web-Technologie-Stack
 
-核心推荐：
+Kernempfehlung:
 
 ```text
 React
@@ -445,7 +441,7 @@ Tailwind CSS
 Radix UI / shadcn
 ```
 
-可视化：
+Visualisierung:
 
 ```text
 SVG
@@ -458,50 +454,50 @@ KaTeX
 
 ---
 
-# 8. 为什么使用 React + Vite
+# 8. Warum React + Vite
 
-PhysicsOS 的 Web 端本质上是：
+Das Web von PhysicsOS ist im Wesentlichen:
 
 > **Browser-based Desktop Application**
 
-它的核心不是 SSR 内容页，而是：
+Sein Kern sind keine SSR-Inhaltsseiten, sondern:
 
 ```text
 Physics Canvas
-实时仿真
-拖拽
+Echtzeit-Simulation
+Drag & Drop
 Scene Tree
 Inspector
 Timeline
 Agent
-多面板工作区
-试卷解析
-数据图表
+Mehrpanel-Arbeitsbereich
+Klausuranalyse
+Datendiagramme
 ```
 
-因此主应用优先采用：
+Daher kommt für die Hauptanwendung vorrangig zum Einsatz:
 
 ```text
 React + TypeScript + Vite
 ```
 
-宣传官网如果以后需要，可以单独建立 Next.js 应用，不与 Physics Workspace 强绑定。
+Falls später eine Werbewebsite benötigt wird, kann separat eine Next.js-Anwendung angelegt werden, die nicht eng an den Physics Workspace gebunden ist.
 
 ---
 
-# 9. 前端状态架构
+# 9. Frontend-Zustandsarchitektur
 
-前端状态必须严格划分。
+Der Frontend-Zustand muss streng aufgeteilt werden.
 
 ## 9.1 UI State
 
-使用：
+Verwendet:
 
 ```text
 Zustand
 ```
 
-例如：
+Zum Beispiel:
 
 ```text
 sidebarOpen
@@ -517,36 +513,36 @@ temporaryTool
 
 ## 9.2 Server State
 
-使用：
+Verwendet:
 
 ```text
 TanStack Query
 ```
 
-例如：
+Zum Beispiel:
 
 ```text
-用户
-题目
-试卷
-实验列表
-错题
-课程
-学习记录
-资源
+Nutzer
+Aufgaben
+Klausuren
+Experimentliste
+Fehleraufgaben
+Kurse
+Lernverlauf
+Ressourcen
 ```
 
 ---
 
 ## 9.3 Physics World State
 
-使用：
+Verwendet:
 
 ```text
 PhysicsScene Runtime
 ```
 
-例如：
+Zum Beispiel:
 
 ```text
 Body
@@ -558,13 +554,13 @@ Timeline
 Revision
 ```
 
-不得复制一份到 Zustand 作为第二事实源。
+Darf nicht als zweite Faktenquelle in Zustand kopiert werden.
 
 ---
 
 ## 9.4 Agent State
 
-Agent state（Session / Run / Turn / Tool Call / Agent Status / Streaming）由 Harness 宿主管理：
+Der Agent State (Session / Run / Turn / Tool Call / Agent Status / Streaming) wird vom Harness-Host verwaltet:
 
 ```text
 Session
@@ -575,13 +571,13 @@ Agent Status
 Streaming
 ```
 
-> **已退役（ADR-0002，2026-09-27）**：设计稿中原由 `PhysicsAgentRuntime`（`@physicsos/agent-runtime`）承担的 Agent state 管理已退役删除，见 `docs/adr/0002-agent-runtime-adapter-disposition.md`。Harness 是 Agent 宿主，PhysicsOS 不自建独立 Agent runtime。
+> **Stillgelegt (ADR-0002, 2026-09-27)**: Die im Entwurf vorgesehene Verwaltung des Agent State durch `PhysicsAgentRuntime` (`@physicsos/agent-runtime`) wurde stillgelegt und gelöscht, siehe `docs/adr/0002-agent-runtime-adapter-disposition.md`. Der Harness ist der Agent-Host, PhysicsOS baut keine eigenständige Agent-Runtime.
 
 ---
 
 # 10. PlatformBridge
 
-为 Web → Desktop 复用提前建立平台抽象。
+Für die Wiederverwendung Web → Desktop wird frühzeitig eine Plattformabstraktion eingerichtet.
 
 ```ts
 interface PlatformBridge {
@@ -597,14 +593,14 @@ interface PlatformBridge {
 }
 ```
 
-实现：
+Implementierungen:
 
 ```text
 BrowserPlatformBridge
 TauriPlatformBridge
 ```
 
-业务代码禁止到处判断：
+Geschäftscode darf nicht überall prüfen:
 
 ```ts
 if (window.__TAURI__) {
@@ -615,11 +611,11 @@ if (window.__TAURI__) {
 
 # 11. Physics Workspace
 
-核心工作页面：
+Zentrale Arbeitsseite:
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
-│ PhysicsOS │ 场景名称 │ ▶ │ ⏸ │ 1x │ 保存 │ 分享            │
+│ PhysicsOS │ Szenenname │ ▶ │ ⏸ │ 1x │ Speichern │ Teilen     │
 ├────────────┬──────────────────────────────┬───────────────────┤
 │ Scene Tree │                              │ Inspector         │
 │            │                              │                   │
@@ -636,9 +632,9 @@ if (window.__TAURI__) {
 
 ---
 
-# 12. Physics Workspace 模块
+# 12. Module des Physics Workspace
 
-建议拆分：
+Empfohlene Aufteilung:
 
 ```text
 workspace/
@@ -655,15 +651,15 @@ workspace/
 └── agent-panel/
 ```
 
-Workspace 本身只协调这些模块。
+Der Workspace selbst koordiniert nur diese Module.
 
 ---
 
 # 13. Physics Canvas
 
-Canvas 必须作为独立运行子系统，而不是普通 React 组件集合。
+Der Canvas muss als eigenständiges Laufzeit-Subsystem aufgebaut sein und nicht als eine Sammlung gewöhnlicher React-Komponenten.
 
-结构：
+Struktur:
 
 ```text
 PhysicsCanvas
@@ -680,35 +676,35 @@ PhysicsCanvas
 
 ---
 
-# 14. 2D / 3D 策略
+# 14. 2D- / 3D-Strategie
 
-原则：
+Prinzip:
 
-> **2D 为主体，3D 为增强。**
+> **2D als Hauptkörper, 3D als Erweiterung.**
 
-使用场景：
+Einsatzszenarien:
 
 ```text
 SVG
-→ 静态矢量、受力图、公式辅助图
+→ Statische Vektorgrafik, Kräftediagramme, Formelhilfsbilder
 
 Canvas / PixiJS
-→ 高频 2D 动态场景
+→ Hochfrequente dynamische 2D-Szenen
 
 Three.js
-→ 真正需要空间理解的 3D 场景
+→ Echte 3D-Szenen, die räumliches Verständnis erfordern
 
 ECharts
-→ x-t / v-t / a-t / Energy 等图表
+→ Diagramme wie x-t / v-t / a-t / Energie
 ```
 
-禁止所有实验统一使用 Three.js。
+Es ist verboten, für alle Experimente einheitlich Three.js zu verwenden.
 
 ---
 
 # 15. PhysicsScene Runtime
 
-核心结构：
+Kernstruktur:
 
 ```text
 PhysicsSceneRuntime
@@ -722,7 +718,7 @@ PhysicsSceneRuntime
 └── SceneQueryService
 ```
 
-修改链路：
+Änderungspfad:
 
 ```text
 Command
@@ -742,13 +738,13 @@ revision + 1
 
 # 16. Scene Mutation
 
-禁止：
+Verboten:
 
 ```ts
 scene.particles[0].mass = 2
 ```
 
-必须：
+Erforderlich:
 
 ```text
 ChangeParticleMass Command
@@ -762,7 +758,7 @@ Scene Reducer
 Scene Revision + 1
 ```
 
-这样才能支持：
+Nur so lassen sich unterstützen:
 
 ```text
 Undo
@@ -777,7 +773,7 @@ Agent Trace
 
 # 17. Scene EventStore
 
-典型事件：
+Typische Ereignisse:
 
 ```text
 SceneCreated
@@ -805,24 +801,24 @@ ObservationDisabled
 
 # 18. SnapshotStore
 
-Snapshot 用于：
+Snapshots dienen für:
 
 ```text
-快速恢复
-大跨度时间回放
+Schnelle Wiederherstellung
+Wiedergabe über große Zeitspannen
 Branch
-Undo/Redo 优化
-Agent Session 恢复
-场景分享
+Optimierung von Undo/Redo
+Wiederherstellung von Agent Sessions
+Teilen von Szenen
 ```
 
-Snapshot 不替代 EventStore。
+Ein Snapshot ersetzt den EventStore nicht.
 
 ---
 
 # 19. Physics Timeline
 
-Timeline 与 Scene Runtime 原生结合。
+Die Timeline ist nativ mit der Scene Runtime verbunden.
 
 ```text
 0s ───── 1s ───── 2s ───── 3s
@@ -830,7 +826,7 @@ Timeline 与 Scene Runtime 原生结合。
               current
 ```
 
-支持：
+Unterstützt:
 
 ```text
 play()
@@ -841,38 +837,38 @@ stepBackward()
 setPlaybackRate()
 ```
 
-用户拖动时间轴后，所有：
+Nach dem Ziehen der Timeline durch den Nutzer müssen alle:
 
 ```text
-位置
-速度
-加速度
-力
-场
-能量
-电路数据
-轨迹
+Positionen
+Geschwindigkeiten
+Beschleunigungen
+Kräfte
+Felder
+Energien
+Schaltungsdaten
+Trajektorien
 ```
 
-必须恢复到该时刻。
+auf diesen Zeitpunkt wiederhergestellt werden.
 
 ---
 
 # 20. Physics Core
 
-`physics-core` 只定义最核心的：
+`physics-core` definiert nur die allerwichtigsten:
 
 ```text
-基础类型
+Basistypen
 Engine Interface
 Simulation Contract
-公共计算接口
+Öffentliche Berechnungsschnittstellen
 Domain Registry
 ```
 
-必须保持纯净。
+Muss rein bleiben.
 
-禁止依赖：
+Verboten sind Abhängigkeiten von:
 
 ```text
 React
@@ -881,14 +877,14 @@ Three.js
 Agent
 Harness
 Spring Boot
-数据库
+Datenbank
 ```
 
 ---
 
 # 21. Physics Engine Registry
 
-统一注册不同物理领域。
+Einheitliche Registrierung der verschiedenen Physikdomänen.
 
 ```ts
 interface PhysicsEngine<TScene = PhysicsScene, TResult = SimulationResult> {
@@ -900,7 +896,7 @@ interface PhysicsEngine<TScene = PhysicsScene, TResult = SimulationResult> {
 }
 ```
 
-Engine Registry：
+Engine Registry:
 
 ```text
 Mechanics
@@ -920,100 +916,100 @@ Thermal
 
 # 22. Mechanics Engine
 
-负责：
+Zuständig für:
 
 ```text
-受力
-牛顿定律
-摩擦
-弹力
-支持力
-连接体
-约束
-功与能
-动量
-碰撞
+Kräfte
+Newtonsche Gesetze
+Reibung
+Elastische Kräfte
+Stützkräfte
+Verbundene Körper
+Zwangsbedingungen
+Arbeit und Energie
+Impuls
+Stöße
 ```
 
 ---
 
 # 23. Kinematics Engine
 
-负责：
+Zuständig für:
 
 ```text
-直线运动
-匀变速运动
-自由落体
-竖直上抛
-平抛
-斜抛
-圆周运动
-轨迹
-状态随时间变化
+Geradlinige Bewegung
+Gleichmäßig beschleunigte Bewegung
+Freier Fall
+Senkrechter Wurf nach oben
+Waagerechter Wurf
+Schräger Wurf
+Kreisbewegung
+Trajektorien
+Zeitliche Zustandsänderung
 ```
 
 ---
 
 # 24. Electric Engine
 
-负责：
+Zuständig für:
 
 ```text
-库仑力
-电场
-电势
-电势能
-电场叠加
-带电粒子电场运动
+Coulombkraft
+Elektrisches Feld
+Potenzial
+Elektrische potenzielle Energie
+Überlagerung elektrischer Felder
+Bewegung geladener Teilchen im elektrischen Feld
 ```
 
 ---
 
 # 25. Magnetic Engine
 
-负责：
+Zuständig für:
 
 ```text
-洛伦兹力
-安培力
-匀强磁场
-磁场区域
-粒子圆周运动
-出入场
-边界问题
+Lorentzkraft
+Ampèrekraft
+Homogenes Magnetfeld
+Magnetfeldbereiche
+Kreisbewegung von Teilchen
+Ein- und Austritt
+Randprobleme
 ```
 
 ---
 
 # 26. EM Composite Engine
 
-处理：
+Behandelt:
 
 ```text
-电场 + 磁场
-电场 + 重力
-磁场 + 重力
-电场 + 磁场 + 重力
-速度选择器
-质谱仪
-回旋加速器
-多区域复合运动
+Elektrisches Feld + Magnetfeld
+Elektrisches Feld + Schwerkraft
+Magnetfeld + Schwerkraft
+Elektrisches Feld + Magnetfeld + Schwerkraft
+Geschwindigkeitsselektor
+Massenspektrometer
+Zyklotron
+Zusammengesetzte Bewegung in mehreren Bereichen
 ```
 
 ---
 
 # 27. Circuit Engine
 
-内部使用：
+Intern verwendet:
 
 ```text
 CircuitGraph
 ```
 
-而不是“动画状态”。
+und nicht „Animationszustände“.
 
-结构：
+Struktur:
 
 ```text
 Node
@@ -1028,7 +1024,7 @@ Switch
 Meter
 ```
 
-Circuit Engine 输出：
+Ausgabe der Circuit Engine:
 
 ```text
 Node Voltage
@@ -1043,23 +1039,23 @@ Measurement
 
 # 28. Induction Engine
 
-负责：
+Zuständig für:
 
 ```text
-磁通量
-法拉第电磁感应
-楞次定律
-运动导体
-线框
-导轨
-双棒
-电磁阻尼
-自感
-互感
-交流基础
+Magnetischer Fluss
+Faradaysches Induktionsgesetz
+Lenzsche Regel
+Bewegter Leiter
+Leiterrahmen
+Schienen
+Zwei Stäbe
+Elektromagnetische Dämpfung
+Selbstinduktion
+Gegeninduktion
+Grundlagen von Wechselstrom
 ```
 
-需要和：
+Muss zusammenarbeiten mit:
 
 ```text
 Mechanics
@@ -1067,13 +1063,11 @@ Circuit
 Magnetic
 ```
 
-协作。
-
 ---
 
 # 29. Math Runtime
 
-数学能力独立。
+Die mathematische Fähigkeit ist eigenständig.
 
 ```text
 Math Runtime
@@ -1087,9 +1081,9 @@ Math Runtime
 └── Unit System
 ```
 
-复杂能力通过 Python 服务实现。
+Komplexe Fähigkeiten werden über einen Python-Service umgesetzt.
 
-推荐：
+Empfohlen:
 
 ```text
 FastAPI
@@ -1098,21 +1092,19 @@ NumPy
 SciPy
 ```
 
-TypeScript 侧通过：
+Auf der TypeScript-Seite aufgerufen über:
 
 ```text
 MathRuntimeClient
 ```
 
-调用。
-
 ---
 
-# 30. Math Runtime 原则
+# 30. Prinzipien der Math Runtime
 
-禁止 Physics Engine 直接依赖某个 Python 包的 HTTP 结构。
+Die Physics Engine darf nicht direkt von der HTTP-Struktur eines Python-Pakets abhängen.
 
-正确：
+Richtig:
 
 ```text
 Physics Engine
@@ -1128,15 +1120,15 @@ Python Math Service
 
 # 31. Physics Units
 
-独立：
+Eigenständig:
 
 ```text
 physics-units
 ```
 
-内部统一 SI。
+Intern einheitlich SI.
 
-UI 可显示：
+Die UI kann anzeigen:
 
 ```text
 cm
@@ -1147,13 +1139,13 @@ mT
 ns
 ```
 
-进入 Engine 前转换为 Canonical SI。
+Vor dem Eintritt in die Engine wird in kanonisches SI umgerechnet.
 
 ---
 
 # 32. Physics Verifier
 
-统一验证层：
+Einheitliche Verifikationsschicht:
 
 ```text
 Physics Verifier
@@ -1168,18 +1160,18 @@ Physics Verifier
 └── Semantic Review
 ```
 
-顺序：
+Reihenfolge:
 
 ```text
-规则
+Regeln
 ↓
-单位
+Einheiten
 ↓
-数学
+Mathematik
 ↓
-数值
+Zahlenwerte
 ↓
-物理不变量
+Physikalische Invarianten
 ↓
 LLM Semantic Review
 ```
@@ -1188,7 +1180,7 @@ LLM Semantic Review
 
 # 33. Simulation Pipeline
 
-统一模拟管线：
+Einheitliche Simulationspipeline:
 
 ```text
 PhysicsScene
@@ -1212,37 +1204,37 @@ Verified SimulationResult
 
 # 34. Simulation Worker
 
-浏览器中的高计算量 Simulation 不得阻塞 UI。
+Rechenintensive Simulationen im Browser dürfen die UI nicht blockieren.
 
-优先：
+Vorrang:
 
 ```text
 Web Worker
 ```
 
-主线程负责：
+Der Hauptthread ist zuständig für:
 
 ```text
 UI
 Renderer
-用户操作
+Nutzeraktionen
 ```
 
-Worker 负责：
+Der Worker ist zuständig für:
 
 ```text
-数值推进
-批量轨迹计算
-数据采样
+Numerisches Fortschreiben
+Stapelberechnung von Trajektorien
+Datenabtastung
 ```
 
 ---
 
 # 35. Observation Runtime
 
-Observation 是独立层。
+Observation ist eine eigenständige Schicht.
 
-结构：
+Struktur:
 
 ```text
 Observation Runtime
@@ -1261,32 +1253,32 @@ Observation Runtime
 
 # 36. Observation Model
 
-Physics Engine 输出：
+Die Physics Engine gibt aus:
 
 ```text
-世界是什么状态
+Welchen Zustand die Welt hat
 ```
 
-Observation Runtime 转换为：
+Die Observation Runtime wandelt um in:
 
 ```text
-用户希望看见哪些信息
+Welche Informationen der Nutzer sehen möchte
 ```
 
-例如：
+Zum Beispiel:
 
 ```text
-显示洛伦兹力
-显示瞬时速度
-显示圆心
-显示轨迹半径
-隐藏坐标系
-显示动能曲线
+Lorentzkraft anzeigen
+Momentangeschwindigkeit anzeigen
+Mittelpunkt anzeigen
+Bahnradius anzeigen
+Koordinatensystem ausblenden
+Kurve der kinetischen Energie anzeigen
 ```
 
 ---
 
-# 37. Renderer Architecture
+# 37. Renderer-Architektur
 
 ```text
 Physics Engine
@@ -1300,7 +1292,7 @@ Visual Scene Model
 Renderer
 ```
 
-Renderer 支持：
+Der Renderer unterstützt:
 
 ```text
 SVG Renderer
@@ -1314,10 +1306,10 @@ Chart Renderer
 
 # 38. Question Space Runtime
 
-完整链路：
+Vollständige Kette:
 
 ```text
-题目 / 图片 / PDF
+Aufgabe / Bild / PDF
       ↓
 Document Parser
       ↓
@@ -1350,33 +1342,33 @@ Tutor Agent
 
 # 39. Document Service
 
-负责：
+Zuständig für:
 
 ```text
-PDF 解析
-图片解析
-扫描文档预处理
-页面切分
-题号检测
-题目区域检测
-文字识别
-图片抽取
-题目切分
+PDF-Analyse
+Bildanalyse
+Vorverarbeitung gescannter Dokumente
+Seitenaufteilung
+Erkennung von Aufgabennummern
+Erkennung von Aufgabenbereichen
+Texterkennung
+Bildextraktion
+Aufgabenzerlegung
 ```
 
-不负责：
+Nicht zuständig für:
 
 ```text
-物理求解
+Physikalisches Lösen
 Scene Simulation
-Agent 教学
+Agent-Unterricht
 ```
 
 ---
 
 # 40. Question Segmentation
 
-整张试卷：
+Ganze Klausur:
 
 ```text
 Exam
@@ -1387,12 +1379,12 @@ Exam
 └── ...
 ```
 
-每题保存：
+Pro Aufgabe wird gespeichert:
 
 ```text
-原始来源
-题干
-图片
+Ursprüngliche Quelle
+Aufgabenstellung
+Bild
 Diagram IR
 Physics IR
 Scene
@@ -1405,7 +1397,7 @@ Diagnostic
 
 # 41. Physics IR
 
-Physics IR 是正式中间层。
+Physics IR ist die formale Zwischenschicht.
 
 ```text
 Natural Language
@@ -1415,7 +1407,7 @@ Physics IR
 PhysicsScene
 ```
 
-主要包含：
+Enthält hauptsächlich:
 
 ```text
 domain
@@ -1436,13 +1428,13 @@ confidence
 
 # 42. Diagram IR
 
-视觉题图先转换为：
+Visuelle Aufgabenbilder werden zuerst umgewandelt in:
 
 ```text
 Diagram IR
 ```
 
-支持：
+Unterstützt:
 
 ```text
 Point
@@ -1458,7 +1450,7 @@ Coordinate
 Boundary
 ```
 
-然后才能映射：
+Erst danach kann abgebildet werden:
 
 ```text
 Diagram IR
@@ -1472,13 +1464,13 @@ PhysicsScene / CircuitGraph
 
 # 43. Question → Physics World
 
-试题页面提供：
+Die Aufgabenseite bietet:
 
 ```text
-在物理世界中打开
+In der Physikwelt öffnen
 ```
 
-流程：
+Ablauf:
 
 ```text
 Question
@@ -1496,13 +1488,13 @@ Physics Workspace
 
 # 44. Physics World → Dynamic Question
 
-实验场景可以：
+Experimentelle Szenen können:
 
 ```text
-基于当前场景生成试题
+Auf Basis der aktuellen Szene Aufgaben erzeugen
 ```
 
-Question Engine 根据：
+Die Question Engine erzeugt anhand von:
 
 ```text
 Scene
@@ -1512,25 +1504,23 @@ Variable Policy
 Question Pattern
 ```
 
-生成：
+Aufgaben der Stufen:
 
 ```text
-基础
-中等
-综合
-考试
-变式
+Basis
+Mittel
+Umfassend
+Prüfung
+Variation
 ```
-
-题目。
 
 ---
 
 # 45. Physics Agent Runtime
 
-> **已退役（ADR-0002，2026-09-27）**：`PhysicsAgentRuntime`（`@physicsos/agent-runtime`）已退役删除，见 `docs/adr/0002-agent-runtime-adapter-disposition.md`。Harness 是 Agent 宿主；PhysicsOS 不自建独立 Agent runtime。以下「角色」划分仍作为设计参考——它们不是常驻运行时，而是表达为 Harness 上的 Prompt + Tool Scope + Context + Workflow（见 §46）。
+> **Stillgelegt (ADR-0002, 2026-09-27)**: `PhysicsAgentRuntime` (`@physicsos/agent-runtime`) wurde stillgelegt und gelöscht, siehe `docs/adr/0002-agent-runtime-adapter-disposition.md`. Der Harness ist der Agent-Host; PhysicsOS baut keine eigenständige Agent-Runtime. Die folgende Aufteilung in „Rollen“ gilt weiterhin als Entwurfsreferenz – es sind keine dauerhaft laufenden Runtimes, sondern sie werden auf dem Harness als Prompt + Tool Scope + Context + Workflow ausgedrückt (siehe §46).
 
-统一抽象：
+Einheitliche Abstraktion:
 
 ```text
 PhysicsAgentRuntime
@@ -1547,9 +1537,9 @@ PhysicsAgentRuntime
 
 ---
 
-# 46. Agent 不等于 7 个常驻模型
+# 46. Ein Agent entspricht nicht 7 dauerhaft laufenden Modellen
 
-“角色”表示：
+„Rolle“ bedeutet:
 
 ```text
 Role
@@ -1563,15 +1553,15 @@ Context
 Workflow
 ```
 
-系统根据任务动态创建。
+Das System erzeugt sie je nach Aufgabe dynamisch.
 
 ---
 
 # 47. PhysicsAgentRuntime API
 
-> **已退役（ADR-0002，2026-09-27）**：本接口及其 `@physicsos/agent-runtime` 包已退役删除，见 `docs/adr/0002-agent-runtime-adapter-disposition.md`。Harness 是 Agent 宿主；PhysicsOS 不自建独立 Agent runtime。以下接口仅作历史设计记录。
+> **Stillgelegt (ADR-0002, 2026-09-27)**: Diese Schnittstelle und ihr Package `@physicsos/agent-runtime` wurden stillgelegt und gelöscht, siehe `docs/adr/0002-agent-runtime-adapter-disposition.md`. Der Harness ist der Agent-Host; PhysicsOS baut keine eigenständige Agent-Runtime. Die folgende Schnittstelle dient nur noch als historische Entwurfsaufzeichnung.
 
-上层只依赖统一接口。
+Die obere Ebene hängt nur von der einheitlichen Schnittstelle ab.
 
 ```ts
 interface AgentRuntime {
@@ -1589,29 +1579,29 @@ interface AgentRuntime {
 
 # 48. DeepSeek Harness Adapter
 
-> **已退役（ADR-0002，2026-09-27）**：曾作为「PhysicsOS Agent/Domain 中唯一允许依赖 Harness 的包」的 `agent-dsh-adapter`（`@physicsos/agent-dsh-adapter`）与配套的 `agent-runtime`（`@physicsos/agent-runtime`）已退役删除，见 `docs/adr/0002-agent-runtime-adapter-disposition.md`；其方法曾是 `Promise.reject(new UnimplementedError(...))` 骨架，无生产路径 import。
+> **Stillgelegt (ADR-0002, 2026-09-27)**: `agent-dsh-adapter` (`@physicsos/agent-dsh-adapter`), das früher als „einziges Package in Agent/Domain von PhysicsOS, das vom Harness abhängen darf“ galt, und das zugehörige `agent-runtime` (`@physicsos/agent-runtime`) wurden stillgelegt und gelöscht, siehe `docs/adr/0002-agent-runtime-adapter-disposition.md`; seine Methoden waren ein Skelett mit `Promise.reject(new UnimplementedError(...))`, ohne Produktionspfad-Import.
 
-Harness 是 Agent 宿主；PhysicsOS 不自建独立 Agent runtime。二者的集成边界是 Harness 工作区内的工具插件：
+Der Harness ist der Agent-Host; PhysicsOS baut keine eigenständige Agent-Runtime. Die Integrationsgrenze beider ist das Tool-Plugin im Harness-Workspace:
 
 ```text
 Harness tool runtime
      ↓
-dsh-tool-physicsos                    （overlays/harness/files/packages/physicsos/tool-physicsos）
+dsh-tool-physicsos                    (overlays/harness/files/packages/physicsos/tool-physicsos)
      ↓
 @physicsos/agent-tools
      ↓
-PhysicsScene → Engine → Verifier      （物理世界 runtime：数值唯一来源）
+PhysicsScene → Engine → Verifier      (Runtime der physikalischen Welt: einzige Quelle der Zahlenwerte)
 ```
 
-正式 UI 叠加层 `vendor/deepseek-harness/packages/client/ui-physicsos` 是展示集成边界，可以依赖已声明的 Harness 客户端 layout/sidebar/conversation slot contract；不得依赖 Harness Agent 内部实现，也不得把 Harness 类型扩散进 PhysicsOS Domain。
+Die offizielle UI-Overlay-Schicht `vendor/deepseek-harness/packages/client/ui-physicsos` ist die Integrationsgrenze der Darstellung und darf von den deklarierten Slot-Contracts für Layout/Sidebar/Conversation des Harness-Clients abhängen; sie darf nicht von Agent-Interna des Harness abhängen und Harness-Typen nicht in die PhysicsOS-Domäne streuen.
 
-其他 PhysicsOS 领域模块禁止直接 import Harness。
+Andere PhysicsOS-Domänenmodule dürfen den Harness nicht direkt importieren.
 
 ---
 
 # 49. Physics Profile
 
-在 Harness 上组合：
+Auf dem Harness zusammengesetzt:
 
 ```text
 Physics Profile
@@ -1632,22 +1622,22 @@ Physics Profile
 
 ## Orchestrator
 
-负责：
+Zuständig für:
 
 ```text
-识别任务
-选择 Skill
-选择 Tools
-选择模型
-选择 Workflow
-调度其他角色
+Aufgabe erkennen
+Skill auswählen
+Tools auswählen
+Modell auswählen
+Workflow auswählen
+Andere Rollen koordinieren
 ```
 
 ---
 
 ## Question Parser
 
-负责：
+Zuständig für:
 
 ```text
 Question
@@ -1659,7 +1649,7 @@ Physics IR
 
 ## Scene Builder
 
-负责：
+Zuständig für:
 
 ```text
 Physics IR
@@ -1673,76 +1663,76 @@ PhysicsScene
 
 ## Solver
 
-负责：
+Zuständig für:
 
 ```text
-建立求解路径
-调用 Physics Tools
-调用 Math Runtime
-获得确定结果
+Lösungsweg aufbauen
+Physics Tools aufrufen
+Math Runtime aufrufen
+Deterministische Ergebnisse erhalten
 ```
 
 ---
 
 ## Verifier
 
-负责验证：
+Zuständig für die Verifikation von:
 
 ```text
-单位
-公式
-约束
-结果
-轨迹
-边界
+Einheiten
+Formeln
+Zwangsbedingungen
+Ergebnissen
+Trajektorien
+Randbedingungen
 ```
 
 ---
 
 ## Observation Planner
 
-负责决定：
+Zuständig für die Entscheidung:
 
 ```text
-哪些物理量应该被显示
-什么时候暂停
-显示哪些向量
-显示哪些图表
+Welche physikalischen Größen angezeigt werden sollen
+Wann pausiert wird
+Welche Vektoren angezeigt werden
+Welche Diagramme angezeigt werden
 ```
 
 ---
 
 ## Tutor
 
-负责：
+Zuständig für:
 
 ```text
-提示
-引导
-提问
-解释
-逐步教学
-规律总结
+Hinweise
+Anleitung
+Fragen stellen
+Erklären
+Schrittweises Unterrichten
+Zusammenfassung von Gesetzmäßigkeiten
 ```
 
 ---
 
 ## Diagnostic
 
-负责：
+Zuständig für:
 
 ```text
-发现学生错误模式
-更新 Learning State
+Fehlermuster der Schüler erkennen
+Learning State aktualisieren
 ```
 
 ---
 
 # 51. Agent Workflow
 
-Agent Loop 与 Physics Workflow 分离。
+Agent Loop und Physics Workflow sind getrennt.
 
-Harness 管：
+Der Harness verwaltet:
 
 ```text
 Turn
@@ -1758,7 +1748,7 @@ Tool Result
 Next Step
 ```
 
-PhysicsOS 管：
+PhysicsOS verwaltet:
 
 ```text
 INGEST
@@ -1790,13 +1780,13 @@ REFINE
 
 # 52. Tool Runtime
 
-统一命名：
+Einheitliche Benennung:
 
 ```text
 physics.*
 ```
 
-例如：
+Zum Beispiel:
 
 ```text
 physics.scene.create
@@ -1855,11 +1845,11 @@ Tool Result
 
 # 54. Tool Result
 
-所有 Tool Result 必须结构化。
+Alle Tool Results müssen strukturiert sein.
 
-不得只返回一段自由文本。
+Es darf nicht nur ein Freitext zurückgegeben werden.
 
-至少包含：
+Mindestens enthalten:
 
 ```text
 ok
@@ -1867,7 +1857,7 @@ data/error
 traceId
 ```
 
-错误包含：
+Fehler enthalten:
 
 ```text
 code
@@ -1880,7 +1870,7 @@ details
 
 # 55. Skills Runtime
 
-目录：
+Verzeichnis:
 
 ```text
 skills/
@@ -1888,9 +1878,9 @@ skills/
 └── senior-high/
 ```
 
-按知识点拆 Skill。
+Skills werden nach Wissenspunkten aufgeteilt.
 
-例如：
+Zum Beispiel:
 
 ```text
 senior-high/
@@ -1900,7 +1890,7 @@ senior-high/
 
 ---
 
-# 56. Skill 结构
+# 56. Skill-Struktur
 
 ```text
 charged-particle-magnetic-field/
@@ -1920,24 +1910,24 @@ charged-particle-magnetic-field/
 
 # 57. Skill Progressive Loading
 
-Agent 当前处理磁场问题时：
+Wenn der Agent gerade ein Magnetfeldproblem bearbeitet:
 
-只加载：
+Werden nur geladen:
 
 ```text
-磁场相关 Skill
-相关 Tool
-相关公式
-相关错误模式
+Magnetfeldbezogene Skills
+Zugehörige Tools
+Zugehörige Formeln
+Zugehörige Fehlermuster
 ```
 
-不一次注入整个初高中 Physics Knowledge。
+Nicht das gesamte Physikwissen der Mittel- und Oberstufe auf einmal injizieren.
 
 ---
 
 # 58. Prompt Assembly
 
-Prompt 按模块动态组装：
+Der Prompt wird modular dynamisch zusammengesetzt:
 
 ```text
 Identity
@@ -1963,13 +1953,13 @@ Teaching Policy
 Recent Context
 ```
 
-禁止单个超长 `system_prompt.txt`。
+Eine einzelne überlange `system_prompt.txt` ist verboten.
 
 ---
 
-# 59. Context Architecture
+# 59. Context-Architektur
 
-分层：
+Schichtung:
 
 ```text
 L0 Constitution
@@ -1985,25 +1975,25 @@ L6 Retrieval
 
 # 60. Context Compression
 
-Physics-aware Compaction 输出至少包含：
+Die Physics-aware Compaction gibt mindestens aus:
 
 ```text
-当前任务
+Aktuelle Aufgabe
 Scene ID
 Scene Revision
-已经确认的事实
-已经推导的结果
-已经完成的步骤
-当前目标
-学生误区
-关键 Event ID
+Bereits bestätigte Fakten
+Bereits hergeleitete Ergebnisse
+Bereits abgeschlossene Schritte
+Aktuelles Ziel
+Fehlvorstellungen des Schülers
+Wichtige Event IDs
 ```
 
-Scene 本身不通过自然语言摘要替代。
+Die Scene selbst wird nicht durch eine Zusammenfassung in natürlicher Sprache ersetzt.
 
 ---
 
-# 61. Memory Architecture
+# 61. Memory-Architektur
 
 ```text
 Memory
@@ -2020,7 +2010,7 @@ Memory
 
 # 62. Model Router
 
-模型层不绑定单一 Provider。
+Die Modellschicht ist nicht an einen einzelnen Provider gebunden.
 
 ```text
 Model Router
@@ -2033,19 +2023,19 @@ Model Router
 └── Optional Local Model
 ```
 
-Agent 根据任务选择。
+Der Agent wählt je nach Aufgabe.
 
 ---
 
-# 63. 后端业务服务
+# 63. Backend-Geschäftsservices
 
-业务后端推荐：
+Empfohlenes Geschäfts-Backend:
 
 ```text
 Spring Boot
 ```
 
-负责：
+Zuständig für:
 
 ```text
 Auth
@@ -2064,9 +2054,9 @@ Analytics
 
 ---
 
-# 64. 服务边界
+# 64. Service-Grenzen
 
-逻辑上：
+Logisch:
 
 ```text
 API Gateway
@@ -2078,15 +2068,15 @@ API Gateway
 └── Document Service
 ```
 
-初期不强制全部独立部署，但代码边界必须存在。
+Anfangs müssen nicht alle unabhängig deployt werden, die Code-Grenzen müssen aber existieren.
 
 ---
 
-# 65. 数据存储
+# 65. Datenspeicherung
 
 ## PostgreSQL
 
-保存：
+Speichert:
 
 ```text
 User
@@ -2108,7 +2098,7 @@ Permission
 
 ## Object Storage
 
-保存：
+Speichert:
 
 ```text
 PDF
@@ -2123,7 +2113,7 @@ Generated Files
 
 ## Redis
 
-用于：
+Verwendet für:
 
 ```text
 Cache
@@ -2133,13 +2123,13 @@ Queue
 Temporary Runtime State
 ```
 
-禁止作为唯一持久事实源。
+Darf nicht als einzige dauerhafte Faktenquelle dienen.
 
 ---
 
 ## Vector Store
 
-用于：
+Verwendet für:
 
 ```text
 Curriculum Retrieval
@@ -2147,13 +2137,13 @@ Question Retrieval
 Knowledge Retrieval
 ```
 
-不存 PhysicsScene 真实状态。
+Speichert nicht den realen Zustand von PhysicsScene.
 
 ---
 
-# 66. 双 Event Stream
+# 66. Zwei Event Streams
 
-PhysicsOS 同时存在：
+PhysicsOS hat gleichzeitig:
 
 ```text
 Agent Event Stream
@@ -2161,7 +2151,7 @@ Agent Event Stream
 Physics Event Stream
 ```
 
-Agent Stream：
+Agent Stream:
 
 ```text
 Prompt
@@ -2171,7 +2161,7 @@ Tool
 Context
 ```
 
-Physics Stream：
+Physics Stream:
 
 ```text
 Scene
@@ -2182,9 +2172,9 @@ Interaction
 
 ---
 
-# 67. Trace 关联
+# 67. Trace-Verknüpfung
 
-统一关联：
+Einheitlich verknüpft:
 
 ```text
 trace_id
@@ -2197,10 +2187,10 @@ scene_revision
 physics_event_id
 ```
 
-从而支持完整 Trace：
+Damit wird ein vollständiger Trace unterstützt:
 
 ```text
-用户问题
+Nutzerfrage
 ↓
 Agent
 ↓
@@ -2219,33 +2209,33 @@ Assistant
 
 ---
 
-# 68. API 版本
+# 68. API-Versionen
 
-业务：
+Business:
 
 ```text
 /api/v1/*
 ```
 
-Agent：
+Agent:
 
 ```text
 /agent/v1/*
 ```
 
-Simulation：
+Simulation:
 
 ```text
 /simulation/v1/*
 ```
 
-Document：
+Document:
 
 ```text
 /document/v1/*
 ```
 
-Math：
+Math:
 
 ```text
 /math/v1/*
@@ -2255,36 +2245,36 @@ Math：
 
 # 69. Streaming
 
-推荐：
+Empfohlen:
 
 ```text
-Agent 文本流 → SSE
+Agent-Textstrom → SSE
 ```
 
-需要双向高频协作：
+Bei Bedarf an bidirektionaler hochfrequenter Zusammenarbeit:
 
 ```text
 WebSocket
 ```
 
-例如：
+Zum Beispiel:
 
 ```text
-多人 Scene Collaboration
-高频 Scene Event Sync
+Mehrbenutzer-Scene-Collaboration
+Hochfrequente Scene Event Sync
 ```
 
 ---
 
-# 70. 本地开发
+# 70. Lokale Entwicklung
 
-建议使用：
+Empfohlen:
 
 ```text
 Docker Compose
 ```
 
-提供：
+stellt bereit:
 
 ```text
 PostgreSQL
@@ -2293,11 +2283,11 @@ Object Storage
 Vector Store
 ```
 
-应用服务本机启动。
+Die Anwendungsservices werden lokal gestartet.
 
 ---
 
-# 71. 推荐根命令
+# 71. Empfohlene Root-Befehle
 
 ```bash
 pnpm install
@@ -2318,14 +2308,14 @@ pnpm test:e2e
 pnpm build
 ```
 
-Java 服务：
+Java-Services:
 
 ```bash
 ./mvnw test
 ./mvnw spring-boot:run
 ```
 
-Python：
+Python:
 
 ```bash
 uv sync
@@ -2334,9 +2324,9 @@ uv run pytest
 
 ---
 
-# 72. 环境变量
+# 72. Umgebungsvariablen
 
-示例：
+Beispiel:
 
 ```env
 APP_ENV=
@@ -2358,19 +2348,19 @@ MODEL_PROVIDER=
 MODEL_API_KEY=
 ```
 
-仓库只提交：
+Das Repository committet nur:
 
 ```text
 .env.example
 ```
 
-禁止提交真实 Secret。
+Echte Secrets dürfen nicht committet werden.
 
 ---
 
-# 73. 测试体系
+# 73. Testsystem
 
-PhysicsOS 至少包含：
+PhysicsOS umfasst mindestens:
 
 ```text
 Unit Test
@@ -2385,7 +2375,7 @@ Visual Regression
 
 # 74. Unit Test
 
-适合：
+Geeignet für:
 
 ```text
 Units
@@ -2401,49 +2391,49 @@ Tool Guard
 
 # 75. Physics Golden Test
 
-最关键测试。
+Der wichtigste Test.
 
-必须为经典模型建立 Golden Case：
+Für klassische Modelle müssen Golden Cases angelegt werden:
 
 ```text
-自由落体
-平抛
-斜抛
-圆周运动
-斜面受力
-摩擦
-动量守恒
-库仑力
-电场偏转
-带电粒子磁场运动
-速度选择器
-串并联电路
-电磁感应
+Freier Fall
+Waagerechter Wurf
+Schräger Wurf
+Kreisbewegung
+Kräfte an der schiefen Ebene
+Reibung
+Impulserhaltung
+Coulombkraft
+Ablenkung im elektrischen Feld
+Bewegung geladener Teilchen im Magnetfeld
+Geschwindigkeitsselektor
+Reihen- und Parallelschaltung
+Elektromagnetische Induktion
 ```
 
 ---
 
 # 76. Agent Contract Test
 
-测试：
+Testen:
 
 ```text
 Tool Schema
 Tool Permission
 Tool Result
-Physics IR 输出
+Ausgabe von Physics IR
 Scene Builder
 Compaction
 Role Tool Scope
 ```
 
-不能主要测试模型“说得好不好听”。
+Es darf nicht hauptsächlich getestet werden, ob das Modell „schön spricht“.
 
 ---
 
 # 77. Integration Test
 
-测试完整管线：
+Die vollständige Pipeline testen:
 
 ```text
 Question
@@ -2463,54 +2453,54 @@ Observation
 
 # 78. E2E
 
-关键流程：
+Zentrale Abläufe:
 
 ```text
-进入实验室
-选择实验
-修改参数
-运行
-暂停
-拖动时间轴
-打开 Observable
-询问 Agent
+Labor betreten
+Experiment auswählen
+Parameter ändern
+Ausführen
+Pausieren
+Timeline ziehen
+Observable öffnen
+Agent fragen
 ```
 
-以及：
+Sowie:
 
 ```text
-上传题目
-解析题目
-生成 Physics IR
-建立 Scene
-可视化
-查看解析
-进入实验世界
+Aufgabe hochladen
+Aufgabe analysieren
+Physics IR erzeugen
+Scene aufbauen
+Visualisieren
+Lösung ansehen
+In die Experimentierwelt wechseln
 ```
 
 ---
 
 # 79. Visual Regression
 
-针对：
+Gilt für:
 
 ```text
 Physics Workspace
-重要物理图
-受力箭头
-轨迹
-电场线
-磁场区域
-电路图
+Wichtige physikalische Diagramme
+Kraftpfeile
+Trajektorien
+Feldlinien
+Magnetfeldbereiche
+Schaltpläne
 ```
 
-进行视觉回归。
+Visuelle Regression wird durchgeführt.
 
 ---
 
 # 80. CI
 
-PR 至少执行：
+Ein PR führt mindestens aus:
 
 ```text
 format check
@@ -2522,7 +2512,7 @@ agent contract tests
 build
 ```
 
-核心模块修改追加：
+Bei Änderungen an Kernmodulen zusätzlich:
 
 ```text
 integration tests
@@ -2534,7 +2524,7 @@ visual regression
 
 # 81. Web → Windows EXE
 
-未来 Desktop 结构：
+Künftige Desktop-Struktur:
 
 ```text
 PhysicsOS Shared React UI
@@ -2546,7 +2536,7 @@ Tauri Adapter
 Windows Native APIs
 ```
 
-预计共享：
+Voraussichtlich gemeinsam genutzt:
 
 ```text
 UI
@@ -2561,22 +2551,22 @@ Skills
 API Client
 ```
 
-桌面专属：
+Desktop-spezifisch:
 
 ```text
-文件系统
+Dateisystem
 Native Dialog
 Auto Update
-系统通知
-本地 Runtime
+Systembenachrichtigungen
+Lokale Runtime
 Local Harness Sidecar
 ```
 
 ---
 
-# 82. Desktop 本地模式
+# 82. Desktop-Lokalmodus
 
-未来可以支持：
+Künftig unterstützbar:
 
 ```text
 PhysicsOS.exe
@@ -2587,66 +2577,66 @@ PhysicsOS.exe
 └── Local Harness Sidecar
 ```
 
-并允许：
+und das Umschalten zwischen:
 
 ```text
 Cloud Agent
 Local Agent
 ```
 
-切换。
+erlauben.
 
 ---
 
-# 83. UI 开发方向
+# 83. Richtung der UI-Entwicklung
 
-整体：
-
-```text
-暖白
-雾白
-冰蓝透明
-自然蓝
-少量青绿
-深灰文字
-少量警告橙
-```
-
-避免：
+Insgesamt:
 
 ```text
-暗黑科技
-死紫色渐变
-赛博朋克
-传统教育后台
-满屏卡片
+Warmweiß
+Nebelweiß
+Eisblau transparent
+Natürliches Blau
+Wenig Türkisgrün
+Dunkelgraue Schrift
+Wenig Warnorange
 ```
 
-关键原则：
+Vermeiden:
 
-> **物理世界是主视觉，UI 是容器。**
+```text
+Dunkle Tech-Optik
+Starre violette Verläufe
+Cyberpunk
+Klassisches Bildungs-Backend
+Mit Karten überfüllte Seiten
+```
+
+Schlüsselprinzip:
+
+> **Die physikalische Welt ist das Hauptmotiv, die UI ist der Container.**
 
 ---
 
-# 84. 性能策略
+# 84. Performance-Strategie
 
-高频 Simulation：
+Hochfrequente Simulation:
 
 ```text
 Web Worker
 ```
 
-Renderer 与 React 状态更新解耦。
+Renderer und React-Zustandsaktualisierung sind entkoppelt.
 
-不要每个 Physics Frame 都触发 React 全树更新。
+Nicht bei jedem Physics Frame den gesamten React-Baum aktualisieren.
 
 ---
 
 # 85. Simulation Sampling
 
-轨迹不无限保存所有积分步。
+Trajektorien speichern nicht unbegrenzt alle Integrationsschritte.
 
-区分：
+Zu unterscheiden:
 
 ```text
 solver timestep
@@ -2655,46 +2645,46 @@ render sample rate
 chart sample rate
 ```
 
-保证：
+Sicherzustellen ist:
 
 ```text
-计算精度
+Rechengenauigkeit
 ≠
-存储频率
+Speicherfrequenz
 ≠
-显示帧率
+Anzeige-Framerate
 ```
 
 ---
 
 # 86. Lazy Loading
 
-以下能力按需加载：
+Folgende Fähigkeiten werden bei Bedarf geladen:
 
 ```text
-Three.js 场景
-大型 Physics Skill
-复杂题目资源
-高级图表
+Three.js-Szenen
+Große Physik-Skills
+Komplexe Aufgabenressourcen
+Erweiterte Diagramme
 Teacher Studio
 ```
 
-降低首屏体积。
+Das verringert die Größe beim ersten Laden.
 
 ---
 
-# 87. 安全
+# 87. Sicherheit
 
-文件上传：
+Datei-Upload:
 
 ```text
-MIME 验证
-大小限制
-恶意文件检查
-隔离解析
+MIME-Validierung
+Größenbeschränkung
+Prüfung auf Schadsoftware
+Isolierte Verarbeitung
 ```
 
-Agent：
+Agent:
 
 ```text
 Tool Permission
@@ -2707,7 +2697,7 @@ Audit
 
 # 88. Observability
 
-每个服务统一输出：
+Jeder Service gibt einheitlich aus:
 
 ```text
 timestamp
@@ -2721,7 +2711,7 @@ sceneId
 event
 ```
 
-开发后台未来能够查看完整：
+Das Entwickler-Backend soll künftig den vollständigen Ablauf einsehen können:
 
 ```text
 User
@@ -2743,9 +2733,9 @@ Observation
 
 ---
 
-# 89. 依赖方向
+# 89. Abhängigkeitsrichtung
 
-必须保持：
+Einzuhalten:
 
 ```text
 Apps
@@ -2757,7 +2747,7 @@ Domain Packages
 Core Packages
 ```
 
-禁止：
+Verboten:
 
 ```text
 Core
@@ -2769,29 +2759,29 @@ UI
 
 # 90. Package README
 
-每个重要 Package 应包含：
+Jedes wichtige Package sollte enthalten:
 
 ```text
 README.md
 ```
 
-说明：
+mit Angaben zu:
 
 ```text
-职责
-公开 API
-允许依赖
-禁止依赖
-核心 Contract
-示例
-测试方式
+Verantwortung
+Öffentliche API
+Erlaubte Abhängigkeiten
+Verbotene Abhängigkeiten
+Zentrale Contracts
+Beispiele
+Testmethode
 ```
 
 ---
 
-# 91. 开发文档阅读顺序
+# 91. Lesereihenfolge der Entwicklungsdokumente
 
-所有开发人员 / AI Agent 开始任务前阅读：
+Alle Entwickler / AI Agents lesen vor Aufgabenbeginn:
 
 ```text
 00-PRODUCT-OVERVIEW.md
@@ -2802,72 +2792,72 @@ README.md
 ↓
 03-DOMAIN-CONTRACTS.md
 ↓
-目标 Package README
+README des Ziel-Packages
 ↓
-相关 Tests
+Zugehörige Tests
 ```
 
 ---
 
-# 92. 开发阶段输出要求
+# 92. Ausgabeanforderungen am Ende einer Entwicklungsphase
 
-每个功能开发后必须说明：
+Nach jeder Funktionsentwicklung ist anzugeben:
 
 ```text
-修改了什么
-修改哪些文件
-为什么这样实现
-是否改变 Contract
-测试了什么
-测试结果
-剩余风险
+Was geändert wurde
+Welche Dateien geändert wurden
+Warum so umgesetzt
+Ob ein Contract geändert wurde
+Was getestet wurde
+Testergebnis
+Verbleibende Risiken
 ```
 
 ---
 
-# 93. 开发完成定义
+# 93. Definition der abgeschlossenen Entwicklung
 
-一个功能只有在以下条件全部满足时才能称为完成：
+Eine Funktion gilt nur dann als abgeschlossen, wenn alle folgenden Bedingungen erfüllt sind:
 
 ```text
-代码完成
-真实功能接通
-类型检查通过
-Lint 通过
-Unit Test 通过
-相关 Golden Test 通过
-Build 通过
-必要 E2E 通过
-没有核心 Mock
-没有假成功路径
-Contract 已同步
-文档已同步
+Code fertig
+Echte Funktion angebunden
+Typprüfung bestanden
+Lint bestanden
+Unit Test bestanden
+Zugehöriger Golden Test bestanden
+Build bestanden
+Notwendiges E2E bestanden
+Keine zentralen Mocks
+Keine Pfade mit vorgetäuschtem Erfolg
+Contract synchronisiert
+Dokumentation synchronisiert
 ```
 
 ---
 
-# 94. 架构红线
+# 94. Architektur-Rote-Linien
 
-禁止：
+Verboten:
 
 ```text
-LLM 代替 Physics Engine
-React 组件直接计算核心物理结果
-Renderer 自己决定物理结果
-Agent 绕过 Tool 修改 Scene
-Physics Core 依赖 React
-Physics Core 依赖 Harness
-PhysicsScene 保存 Renderer 对象
-用普通聊天 Summary 替代 Scene
-Web 和 Desktop 复制两套代码
-不同模块私自定义重复 Contract
+LLM ersetzt Physics Engine
+React-Komponenten berechnen direkt zentrale physikalische Ergebnisse
+Renderer entscheidet selbst über physikalische Ergebnisse
+Agent umgeht Tool und ändert die Scene
+Physics Core hängt von React ab
+Physics Core hängt vom Harness ab
+PhysicsScene speichert Renderer-Objekte
+Normale Chat-Zusammenfassung ersetzt die Scene
+Web und Desktop kopieren zwei Code-Basen
+Verschiedene Module definieren eigenmächtig doppelte Contracts
 ```
 
 ---
 
-# 95. 最终工程形态
+# 95. Endgültige Engineering-Gestalt
 
-PhysicsOS 最终必须形成：
+PhysicsOS muss am Ende bilden:
 
 ```text
                 PhysicsOS Applications
@@ -2893,28 +2883,28 @@ PhysicsOS 最终必须形成：
                      Renderer
 ```
 
-最终达到：
+Das Endziel lautet:
 
-> **同一套 Physics World 能够服务 Web、未来 Windows EXE、试题系统、实验系统、教师端与 Physics Agent，而不重复实现物理逻辑。**
+> **Dieselbe Physics World kann Web, das künftige Windows EXE, das Aufgabensystem, das Experimentsystem, die Lehrerseite und den Physics Agent bedienen, ohne die Physiklogik doppelt zu implementieren.**
 
 ---
 
-# 96. 当前开发主方向
+# 96. Aktuelle Hauptrichtung der Entwicklung
 
-当前正式开发优先级：
+Aktuelle offizielle Entwicklungspriorität:
 
 ```text
 Web First
 ```
 
-即：
+Das heißt:
 
 ```text
 vendor/deepseek-harness/apps/web
 +
 vendor/deepseek-harness/packages/client/ui-physicsos
 +
-核心共享 packages
+Zentrale gemeinsame Packages
 +
 Agent Runtime
 +
@@ -2923,12 +2913,12 @@ Physics Runtime
 Question Runtime
 ```
 
-浏览器端正式入口是 vendor harness 的 `dsh-client-ui-physicsos`（旧版独立原型 `apps/web` 已删除）。
+Der offizielle Browser-Einstieg ist `dsh-client-ui-physicsos` des vendor Harness (der alte eigenständige Prototyp `apps/web` wurde gelöscht).
 
-Desktop 只做架构预留，暂不复制开发。
+Der Desktop wird nur architektonisch vorgehalten, vorerst keine Doppelentwicklung.
 
 ---
 
-# 97. 一句话工程目标
+# 97. Engineering-Ziel in einem Satz
 
-> **把 PhysicsOS 建设成一套模块边界清晰、物理结果可验证、Agent 可替换、Web 与 Desktop 可复用、能够长期扩展完整初高中物理体系的数字物理世界工程平台。**
+> **PhysicsOS als digitale Physikwelt-Engineering-Plattform aufzubauen, mit klaren Modulgrenzen, verifizierbaren physikalischen Ergebnissen, austauschbarem Agent, wiederverwendbar für Web und Desktop und langfristig erweiterbar auf das vollständige Physiksystem der Mittel- und Oberstufe.**

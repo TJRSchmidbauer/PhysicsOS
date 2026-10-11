@@ -1,63 +1,63 @@
-# PhysicsOS Deployment and Operations
+# PhysicsOS Deployment und Betrieb
 
-This runbook covers the production container foundation: CI gates, immutable
-image builds, Compose startup, health verification, backups, restore drills,
-and rollback. It does not authorize a push or deployment by itself.
+Dieses Runbook behandelt die Grundlage für Produktions-Container: CI-Gates, unveränderliche
+Image-Builds, Compose-Start, Health-Verifikation, Backups, Wiederherstellungsübungen
+und Rollback. Es autorisiert für sich genommen weder einen Push noch ein Deployment.
 
-## 1. Production topology
+## 1. Produktionstopologie
 
-The Compose stack runs three stateful roles:
+Der Compose-Stack betreibt drei zustandsbehaftete Rollen:
 
-| Service    | Responsibility                                           | Persistent data         |
-| ---------- | -------------------------------------------------------- | ----------------------- |
-| `app`      | Harness Web/API host plus PhysicsOS host plugins         | `app_data` (`DSH_HOME`) |
-| `postgres` | Relational account, learning, and event storage          | `postgres_data`         |
-| `redis`    | Shared rate limits, queues, and short-lived coordination | `redis_data`            |
+| Service    | Verantwortung                                                    | Persistente Daten       |
+| ---------- | ---------------------------------------------------------------- | ----------------------- |
+| `app`      | Harness-Web-/API-Host plus PhysicsOS-Host-Plugins                | `app_data` (`DSH_HOME`) |
+| `postgres` | Relationale Speicherung von Konten, Lernverlauf und Ereignissen | `postgres_data`         |
+| `redis`    | Gemeinsames Rate Limiting, Queues und kurzlebige Koordination    | `redis_data`            |
 
-The app publishes only to host loopback by default:
+Die App wird standardmäßig nur auf dem Loopback des Hosts veröffentlicht:
 
 ```text
 127.0.0.1:${PHYSICSOS_HTTP_PORT:-3080} -> app:3080
 ```
 
-Put an authenticated TLS reverse proxy on the host for remote access. Do not
-bind the raw Harness Web port to a public interface.
+Für Fernzugriff ist auf dem Host ein authentifizierter TLS-Reverse-Proxy vorzuschalten. Der rohe
+Harness-Web-Port darf nicht an eine öffentliche Schnittstelle gebunden werden.
 
-Every service has a Docker healthcheck. The app's `/healthz` route is process
-liveness; `/readyz` is fail-closed readiness for PostgreSQL and Redis. Docker
-starts the app only after both dependencies are healthy.
+Jeder Service hat einen Docker-Healthcheck. Die Route `/healthz` der App meldet die Prozess-
+Liveness; `/readyz` ist die fail-closed-Readiness für PostgreSQL und Redis. Docker
+startet die App erst, wenn beide Abhängigkeiten gesund sind.
 
-The supported public-beta topology is a **single `app` replica**. Session logs
-live under `DSH_HOME` (`PHYSICSOS_SESSIONS_ROOT`, default
-`dshHomePath('sessions')` inside the `app_data` volume). A second replica sees
-only the sessions it wrote itself unless that root points at a shared
-filesystem, so scale the app out only after that change has been tested.
+Die unterstützte Topologie für die öffentliche Beta ist **eine einzelne `app`-Replik**. Session-Logs
+liegen unter `DSH_HOME` (`PHYSICSOS_SESSIONS_ROOT`, Standard
+`dshHomePath('sessions')` im Volume `app_data`). Eine zweite Replik sieht
+nur die Sessions, die sie selbst geschrieben hat, es sei denn, das Root zeigt auf ein gemeinsames
+Dateisystem; die App sollte daher erst nach einem Test dieser Änderung horizontal skaliert werden.
 
-## 2. Prerequisites
+## 2. Voraussetzungen
 
-- Docker Engine with Compose v2
-- An initialized repository, including `vendor/deepseek-harness`
-- A deployment host with enough disk for three named volumes and local backups
-- A reverse proxy, TLS certificate, DNS name, and network allowlist for the
-  deployment environment
+- Docker Engine mit Compose v2
+- Ein initialisiertes Repository, einschließlich `vendor/deepseek-harness`
+- Ein Deployment-Host mit genug Festplatte für drei benannte Volumes und lokale Backups
+- Ein Reverse Proxy, TLS-Zertifikat, DNS-Name und eine Netzwerk-Allowlist für die
+  Deployment-Umgebung
 
-The local `.env.*` secret paths are ignored by Git. Never place secrets in the
-image, Compose environment values, source files, or frontend bundles.
+Die lokalen Secret-Pfade `.env.*` werden von Git ignoriert. Secrets dürfen niemals im
+Image, in Compose-Umgebungswerten, Quelldateien oder Frontend-Bundles stehen.
 
-## 3. Configure secrets
+## 3. Secrets konfigurieren
 
-Compose wires seven secret files. `scripts/docker-entrypoint.mjs` materializes
-each `<NAME>_FILE` into the plain `<NAME>` variable the Harness reads; a
-missing or empty file aborts startup instead of silently degrading.
+Compose bindet sieben Secret-Dateien ein. `scripts/docker-entrypoint.mjs` materialisiert
+jedes `<NAME>_FILE` in die einfache Variable `<NAME>`, die der Harness liest; eine
+fehlende oder leere Datei bricht den Start ab, statt stillschweigend zu degradieren.
 
-Create them once per environment:
+Einmal pro Umgebung anlegen:
 
 ```sh
 umask 077
 openssl rand -hex 32 > .env.postgres_password
 openssl rand -hex 32 > .env.redis_password
-# Bootstrap SUPER_ADMIN. There is no self-service path to an admin account:
-# registration only ever creates STUDENT. No default password is invented here.
+# Bootstrap-SUPER_ADMIN. Es gibt keinen Self-Service-Weg zu einem Admin-Konto:
+# Die Registrierung erzeugt immer nur STUDENT. Hier wird kein Standardpasswort erfunden.
 openssl rand -base64 24 > .env.admin_password
 
 postgres_password="$(cat .env.postgres_password)"
@@ -71,109 +71,109 @@ printf '%s\n' 'replace-with-the-model-provider-key' > .env.deepseek_api_key
 printf '%s\n' 'replace-with-the-question-image-api-key' > .env.image_api_key
 ```
 
-Percent-encode characters before inserting credentials into URLs. Production
-secret managers may provide the same files at another path with
+Vor dem Einsetzen von Zugangsdaten in URLs sind Zeichen prozentzucodieren (Percent-Encoding). Produktions-
+Secret-Manager können dieselben Dateien unter einem anderen Pfad bereitstellen, und zwar mit
 `PHYSICSOS_POSTGRES_PASSWORD_FILE`, `PHYSICSOS_REDIS_PASSWORD_FILE`,
 `PHYSICSOS_DATABASE_URL_FILE`, `PHYSICSOS_REDIS_URL_FILE`,
-`PHYSICSOS_DEEPSEEK_API_KEY_FILE`, `PHYSICSOS_ADMIN_PASSWORD_FILE`, and
-`PHYSICSOS_IMAGE_API_KEY_FILE` (the one-S `PHYSICOS_IMAGE_API_KEY_FILE` is a
-one-cycle alias — see `docs/adr/0004-image-api-env-migration.md`).
+`PHYSICSOS_DEEPSEEK_API_KEY_FILE`, `PHYSICSOS_ADMIN_PASSWORD_FILE` und
+`PHYSICSOS_IMAGE_API_KEY_FILE` (das `PHYSICOS_IMAGE_API_KEY_FILE` mit einem S ist ein
+Alias für einen Zyklus – siehe `docs/adr/0004-image-api-env-migration.md`).
 
-The seven names by role:
+Die sieben Namen nach Rolle:
 
-| File                     | Secret                           | Missing/empty behavior                   |
-| ------------------------ | -------------------------------- | ---------------------------------------- |
-| `.env.postgres_password` | PostgreSQL superuser password    | `postgres` container refuses to start    |
-| `.env.redis_password`    | Redis `requirepass`              | `redis` container exits                  |
-| `.env.database_url`      | App → PostgreSQL DSN             | `docker compose config` fails            |
-| `.env.redis_url`         | App → Redis DSN                  | `docker compose config` fails            |
-| `.env.deepseek_api_key`  | Model provider key               | app refuses to start                     |
-| `.env.admin_password`    | Bootstrap `SUPER_ADMIN` password | app refuses to start; no admin is seeded |
-| `.env.image_api_key`     | Paper question-image generation  | app refuses to start                     |
+| Datei                    | Secret                            | Verhalten bei fehlender/leerer Datei         |
+| ------------------------ | --------------------------------- | -------------------------------------------- |
+| `.env.postgres_password` | Passwort des PostgreSQL-Superusers | Container `postgres` weigert sich zu starten |
+| `.env.redis_password`    | Redis `requirepass`               | Container `redis` beendet sich               |
+| `.env.database_url`      | DSN App → PostgreSQL              | `docker compose config` schlägt fehl         |
+| `.env.redis_url`         | DSN App → Redis                   | `docker compose config` schlägt fehl         |
+| `.env.deepseek_api_key`  | Schlüssel des Modellanbieters     | App weigert sich zu starten                  |
+| `.env.admin_password`    | Passwort des Bootstrap-`SUPER_ADMIN` | App weigert sich zu starten; kein Admin wird angelegt |
+| `.env.image_api_key`     | Aufgabenbild-Generierung der Paper-Pipeline | App weigert sich zu starten        |
 
-`.env.admin_password` is consumed once, at first boot, to seed
-`PHYSICSOS-OPEN:admin`. Keep the file afterwards so later restarts stay
-consistent, and rotate the account password through the normal flow rather
-than editing the file. If question images are intentionally disabled for the
-beta, remove the `image_api_key` secret from `compose.yml` instead of leaving
-an empty file, and record that decision in the release notes.
+`.env.admin_password` wird einmal beim ersten Start verwendet, um
+`PHYSICSOS-OPEN:admin` anzulegen. Die Datei sollte danach erhalten bleiben, damit spätere Neustarts
+konsistent bleiben, und das Kontopasswort ist über den normalen Ablauf zu rotieren, statt
+die Datei zu bearbeiten. Sind Aufgabenbilder für die Beta bewusst deaktiviert, ist
+das Secret `image_api_key` aus `compose.yml` zu entfernen, statt eine leere Datei zu belassen,
+und diese Entscheidung in den Release Notes festzuhalten.
 
-### 3.1 Reverse proxy and forwarded headers
+### 3.1 Reverse Proxy und weitergeleitete Header
 
-Set `PHYSICOS_TRUSTED_PROXIES` to the **exact IP literals** of the proxy peers
-that connect to the app, comma-separated. CIDR ranges and hostnames are
-rejected at startup:
+`PHYSICOS_TRUSTED_PROXIES` ist auf die **exakten IP-Literale** der Proxy-Peers zu setzen,
+die sich mit der App verbinden, durch Kommas getrennt. CIDR-Bereiche und Hostnamen werden
+beim Start abgelehnt:
 
 ```sh
-# TLS terminator on the same Docker host (published via the loopback port)
+# TLS-Terminator auf demselben Docker-Host (veröffentlicht über den Loopback-Port)
 PHYSICOS_TRUSTED_PROXIES=127.0.0.1,::1
 
-# Proxy in another container: use the bridge gateway address the app sees
+# Proxy in einem anderen Container: die Bridge-Gateway-Adresse verwenden, die die App sieht
 PHYSICOS_TRUSTED_PROXIES=172.18.0.1
 ```
 
-Only a TCP peer in this list may supply `X-Forwarded-Proto` and
-`X-Forwarded-For`. Leaving it empty behind a TLS proxy means the session
-cookie is issued without `Secure`, CSRF origin checks may reject `https`
-requests, and every visitor shares the proxy's rate-limit bucket. Setting it
-too broadly (or listing an address an untrusted client can reach from) lets
-clients spoof their IP and protocol, defeating per-IP limits and audit
-attribution.
+Nur ein TCP-Peer aus dieser Liste darf `X-Forwarded-Proto` und
+`X-Forwarded-For` liefern. Bleibt die Liste hinter einem TLS-Proxy leer, wird das Session-
+Cookie ohne `Secure` ausgestellt, CSRF-Origin-Prüfungen können `https`-
+Anfragen ablehnen, und alle Besucher teilen sich den Rate-Limit-Bucket des Proxys. Wird sie
+zu weit gefasst (oder eine Adresse eingetragen, von der aus ein nicht vertrauenswürdiger Client zugreifen kann), können
+Clients ihre IP und ihr Protokoll fälschen, wodurch das Limit pro IP und die Zuordnung im Audit unterlaufen werden.
 
-Optional knobs, all plain environment variables:
+Optionale Stellschrauben, allesamt einfache Umgebungsvariablen:
 
-| Variable                   | Default                       | Purpose                                                       |
-| -------------------------- | ----------------------------- | ------------------------------------------------------------- |
-| `PHYSICOS_TRUSTED_PROXIES` | empty (trust nothing)         | Exact proxy IP literals for forwarded headers                 |
-| `PHYSICSOS_SESSIONS_ROOT`  | `/var/lib/physicsos/sessions` | Shared session root; required before scaling past one replica |
-| `PHYSICSOS_PANDOC`         | `/usr/bin/pandoc`             | Pandoc binary used for A4 export                              |
-| `PHYSICSOS_SOFFICE`        | `/usr/bin/soffice`            | LibreOffice binary; macOS dev can point at the app bundle     |
-| `PHYSICSOS_DATABASE_SSL`   | `false`                       | Enable TLS for the PostgreSQL connection                      |
+| Variable                   | Standard                      | Zweck                                                              |
+| -------------------------- | ----------------------------- | ------------------------------------------------------------------ |
+| `PHYSICOS_TRUSTED_PROXIES` | leer (nichts vertrauen)       | Exakte Proxy-IP-Literale für weitergeleitete Header                |
+| `PHYSICSOS_SESSIONS_ROOT`  | `/var/lib/physicsos/sessions` | Gemeinsames Session-Root; erforderlich, bevor über eine Replik hinaus skaliert wird |
+| `PHYSICSOS_PANDOC`         | `/usr/bin/pandoc`             | Pandoc-Binary für den A4-Export                                    |
+| `PHYSICSOS_SOFFICE`        | `/usr/bin/soffice`            | LibreOffice-Binary; macOS-Dev kann auf das App-Bundle zeigen       |
+| `PHYSICSOS_DATABASE_SSL`   | `false`                       | TLS für die PostgreSQL-Verbindung aktivieren                       |
 
-### 3.2 Runtime environment contract
+### 3.2 Vertrag der Laufzeitumgebung
 
-`Dockerfile` declares the image defaults, `compose.yml` provides the same
-defaults while mapping the host-side overrides, and `.env.example` lists every
-override an operator may need. The production storage and shared-state
-backends are intentionally fixed in both the image and Compose to
-`postgres`/`redis`; they are not optional `.env` switches.
+`Dockerfile` deklariert die Image-Standardwerte, `compose.yml` liefert dieselben
+Standardwerte und bildet dabei die hostseitigen Überschreibungen ab, und `.env.example` listet jede
+Überschreibung auf, die ein Operator brauchen kann. Die Produktions-Backends für Speicher und Shared State
+sind in Image und Compose bewusst fest auf
+`postgres`/`redis` gesetzt; es sind keine optionalen `.env`-Schalter.
 
-| Runtime variable                 | Source in Compose                 | Purpose                                    |
+| Laufzeitvariable                 | Quelle in Compose                 | Zweck                                      |
 | -------------------------------- | --------------------------------- | ------------------------------------------ |
-| `PHYSICSOS_STORAGE_BACKEND`      | fixed `postgres`                  | Prevents JSON storage fallback             |
-| `PHYSICSOS_STORAGE_SCHEMA`       | `PHYSICSOS_STORAGE_SCHEMA`        | PostgreSQL schema, default `physicsos`     |
-| `PHYSICSOS_SHARED_STATE_BACKEND` | fixed `redis`                     | Prevents in-memory rate-limit fallback     |
-| `DATABASE_URL_FILE`              | `PHYSICSOS_DATABASE_URL_FILE`     | Materialized to `DATABASE_URL`             |
-| `REDIS_URL_FILE`                 | `PHYSICSOS_REDIS_URL_FILE`        | Materialized to `REDIS_URL`                |
-| `DEEPSEEK_API_KEY_FILE`          | `PHYSICSOS_DEEPSEEK_API_KEY_FILE` | Materialized to `DEEPSEEK_API_KEY`         |
-| `PHYSICSOS_ADMIN_PASSWORD_FILE`  | `PHYSICSOS_ADMIN_PASSWORD_FILE`   | Materialized to `PHYSICSOS_ADMIN_PASSWORD` |
-| `PHYSICSOS_IMAGE_API_KEY_FILE`   | `PHYSICSOS_IMAGE_API_KEY_FILE`    | Materialized to `PHYSICSOS_IMAGE_API_KEY`  |
-| `PHYSICOS_TRUSTED_PROXIES`       | `PHYSICOS_TRUSTED_PROXIES`        | Forwarded-header trust list                |
+| `PHYSICSOS_STORAGE_BACKEND`      | fest `postgres`                   | Verhindert den Fallback auf JSON-Speicher  |
+| `PHYSICSOS_STORAGE_SCHEMA`       | `PHYSICSOS_STORAGE_SCHEMA`        | PostgreSQL-Schema, Standard `physicsos`    |
+| `PHYSICSOS_SHARED_STATE_BACKEND` | fest `redis`                      | Verhindert den Fallback auf In-Memory-Rate-Limit |
+| `DATABASE_URL_FILE`              | `PHYSICSOS_DATABASE_URL_FILE`     | Wird zu `DATABASE_URL` materialisiert      |
+| `REDIS_URL_FILE`                 | `PHYSICSOS_REDIS_URL_FILE`        | Wird zu `REDIS_URL` materialisiert         |
+| `DEEPSEEK_API_KEY_FILE`          | `PHYSICSOS_DEEPSEEK_API_KEY_FILE` | Wird zu `DEEPSEEK_API_KEY` materialisiert  |
+| `PHYSICSOS_ADMIN_PASSWORD_FILE`  | `PHYSICSOS_ADMIN_PASSWORD_FILE`   | Wird zu `PHYSICSOS_ADMIN_PASSWORD` materialisiert |
+| `PHYSICSOS_IMAGE_API_KEY_FILE`   | `PHYSICSOS_IMAGE_API_KEY_FILE`    | Wird zu `PHYSICSOS_IMAGE_API_KEY` materialisiert |
+| `PHYSICOS_TRUSTED_PROXIES`       | `PHYSICOS_TRUSTED_PROXIES`        | Vertrauensliste für weitergeleitete Header |
 
-Validate the composed configuration without starting containers:
+Die zusammengesetzte Konfiguration validieren, ohne Container zu starten:
 
 ```sh
 docker compose config --quiet
 ```
 
-### 3.3 模型链路（provider / base URL / key）
+### 3.3 Modellkette (Provider / Base URL / Key)
 
-生产组合的默认模型走 `llm-deepseek` 的 `deepseek-official` 路由，但
-`DEEPSEEK_BASE_URL` 不再直接指向第三方网关，而是指向容器内的
-`model-pool-host` 回环代理。代理再按通道优先级与 key 权重选择上游，因此单个
-key 失效时不需要重启 Harness。
+Das Standardmodell der Produktionskomposition läuft über die Route `deepseek-official` von `llm-deepseek`, aber
+`DEEPSEEK_BASE_URL` zeigt nicht mehr direkt auf das Gateway eines Drittanbieters, sondern auf den Loopback-Proxy von
+`model-pool-host` im Container. Der Proxy wählt dann nach Kanalpriorität und Key-Gewicht den Upstream,
+sodass der Harness nicht neu gestartet werden muss, wenn ein einzelner
+Key ausfällt.
 
-| 项               | 生产取值                                                                    | 说明                                                                             |
+| Punkt            | Produktionswert                                                             | Erläuterung                                                                      |
 | ---------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Harness base URL | `http://127.0.0.1:${PHYSICSOS_MODEL_POOL_PORT:-38972}/v1`                   | 只在 app 容器内监听；公网端口不会暴露代理                                        |
-| 兜底上游         | `PHYSICSOS_MODEL_FALLBACK_BASE_URL`，默认 `https://api.fengshao1227.com/v1` | 只用于空池播种；后台新增任意通道后不再自动重加                                   |
-| key              | `.env.deepseek_api_key`（OpenAI 兼容 key）                                  | 仅作为空池兜底种子，由 `model-pool-host` 加密存入 `physicsos_model_pool`         |
-| 加密主密钥       | `.env.model_pool_secret`                                                    | 派生 AES-256-GCM 密钥；必须长期稳定，换掉后旧 key 会 `KEY_DECRYPT_FAILED`        |
-| 模型名           | `deepseek-v4-flash`                                                         | 网关实测首字约 1 秒；旧的 `deepseek-v4.1-flash` 在高峰期可能等待 10–30 秒        |
-| 输出上限         | `maxTokens: 32768`                                                          | 推理模型先花 reasoning token；上限太小会 `content:null` + `finish_reason:length` |
+| Harness Base URL | `http://127.0.0.1:${PHYSICSOS_MODEL_POOL_PORT:-38972}/v1`                   | Lauscht nur im App-Container; der öffentliche Port legt den Proxy nicht offen    |
+| Fallback-Upstream | `PHYSICSOS_MODEL_FALLBACK_BASE_URL`, Standard `https://api.fengshao1227.com/v1` | Nur zum Befüllen eines leeren Pools; wird nicht automatisch erneut hinzugefügt, sobald im Backend ein beliebiger Kanal angelegt wurde |
+| Key              | `.env.deepseek_api_key` (OpenAI-kompatibler Key)                            | Nur als Fallback-Seed für den leeren Pool; wird von `model-pool-host` verschlüsselt in `physicsos_model_pool` abgelegt |
+| Hauptschlüssel der Verschlüsselung | `.env.model_pool_secret`                          | Leitet den AES-256-GCM-Schlüssel ab; muss langfristig stabil bleiben, nach einem Wechsel erzeugen alte Keys `KEY_DECRYPT_FAILED` |
+| Modellname       | `deepseek-v4-flash`                                                         | Gemessen am Gateway ca. 1 Sekunde bis zum ersten Zeichen; das alte `deepseek-v4.1-flash` kann zu Spitzenzeiten 10–30 Sekunden warten |
+| Ausgabelimit     | `maxTokens: 32768`                                                          | Reasoning-Modelle verbrauchen zuerst Reasoning-Tokens; ein zu kleines Limit führt zu `content:null` + `finish_reason:length` |
 
-模型名与输出上限写在 `$DSH_HOME/settings.yaml`（容器内
-`/var/lib/physicsos/settings.yaml`，缺失时回落到 base 组合默认值）：
+Modellname und Ausgabelimit stehen in `$DSH_HOME/settings.yaml` (im Container
+`/var/lib/physicsos/settings.yaml`, bei Fehlen Rückfall auf die Standardwerte der Basiskomposition):
 
 ```yaml
 llm-deepseek:
@@ -190,28 +190,28 @@ agent-default-model:
   reasoningEffort: off
 ```
 
-`scripts/deploy/configure-model.sh` 会幂等写入这组设置，并只替换用户可见名称；
-内部模型 ID 与号池路由使用 `deepseek-v4-flash`；显示名称固定为“平台公益模型”。
+`scripts/deploy/configure-model.sh` schreibt diese Einstellungen idempotent und ersetzt nur den für Nutzer sichtbaren Namen;
+die interne Modell-ID und die Pool-Route verwenden `deepseek-v4-flash`; der Anzeigename ist fest „平台公益模型“ (Gemeinnütziges Plattformmodell).
 
-三个容易踩的坑：
+Drei häufige Stolperfallen:
 
-1. **secret 文件权限**：每个 secret 都在 compose 里以长语法声明
-   `uid: '999'`、`gid: '999'`、`mode: '0400'`（复用 `x-secret-mount` 锚点），
-   Compose 据此改写挂载文件的属主与权限，宿主机文件因此可以保持 `0600`（或更
-   严格）而不必放宽到 `0644`。宿主机一侧 `scripts/deploy/secure-secrets.sh`
-   仍按同一不变量加固这些文件，作为纵深防线。若某个 secret 漏了这段声明，容器
-   会退回宿主机文件权限：`0600 root:root` 时 app（uid 999）起不来并打印
-   `secret file for PHYSICSOS_IMAGE_API_KEY_FILE is unreadable (EACCES)`。
-2. **`/api` 的域名信任栅栏只认 CLI 参数**：`PHYSICOS_TRUSTED_HOSTS` 本身不会被
-   harness 读取，它必须同时出现在 compose 的
-   `--trusted-host ${PHYSICOS_TRUSTED_HOSTS}` 里。漏传时公网的
-   `/api/host.describe` 返回 `403 forbidden`，浏览器客户端卡在“正在加载工作区 /
-   Loading plugins”，而 loopback 仍然正常。
-3. **辅助请求也走模型**：会话标题、出卷专区的解题调用共用同一端点与 key，
-   `session-title-first-prompt-llm` 也会消耗额度，因此一次真实回合的按账号计数
-   通常 +2。
+1. **Berechtigungen der Secret-Dateien**: Jedes Secret wird in Compose in der langen Syntax mit
+   `uid: '999'`, `gid: '999'`, `mode: '0400'` deklariert (wiederverwendet den Anker `x-secret-mount`);
+   Compose schreibt danach Besitzer und Berechtigungen der eingehängten Datei um, sodass die Dateien auf dem Host auf `0600` (oder
+   strenger) bleiben können und nicht auf `0644` gelockert werden müssen. Auf der Host-Seite härtet `scripts/deploy/secure-secrets.sh`
+   diese Dateien weiterhin nach derselben Invariante, als Verteidigung in der Tiefe. Fehlt diese Deklaration bei einem Secret, fällt der Container
+   auf die Dateiberechtigungen des Hosts zurück: Bei `0600 root:root` startet die App (uid 999) nicht und gibt aus:
+   `secret file for PHYSICSOS_IMAGE_API_KEY_FILE is unreadable (EACCES)`.
+2. **Die Domänen-Vertrauensschranke von `/api` erkennt nur CLI-Parameter**: `PHYSICOS_TRUSTED_HOSTS` selbst wird vom
+   Harness nicht gelesen, es muss zugleich in Compose in
+   `--trusted-host ${PHYSICOS_TRUSTED_HOSTS}` stehen. Fehlt es, liefert `/api/host.describe` über das öffentliche Netz
+   `403 forbidden`, der Browser-Client hängt bei „Arbeitsbereich wird geladen /
+   Loading plugins“, während Loopback weiterhin normal funktioniert.
+3. **Auch Hilfsanfragen laufen über das Modell**: Sitzungstitel und die Lösungsaufrufe des Klausurbereichs nutzen denselben Endpunkt und Key,
+   auch `session-title-first-prompt-llm` verbraucht Kontingent, daher zählt
+   eine echte Runde pro Konto in der Regel +2.
 
-最小验收（服务器上执行；key 只从 secret 读，不回显）：
+Minimale Abnahme (auf dem Server auszuführen; der Key wird nur aus dem Secret gelesen und nicht ausgegeben):
 
 ```sh
 cd /opt/physicsos && K=$(cat .env.deepseek_api_key)
@@ -221,43 +221,43 @@ docker compose exec -T app node -e "fetch('http://127.0.0.1:38972/v1/models').th
 docker compose exec -T app cat /var/lib/physicsos/settings.yaml
 ```
 
-### 3.4 平台模型号池（model-pool）
+### 3.4 Plattform-Modellpool (model-pool)
 
-管理员在「管理后台 → 模型通道」维护通道和 key；页签只显示 key 尾 4 位。
-`model-pool-host` 同时暴露：
+Administratoren pflegen Kanäle und Keys unter „Admin-Backend → Modellkanäle“; der Tab zeigt nur die letzten 4 Stellen des Keys.
+`model-pool-host` stellt zugleich bereit:
 
-- app 容器内的 OpenAI 兼容代理：`http://127.0.0.1:38972/v1`
-- 同源管理接口：`/physicsos/model-pool/*`，只接受 `SUPER_ADMIN`
+- einen OpenAI-kompatiblen Proxy im App-Container: `http://127.0.0.1:38972/v1`
+- eine gleichursprüngliche Verwaltungsschnittstelle: `/physicsos/model-pool/*`, die nur `SUPER_ADMIN` akzeptiert
 
-#### 策略语义
+#### Strategiesemantik
 
-| 行为     | 生产语义                                                                                                                         |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| 轮询     | 先按 `priority` 从小到大的通道分档，档内按 key 权重轮询；单次请求仍返回完整候选链用于故障转移                                    |
-| 重试     | `retryCount` 默认 2，最多尝试候选 key 数量个；400/404/422 等客户端错误不换 key                                                   |
-| 冷却     | 401/403 认证失败立即冷却；429/5xx/传输失败达到 `failureThreshold` 后冷却                                                         |
-| 退避     | `cooldownBaseMs` 起指数增长，受 `cooldownMaxMs` 限制；`autoRecover=true` 时到期自动恢复                                          |
-| 流式     | 只会在上游响应头返回前重试；流已经开始后不重放，避免重复内容                                                                     |
-| 模型别名 | 通道里的模型名是**上游**的名字，转发时替换平台侧名字；留空则原样透传。选路不按模型名过滤                                         |
-| 全不可用 | 明确返回 HTTP 503 与 `MODEL_POOL_EXHAUSTED`、`MODEL_POOL_EMPTY`、`MODEL_POOL_NO_KEY` 或 `MODEL_POOL_ALL_COOLING`，不伪造模型回复 |
+| Verhalten        | Produktionssemantik                                                                                                              |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Round Robin      | Zuerst werden Kanäle nach `priority` von klein nach groß in Stufen eingeteilt, innerhalb einer Stufe wird nach Key-Gewicht rotiert; eine einzelne Anfrage erhält weiterhin die vollständige Kandidatenkette für das Failover |
+| Retry            | `retryCount` Standard 2, höchstens so viele Versuche, wie es Kandidaten-Keys gibt; bei Client-Fehlern wie 400/404/422 wird der Key nicht gewechselt |
+| Cooldown         | Bei 401/403-Authentifizierungsfehlern sofort Cooldown; bei 429/5xx/Übertragungsfehlern Cooldown, sobald `failureThreshold` erreicht ist |
+| Backoff          | Exponentielles Wachstum ab `cooldownBaseMs`, begrenzt durch `cooldownMaxMs`; bei `autoRecover=true` automatische Wiederherstellung nach Ablauf |
+| Streaming        | Wiederholt wird nur, bevor der Upstream die Antwort-Header zurückgibt; nach Beginn des Streams wird nicht erneut abgespielt, um doppelten Inhalt zu vermeiden |
+| Modell-Alias     | Der Modellname im Kanal ist der Name **beim Upstream** und ersetzt beim Weiterleiten den plattformseitigen Namen; leer gelassen wird unverändert durchgereicht. Die Routenwahl filtert nicht nach Modellnamen |
+| Alle nicht verfügbar | Liefert ausdrücklich HTTP 503 mit `MODEL_POOL_EXHAUSTED`, `MODEL_POOL_EMPTY`, `MODEL_POOL_NO_KEY` oder `MODEL_POOL_ALL_COOLING`, erfindet keine Modellantwort |
 
-#### 日常操作
+#### Tägliche Abläufe
 
-1. **换 key**：在「模型通道」找到 key，点「编辑」后粘贴新 key；请求成功后旧的
-   密文会被覆盖，失败计数清零。只在创建/替换的请求体内出现明文 key，列表和审计
-   永远只记尾号。
-2. **临时停用 key**：把 key 的「启用」取消后保存；代理下一请求立即跳过它。
-3. **停用整条通道**：编辑通道并把「通道启用」取消；该通道下所有 key 一起退出候选。
-4. **全部停用**：模型请求会返回上述 503；这是可恢复的配置状态，不会退回到未加密的
-   单 key 直连。
-5. **手动恢复**：对冷却中的 key 点「重置失败」，或按策略等待自动恢复。
-6. **单 key 探测**：点「测试此 key」，页面显示上游状态、延迟和脱敏错误。
+1. **Key wechseln**: Im Bereich „Modellkanäle“ den Key suchen, auf „Bearbeiten“ klicken und den neuen Key einfügen; nach erfolgreicher Anfrage wird der alte
+   Geheimtext überschrieben und der Fehlerzähler zurückgesetzt. Nur im Request-Body beim Anlegen/Ersetzen erscheint der Klartext-Key, Liste und Audit
+   protokollieren immer nur die letzten Stellen.
+2. **Key vorübergehend deaktivieren**: „Aktiviert“ beim Key abwählen und speichern; der Proxy überspringt ihn bei der nächsten Anfrage sofort.
+3. **Einen ganzen Kanal deaktivieren**: Den Kanal bearbeiten und „Kanal aktiviert“ abwählen; alle Keys dieses Kanals scheiden gemeinsam aus der Kandidatenliste aus.
+4. **Alles deaktivieren**: Modellanfragen liefern das oben genannte 503; das ist ein wiederherstellbarer Konfigurationszustand und fällt nicht auf eine unverschlüsselte
+   direkte Einzel-Key-Verbindung zurück.
+5. **Manuelle Wiederherstellung**: Bei einem Key im Cooldown auf „Fehler zurücksetzen“ klicken oder gemäß Strategie auf die automatische Wiederherstellung warten.
+6. **Einzel-Key-Probe**: Auf „Diesen Key testen“ klicken; die Seite zeigt Upstream-Status, Latenz und einen bereinigten Fehler.
 
-#### 加密与备份
+#### Verschlüsselung und Backup
 
-`model_pool_secret` 必须与 `postgres_data` 一起备份；只有数据库而没有主密钥时，
-通道记录仍可读，但 key 无法解密，模型请求会 fail-closed。不要把 secret 写进
-`docs/`、issue、日志或 shell 历史。
+`model_pool_secret` muss zusammen mit `postgres_data` gesichert werden; liegt nur die Datenbank ohne Hauptschlüssel vor,
+bleiben die Kanaleinträge lesbar, die Keys lassen sich aber nicht entschlüsseln, und Modellanfragen schlagen fail-closed fehl. Das Secret darf nicht in
+`docs/`, Issues, Logs oder die Shell-Historie geschrieben werden.
 
 ```sh
 openssl rand -hex 32 > .env.model_pool_secret
@@ -266,11 +266,11 @@ docker compose config --quiet
 docker compose up -d app
 ```
 
-## 4. Continuous integration
+## 4. Continuous Integration
 
-`.github/workflows/ci.yml` runs on `main` pushes, pull requests, and manual
-dispatch. The job initializes the pinned Harness submodule, applies the overlay,
-installs both lockfiles, and runs:
+`.github/workflows/ci.yml` läuft bei Pushes auf `main`, Pull Requests und manuellem
+Dispatch. Der Job initialisiert das gepinnte Harness-Submodul, wendet das Overlay an,
+installiert beide Lockfiles und führt aus:
 
 ```sh
 docker compose config --quiet
@@ -285,79 +285,77 @@ pnpm test
 pnpm build
 ```
 
-A release is eligible only when every gate is green on the exact commit being
-deployed. Preserve the image digest and commit SHA together in the release
-record. The format gate is intentionally scoped to the deployment-owned paths
-until the repository-wide Prettier baseline is reconciled.
+Ein Release ist nur zulässig, wenn jedes Gate auf genau dem zu deployenden Commit grün ist.
+Image-Digest und Commit-SHA sind gemeinsam in der Release-Aufzeichnung festzuhalten. Das Format-Gate ist bewusst auf die vom Deployment verantworteten Pfade beschränkt,
+bis die repositoryweite Prettier-Baseline bereinigt ist.
 
-### Harness `dsh-v0.1.7-rc.2` sync (2026-09-27)
+### Harness-Sync `dsh-v0.1.7-rc.2` (2026-09-27)
 
-The pinned Harness moved from `47f943859bef60e4160492346772ded9b24f765a` to
-`477b4f420553e8a52c2fbccc464d7561b239c443` (`dsh-v0.1.7-rc.2`). The
-compatibility patch records these interface decisions:
+Der gepinnte Harness wurde von `47f943859bef60e4160492346772ded9b24f765a` auf
+`477b4f420553e8a52c2fbccc464d7561b239c443` (`dsh-v0.1.7-rc.2`) umgestellt. Der
+Kompatibilitäts-Patch hält diese Schnittstellenentscheidungen fest:
 
-- `client-connection` now requires the `credentials` service and dispatches
-  shared `/api` calls through registered RPC interceptors; the removed
-  `apiProxy` fallback is not restored. PhysicsOS adds policy hooks for request
-  authorization, fetch rewriting, and forwarded-event admission. The auth-host
-  account/session/workspace ownership ledger remains the authority for `/api`;
-  cross-account reads and writes still fail closed.
-- Private workspace provisioning now uses the target `workspaceRegistry`
-  service. The old `apiProxy.workspace.create/rename` seam was removed upstream.
-- Session persistence now reads released V3 (`session.v3.jsonl` or
-  `session.v3.jsonl.zstd`) and publishes a verified V4 successor on an explicit
-  write. Existing V3/Zstd logs are not deleted or rewritten during read-only
-  access, and `physics/scene` is admitted by the historical V3-to-V4 converter.
-  Rollback requiring an older Harness must restore the pre-upgrade session
-  volume or keep writes stopped; do not down-convert in place.
-- Connection's multipart binary response path is retained. Paper uploads and
-  PhysicsOS image imports continue through the attachment/binary framing rather
-  than base64 JSON substitution.
-- Model traffic remains `DEEPSEEK_BASE_URL -> 127.0.0.1:
-${PHYSICSOS_MODEL_POOL_PORT}` and the model-pool proxy remains the only
-  provider-selection layer.
-- `class-host` is not mounted in the production Web composition. `plugin-center`
-  is mounted immediately after `ops-host`; the package remains available for
-  migration and explicit administrative use.
+- `client-connection` verlangt nun den Dienst `credentials` und leitet
+  gemeinsame `/api`-Aufrufe über registrierte RPC-Interceptors; der entfernte
+  `apiProxy`-Fallback wird nicht wiederhergestellt. PhysicsOS ergänzt Policy-Hooks für die Autorisierung von Anfragen,
+  das Umschreiben von fetch und die Zulassung weitergeleiteter Ereignisse. Das auth-host-Ledger für
+  Konto/Session/Workspace-Besitz bleibt die maßgebliche Instanz für `/api`;
+  kontoübergreifendes Lesen und Schreiben schlägt weiterhin fail-closed fehl.
+- Die Bereitstellung privater Workspaces verwendet nun den Zieldienst `workspaceRegistry`.
+  Die alte Naht `apiProxy.workspace.create/rename` wurde im Upstream entfernt.
+- Die Session-Persistenz liest nun das veröffentlichte V3 (`session.v3.jsonl` oder
+  `session.v3.jsonl.zstd`) und veröffentlicht bei einem ausdrücklichen Schreibvorgang einen verifizierten V4-Nachfolger. Bestehende V3-/Zstd-Logs werden bei
+  rein lesendem Zugriff weder gelöscht noch umgeschrieben, und `physics/scene` wird vom historischen V3-zu-V4-Konverter zugelassen.
+  Ein Rollback, der einen älteren Harness erfordert, muss das Session-Volume vor dem Upgrade wiederherstellen
+  oder Schreibvorgänge gestoppt halten; keine Rückkonvertierung an Ort und Stelle.
+- Der multipart-Pfad für binäre Antworten der Verbindung bleibt erhalten. Paper-Uploads und
+  PhysicsOS-Bildimporte laufen weiterhin über das Anhangs-/Binär-Framing und nicht über
+  Base64-JSON-Ersetzung.
+- Der Modellverkehr bleibt `DEEPSEEK_BASE_URL -> 127.0.0.1:
+${PHYSICSOS_MODEL_POOL_PORT}`, und der model-pool-Proxy bleibt die einzige
+  Schicht zur Provider-Auswahl.
+- `class-host` ist in der Web-Produktionskomposition nicht eingehängt. `plugin-center`
+  wird unmittelbar nach `ops-host` eingehängt; das Package bleibt für Migration
+  und ausdrückliche administrative Nutzung verfügbar.
 
-- **Document gate (new in 0.1.7-rc.2).** `dsh web` now refuses `index.html`
-  unless the browser first presents the per-process launch token it prints at
-  startup (`dsh web: http://127.0.0.1:3080/?token=…`), exchanging it for an
-  authority-bound signed `dsh-auth-<hash>` cookie. Two facts decide the
-  deployment: the token is **per-process** (fresh random bytes on every boot),
-  and the cookie is bound to the authority that minted it (host **and** port),
-  so neither can be provisioned for ordinary visitors behind a reverse proxy —
-  there is no flag, environment variable, or config field that disables the
-  gate (the CLI exposes only `--host`, `--port`, `--trusted-host`, `--no-open`).
-  PhysicsOS therefore relaxes it in the compatibility patch for the authorities
-  the deployment **declares** in `trustedHosts` — the same list the `/api`
-  fence already uses (`--trusted-host` / `PHYSICOS_TRUSTED_HOSTS`). A token-less
-  document request whose `Host` is a declared authority is served directly;
-  loopback and undeclared hosts keep the stock gate, and a request that carries
-  the token keeps the stock exchange. The account boundary is unchanged: every
-  `/api` call still passes `apiPolicy` and needs a live product session. The
-  change lives in `overlays/harness/upstream-changes.patch`
-  (`packages/client/connection/src/api-request-trust.ts` and `rpc-host.ts`).
-  Because that list now gates the document itself, **adding or removing a
-  `PHYSICOS_TRUSTED_HOSTS` entry changes whether the public site is reachable**;
-  keep it identical to the reverse proxy's `server_name`.
-- The compose `app` command now passes `--no-open`. A container has no browser,
-  so the default handoff only spawns an opener that is certain to fail and logs
-  a warning to stderr. The launch URL still prints (`printUrl` stays true) and
-  is visible in `docker compose logs app`.
-- `/healthz` and `/readyz` are named routes registered ahead of the frontend
-  fallback, so the Docker healthcheck is **not** affected by the gate. A
-  loopback `GET /` without a cookie returns 401 by design — smoke-test the
-  document through the public origin instead (step 6).
+- **Document Gate (neu in 0.1.7-rc.2).** `dsh web` verweigert nun `index.html`,
+  es sei denn, der Browser legt zuerst das prozessbezogene Launch-Token vor, das beim
+  Start ausgegeben wird (`dsh web: http://127.0.0.1:3080/?token=…`), und tauscht es gegen ein
+  an die Autorität gebundenes, signiertes Cookie `dsh-auth-<hash>`. Zwei Fakten bestimmen das
+  Deployment: Das Token ist **pro Prozess** (bei jedem Boot frische Zufallsbytes),
+  und das Cookie ist an die Autorität gebunden, die es ausgestellt hat (Host **und** Port),
+  sodass sich beides für gewöhnliche Besucher hinter einem Reverse Proxy nicht bereitstellen lässt –
+  es gibt kein Flag, keine Umgebungsvariable und kein Konfigurationsfeld, das das
+  Gate abschaltet (die CLI bietet nur `--host`, `--port`, `--trusted-host`, `--no-open`).
+  PhysicsOS lockert es daher im Kompatibilitäts-Patch für die Autoritäten,
+  die das Deployment in `trustedHosts` **deklariert** – dieselbe Liste, die auch die
+  `/api`-Schranke bereits verwendet (`--trusted-host` / `PHYSICOS_TRUSTED_HOSTS`). Eine tokenlose
+  Dokumentanfrage, deren `Host` eine deklarierte Autorität ist, wird direkt bedient;
+  Loopback und nicht deklarierte Hosts behalten das Standard-Gate, und eine Anfrage mit
+  Token behält den Standard-Austausch. Die Kontogrenze bleibt unverändert: Jeder
+  `/api`-Aufruf durchläuft weiterhin `apiPolicy` und benötigt eine aktive Produkt-Session. Die
+  Änderung liegt in `overlays/harness/upstream-changes.patch`
+  (`packages/client/connection/src/api-request-trust.ts` und `rpc-host.ts`).
+  Da diese Liste nun das Dokument selbst absichert, **ändert das Hinzufügen oder Entfernen eines
+  Eintrags in `PHYSICOS_TRUSTED_HOSTS`, ob die öffentliche Website erreichbar ist**;
+  sie ist identisch zum `server_name` des Reverse Proxy zu halten.
+- Der Compose-Befehl `app` übergibt nun `--no-open`. Ein Container hat keinen Browser,
+  daher startet die Standardübergabe nur einen Opener, der sicher scheitert, und protokolliert
+  eine Warnung auf stderr. Die Launch-URL wird weiterhin ausgegeben (`printUrl` bleibt true) und
+  ist in `docker compose logs app` sichtbar.
+- `/healthz` und `/readyz` sind benannte Routen, die vor dem Frontend-
+  Fallback registriert sind, sodass der Docker-Healthcheck vom Gate **nicht** betroffen ist. Ein
+  Loopback-`GET /` ohne Cookie liefert absichtlich 401 – das Dokument stattdessen
+  über den öffentlichen Origin per Smoke-Test prüfen (Schritt 6).
 
-Rollback is application-first: restore the previous image digest and the
-submodule pointer/overlay pair from `47f943859bef60e4160492346772ded9b24f765a`
-before serving traffic, then reopen the preserved PostgreSQL/session volumes.
-Never delete existing session logs during rollback.
+Das Rollback erfolgt zuerst auf Anwendungsebene: Vor dem Ausliefern von Verkehr sind der vorherige Image-Digest und das
+Paar aus Submodul-Pointer/Overlay von `47f943859bef60e4160492346772ded9b24f765a`
+wiederherzustellen, danach werden die erhaltenen PostgreSQL-/Session-Volumes wieder geöffnet.
+Beim Rollback dürfen niemals vorhandene Session-Logs gelöscht werden.
 
-## 5. Build and release
+## 5. Build und Release
 
-Build locally:
+Lokal bauen:
 
 ```sh
 export PHYSICSOS_APP_IMAGE="registry.example/physicsos-app:$(git rev-parse --short=12 HEAD)"
@@ -366,8 +364,8 @@ docker image inspect "$PHYSICSOS_APP_IMAGE" \
   --format '{{index .RepoDigests 0}}'
 ```
 
-For a registry release, tag with the full commit SHA and, after push, deploy the
-resulting digest rather than a movable tag:
+Für ein Registry-Release mit der vollständigen Commit-SHA taggen und nach dem Push den
+resultierenden Digest deployen, nicht einen beweglichen Tag:
 
 ```sh
 docker push "$PHYSICSOS_APP_IMAGE"
@@ -375,88 +373,88 @@ docker image inspect "$PHYSICSOS_APP_IMAGE" \
   --format '{{index .RepoDigests 0}}'
 ```
 
-Record:
+Festzuhalten:
 
-- commit SHA
-- image digest
-- Compose revision
-- database migration revision, when the release has one
-- operator and UTC start/end time
+- Commit-SHA
+- Image-Digest
+- Compose-Revision
+- Revision der Datenbankmigration, falls das Release eine hat
+- Operator sowie Start-/Endzeit in UTC
 
 ## 6. Deploy
 
-**Hard precondition for a Harness upgrade that bumps the session-log format**
-(the 0.1.7 promotion in particular). Before switching the primary Compose
-project, tag the previous image, take a filesystem-level backup of the sessions
-root (`/var/lib/physicsos/sessions`, `PHYSICSOS_SESSIONS_ROOT` inside
-`app_data`) **and** a `pg_dump`, and confirm both are readable.
+**Harte Voraussetzung für ein Harness-Upgrade, das das Format der Session-Logs hochsetzt**
+(insbesondere die Beförderung auf 0.1.7). Bevor das primäre Compose-
+Projekt umgeschaltet wird, ist das vorherige Image zu taggen, ein Backup des Sessions-
+Roots auf Dateisystemebene zu ziehen (`/var/lib/physicsos/sessions`, `PHYSICSOS_SESSIONS_ROOT` innerhalb von
+`app_data`) **und** ein `pg_dump`, und es ist zu bestätigen, dass beide lesbar sind.
 
-This is a precondition, not a nicety: the running deployment stores session logs
-in the oldest on-disk format (`{"type":"session","version":0,…}`). Harness
-0.1.7 ships the `v0 → v1 → v2 → v3 → v4` migration chain
-(`packages/session/session-format-v0-to-v1` … `-v3-to-v4`, with
-`catalog-migration.ts` selecting `historicalSessionFormatCatalog` for
-`version <= 3`), so 0.1.7 migrates those logs forward **in place**. After
-promotion the previous release (rollback image `14157e1`, submodule pinned at
-`47f9438`) would be reading already-migrated data. The rollback image is
-therefore a true rollback only **together with** the pre-promotion sessions-root
-and database backups. Never down-convert in place on rollback — restore from the
-backup.
+Das ist eine Voraussetzung, keine Nettigkeit: Das laufende Deployment speichert Session-Logs
+im ältesten On-Disk-Format (`{"type":"session","version":0,…}`). Harness
+0.1.7 liefert die Migrationskette `v0 → v1 → v2 → v3 → v4`
+(`packages/session/session-format-v0-to-v1` … `-v3-to-v4`, wobei
+`catalog-migration.ts` für `version <= 3` den `historicalSessionFormatCatalog` auswählt),
+sodass 0.1.7 diese Logs **an Ort und Stelle** vorwärts migriert. Nach der Beförderung würde das vorherige Release
+(Rollback-Image `14157e1`, Submodul gepinnt auf
+`47f9438`) bereits migrierte Daten lesen. Das Rollback-Image ist
+daher nur **zusammen mit** den Backups von Sessions-Root
+und Datenbank vor der Beförderung ein echtes Rollback. Beim Rollback niemals an Ort und Stelle rückkonvertieren – aus dem
+Backup wiederherstellen.
 
-1. Verify the candidate digest and CI result for the same commit.
-2. Verify a successful backup before any schema migration.
-3. Start the dependencies and wait for healthy state:
+1. Den Kandidaten-Digest und das CI-Ergebnis für denselben Commit verifizieren.
+2. Vor jeder Schemamigration ein erfolgreiches Backup verifizieren.
+3. Die Abhängigkeiten starten und auf den gesunden Zustand warten:
 
 ```sh
 docker compose up -d postgres redis
 docker compose ps
 ```
 
-4. Run the release migration step before starting the new app. Migrations must
-   be backward-compatible with the currently running app. If the migration
-   fails, stop the release, keep the old app running, and do not retry blindly.
+4. Den Migrationsschritt des Releases ausführen, bevor die neue App startet. Migrationen müssen
+   zur aktuell laufenden App abwärtskompatibel sein. Schlägt die Migration
+   fehl, ist das Release zu stoppen, die alte App weiterlaufen zu lassen und nicht blind zu wiederholen.
 
-5. Start the app:
+5. Die App starten:
 
 ```sh
 docker compose up -d --no-build app
 docker compose ps app
 ```
 
-6. Smoke test readiness and the Web entry point:
+6. Readiness und den Web-Einstieg per Smoke-Test prüfen:
 
 ```sh
 curl --fail --show-error http://127.0.0.1:3080/healthz
 curl --fail --show-error http://127.0.0.1:3080/readyz
-# The document is gated: a loopback GET/HEAD / without a cookie answers 401.
-# Check the document through the declared public origin instead.
+# Das Dokument ist abgesichert: Ein Loopback-GET/HEAD / ohne Cookie antwortet mit 401.
+# Das Dokument stattdessen über den deklarierten öffentlichen Origin prüfen.
 curl --fail --show-error --head "https://${PHYSICOS_TRUSTED_HOSTS:-physics.dongsiwei.com}/"
 docker compose logs --since=10m app
 ```
 
-`docker compose logs app` must show the `dsh web: …` launch line. If the
-public-origin document returns 401 (or the pre-0.1.7 "404"), the Host is not
-in `PHYSICOS_TRUSTED_HOSTS` / `--trusted-host` — see section 4.
+`docker compose logs app` muss die Startzeile `dsh web: …` zeigen. Liefert das
+Dokument am öffentlichen Origin 401 (oder das „404“ vor 0.1.7), steht der Host nicht
+in `PHYSICOS_TRUSTED_HOSTS` / `--trusted-host` – siehe Abschnitt 4.
 
-7. Verify one authenticated read and one bounded write through the external
-   reverse proxy. Confirm the resulting account/tenant scope and audit event.
+7. Über den externen Reverse Proxy einen authentifizierten Lesezugriff und einen begrenzten Schreibzugriff verifizieren.
+   Den resultierenden Konto-/Mandantenbereich und das Audit-Ereignis bestätigen.
 
 ## 7. Backup
 
-Back up PostgreSQL, Redis, and the `app_data` volume together. A database dump
-without the session/replay volume is not a complete PhysicsOS backup.
+PostgreSQL, Redis und das Volume `app_data` sind gemeinsam zu sichern. Ein Datenbank-Dump
+ohne das Session-/Replay-Volume ist kein vollständiges PhysicsOS-Backup.
 
-### 7.1 Scheduled PostgreSQL backup
+### 7.1 Geplantes PostgreSQL-Backup
 
-On a hardened host, install the maintenance jobs with:
+Auf einem gehärteten Host werden die Wartungsjobs installiert mit:
 
 ```sh
 sudo PHYSICSOS_DIR=/opt/physicsos \
   /opt/physicsos/scripts/deploy/install-operations.sh
 ```
 
-This installs `/etc/cron.d/physicsos-postgres-backup`; it runs daily at
-`02:15` host time (the current production host uses UTC):
+Das installiert `/etc/cron.d/physicsos-postgres-backup`; es läuft täglich um
+`02:15` Hostzeit (der aktuelle Produktionshost verwendet UTC):
 
 ```text
 15 2 * * * root PHYSICSOS_DIR=/opt/physicsos \
@@ -464,15 +462,15 @@ This installs `/etc/cron.d/physicsos-postgres-backup`; it runs daily at
   >>/var/log/physicsos-postgres-backup.log 2>&1
 ```
 
-Run one backup immediately and print its verified artifact path:
+Ein Backup sofort ausführen und den Pfad des verifizierten Artefakts ausgeben:
 
 ```sh
 sudo PHYSICSOS_DIR=/opt/physicsos \
   /opt/physicsos/scripts/deploy/backup-postgres.sh
 ```
 
-The default output root is `/opt/physicsos/backups/postgres`, with one private
-timestamp directory per run:
+Das Standard-Ausgabe-Root ist `/opt/physicsos/backups/postgres`, mit einem privaten
+Zeitstempelverzeichnis pro Lauf:
 
 ```text
 /opt/physicsos/backups/postgres/YYYYMMDDTHHMMSSZ/
@@ -482,8 +480,8 @@ timestamp directory per run:
 └── postgres.list
 ```
 
-`postgres.list` is the successful `pg_restore --list` output. Re-verify a
-specific archive without touching the database, then check its checksum:
+`postgres.list` ist die erfolgreiche Ausgabe von `pg_restore --list`. Ein bestimmtes
+Archiv lässt sich erneut verifizieren, ohne die Datenbank anzufassen, danach wird die Prüfsumme kontrolliert:
 
 ```sh
 backup=/opt/physicsos/backups/postgres/RECOVERY_POINT
@@ -494,18 +492,18 @@ docker run --rm --network none \
 (cd "$backup" && sha256sum -c postgres.dump.sha256)
 ```
 
-The production verification on 2026-09-26 created
-`/opt/physicsos/backups/postgres/20260926T112730Z`: the 161,176-byte archive
-contained 119 `pg_restore --list` entries and passed its SHA-256 check.
+Die Produktionsverifikation vom 2026-09-26 erzeugte
+`/opt/physicsos/backups/postgres/20260926T112730Z`: Das 161.176 Byte große Archiv
+enthielt 119 Einträge von `pg_restore --list` und bestand die SHA-256-Prüfung.
 
-Retention defaults to 14 days and can be changed with
-`PHYSICSOS_BACKUP_RETENTION_DAYS`. Scheduled dumps cover PostgreSQL only;
-Redis and `app_data` still require the coordinated full backup below and must
-be copied to encrypted off-host storage.
+Die Aufbewahrung beträgt standardmäßig 14 Tage und lässt sich mit
+`PHYSICSOS_BACKUP_RETENTION_DAYS` ändern. Geplante Dumps decken nur PostgreSQL ab;
+Redis und `app_data` erfordern weiterhin das untenstehende koordinierte Vollbackup und müssen
+auf verschlüsselten Speicher außerhalb des Hosts kopiert werden.
 
-### 7.2 Coordinated full backup
+### 7.2 Koordiniertes Vollbackup
 
-Set a UTC timestamp and create a private backup directory:
+Einen UTC-Zeitstempel setzen und ein privates Backup-Verzeichnis anlegen:
 
 ```sh
 stamp="$(date -u +%Y%m%dT%H%M%SZ)"
@@ -513,7 +511,7 @@ backup_dir="backups/$stamp"
 install -d -m 0700 "$backup_dir"
 ```
 
-PostgreSQL custom-format dump:
+PostgreSQL-Dump im Custom-Format:
 
 ```sh
 docker compose exec -T postgres sh -c \
@@ -522,7 +520,7 @@ docker compose exec -T postgres sh -c \
   > "$backup_dir/postgres.dump"
 ```
 
-Redis append-only snapshot:
+Redis-Append-Only-Snapshot:
 
 ```sh
 docker compose exec -T redis sh -c \
@@ -537,7 +535,7 @@ docker run --rm \
 docker compose start redis
 ```
 
-Application/session volume:
+Anwendungs-/Session-Volume:
 
 ```sh
 docker compose stop app
@@ -548,7 +546,7 @@ docker run --rm \
 docker compose start app
 ```
 
-Write a manifest with the release identity and checksums:
+Ein Manifest mit Release-Identität und Prüfsummen schreiben:
 
 ```sh
 {
@@ -558,22 +556,22 @@ Write a manifest with the release identity and checksums:
 } > "$backup_dir/manifest.txt"
 ```
 
-Copy the directory to encrypted off-host storage. Test restoration monthly and
-before every risky migration. Define and record RPO/RTO per environment; do not
-claim a recovery target that has not been measured in a restore drill.
+Das Verzeichnis auf verschlüsselten Speicher außerhalb des Hosts kopieren. Die Wiederherstellung monatlich und
+vor jeder riskanten Migration testen. RPO/RTO pro Umgebung definieren und festhalten; kein Wiederherstellungsziel
+behaupten, das nicht in einer Wiederherstellungsübung gemessen wurde.
 
-## 8. Restore
+## 8. Wiederherstellung
 
-Restore is destructive. Announce a maintenance window, stop writes, and
-explicitly approve the recovery point before proceeding.
+Die Wiederherstellung ist destruktiv. Ein Wartungsfenster ankündigen, Schreibvorgänge stoppen und
+den Wiederherstellungspunkt ausdrücklich freigeben, bevor fortgefahren wird.
 
-1. Preserve the failed volumes for investigation:
+1. Die fehlgeschlagenen Volumes zur Untersuchung erhalten:
 
 ```sh
 docker compose stop app redis postgres
 ```
 
-2. Restore the application volume:
+2. Das Anwendungs-Volume wiederherstellen:
 
 ```sh
 docker run --rm \
@@ -582,8 +580,8 @@ docker run --rm \
   alpine:3.21 sh -c 'rm -rf /target/* && tar -C /target -xzf /backup/app-data.tgz'
 ```
 
-3. Recreate PostgreSQL and restore the dump. `RECOVERY_POINT` is the timestamp
-   directory under `/opt/physicsos/backups/postgres`:
+3. PostgreSQL neu anlegen und den Dump wiederherstellen. `RECOVERY_POINT` ist das Zeitstempel-
+   Verzeichnis unter `/opt/physicsos/backups/postgres`:
 
 ```sh
 docker compose up -d postgres
@@ -600,7 +598,7 @@ docker compose exec -T postgres sh -c \
   < /opt/physicsos/backups/postgres/RECOVERY_POINT/postgres.dump
 ```
 
-4. Recreate Redis and restore its snapshot:
+4. Redis neu anlegen und seinen Snapshot wiederherstellen:
 
 ```sh
 docker compose stop redis
@@ -611,7 +609,7 @@ docker run --rm \
 docker compose start redis
 ```
 
-5. Start the app and validate:
+5. Die App starten und validieren:
 
 ```sh
 docker compose up -d app
@@ -619,29 +617,29 @@ docker compose ps
 curl --fail --show-error http://127.0.0.1:3080/readyz
 ```
 
-Validate account/session counts against the backup manifest, open a restored
-session, replay one saved PhysicsOS scene, and confirm new writes persist after
-a `docker compose restart app`.
+Konto-/Session-Anzahlen gegen das Backup-Manifest validieren, eine wiederhergestellte
+Session öffnen, eine gespeicherte PhysicsOS-Scene abspielen und bestätigen, dass neue Schreibvorgänge nach
+einem `docker compose restart app` bestehen bleiben.
 
-If any validation fails, stop the app, preserve logs and restored volumes, and
-choose a later recovery point or repeat the restore. Do not reopen traffic on a
-partially restored database.
+Schlägt eine Validierung fehl, ist die App zu stoppen, sind Logs und wiederhergestellte Volumes zu erhalten,
+und es ist ein späterer Wiederherstellungspunkt zu wählen oder die Wiederherstellung zu wiederholen. Der Verkehr darf nicht auf einer
+teilweise wiederhergestellten Datenbank wieder geöffnet werden.
 
 ## 9. Rollback
 
-Rollback is application-first. Database down-migrations are prohibited unless
-they are proven lossless and have their own tested procedure.
+Das Rollback erfolgt zuerst auf Anwendungsebene. Datenbank-Down-Migrationen sind verboten, es sei denn,
+sie sind nachweislich verlustfrei und haben ein eigenes getestetes Verfahren.
 
-For the 0.1.7 promotion specifically, the previous image alone is **not** a
-rollback: 0.1.7 migrated session logs forward in place (`v0 → … → v4`), so the
-rollback image would read migrated data. Restore the sessions root and the
-database from the backups taken under the section 6 precondition before
-serving traffic, and never down-convert in place. A rollback of the image alone
-is also insufficient for the command: the new compose `app` command passes
-`--no-open`, which the previous image rejects with `unknown option '--no-open'`,
-so any rollback must revert the compose command together with the image digest.
+Speziell für die Beförderung auf 0.1.7 ist das vorherige Image allein **kein**
+Rollback: 0.1.7 hat Session-Logs an Ort und Stelle vorwärts migriert (`v0 → … → v4`), das
+Rollback-Image würde also migrierte Daten lesen. Sessions-Root und
+Datenbank sind aus den Backups wiederherzustellen, die gemäß der Voraussetzung aus Abschnitt 6 erstellt wurden, bevor
+Verkehr ausgeliefert wird; niemals an Ort und Stelle rückkonvertieren. Ein Rollback nur des Images
+genügt auch für den Befehl nicht: Der neue Compose-Befehl `app` übergibt
+`--no-open`, was das vorherige Image mit `unknown option '--no-open'` ablehnt,
+sodass bei jedem Rollback der Compose-Befehl gemeinsam mit dem Image-Digest zurückzusetzen ist.
 
-To deploy the previous image digest:
+So wird der vorherige Image-Digest deployt:
 
 ```sh
 export PHYSICSOS_APP_IMAGE='registry.example/physicsos-app@sha256:PREVIOUS_DIGEST'
@@ -651,25 +649,25 @@ docker compose ps app
 curl --fail --show-error http://127.0.0.1:3080/readyz
 ```
 
-Use expand/migrate/contract for schema changes so the previous app remains
-compatible during rollback. If the new release wrote non-backward-compatible
-data, stop writes and choose explicitly between forward repair and destructive
-restore.
+Für Schemaänderungen ist Expand/Migrate/Contract zu verwenden, damit die vorherige App
+beim Rollback kompatibel bleibt. Hat das neue Release nicht abwärtskompatible
+Daten geschrieben, sind Schreibvorgänge zu stoppen und ausdrücklich zwischen Vorwärtskorrektur und destruktiver
+Wiederherstellung zu entscheiden.
 
-After rollback:
+Nach dem Rollback:
 
-1. Verify `/healthz`, `/readyz`, login, one replay, and one bounded write.
-2. Keep the failed image digest and logs for diagnosis.
-3. Record the rollback reason, timestamp, impact window, and data decision.
-4. Do not redeploy the failed digest until a regression test reproduces the
-   failure and the fix passes root CI.
+1. `/healthz`, `/readyz`, Login, eine Wiedergabe und einen begrenzten Schreibzugriff verifizieren.
+2. Den fehlgeschlagenen Image-Digest und die Logs zur Diagnose aufbewahren.
+3. Rollback-Grund, Zeitstempel, Auswirkungszeitraum und die Datenentscheidung festhalten.
+4. Den fehlgeschlagenen Digest erst erneut deployen, wenn ein Regressionstest den
+   Fehler reproduziert und die Korrektur die Root-CI besteht.
 
-## 10. Server hardening
+## 10. Server-Härtung
 
-### 10.1 Verified production baseline
+### 10.1 Verifizierte Produktions-Baseline
 
-On 2026-09-26 the production host was checked with the effective OpenSSH
-configuration, not only the visible drop-in files:
+Am 2026-09-26 wurde der Produktionshost anhand der effektiven OpenSSH-
+Konfiguration geprüft, nicht nur anhand der sichtbaren Drop-in-Dateien:
 
 ```text
 PasswordAuthentication no
@@ -678,8 +676,8 @@ PubkeyAuthentication yes
 PermitRootLogin without-password
 ```
 
-`fail2ban` is installed and enabled with the `sshd` jail using the systemd
-backend (`maxretry=5`, `findtime=10m`, `bantime=1h`). Verify it with:
+`fail2ban` ist installiert und aktiviert, mit dem `sshd`-Jail über das systemd-
+Backend (`maxretry=5`, `findtime=10m`, `bantime=1h`). Verifizierbar mit:
 
 ```sh
 systemctl is-enabled fail2ban
@@ -688,10 +686,10 @@ fail2ban-client status sshd
 sshd -T | grep -E '^(passwordauthentication|kbdinteractiveauthentication|pubkeyauthentication) '
 ```
 
-Every PhysicsOS container is configured with restart policy
-`unless-stopped` and `json-file` logging limited to `max-size=20m` and
-`max-file=5`. Verify the effective container settings rather than trusting the
-Compose source alone:
+Jeder PhysicsOS-Container ist mit der Restart-Policy
+`unless-stopped` und `json-file`-Logging mit `max-size=20m` und
+`max-file=5` konfiguriert. Die effektiven Container-Einstellungen sind zu verifizieren, statt
+allein der Compose-Quelle zu vertrauen:
 
 ```sh
 cd /opt/physicsos
@@ -699,57 +697,57 @@ docker compose ps -q | xargs docker inspect --format \
   '{{.Name}} Restart={{.HostConfig.RestartPolicy.Name}} LogDriver={{.HostConfig.LogConfig.Type}} MaxSize={{index .HostConfig.LogConfig.Config "max-size"}} MaxFile={{index .HostConfig.LogConfig.Config "max-file"}}'
 ```
 
-The host SSH configuration is already compliant, so do not rewrite
-`sshd_config` during routine deployment. If a future host is missing these
-settings, add a validated drop-in, run `sshd -t`, reload SSH, and keep the
-existing key-based session open until a second key login succeeds.
+Die SSH-Konfiguration des Hosts ist bereits konform, daher darf
+`sshd_config` im Routine-Deployment nicht umgeschrieben werden. Fehlen diese
+Einstellungen auf einem künftigen Host, ist ein validiertes Drop-in hinzuzufügen, `sshd -t` auszuführen, SSH neu zu laden und die
+bestehende schlüsselbasierte Sitzung offen zu halten, bis ein zweiter Key-Login erfolgreich war.
 
-### 10.1.1 Browser security headers
+### 10.1.1 Browser-Sicherheits-Header
 
-The public nginx site is hardened by
-`scripts/deploy/install-nginx-security-headers.sh`. The script is idempotent,
-backs up the site to `/var/backups/physicsos-operations/`, validates with
-`nginx -t`, and reloads only after validation succeeds. It adds:
+Die öffentliche nginx-Site wird gehärtet durch
+`scripts/deploy/install-nginx-security-headers.sh`. Das Skript ist idempotent,
+sichert die Site unter `/var/backups/physicsos-operations/`, validiert mit
+`nginx -t` und lädt erst nach erfolgreicher Validierung neu. Es fügt hinzu:
 
-- HSTS (`Strict-Transport-Security`) with a one-year max age and subdomains
+- HSTS (`Strict-Transport-Security`) mit einem Jahr max age und Subdomains
 - `X-Content-Type-Options: nosniff`
 - `X-Frame-Options: DENY`
 - `Referrer-Policy: strict-origin-when-cross-origin`
-- a restrictive `Permissions-Policy`
+- eine restriktive `Permissions-Policy`
 
-Use `PHYSICSOS_HSTS_MODE=report` only for a controlled pre-HSTS check; the
-public-beta default is `enforce`. A Content-Security-Policy is intentionally
-not emitted until the app's inline styles, workers, WebSockets, and generated
-assets have a tested allowlist.
+`PHYSICSOS_HSTS_MODE=report` nur für eine kontrollierte Prüfung vor HSTS verwenden; der
+Standard der öffentlichen Beta ist `enforce`. Eine Content-Security-Policy wird bewusst
+nicht ausgegeben, bis es für Inline-Styles, Worker, WebSockets und generierte
+Assets der App eine getestete Allowlist gibt.
 
-Verify the live response from outside the host:
+Die Live-Antwort von außerhalb des Hosts verifizieren:
 
 ```sh
 curl -sS -o /dev/null -D - https://physics.dongsiwei.com/readyz |
   grep -Ei 'strict-transport-security|x-content-type-options|x-frame-options|referrer-policy|permissions-policy'
 ```
 
-### 10.2 Production self-check evidence
+### 10.2 Nachweis der Produktions-Selbstprüfung
 
-The 2026-09-26 check returned:
+Die Prüfung vom 2026-09-26 ergab:
 
 ```text
 GET /healthz -> 200 {"status":"ok"}
 GET /readyz  -> 200 {"status":"ready","checks":{"postgres":{"status":"ok"},"redis":{"status":"ok"}}}
 ```
 
-The app container had `PHYSICSOS_STORAGE_BACKEND=postgres`,
-`PHYSICSOS_SHARED_STATE_BACKEND=redis`, and both the `*_FILE` source paths and
-their materialized plain environment names in the running app process.
-PostgreSQL contained 34 tables in schema `physicsos`, including
-`dsh_storage_units` and `dsh_storage_globals`, with nine live connections
-identified as `physicsos-storage-postgres`. Redis reported
-`total_connections_received=280` and `total_commands_processed=428` at the
-time of final inspection. No JSON or memory fallback was configured or
-observed. These are non-secret operational identifiers only; no production
-records or secret values were read out.
+Der App-Container hatte `PHYSICSOS_STORAGE_BACKEND=postgres`,
+`PHYSICSOS_SHARED_STATE_BACKEND=redis` sowie sowohl die Quellpfade `*_FILE` als auch
+deren materialisierte einfache Umgebungsnamen im laufenden App-Prozess.
+PostgreSQL enthielt 34 Tabellen im Schema `physicsos`, darunter
+`dsh_storage_units` und `dsh_storage_globals`, mit neun aktiven Verbindungen,
+identifiziert als `physicsos-storage-postgres`. Redis meldete
+`total_connections_received=280` und `total_commands_processed=428` zum
+Zeitpunkt der abschließenden Inspektion. Es wurde kein JSON- oder Memory-Fallback konfiguriert oder
+beobachtet. Dies sind ausschließlich nicht geheime betriebliche Bezeichner; es wurden keine Produktions-
+datensätze oder Secret-Werte ausgelesen.
 
-Before traffic is enabled on a new release, repeat:
+Bevor bei einem neuen Release Verkehr freigegeben wird, ist Folgendes zu wiederholen:
 
 ```sh
 docker compose exec -T app node scripts/healthcheck.mjs http://127.0.0.1:3080/readyz
@@ -757,47 +755,47 @@ curl --fail --show-error http://127.0.0.1:3080/healthz
 curl --fail --show-error http://127.0.0.1:3080/readyz
 ```
 
-## 11. Operational checks
+## 11. Betriebliche Prüfungen
 
-Daily:
+Täglich:
 
-- all Compose services healthy
-- `/readyz` success and PostgreSQL/Redis disk headroom
-- 5xx, latency, process restarts, queue backlog, and model-provider errors
-- backup completion and off-host checksum
+- Alle Compose-Services gesund
+- `/readyz` erfolgreich und Festplattenreserve von PostgreSQL/Redis
+- 5xx, Latenz, Prozessneustarts, Queue-Rückstand und Fehler des Modellanbieters
+- Abschluss des Backups und Prüfsumme außerhalb des Hosts
 
-Weekly:
+Wöchentlich:
 
-- restore one backup into an isolated environment
-- verify session replay and one PhysicsOS scene
-- confirm secret-file permissions and rotation status
-- review image digests against the release record
+- Ein Backup in eine isolierte Umgebung wiederherstellen
+- Session-Replay und eine PhysicsOS-Scene verifizieren
+- Berechtigungen der Secret-Dateien und Rotationsstatus bestätigen
+- Image-Digests mit der Release-Aufzeichnung abgleichen
 
-Incident response:
+Incident Response:
 
-| symptom                                      | first action                                                                                  |
+| Symptom                                      | Erste Maßnahme                                                                                |
 | -------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| app unhealthy while dependencies are healthy | inspect app logs and `/readyz`; roll back if the prior digest passes                          |
-| PostgreSQL unavailable                       | stop app writes, inspect `docker compose logs postgres`, restore service or recovery point    |
-| Redis unavailable                            | expect fail-closed readiness; restore Redis before reopening traffic                          |
-| migration failed                             | keep the old app, do not start the new app, fix forward only with a reviewed migration        |
-| rollback needed                              | deploy the prior digest, verify health/login/replay, and preserve the failed release evidence |
+| App nicht gesund, obwohl Abhängigkeiten gesund | App-Logs und `/readyz` prüfen; Rollback, wenn der vorherige Digest besteht                    |
+| PostgreSQL nicht verfügbar                   | Schreibvorgänge der App stoppen, `docker compose logs postgres` prüfen, Dienst oder Wiederherstellungspunkt wiederherstellen |
+| Redis nicht verfügbar                        | Fail-closed-Readiness erwarten; Redis wiederherstellen, bevor der Verkehr wieder geöffnet wird |
+| Migration fehlgeschlagen                     | Alte App behalten, neue App nicht starten, nur mit einer geprüften Migration vorwärts korrigieren |
+| Rollback nötig                               | Vorherigen Digest deployen, Health/Login/Replay verifizieren und die Belege des fehlgeschlagenen Releases bewahren |
 
-Production is ready only when health, logs, metrics, alerts, backup, restore,
-rollback, resource limits, and ownership are all defined and tested.
+Die Produktion ist erst bereit, wenn Health, Logs, Metriken, Alarme, Backup, Wiederherstellung,
+Rollback, Ressourcenlimits und Zuständigkeiten alle definiert und getestet sind.
 
-## 12. 公测前检查清单
+## 12. Checkliste vor der öffentlichen Beta
 
-- [ ] `.env.admin_password` 已设置为随机强密码，且首启日志确认 `PHYSICSOS-OPEN:admin`
-      已种为 `SUPER_ADMIN`；公测期间不自助注册管理员。
-- [ ] TLS 反代已启用，且 `PHYSICOS_TRUSTED_PROXIES` 是该反代的精确 IP（含 IPv6
-      写法如有）；未配置时不要对外暴露。
-- [ ] nginx 已运行 `scripts/deploy/install-nginx-security-headers.sh`，公网响应
-      含 HSTS 与四项基础安全头，且 `nginx -t` 通过。
-- [ ] `.env.image_api_key` 已设置；若有意关闭题图生成，已在 `compose.yml` 移除
-      `image_api_key` secret 并记录该决定。
-- [ ] `docker compose up -d postgres redis` 后两者 healthy，`/readyz` 返回成功。
-- [ ] PostgreSQL 定时备份已启用且最近一次运行成功；完整恢复演练覆盖
-      PostgreSQL + Redis + `app_data` 三件套并校验 manifest。
-- [ ] 仍是单副本；若已多副本，`PHYSICSOS_SESSIONS_ROOT` 指向共享文件系统并验证过
-      跨副本会话可见。
+- [ ] `.env.admin_password` ist auf ein zufälliges starkes Passwort gesetzt, und das Log des ersten Starts bestätigt, dass `PHYSICSOS-OPEN:admin`
+      als `SUPER_ADMIN` angelegt wurde; während der öffentlichen Beta gibt es keine Selbstregistrierung von Administratoren.
+- [ ] Der TLS-Reverse-Proxy ist aktiviert, und `PHYSICOS_TRUSTED_PROXIES` ist die exakte IP dieses Proxys (ggf. inklusive IPv6-
+      Schreibweise); ist es nicht konfiguriert, nicht nach außen freigeben.
+- [ ] Auf nginx wurde `scripts/deploy/install-nginx-security-headers.sh` ausgeführt, die öffentliche Antwort
+      enthält HSTS und die vier grundlegenden Sicherheits-Header, und `nginx -t` besteht.
+- [ ] `.env.image_api_key` ist gesetzt; wurde die Aufgabenbild-Generierung bewusst abgeschaltet, wurde das Secret
+      `image_api_key` aus `compose.yml` entfernt und diese Entscheidung dokumentiert.
+- [ ] Nach `docker compose up -d postgres redis` sind beide healthy, und `/readyz` liefert Erfolg.
+- [ ] Das geplante PostgreSQL-Backup ist aktiviert und der letzte Lauf war erfolgreich; die vollständige Wiederherstellungsübung deckt
+      das Dreigespann PostgreSQL + Redis + `app_data` ab und prüft das Manifest.
+- [ ] Es ist weiterhin eine einzelne Replik; bei mehreren Repliken zeigt `PHYSICSOS_SESSIONS_ROOT` auf ein gemeinsames Dateisystem und die
+      replikaübergreifende Sichtbarkeit von Sessions wurde verifiziert.

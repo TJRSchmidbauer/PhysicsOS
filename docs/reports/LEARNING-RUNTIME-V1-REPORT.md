@@ -1,163 +1,164 @@
-# PhysicsOS Learning Runtime V1 — 智能教学层
+# PhysicsOS Learning Runtime V1 — Intelligente Lehrschicht
 
-> 文件：`docs/reports/LEARNING-RUNTIME-V1-REPORT.md`
-> 验收日期：2026-08-24
-> 前置：`COMPOSITE_FIELD_RUNTIME_V1_COMPLETE`（见 `MILESTONES.md`）
-> 里程碑：`PHYSICSOS_LEARNING_RUNTIME_V1_COMPLETE`
+> Datei: `docs/reports/LEARNING-RUNTIME-V1-REPORT.md`
+> Abnahmedatum: 2026-08-24
+> Vorgänger: `COMPOSITE_FIELD_RUNTIME_V1_COMPLETE` (siehe `MILESTONES.md`)
+> Meilenstein: `PHYSICSOS_LEARNING_RUNTIME_V1_COMPLETE`
 
-## 1. 目标与问题
+## 1. Ziel und Problem
 
-复合场 V1 之后，物理能力（Scene → Engine → Verifier → Observation → Canvas →
-Agent）已经完整，但产品仍然只是「可验证的物理模拟器」：学生看得到 PASS，
-看不到**为什么**；答错了没有人告诉他错在哪一类；学过什么、掌握到什么程度
-没有任何记录。本轮**不扩物理**（不加实验模板、不加引擎、不加公式），只做
-**学生使用闭环**：
+Nach den zusammengesetzten Feldern V1 ist die physikalische Fähigkeit (Scene → Engine → Verifier → Observation → Canvas →
+Agent) vollständig, aber das Produkt ist weiterhin nur ein „verifizierbarer Physiksimulator“: Der Schüler sieht PASS,
+aber nicht, **warum**; bei einer falschen Antwort sagt ihm niemand, welcher Art der Fehler ist; was er gelernt hat und
+bis zu welchem Grad er es beherrscht, wird nirgends festgehalten. Diese Runde **erweitert die Physik nicht** (keine Experimentvorlagen, keine Engine, keine Formeln), sondern baut nur den
+**Nutzungskreislauf für Schüler**:
 
-1. **Tutor Mode（引导式教学）**——不是聊天框，是观察 → 引导问题 → 提示阶梯 → 答案。
-2. **错误诊断 · 自测**——概念/方向/建模三类错误的分类诊断，引用 Verifier 证据。
-3. **学习记录**——错题、错误类型、知识点掌握度，全部由真实作答聚合。
-4. **知识图谱**——课程树 + 题目↔知识点的手工审计映射。
-5. **实验报告**——当前帧的参数/派生量/区域事件/验证/结论，一键导出 Markdown。
+1. **Tutor Mode (geführter Unterricht)** – kein Chatfenster, sondern Beobachtung → Leitfrage → Hinweisleiter → Antwort.
+2. **Fehlerdiagnose · Selbsttest** – Klassifikationsdiagnose in drei Fehlerklassen (Konzept/Richtung/Modellierung) mit Verweis auf Verifier-Evidenz.
+3. **Lernverlauf** – Fehleraufgaben, Fehlertypen und Beherrschungsgrad der Wissenspunkte, alles aus echten Antworten aggregiert.
+4. **Wissensgraph** – Kursbaum + manuell geprüfte Zuordnung Aufgabe↔Wissenspunkt.
+5. **Versuchsbericht** – Parameter/abgeleitete Größen/Bereichsereignisse/Verifikation/Schlussfolgerung des aktuellen Frames, per Klick als Markdown exportierbar.
 
-## 2. 架构铁律（延续，未破例）
+## 2. Eiserne Architekturregeln (fortgeführt, keine Ausnahme)
 
-- **下游永不重算上游已断言的事实**：Tutor 的每一个数字来自
-  `PhysicsAgentContext`（引擎派生量 + Verifier 结果）；报告的每一行来自
-  `WorkspaceSnapshot` 当前帧；学习记录只做计数，不做物理。
-- **教学内容是数据，不是启发式**：知识图谱与自测题库是手工审计的显式表，
-  测试断言 56 道内置题每道都被映射且只引用已声明的节点/题目——
-  题目永远不会静默漂移到错误的知识点上。
-- **纯视图与事实修改严格分离**：Tutor 揭示提示时的画布高亮走与 Q&A Agent
-  同一条 `physics.ui.highlight` 工具路径，revision 不变（浏览器 CASE A 断言）。
+- **Nachgelagerte Schichten berechnen niemals Fakten neu, die vorgelagerte bereits festgestellt haben**: Jede Zahl des Tutors stammt aus
+  `PhysicsAgentContext` (abgeleitete Größen der Engine + Ergebnis des Verifiers); jede Zeile des Berichts stammt aus
+  dem aktuellen Frame des `WorkspaceSnapshot`; der Lernverlauf zählt nur und rechnet keine Physik.
+- **Lehrinhalte sind Daten, keine Heuristik**: Wissensgraph und Selbsttest-Aufgabenbank sind manuell geprüfte explizite Tabellen,
+  die Tests stellen sicher, dass alle 56 eingebauten Aufgaben zugeordnet sind und nur deklarierte Knoten/Aufgaben referenzieren –
+  Aufgaben driften nie still auf falsche Wissenspunkte ab.
+- **Reine Ansicht und Faktenänderung sind streng getrennt**: Beim Aufdecken eines Hinweises im Tutor läuft die Canvas-Hervorhebung über denselben Pfad
+  des Tools `physics.ui.highlight` wie beim Q&A-Agent, die Revision bleibt unverändert (Browser-CASE-A-Assertion).
 
-## 3. Question Space：错误诊断 · 自测 + 知识总结
+## 3. Question Space: Fehlerdiagnose · Selbsttest + Wissenszusammenfassung
 
-### 3.1 自测题库（`packages/question-core/src/self-checks.ts`）
+### 3.1 Selbsttest-Aufgabenbank (`packages/question-core/src/self-checks.ts`)
 
-- `SelfCheckItem { id, prompt, options[], takeaway }`；每个错误选项携带
-  `mistake { type, explanation, evidenceCheckId?, review[] }`。
-- **19 个自测探针、55 个选项、36 个已分类错误选项**，覆盖全部 56 道
-  Golden Questions（磁场 10 / 电场 19 / 力学 6 / 复合场 21）。
-- 错误分类固定为三类：**概念错误**（如「磁场力做功 → 速度增加」）、
-  **方向错误**（左/右手定则、场方向判断）、**建模错误**（如忽略重力前不比较
-  数量级）。每个错误选项必须给出可读解释与至少一个「建议复习」指引，
-  测试逐项断言。
-- `learning-content.test.ts`：节点 id 唯一且父节点先声明；56 题全部有映射与
-  自测；映射表不允许引用不存在的题；每题恰好一个正确选项，错误选项全部
-  分类齐全。
+- `SelfCheckItem { id, prompt, options[], takeaway }`; jede falsche Option trägt
+  `mistake { type, explanation, evidenceCheckId?, review[] }`.
+- **19 Selbsttest-Sonden, 55 Optionen, 36 klassifizierte falsche Optionen**, die alle 56
+  Golden Questions abdecken (Magnetfeld 10 / Elektrisches Feld 19 / Mechanik 6 / Zusammengesetzte Felder 21).
+- Die Fehlerklassifikation ist auf drei Klassen festgelegt: **Konzeptfehler** (z. B. „Magnetkraft verrichtet Arbeit → Geschwindigkeit nimmt zu“),
+  **Richtungsfehler** (Linke-/Rechte-Hand-Regel, Beurteilung der Feldrichtung), **Modellierungsfehler** (z. B. Vernachlässigung der Schwerkraft ohne
+  Größenordnungsvergleich). Jede falsche Option muss eine lesbare Erklärung und mindestens einen Hinweis „Zur Wiederholung empfohlen“ liefern,
+  die Tests prüfen dies Punkt für Punkt.
+- `learning-content.test.ts`: Knoten-IDs eindeutig und Elternknoten zuerst deklariert; alle 56 Aufgaben haben Zuordnung und
+  Selbsttest; die Zuordnungstabelle darf keine nicht existierenden Aufgaben referenzieren; jede Aufgabe hat genau eine richtige Option, bei den falschen Optionen ist die
+  Klassifikation vollständig.
 
-### 3.2 Question Space 集成（`QuestionWorkspace.tsx`）
+### 3.2 Integration in den Question Space (`QuestionWorkspace.tsx`)
 
-- 解题结果下方新增「**错误诊断 · 自测**」区（`data-physicsos-selfcheck`）：
-  点错 → 诊断卡（错误类型徽标 + 解释 + `Verifier：check_id PASS/FAIL` 活证据 +
-  建议复习 chips）；点对 → takeaway 强化卡。选项作答后锁定并揭示正确项。
-- 诊断卡引用的 Verifier 证据来自**当前解出的 Simulation checks**
-  （`resolveEvidence`），不是静态文案——例如「磁场力不做功」引用
-  `magnetic_force_does_no_work` 的实时状态。
-- 新增「**知识总结**」区（`data-physicsos-knowledge`）：当前题的知识点 chips，
-  来自知识图谱映射（例如质子题 → 洛伦兹力、磁场中的圆周运动）。
-- 每次作答通过 `recordAttempt` 写入学习记录（题目、自测项、选项、对错、
-  错误类型、知识点），Question Space 自身不存储任何状态。
+- Unterhalb des Lösungsergebnisses neu: der Bereich „**Fehlerdiagnose · Selbsttest**“ (`data-physicsos-selfcheck`):
+  Falsche Antwort → Diagnosekarte (Badge der Fehlerklasse + Erklärung + `Verifier: check_id PASS/FAIL` als Live-Evidenz +
+  empfohlene Wiederholungs-Chips); richtige Antwort → Karte zur Festigung des takeaway. Nach der Antwort sind die Optionen gesperrt und die richtige wird aufgedeckt.
+- Die in der Diagnosekarte zitierte Verifier-Evidenz stammt aus den **aktuell gelösten Simulation-Checks**
+  (`resolveEvidence`), nicht aus statischem Text – zum Beispiel verweist „Magnetkraft verrichtet keine Arbeit“ auf den Live-Status von
+  `magnetic_force_does_no_work`.
+- Neu ist der Bereich „**Wissenszusammenfassung**“ (`data-physicsos-knowledge`): Wissenspunkt-Chips der aktuellen Aufgabe,
+  stammen aus der Zuordnung des Wissensgraphen (z. B. Protonenaufgabe → Lorentzkraft, Kreisbewegung im Magnetfeld).
+- Jede Antwort wird über `recordAttempt` in den Lernverlauf geschrieben (Aufgabe, Selbsttest-Element, Option, richtig/falsch,
+  Fehlerklasse, Wissenspunkte); der Question Space selbst speichert keinen Zustand.
 
-## 4. 知识图谱（`packages/question-core/src/knowledge-graph.ts`）
+## 4. Wissensgraph (`packages/question-core/src/knowledge-graph.ts`)
 
-- **20 个节点**：力学（匀变速、抛体、牛顿第二定律、受力分析、斜面、
-  单位与数量级）+ 电磁学（场强、叠加、电场力、类平抛偏转、有界场、做功与
-  动能、洛伦兹力、圆周运动、E+B、速度选择器、质谱仪、三场平衡）。
-- `QUESTION_KNOWLEDGE`：56 道题的手工映射表；`knowledgeNodesOfQuestion`
-  按表序返回节点。一切是数据，无关键词启发式。
+- **20 Knoten**: Mechanik (gleichmäßig beschleunigte Bewegung, Wurf, zweites Newtonsches Gesetz, Kräfteanalyse,
+  schiefe Ebene, Einheiten und Größenordnungen) + Elektromagnetismus (Feldstärke, Überlagerung, elektrische Kraft, Ablenkung wie beim waagerechten Wurf,
+  begrenzte Felder, Arbeit und kinetische Energie, Lorentzkraft, Kreisbewegung, E+B, Geschwindigkeitsselektor, Massenspektrometer,
+  Dreifeld-Gleichgewicht).
+- `QUESTION_KNOWLEDGE`: die manuelle Zuordnungstabelle für 56 Aufgaben; `knowledgeNodesOfQuestion`
+  liefert die Knoten in Tabellenreihenfolge. Alles sind Daten, keine Schlüsselwort-Heuristik.
 
-## 5. Tutor Mode（AI 助教 → 引导）
+## 5. Tutor Mode (KI-Assistent → Anleitung)
 
-### 5.1 课程脚本（`physics/physics-tutor.ts`）
+### 5.1 Kursskripte (`physics/physics-tutor.ts`)
 
-- `TutorScript { topic, observation[], question, hints[], answer, evidence[] }`；
-  **10 种课程**：速度选择器（平衡/偏转两个变体）、质谱仪圆弧、三场合力、
-  E+B 合力、磁场圆周、平抛分解、斜面受力分解、电场与电场力、力与运动通式。
-- 课程选择按**事实**分派：复合场按 runtime 已发布的事实区分装置
-  （质谱仪的偏转区 id、重力派生量非零、`velocity_selection_condition` 的存在），
-  力学按场景标题；`context.status === 'failed'` 时不给课程。
-- 观察区引用当前帧派生量（`|F_E| = 3.20e-15 N` 一类真实数字）；答案区把
-  Verifier 具名校验作为证据 chips（`速度选择条件 · PASS/FAIL`）。缺失的事实
-  就少说，任何 rung 都不计算物理。
+- `TutorScript { topic, observation[], question, hints[], answer, evidence[] }`; **10 Kursarten**:
+  Geschwindigkeitsselektor (zwei Varianten: Gleichgewicht/Ablenkung), Massenspektrometer-Kreisbogen, Dreifeld-Resultierende,
+  E+B-Resultierende, Kreisbewegung im Magnetfeld, Zerlegung beim waagerechten Wurf, Kräftezerlegung an der schiefen Ebene, elektrisches Feld und elektrische Kraft,
+  allgemeines Schema Kraft und Bewegung.
+- Die Kurswahl erfolgt nach **Fakten**: Bei zusammengesetzten Feldern wird das Gerät anhand der von der Runtime veröffentlichten Fakten unterschieden
+  (ID der Ablenkzone des Massenspektrometers, abgeleitete Größe der Schwerkraft ungleich null, Vorhandensein von `velocity_selection_condition`),
+  bei der Mechanik nach dem Szenentitel; bei `context.status === 'failed'` wird kein Kurs angeboten.
+- Der Beobachtungsbereich zitiert die abgeleiteten Größen des aktuellen Frames (echte Zahlen wie `|F_E| = 3.20e-15 N`);
+  der Antwortbereich zeigt die benannten Prüfungen des Verifiers als Evidenz-Chips (`Geschwindigkeitsselektionsbedingung · PASS/FAIL`). Fehlende Fakten
+  werden einfach weggelassen, keine Sprosse berechnet Physik.
 
-### 5.2 卡片（`TutorCard.tsx` + `AgentDrawer.tsx` 引导 tab）
+### 5.2 Karte (`TutorCard.tsx` + Tab „Anleitung“ in `AgentDrawer.tsx`)
 
-- AI 助教抽屉新增 `问答 / 引导` 两个 tab（role=tablist）。
-- 阶梯逐级揭示：提示 n 按钮显示进度（`提示 1/3`）；揭示某一级时通过共享
-  `runTools` 触发它声明的画布高亮（合并、超时熄灭规则与 Q&A 一致）。
-- 课程 id 变化（换装置，或学生把 v 改离 E/B 使平衡翻面）自动重置阶梯——
-  半揭示的旧课程提示是谎言。
-- 答案揭示后提供「重新开始」。
+- Der Drawer des KI-Assistenten erhält zwei Tabs `Fragen / Anleitung` (role=tablist).
+- Die Leiter wird Stufe für Stufe aufgedeckt: Der Button für Hinweis n zeigt den Fortschritt (`Hinweis 1/3`); beim Aufdecken einer Stufe wird über das gemeinsame
+  `runTools` die von ihr deklarierte Canvas-Hervorhebung ausgelöst (Regeln zum Zusammenführen und Erlöschen per Timeout wie bei Q&A).
+- Ändert sich die Kurs-ID (Gerät gewechselt oder der Schüler ändert v weg von E/B, sodass das Gleichgewicht kippt), wird die Leiter automatisch zurückgesetzt –
+  die Hinweise eines halb aufgedeckten alten Kurses sind eine Lüge.
+- Nach dem Aufdecken der Antwort steht „Neu starten“ zur Verfügung.
 
-## 6. 学习记录（`learning-record-store.ts` + `LearningRecordWorkspace.tsx`）
+## 6. Lernverlauf (`learning-record-store.ts` + `LearningRecordWorkspace.tsx`)
 
-- `createLearningRecordController(storage)`：localStorage 持久化（cap 200，
-  最新在前），损坏数据静默丢弃；`knowledgeMasteryOf` / `mistakeCountsOf` /
-  `recentMistakesOf` 三个纯聚合函数，**只计数**。
-- 学习记录是正式 surface（`data-physicsos-surface="record"`），Sidebar footer
-  「学习记录」入口从灰置占位变为真实导航。
-- 页面：自测次数 / 正确率 / 错题数指标卡；概念/方向/建模错误分布；最近错题
-  列表（题目、你的回答、错误类型徽标、相对时间）；知识点掌握（按课程节点
-  的 correct/total 进度条，标注所属学科）。
-- 每条错题带「**重新练习**」：深链回试题空间并打开同一道 Golden Question
-  （`openQuestion` → `consumeQuestion`，浏览器 CASE D 断言 heading）。
+- `createLearningRecordController(storage)`: Persistenz in localStorage (Obergrenze 200, neueste zuerst), beschädigte Daten werden still verworfen;
+  drei reine Aggregationsfunktionen `knowledgeMasteryOf` / `mistakeCountsOf` /
+  `recentMistakesOf`, die **nur zählen**.
+- Der Lernverlauf ist ein offizielles Surface (`data-physicsos-surface="record"`), der Einstieg „Lernverlauf“ im Sidebar-Footer wird
+  vom ausgegrauten Platzhalter zur echten Navigation.
+- Seite: Kennzahlenkarten für Anzahl Selbsttests / Trefferquote / Anzahl Fehleraufgaben; Verteilung der Konzept-/Richtungs-/Modellierungsfehler; Liste der letzten
+  Fehleraufgaben (Aufgabe, deine Antwort, Badge der Fehlerklasse, relative Zeit); Beherrschung der Wissenspunkte (Fortschrittsbalken
+  correct/total je Kursknoten, mit zugehörigem Fach).
+- Jede Fehleraufgabe trägt „**Erneut üben**“: ein Deep Link zurück in den Aufgabenraum, der dieselbe Golden Question öffnet
+  (`openQuestion` → `consumeQuestion`, Browser-CASE-D-Assertion zur Überschrift).
 
-## 7. 实验报告（`physics/experiment-report.ts` + `ExperimentReportPanel.tsx`）
+## 7. Versuchsbericht (`physics/experiment-report.ts` + `ExperimentReportPanel.tsx`)
 
-- `buildExperimentReport(snapshot)`：把当前帧投影为
-  `{ title, goal, parameters, derived, events, verification, conclusion, markdown }`。
-  参数来自 Inspector 树的可编辑字段；派生量与区域事件来自引擎；验证来自
-  Verifier；结论按验证通过率生成（全过 →「验证通过」+ 失败列表为空；
-  有失败 → 点名失败项）。时间一律走自适应 `formatClock`（纳秒级用指数格式）。
-- 工具栏新增「报告」按钮（verification failed 时禁用）→ 对话框展示 +
-  「下载 Markdown」导出 `实验名-实验报告.md`。
-- 报告显示的是**当前帧**的事实：粒子已离开选择器区时电场力/洛伦兹力为
-  0.00 N 是物理事实，不是缺陷（截图 QA 确认过）。
+- `buildExperimentReport(snapshot)`: projiziert den aktuellen Frame auf
+  `{ title, goal, parameters, derived, events, verification, conclusion, markdown }`. Die Parameter stammen aus den editierbaren Feldern des Inspector-Baums; abgeleitete Größen und Bereichsereignisse stammen aus der Engine; die Verifikation vom
+  Verifier; die Schlussfolgerung wird nach der Bestehensquote der Verifikation erzeugt (alles bestanden → „Verifikation bestanden“ + leere Liste der Fehlschläge;
+  bei Fehlschlägen werden die fehlgeschlagenen Punkte genannt). Zeiten laufen stets über die adaptive `formatClock` (im Nanosekundenbereich Exponentialformat).
+- In der Toolbar neu: Schaltfläche „Bericht“ (bei verification failed deaktiviert) → Dialog zur Anzeige +
+  „Markdown herunterladen“ exportiert `Experimentname-Versuchsbericht.md`.
+- Der Bericht zeigt die Fakten des **aktuellen Frames**: Hat das Teilchen den Selektorbereich bereits verlassen, sind elektrische Kraft/Lorentzkraft
+  0,00 N – das ist eine physikalische Tatsache, kein Mangel (per Screenshot-QA bestätigt).
 
-## 8. 浏览器验收（`apps/web/e2e/learning-acceptance.mjs`）
+## 8. Browser-Abnahme (`apps/web/e2e/learning-acceptance.mjs`)
 
-CASE A–F 全 PASS，门禁 5 项全 0：
+CASE A–F alle PASS, alle 5 Gates bei 0:
 
-- **A Tutor Mode**：观察引用真实数字；提示 1 揭示后画布出现高亮组；
-  提示 2 教左手定则；答案含「合力为零 / v = E/B」并引用
-  「速度选择条件 · PASS」；整个阶梯 revision 不变；重新开始复位。
-- **B Tutor 读活的 Runtime**：v₀ → 1.5e5 后课程翻为 `selector-deflecting`
-  （「为什么这个粒子发生了偏转？」），答案引用 FAIL；恢复 v = E/B 翻回平衡课。
-- **C 自测诊断**：质子题 READY；知识总结 chips 来自图谱；点错「做正功」→
-  概念错误徽标 + 「洛伦兹力方向始终垂直于速度方向」解释 +
-  `magnetic_force_does_no_work` 证据 + 建议复习；选项锁定且揭示正确项。
-- **D 学习记录**：1 次自测 / 0% 正确率 / 1 错题聚合正确；错题带原题与
-  「你的回答」；知识点掌握出现洛伦兹力进度条；无页面滚动；
-  「重新练习」深链回同一道题。
-- **E 实验报告**：报告命名实验、实验参数（电场强度…）、引擎派生量（洛伦兹力…）、
-  物理验证（速度选择条件）、实验结论（验证通过）；提供 Markdown 下载；关闭返回。
-- **F 持久化**：整页刷新后错题与错误类型仍在（localStorage）。
+- **A Tutor Mode**: Die Beobachtung zitiert echte Zahlen; nach Hinweis 1 erscheint auf dem Canvas eine Hervorhebungsgruppe;
+  Hinweis 2 lehrt die Linke-Hand-Regel; die Antwort enthält „Resultierende null / v = E/B“ und zitiert
+  „Geschwindigkeitsselektionsbedingung · PASS“; über die gesamte Leiter bleibt die Revision unverändert; Neustart setzt zurück.
+- **B Tutor liest die lebende Runtime**: Nach v₀ → 1,5e5 kippt der Kurs zu `selector-deflecting`
+  („Warum wird dieses Teilchen abgelenkt?“), die Antwort zitiert FAIL; bei wiederhergestelltem v = E/B kippt er zurück zum Gleichgewichtskurs.
+- **C Selbsttest-Diagnose**: Protonenaufgabe READY; Wissenszusammenfassungs-Chips stammen aus dem Graphen; Klick auf die falsche Antwort „verrichtet positive Arbeit“ →
+  Badge Konzeptfehler + Erklärung „Die Richtung der Lorentzkraft steht stets senkrecht zur Geschwindigkeitsrichtung“ +
+  Evidenz `magnetic_force_does_no_work` + Wiederholungsempfehlung; Optionen gesperrt und die richtige wird aufgedeckt.
+- **D Lernverlauf**: Aggregat 1 Selbsttest / 0 % Trefferquote / 1 Fehleraufgabe korrekt; Fehleraufgabe trägt die Originalaufgabe und
+  „Deine Antwort“; bei der Beherrschung der Wissenspunkte erscheint der Fortschrittsbalken Lorentzkraft; kein Seitenscroll;
+  „Erneut üben“ führt per Deep Link zurück zur selben Aufgabe.
+- **E Versuchsbericht**: Der Bericht nennt Experiment, Versuchsparameter (Elektrische Feldstärke …), abgeleitete Größen der Engine (Lorentzkraft …),
+  physikalische Verifikation (Geschwindigkeitsselektionsbedingung), Versuchsschlussfolgerung (Verifikation bestanden); Markdown-Download wird angeboten; Schließen führt zurück.
+- **F Persistenz**: Nach einem Neuladen der gesamten Seite sind Fehleraufgaben und Fehlerklassen weiterhin vorhanden (localStorage).
 
-**回归**：`mechanics` / `electric` / `electric-v2` / `electric-region` /
-`composite` 五份旧 acceptance 全部 ALL CHECKS PASSED。
+**Regression**: Alle fünf alten Acceptance-Skripte `mechanics` / `electric` / `electric-v2` / `electric-region` /
+`composite` mit ALL CHECKS PASSED.
 
-**截图 QA**（人工读图确认）：`tutor-mode-1600x900`、`tutor-deflecting-1600x900`、
-`selfcheck-diagnosis-1600x900`、`learning-record-1600x900`、
-`experiment-report-1600x900`。
+**Screenshot-QA** (manuell am Bild bestätigt): `tutor-mode-1600x900`, `tutor-deflecting-1600x900`,
+`selfcheck-diagnosis-1600x900`, `learning-record-1600x900`,
+`experiment-report-1600x900`.
 
-## 9. 验收数据
+## 9. Abnahmedaten
 
-- `typecheck`（core + web）零错误；`lint`（eslint core + oxlint web）零错误。
-- `test:core` 全绿：question-core **228**（含 learning-content 8 项）、
-  engine-composite 26、physics-composite-core 48、其余包不变。
-- `test:web` ui-physicsos **205 / 16 文件** 全绿（含 `learning.client.spec.tsx`
-  15 项：tutor 脚本、抽屉阶梯与高亮、记录 store 聚合与持久化、record surface、
-  sidebar 入口、自测诊断与知识 chips、重新练习深链、报告构建与面板）。
-- ui-physicsos bundle 重建；overlay `capture` 已回写 `overlays/harness/files/`。
+- `typecheck` (core + web) ohne Fehler; `lint` (eslint core + oxlint web) ohne Fehler.
+- `test:core` alles grün: question-core **228** (einschließlich 8 Punkte learning-content),
+  engine-composite 26, physics-composite-core 48, übrige Packages unverändert.
+- `test:web` ui-physicsos **205 / 16 Dateien** alles grün (einschließlich `learning.client.spec.tsx`
+  mit 15 Punkten: Tutor-Skripte, Drawer-Leiter und Hervorhebung, Aggregation und Persistenz des Record-Stores, Record-Surface,
+  Sidebar-Einstieg, Selbsttest-Diagnose und Wissens-Chips, Deep Link „Erneut üben“, Berichtsaufbau und Panel).
+- ui-physicsos-Bundle neu gebaut; Overlay-`capture` wurde nach `overlays/harness/files/` zurückgeschrieben.
 
-## 10. 不做（明确边界）
+## 10. Nicht Teil (ausdrückliche Grenzen)
 
-- **模型驱动的 Tutor / Agent 答案**：`AGENT_MODEL_BACKED_ANSWERS_BACKLOG`
-  不变——课程与答案仍是确定性脚本；接入真实模型时替换的是意图匹配层，
-  Tutor 的证据与工具契约不动。
-- **图片 / PDF 题目识别**：`QUESTION_IMAGE_PDF_INGEST_BACKLOG` 不变。
-- **跨设备学习记录**：仅 localStorage；账号体系与服务端存储属后续
-  Data Storage 阶段（`docs/10-DATA-STORAGE-ARCHITECTURE.md`）。
-- **自由输入答案的语义批改**：自测是选择式概念探针，不是主观题批改。
-- **3D Renderer**：架构已预留（Renderer 注册表），本阶段不做。
+- **Modellgetriebene Tutor-/Agent-Antworten**: `AGENT_MODEL_BACKED_ANSWERS_BACKLOG`
+  unverändert – Kurse und Antworten sind weiterhin deterministische Skripte; beim Anbinden eines echten Modells wird die Intent-Matching-Schicht ersetzt,
+  Evidenz und Tool-Vertrag des Tutors bleiben unberührt.
+- **Aufgabenerkennung aus Bild / PDF**: `QUESTION_IMAGE_PDF_INGEST_BACKLOG` unverändert.
+- **Geräteübergreifender Lernverlauf**: nur localStorage; Kontosystem und serverseitige Speicherung gehören zur späteren
+  Data-Storage-Phase (`docs/10-DATA-STORAGE-ARCHITECTURE.md`).
+- **Semantische Bewertung frei eingegebener Antworten**: Der Selbsttest ist eine konzeptionelle Sonde im Auswahlverfahren, keine Bewertung subjektiver Aufgaben.
+- **3D-Renderer**: Die Architektur hält ihn vor (Renderer-Registry), in dieser Phase nicht umgesetzt.

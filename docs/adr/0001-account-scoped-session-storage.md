@@ -1,36 +1,36 @@
-# ADR-0001：账户分层会话存储
+# ADR-0001: Kontobasierte Sitzungsspeicherung
 
-- 状态：已接受
-- 日期：2026-09-26
-- 决策人：PhysicsOS maintainers
-- 相关文档 / PR：`packages/session/session-persistence-jsonl`、`scripts/migrate/sessions-to-account-layout.mjs`
+- Status: akzeptiert
+- Datum: 2026-09-26
+- Entscheider: PhysicsOS Maintainer
+- Zugehörige Dokumente / PRs: `packages/session/session-persistence-jsonl`, `scripts/migrate/sessions-to-account-layout.mjs`
 
-## 背景
+## Kontext
 
-PhysicsOS 的 Web 与桌面端都需要让同一账号在不同设备上恢复同一批会话，同时不能让同一服务器上的其他账号通过目录扫描、误配置或运维脚本读到他人的 transcript。原 JSONL 布局按 `cwd` 和 session id 分目录，适合单用户 Harness，但没有账号维度。
+Sowohl die Web- als auch die Desktop-Version von PhysicsOS müssen es ermöglichen, dass dasselbe Konto auf verschiedenen Geräten dieselben Sitzungen wiederherstellt. Gleichzeitig dürfen andere Konten auf demselben Server durch Verzeichnis-Scans, Fehlkonfigurationen oder Betriebsskripte keine fremden Transkripte lesen können. Das ursprüngliche JSONL-Layout war nach `cwd` und Session-ID in Verzeichnisse gegliedert; das passt für einen Einzelnutzer-Harness, kennt aber keine Kontodimension.
 
-`SessionHeader` 是上游稳定的会话格式，当前只包含 `id`、`cwd`、lineage 和 `agentPreset`，不包含账号。PhysicsOS 的真正归属账本是 `physicsos_auth` 存储域中的 `api_resources` 行：`session -> ownerKey(schoolId:username)`。工作区路径是 userKey 的 SHA-256 摘要，不能反向恢复账号；session id 本身也不携带账号。
+Der `SessionHeader` ist ein stabiles Upstream-Sitzungsformat und enthält derzeit nur `id`, `cwd`, Lineage und `agentPreset`, kein Konto. Das eigentliche Zuordnungsbuch von PhysicsOS sind die Zeilen `api_resources` in der Speicherdomäne `physicsos_auth`: `session -> ownerKey(schoolId:username)`. Der Workspace-Pfad ist ein SHA-256-Digest des userKey und lässt sich nicht auf das Konto zurückführen; die Session-ID selbst trägt ebenfalls kein Konto.
 
-因此需要把“谁能读写”和“文件放在哪里”分开：前者仍由 `/api` 的归属校验负责，后者为备份、配额、审计和跨端恢复提供稳定的账号目录边界。
+Daher müssen „wer darf lesen und schreiben“ und „wo liegen die Dateien“ getrennt werden: Ersteres bleibt Aufgabe der Zuordnungsprüfung von `/api`, Letzteres liefert eine stabile Kontoverzeichnis-Grenze für Backup, Kontingente, Audit und geräteübergreifende Wiederherstellung.
 
-## 决定
+## Entscheidung
 
-- 新的物化布局为 `<root>/<schoolId>/<encoded-userKey>/<encoded-sessionId>/session.jsonl*`。
-- `schoolId`、`userKey` 和 session id 在进入文件系统前必须通过白名单校验或注入式编码；拒绝 `..`、路径分隔符、NUL、空段和非法账号字母表。
-- JSONL backend 通过可选 Cordis 服务 `physicsosSessionOwnership` 同步解析 `SessionHeader -> owner`。服务缺失时保留旧布局写入；解析失败或返回非法 owner 时 fail loud。
-- 读取时先识别账户布局，再回退旧 `<root>/<project>/<sessionId>/` 布局。同一 session id 在两处或两个 owner 下同时存在时返回明确的 layout conflict，不静默选择。
-- 迁移由离线脚本完成：默认 dry-run，`--apply` 才 rename；归属只从显式的 `api_resources` 或 ownership manifest 读取，未知、冲突和非法头都跳过并报告。
-- 授权边界不依赖目录名或文件路径。`api_resources` 归属校验仍是唯一准入决定；目录分层用于运维隔离、备份范围和合规检查。
+- Das neue materialisierte Layout lautet `<root>/<schoolId>/<encoded-userKey>/<encoded-sessionId>/session.jsonl*`.
+- `schoolId`, `userKey` und Session-ID müssen vor dem Eintritt ins Dateisystem eine Whitelist-Prüfung oder eine Injektions-sichere Kodierung durchlaufen; `..`, Pfadtrenner, NUL, leere Segmente und ein unzulässiges Konto-Alphabet werden abgelehnt.
+- Das JSONL-Backend löst `SessionHeader -> owner` synchron über den optionalen Cordis-Dienst `physicsosSessionOwnership` auf. Fehlt der Dienst, wird weiter im alten Layout geschrieben; schlägt die Auflösung fehl oder wird ein ungültiger Owner geliefert, schlägt der Vorgang laut fehl (fail loud).
+- Beim Lesen wird zuerst das Kontolayout erkannt, danach auf das alte Layout `<root>/<project>/<sessionId>/` zurückgegriffen. Existiert dieselbe Session-ID an beiden Orten oder unter zwei Ownern, wird ein eindeutiger Layout-Konflikt gemeldet, statt stillschweigend eine Variante zu wählen.
+- Die Migration erfolgt durch ein Offline-Skript: Standardmäßig Dry-Run, erst `--apply` benennt um; die Zuordnung wird nur aus einer expliziten `api_resources`- oder Ownership-Manifest-Quelle gelesen, unbekannte, widersprüchliche und ungültige Header werden übersprungen und gemeldet.
+- Die Autorisierungsgrenze hängt nicht von Verzeichnisnamen oder Dateipfaden ab. Die Zuordnungsprüfung über `api_resources` bleibt die einzige Zugangsentscheidung; die Verzeichnisschichtung dient der betrieblichen Isolation, dem Backup-Umfang und Compliance-Prüfungen.
 
-## 后果
+## Konsequenzen
 
-- 正面：账号数据在共享服务器上有稳定边界；旧日志可分批迁移；桌面端和 Web 端可以从同一账号目录恢复会话；冲突不会被误读成任一账号的数据。
-- 负面：发现会话时要同时扫描新旧布局，账号目录的启动枚举成本高于单一旧根；迁移期间必须维护双侧冲突检查。
-- 需要跟进：生产 composition 必须发布 `physicsosSessionOwnership` provider，将 `api_resources` 的内存索引或等价查询接入 backend；当前 JSON 存储部署可由迁移脚本读取 `physicsos_auth.json`，PostgreSQL 部署应改为数据库查询。
-- 多副本部署必须把 sessions root 放在共享文件系统，或把会话索引/内容迁入 PostgreSQL。仅做本地目录分层不能满足跨副本一致性，也不能提供跨进程写入互斥。
+- Positiv: Kontodaten haben auf gemeinsam genutzten Servern eine stabile Grenze; alte Logs lassen sich stapelweise migrieren; Desktop- und Web-Client können Sitzungen aus demselben Kontoverzeichnis wiederherstellen; Konflikte werden nicht fälschlich als Daten eines der Konten gelesen.
+- Negativ: Beim Entdecken von Sitzungen müssen altes und neues Layout gescannt werden, die Start-Enumeration der Kontoverzeichnisse ist teurer als bei einer einzigen alten Wurzel; während der Migration muss die beidseitige Konfliktprüfung gepflegt werden.
+- Nachzuverfolgen: Die Produktions-Composition muss einen `physicsosSessionOwnership`-Provider veröffentlichen und den In-Memory-Index von `api_resources` oder eine gleichwertige Abfrage an das Backend anbinden; bei JSON-Speicher-Deployments kann das Migrationsskript `physicsos_auth.json` lesen, PostgreSQL-Deployments sollten auf Datenbankabfragen umgestellt werden.
+- Bei Multi-Replica-Deployments muss das Sessions-Root auf einem gemeinsamen Dateisystem liegen, oder Sitzungsindex und -inhalt müssen nach PostgreSQL verlagert werden. Eine rein lokale Verzeichnisschichtung erfüllt die Konsistenz über Replikate hinweg nicht und bietet auch keinen prozessübergreifenden Schreib-Ausschluss.
 
-## 替代方案
+## Alternativen
 
-- 从 `cwd` 反推 owner：已放弃。工作区路径是哈希摘要，不可逆；按路径前缀猜测会在改名、共享目录或迁移后把数据放错账号。
-- 把 `owner/schoolId` 加入 `SessionHeader`：暂不采用。它会改变上游会话格式并迫使 session persistence 依赖认证域；在格式升级前，显式 resolver 能保持后端与认证的边界。
-- 为每个账号挂 symlink 到旧目录：已放弃。它保留旧路径作为权威身份，容易产生双写和权限绕过，且备份工具无法可靠区分真实边界。
+- Owner aus `cwd` ableiten: verworfen. Der Workspace-Pfad ist ein Hash-Digest und nicht umkehrbar; das Raten anhand von Pfadpräfixen würde nach Umbenennungen, bei geteilten Verzeichnissen oder nach Migrationen Daten dem falschen Konto zuordnen.
+- `owner/schoolId` in den `SessionHeader` aufnehmen: vorerst nicht übernommen. Das würde das Upstream-Sitzungsformat verändern und die Sitzungspersistenz zur Abhängigkeit von der Authentifizierungsdomäne machen; bis zu einem Formatupgrade hält ein expliziter Resolver die Grenze zwischen Backend und Authentifizierung aufrecht.
+- Pro Konto einen Symlink auf das alte Verzeichnis anlegen: verworfen. Dabei bliebe der alte Pfad die maßgebliche Identität, was Doppelschreibvorgänge und Rechte-Umgehung begünstigt, und Backup-Werkzeuge könnten die tatsächliche Grenze nicht zuverlässig unterscheiden.

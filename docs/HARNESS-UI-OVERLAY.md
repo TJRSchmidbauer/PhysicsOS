@@ -1,10 +1,10 @@
 # Harness Web Client × PhysicsOS Overlay
 
-日期：2026-08-20
+Datum: 2026-08-20
 
-状态：`MECHANICS_RUNTIME_PACK_V1_COMPLETE`。三个物理域（磁场 / 力学 / 匀强电场）共用**同一个**工作台外壳与画布；Question → Lab 会在首次修改物理事实时 fork 实验分支；Agent Drawer 读取真实 runtime 并通过工具高亮/下发 SceneCommand。图片 / PDF 识别与模型驱动的 Agent 答案仍未接入（见 `docs/reports/BACKLOG.md`）。
+Status: `MECHANICS_RUNTIME_PACK_V1_COMPLETE`. Die drei Physikdomänen (Magnetfeld / Mechanik / homogenes elektrisches Feld) teilen sich **dieselbe** Workbench-Hülle und denselben Canvas; Question → Lab forkt beim ersten Ändern eines physikalischen Fakts einen Experimentzweig; der Agent Drawer liest die echte Runtime und hebt über Tools hervor bzw. sendet SceneCommands. Bild- / PDF-Erkennung und modellgetriebene Agent-Antworten sind weiterhin nicht angebunden (siehe `docs/reports/BACKLOG.md`).
 
-## 产品组合
+## Produktzusammensetzung
 
 ```text
 DeepSeek Harness Web Client
@@ -16,31 +16,31 @@ DeepSeek Harness Web Client
 PhysicsOS domain packages
 ```
 
-根目录 `apps/web` 是废弃的过渡实现，不是第二套 Runtime Host。
+Das `apps/web` im Wurzelverzeichnis ist eine veraltete Übergangsimplementierung und kein zweiter Runtime Host.
 
-## Harness 扩展边界
+## Erweiterungsgrenze des Harness
 
-PhysicsOS 只占用正式 slot：
+PhysicsOS belegt nur offizielle Slots:
 
-| Slot                            | PhysicsOS 内容                |
-| ------------------------------- | ----------------------------- |
-| `sidebar.brand`                 | PhysicsOS 品牌与回首页        |
-| `sidebar.nav`                   | 首页 / 物理实验室 / 试题空间  |
-| `sidebar.new`                   | 新建菜单                      |
-| `sidebar.workspaces`            | 最近空间                      |
-| `sidebar.footer.action`         | 学习记录入口                  |
-| `conversation.hero.brand`       | 首页品牌                      |
-| `conversation.hero.actions`     | 示例、实验/试题入口、最近空间 |
-| `conversation.hero.agentPreset` | 学生学习模式                  |
-| `conversation.surface`          | Physics Lab / Question Space  |
+| Slot                            | PhysicsOS-Inhalt                                  |
+| ------------------------------- | ------------------------------------------------- |
+| `sidebar.brand`                 | PhysicsOS-Marke und Rückkehr zur Startseite       |
+| `sidebar.nav`                   | Startseite / Physiklabor / Aufgabenraum           |
+| `sidebar.new`                   | Menü „Neu“                                        |
+| `sidebar.workspaces`            | Zuletzt verwendete Räume                          |
+| `sidebar.footer.action`         | Einstieg in den Lernverlauf                       |
+| `conversation.hero.brand`       | Marke der Startseite                              |
+| `conversation.hero.actions`     | Beispiele, Einstieg in Experimente/Aufgaben, zuletzt verwendete Räume |
+| `conversation.hero.agentPreset` | Lernmodus für Schüler                             |
+| `conversation.surface`          | Physics Lab / Question Space                      |
 
-不修改 Harness Agent Loop、Session Store、Tools 和 ConversationRoot。
+Agent Loop, Session Store, Tools und ConversationRoot des Harness werden nicht verändert.
 
-## 统一运行链
+## Einheitliche Laufzeitkette
 
 ```text
 Inspector / Timeline / Scene Tree / Question
-        ↓  plain callback（组件不知道自己在哪个物理域）
+        ↓  plain callback (die Komponente weiß nicht, in welcher Physikdomäne sie sich befindet)
 WorkspaceRuntime
         ↓  SceneCommand + expectedRevision
 PhysicsScene + revision
@@ -56,153 +56,153 @@ SceneVisualModel
 PhysicsCanvas → RENDERERS[view.domain]
 ```
 
-**一个工作台，不是每个域一个页面。** `PhysicsSurface`（`LabWorkspace.tsx`）只做
-dispatch：按 `domainOfScene(scene)` 选一个 `WorkspaceRuntime`，交给唯一的
-`PhysicsWorkspace` 外壳。此前 `MechanicsLabWorkspace`（734 行）与
-`ElectricLabWorkspace`（615 行）与磁场外壳有 ~80% 重复结构，已删除。
-新增域 = 一个 runtime adapter + renderer registry 一个条目，不再新增页面。
+**Eine Workbench, nicht eine Seite pro Domäne.** `PhysicsSurface` (`LabWorkspace.tsx`) macht nur
+Dispatch: Je nach `domainOfScene(scene)` wählt sie eine `WorkspaceRuntime` und übergibt sie der einzigen
+`PhysicsWorkspace`-Hülle. Zuvor hatten `MechanicsLabWorkspace` (734 Zeilen) und
+`ElectricLabWorkspace` (615 Zeilen) mit der Magnetfeld-Hülle ~80 % duplizierte Struktur; sie wurden gelöscht.
+Eine neue Domäne = ein Runtime-Adapter + ein Eintrag in der Renderer Registry, keine neue Seite mehr.
 
 ```text
-WorkspaceRuntime（physics/workspace-runtime.ts）
+WorkspaceRuntime (physics/workspace-runtime.ts)
   getSnapshot / editParameter / setChoice / setObservable
   setRunning / setRate / seek / step / advance / setHighlight
-        ├── MagneticWorkspaceRuntime  → MagneticRuntimeBridge（已验收，语义未改）
+        ├── MagneticWorkspaceRuntime  → MagneticRuntimeBridge (abgenommen, Semantik unverändert)
         ├── MechanicsWorkspaceRuntime → MechanicsRuntimeBridge
         └── ElectricWorkspaceRuntime  → SceneRuntime + ElectricEngine
 ```
 
-`PhysicsCanvas` 是磁场与力学唯一正式画布。它只消费 `SceneVisualModel`，负责投影、坐标、网格、刻度、轨迹、矢量、标注和交互，不导入 Engine，也不重新计算答案。
+`PhysicsCanvas` ist der einzige offizielle Canvas für Magnetfeld und Mechanik. Er konsumiert nur das `SceneVisualModel` und ist für Projektion, Koordinaten, Raster, Skalenstriche, Trajektorien, Vektoren, Beschriftungen und Interaktion zuständig; er importiert keine Engine und berechnet keine Antworten neu.
 
-`lab-view-model.ts` 仍是磁场 Runtime 与 Inspector 的纯数据契约；它不再对应第二套画布实现。
+`lab-view-model.ts` bleibt der reine Datenvertrag für Magnetfeld-Runtime und Inspector; es entspricht keiner zweiten Canvas-Implementierung mehr.
 
 ## Physics Lab
 
-实验室由工具栏、场景树、统一画布、Inspector、时间轴、数据面板和 Agent 入口组成。
+Das Labor besteht aus Toolbar, Szenenbaum, einheitlichem Canvas, Inspector, Timeline, Datenpanel und Agent-Einstieg.
 
-磁场场景支持：
+Magnetfeld-Szenen unterstützen:
 
-- `B / q / m / v` 与磁场方向修改
-- revision 校验的 `SceneCommand`
-- 运行、暂停、单步、重置、拖动时间轴与 0.25-2 倍速
-- 速度、洛伦兹力、轨迹、圆心、半径与辅助线
-- Engine 派生量、数据、图像、推导与事件
+- Ändern von `B / q / m / v` und der Magnetfeldrichtung
+- `SceneCommand` mit Revisionsprüfung
+- Ausführen, Pause, Einzelschritt, Zurücksetzen, Ziehen der Timeline und 0,25–2-fache Geschwindigkeit
+- Geschwindigkeit, Lorentzkraft, Trajektorie, Mittelpunkt, Radius und Hilfslinien
+- Von der Engine abgeleitete Größen, Daten, Diagramme, Herleitung und Ereignisse
 
-力学场景支持：
+Mechanik-Szenen unterstützen:
 
-- 匀速、匀加速、平抛/斜抛、牛顿第二定律、斜面（含摩擦）
-- 六个实验模板由「新建」分组 popover 进入，直接建真实 Scene
-- 可编辑 `m / h / v₀ / θ / g / μ / F`，每次提交都是一次 revision 校验的 SceneCommand
-- 自由体图 mg / N / f / ΣF / a，力的分解 mg·sinθ / mg·cosθ 可开关
-- 关键点（起点 / 最高点 / 落地点）、h 与 R 标注、倾角弧、时间轴事件标记
-- 数据表、`x(t) / y(t) / vₓ(t) / v_y(t)`、结构化推导与验证
-- 从 Question Space 带同一个 Scene revision 打开，并在 Lab 中继续可编辑
+- Gleichförmige Bewegung, gleichmäßige Beschleunigung, waagerechter/schräger Wurf, zweites Newtonsches Gesetz, schiefe Ebene (mit Reibung)
+- Sechs Experimentvorlagen sind über das gruppierte Popover „Neu“ erreichbar und erzeugen direkt eine echte Scene
+- Editierbar sind `m / h / v₀ / θ / g / μ / F`; jede Übergabe ist ein SceneCommand mit Revisionsprüfung
+- Freikörperbild mg / N / f / ΣF / a, Kräftezerlegung mg·sinθ / mg·cosθ ein- und ausschaltbar
+- Schlüsselpunkte (Start / höchster Punkt / Landepunkt), Beschriftungen h und R, Neigungswinkelbogen, Ereignismarken auf der Timeline
+- Datentabelle, `x(t) / y(t) / vₓ(t) / v_y(t)`, strukturierte Herleitung und Verifikation
+- Aus dem Question Space mit derselben Scene-Revision geöffnet und im Lab weiter editierbar
 
-关键实现约束：
+Wichtige Implementierungsbeschränkungen:
 
-- `--physics-*` 语义 token 必须由 `mountPhysicsOSChrome()` 在 document 级注入。
-  插件 bundle 只自动注入 `*.module.css`，普通 `.css` 的 import 会静默失效，而
-  未定义的 `var()` 用在 `stroke` 上回退到继承值（画布根节点是 `fill="none"`）
-  —— 后果是整块画布进入 DOM 但完全不着墨。`tests/chrome.client.spec.ts` 守住这点。
-- `PhysicsCanvas` 的 plot box 固定为 960×540，场景在框内居中。按内容尺寸生成
-  viewBox 会让竖幅场景被 `preserveAspectRatio` 放大（实测 1.52×），线宽与字号同步变粗。
-- 个别力的**方向**来自 Observation 层（由模型的斜面坐标系投影引擎已算出的幅值），
-  不由绘制代码决定。
-- `packages/*` 用 `link:` 协议接入，不是 `file:`：pnpm 会复制 `file:` 依赖且不随
-  源码刷新，导致浏览器 bundle 编译旧副本而 vitest 读源码，两边静默分歧。
+- Die semantischen `--physics-*`-Tokens müssen von `mountPhysicsOSChrome()` auf Document-Ebene injiziert werden.
+  Das Plugin-Bundle injiziert automatisch nur `*.module.css`; ein `import` einer gewöhnlichen `.css` bleibt stillschweigend wirkungslos, und
+  ein nicht definiertes `var()` bei `stroke` fällt auf den geerbten Wert zurück (der Canvas-Wurzelknoten hat `fill="none"`)
+  – die Folge: Der gesamte Canvas gelangt in den DOM, zeichnet aber überhaupt nichts. `tests/chrome.client.spec.ts` sichert das ab.
+- Die Plot-Box von `PhysicsCanvas` ist fest 960×540, die Szene wird darin zentriert. Eine nach Inhaltsgröße erzeugte
+  viewBox würde hochformatige Szenen durch `preserveAspectRatio` vergrößern (gemessen 1,52×), Linienbreiten und Schriftgrößen würden mit dicker.
+- Die **Richtung** einzelner Kräfte stammt aus der Observation-Schicht (aus den bereits von der Engine berechneten Beträgen, projiziert im Schiefe-Ebene-Koordinatensystem des Modells),
+  nicht aus dem Zeichencode.
+- `packages/*` werden über das Protokoll `link:` eingebunden, nicht `file:`: pnpm kopiert `file:`-Abhängigkeiten und aktualisiert sie nicht mit dem
+  Quellcode, sodass das Browser-Bundle eine alte Kopie kompiliert, während vitest den Quellcode liest – beide Seiten weichen still voneinander ab.
 
-## 动画时钟
+## Animationsuhr
 
-- 浏览器使用 `requestAnimationFrame`，每次提交使用真实帧间时间。
-- 磁场的微观周期不再直接映射现实秒；1 倍速约 5 秒展示一整圈，避免毫秒时钟跨越几十万周期产生混叠跳点。
-- 已验证的磁场 Simulation 与 Verification 会缓存；每帧只调用解析 `stateAt`、Observation 与视觉投影。
-- 力学每帧直接读取 `MechanicsEngine.stateAt`，不再只显示离散 Simulation 样本。
+- Der Browser verwendet `requestAnimationFrame`, jede Übergabe verwendet die echte Zeit zwischen den Frames.
+- Die mikroskopische Periode im Magnetfeld wird nicht mehr direkt auf reale Sekunden abgebildet; bei 1-facher Geschwindigkeit wird etwa in 5 Sekunden ein voller Umlauf gezeigt, um Aliasing-Sprünge zu vermeiden, wenn eine Millisekundenuhr Hunderttausende Perioden überspringt.
+- Verifizierte Magnetfeld-Simulation und -Verifikation werden zwischengespeichert; pro Frame werden nur das analytische `stateAt`, die Observation und die visuelle Projektion aufgerufen.
+- Die Mechanik liest pro Frame direkt `MechanicsEngine.stateAt` und zeigt nicht mehr nur diskrete Simulationsstichproben.
 
 ## Question Space
 
-当前包含 16 道可复现内置题。磁场与五类力学题经过真实 Question Runtime、Scene、Engine、Verifier、Observation 和 PhysicsCanvas。
+Derzeit enthalten sind 16 reproduzierbare eingebaute Aufgaben. Magnetfeld- und fünf Arten von Mechanikaufgaben laufen durch die echte Question Runtime, Scene, Engine, Verifier, Observation und PhysicsCanvas.
 
-图片、PDF、OCR/VLM 与整卷拆题尚未接入，界面明确显示为未开放；不能把这部分记为已完成。
+Bild, PDF, OCR/VLM und das Zerlegen ganzer Klausuren sind noch nicht angebunden; die Oberfläche zeigt sie ausdrücklich als nicht freigeschaltet an. Dieser Teil darf nicht als fertig verbucht werden.
 
-## 响应式
+## Responsives Verhalten
 
-- 桌面：三栏实验室；宽度不足时依次隐藏 Inspector 与场景树，优先保证画布。
-- Question Space：中等宽度使用完整高度主解题区，输入与结果在右侧堆叠；手机为单列。
-- 手机：Harness 侧栏为抽屉式导航，选择 PhysicsOS 页面后自动收起。
-- 移动力学画布保持 16:9，避免竖向容器把物理图缩成小点。
+- Desktop: dreispaltiges Labor; bei zu geringer Breite werden nacheinander Inspector und Szenenbaum ausgeblendet, damit der Canvas Vorrang behält.
+- Question Space: Bei mittlerer Breite wird ein Hauptlösungsbereich in voller Höhe verwendet, Eingabe und Ergebnis werden rechts gestapelt; auf dem Handy einspaltig.
+- Handy: Die Harness-Sidebar ist eine Drawer-Navigation und klappt nach Auswahl einer PhysicsOS-Seite automatisch ein.
+- Der mobile Mechanik-Canvas bleibt 16:9, damit ein vertikaler Container das Physikbild nicht zu einem kleinen Punkt schrumpfen lässt.
 
-## 实验分支与 Agent
+## Experimentzweig und Agent
 
-题干条件是陈述的事实，因此 Question → Lab 在**第一次修改物理事实**时 fork：
+Die Bedingungen der Aufgabenstellung sind festgestellte Fakten, daher forkt Question → Lab bei der **ersten Änderung eines physikalischen Fakts**:
 
 ```text
-scene-question-001 rev.4        （原题，永不被实验修改）
+scene-question-001 rev.4        (ursprüngliche Aufgabe, wird nie durch Experimente verändert)
         └── fork on first fact edit
             experiment-… rev.0 → rev.1
             metadata.lineage = { origin, branchType, originQuestionId,
                                  originSceneId, parentSceneId, parentRevision, forkedAt }
 ```
 
-播放 / seek / 切换 Observation / Agent 高亮**不**触发 fork ——
-它们改变「在看什么」，不改变「什么是真的」。判据只有一处定义：
-`physics/experimental-branch.ts` 的 `FACT_COMMANDS`。
+Abspielen / seek / Umschalten von Observation / Agent-Hervorhebung lösen **keinen** Fork aus –
+sie ändern, „was man ansieht“, nicht, „was wahr ist“. Das Kriterium ist an genau einer Stelle definiert:
+`FACT_COMMANDS` in `physics/experimental-branch.ts`.
 
-Agent（`physics/physics-agent.ts`）读取 scene / revision / simulation /
-verification / observations / 当前时间 / 已绘制视觉 id，答案引用这些事实并显示
-source chips；它**不重新计算物理量**，匹配不到就明确说无法回答。两类工具严格分离：
+Der Agent (`physics/physics-agent.ts`) liest scene / revision / simulation /
+verification / observations / aktuelle Zeit / bereits gezeichnete visuelle IDs; die Antworten verweisen auf diese Fakten und zeigen
+Source Chips an; er **berechnet keine physikalischen Größen neu** und sagt ausdrücklich, dass er nicht antworten kann, wenn nichts passt. Zwei Arten von Tools sind streng getrennt:
 
-| 工具                         | 性质              | revision | PhysicsEvent |
-| ---------------------------- | ----------------- | -------- | ------------ |
-| `physics.ui.highlight`       | 纯视图交互        | 不变     | 不产生       |
-| `physics.scene.setParameter` | 真实 SceneCommand | +1       | 产生         |
-
----
-
-## 架构约束（不可绕过）
-
-### PhysicsOS Token System 是唯一入口
-
-Harness Client Plugin **不保证**普通 global CSS 被自动注入：bundler 只处理
-`*.module.css`。一个普通 `.css` 的 `import` 可能被静默丢弃，而未定义的
-`var(--physics-*)` 用在 `stroke` / `fill` 上会在计算值阶段失效并回退到继承值
-（画布根节点是 `<svg fill="none">`）—— 结果是整块画布进入 DOM 却完全不着墨，
-且没有任何报错。
-
-因此：
-
-- 所有 PhysicsOS semantic token 必须经由正式的 Client Chrome 安装路径
-  （`mountPhysicsOSChrome()`）在 document 级注入。
-- **禁止**新增 `physics-electric-tokens.css` / `physics-circuit-tokens.css`
-  之类的文件再靠 `import` 偶然生效。新增物理域的颜色语义一律加进现有
-  Physics Token System。
-- `tests/chrome.client.spec.ts` 与 `tests/regression-gates.client.spec.ts`
-  逐个断言 token 存在，使这类故障不能再静默发生。
-
-### `link:` 依赖是开发期桥接（DEV INTEGRATION BRIDGE）
-
-`packages/client/ui-physicsos` 通过 `link:` 引用 `packages/*`：
-
-| 协议    | 行为                                                | 后果                                                                                                                             |
-| ------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `file:` | pnpm 把包**复制**进 `.pnpm` store，之后不随源码刷新 | 浏览器 bundle 编译旧副本，而 vitest 经 tsconfig paths 读源码 —— 两边静默分歧（实测：源码改了场景标题，测试看得到、浏览器看不到） |
-| `link:` | node_modules 里是指向源码目录的软链                 | 编辑即时生效，bundle 与测试消费同一份源码                                                                                        |
-
-标记：**DEV INTEGRATION BRIDGE**。这不是最终架构，只是在
-「PhysicsOS 仓库 + vendored Harness 子模块」这个布局下让开发回路可信的最小手段。
-
-安装可行性：
-
-- Windows / 本机开发：已验证（`pnpm install --filter` 后软链正确建立）。
-- clean clone / CI / 未来 Linux：`link:` 依赖相对路径解析到仓库内的
-  `packages/*`，与 `file:` 同样只要求仓库完整 checkout（含 submodule），
-  不依赖 registry 发布，因此可安装性不低于 `file:`。仍需在首个 CI 作业里
-  实测一次 clean clone 安装。
-
-最终目标不变：把 PhysicsOS overlay 变成 **PhysicsOS-owned Harness Client Plugin**，
-由 PhysicsOS 侧发布、Harness 侧只做 slot 注册，届时移除这条桥接。
+| Tool                         | Charakter          | revision  | PhysicsEvent |
+| ---------------------------- | ------------------ | --------- | ------------ |
+| `physics.ui.highlight`       | Reine Ansichtsinteraktion | unverändert | wird nicht erzeugt |
+| `physics.scene.setParameter` | Echtes SceneCommand | +1       | wird erzeugt |
 
 ---
 
-## 启动与验证
+## Architekturbeschränkungen (nicht umgehbar)
+
+### Das PhysicsOS Token System ist der einzige Eingang
+
+Das Harness Client Plugin **garantiert nicht**, dass gewöhnliches globales CSS automatisch injiziert wird: Der Bundler verarbeitet nur
+`*.module.css`. Der `import` einer gewöhnlichen `.css` kann stillschweigend verworfen werden, und ein nicht definiertes
+`var(--physics-*)` bei `stroke` / `fill` wird in der Phase des berechneten Werts ungültig und fällt auf den geerbten Wert zurück
+(der Canvas-Wurzelknoten ist `<svg fill="none">`) – das Ergebnis: Der gesamte Canvas gelangt in den DOM, zeichnet aber überhaupt nichts,
+und es gibt keinerlei Fehlermeldung.
+
+Daher gilt:
+
+- Alle semantischen PhysicsOS-Tokens müssen über den offiziellen Installationspfad des Client Chrome
+  (`mountPhysicsOSChrome()`) auf Document-Ebene injiziert werden.
+- **Verboten** ist es, Dateien wie `physics-electric-tokens.css` / `physics-circuit-tokens.css`
+  anzulegen und sich darauf zu verlassen, dass der `import` zufällig wirkt. Die Farbsemantik einer neuen Physikdomäne wird stets in das bestehende
+  Physics Token System aufgenommen.
+- `tests/chrome.client.spec.ts` und `tests/regression-gates.client.spec.ts`
+  prüfen das Vorhandensein der Tokens einzeln, sodass solche Fehler nicht mehr still auftreten können.
+
+### `link:`-Abhängigkeiten sind eine Brücke für die Entwicklungszeit (DEV INTEGRATION BRIDGE)
+
+`packages/client/ui-physicsos` verweist per `link:` auf `packages/*`:
+
+| Protokoll | Verhalten                                                          | Folge                                                                                                                                         |
+| --------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file:`   | pnpm **kopiert** das Package in den `.pnpm` Store und aktualisiert es danach nicht mit dem Quellcode | Das Browser-Bundle kompiliert die alte Kopie, während vitest über tsconfig paths den Quellcode liest – beide Seiten weichen still voneinander ab (gemessen: Szenentitel im Quellcode geändert, der Test sieht es, der Browser nicht) |
+| `link:`   | In node_modules liegt ein Symlink auf das Quellverzeichnis         | Änderungen wirken sofort, Bundle und Tests nutzen denselben Quellcode                                                                          |
+
+Kennzeichnung: **DEV INTEGRATION BRIDGE**. Das ist nicht die endgültige Architektur, sondern nur das minimale Mittel, um unter dem Layout
+„PhysicsOS-Repository + gevendortes Harness-Submodul“ den Entwicklungskreislauf vertrauenswürdig zu machen.
+
+Installierbarkeit:
+
+- Windows / lokale Entwicklung: verifiziert (nach `pnpm install --filter` werden die Symlinks korrekt angelegt).
+- Clean Clone / CI / künftiges Linux: Die `link:`-Abhängigkeiten werden über relative Pfade auf `packages/*` im Repository aufgelöst
+  und erfordern wie `file:` nur einen vollständigen Checkout des Repositorys (einschließlich Submodul),
+  ohne Abhängigkeit von einer Registry-Veröffentlichung; die Installierbarkeit ist also nicht schlechter als bei `file:`. Dennoch ist beim ersten CI-Job
+  eine Installation per Clean Clone einmal praktisch zu prüfen.
+
+Das endgültige Ziel bleibt: Das PhysicsOS-Overlay wird zu einem **PhysicsOS-eigenen Harness Client Plugin**,
+das von PhysicsOS-Seite veröffentlicht wird und auf Harness-Seite nur noch die Slot-Registrierung erfordert; dann wird diese Brücke entfernt.
+
+---
+
+## Start und Verifikation
 
 ```sh
 cd vendor/deepseek-harness
@@ -211,24 +211,24 @@ pnpm --filter @deepseek-ai/dsh-client-ui-conversation bundle
 pnpm dsh web
 ```
 
-默认地址：`http://127.0.0.1:3080/`
+Standardadresse: `http://127.0.0.1:3080/`
 
-验收：
+Abnahme:
 
 ```sh
-node tests/acceptance/mechanics-acceptance.mjs   # 五个产品 Case + 浏览器门禁 + 截图
-node tests/acceptance/harness-lab-shot.mjs       # 三分辨率截图 + 门禁
+node tests/acceptance/mechanics-acceptance.mjs   # Fünf Produktfälle + Browser-Gates + Screenshots
+node tests/acceptance/harness-lab-shot.mjs       # Screenshots in drei Auflösungen + Gates
 ```
 
-门禁：无棋盘格（`pattern path` 全部 `fill=none`）、无整页纵向滚动、
-Canvas ≥ 内部工作区 55%、画布真实着墨（>20 条带 stroke 的节点，用于捕捉 token 失效）、
-console error / `pageerror` / `unhandledrejection` / 失败请求 / 4xx-5xx 响应全部为 0。
+Gates: Kein Schachbrettmuster (alle `pattern path` mit `fill=none`), kein vertikales Scrollen der gesamten Seite,
+Canvas ≥ 55 % des internen Arbeitsbereichs, Canvas zeichnet tatsächlich (>20 Knoten mit stroke, um Token-Ausfälle zu erkennen),
+console error / `pageerror` / `unhandledrejection` / fehlgeschlagene Anfragen / 4xx-5xx-Antworten sind alle 0.
 
-验收要求：
+Abnahmeanforderungen:
 
-- Scene revision 与 Question → Lab 所有权一致
-- Engine / Verifier / Observation 不在 UI 中被绕过
-- SVG 网格 `pattern path` 显式 `fill="none"`
-- 动画无 50ms 定时器、无每帧重新 simulate/verify
-- 桌面、窄桌面、手机无横向溢出或互相遮挡
-- console、page error、unhandled rejection 为 0
+- Scene-Revision und Besitz bei Question → Lab sind konsistent
+- Engine / Verifier / Observation werden in der UI nicht umgangen
+- SVG-Raster `pattern path` mit ausdrücklichem `fill="none"`
+- Animation ohne 50-ms-Timer, ohne erneutes simulate/verify pro Frame
+- Desktop, schmaler Desktop und Handy ohne horizontalen Überlauf oder gegenseitige Verdeckung
+- console, page error, unhandled rejection sind 0

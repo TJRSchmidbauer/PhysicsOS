@@ -1,57 +1,56 @@
-# PhysicsOS 发布手册
+# PhysicsOS Release-Handbuch
 
-发布只从已通过 CI 的 commit 或 tag 开始。生产部署、备份和恢复的完整操作以 [`13-DEPLOYMENT-OPERATIONS.md`](./13-DEPLOYMENT-OPERATIONS.md) 为准，本页只描述发布入口、签名材料和检查清单。
+Ein Release geht nur von einem Commit oder Tag aus, der die CI bestanden hat. Maßgeblich für Produktions-Deployment, Backup und Wiederherstellung ist [`13-DEPLOYMENT-OPERATIONS.md`](./13-DEPLOYMENT-OPERATIONS.md); diese Seite beschreibt nur den Release-Einstieg, das Signaturmaterial und die Checkliste.
 
-## 服务端镜像发布
+## Server-Image-Release
 
-1. 确认候选 commit 的 CI、`docker compose config --quiet` 和部署改动验证全部通过。
-2. 创建不可变的语义化 tag，例如 `v0.2.0`，再推送 tag。
-3. tag 会触发 [`.github/workflows/release.yml`](../.github/workflows/release.yml)，构建并推送 `linux/amd64` 镜像到 GHCR，然后创建 GitHub Release。
-4. 也可以手动触发该 workflow，填写已有 tag，并选择草稿发布。
-5. 记录 commit SHA、镜像 digest、Compose 修订、迁移版本（如有）和发布人；部署时使用 digest，不要只依赖可移动 tag。
+1. Sicherstellen, dass CI, `docker compose config --quiet` und die Verifikation der Deployment-Änderungen für den Kandidaten-Commit vollständig bestanden sind.
+2. Einen unveränderlichen semantischen Tag erstellen, z. B. `v0.2.0`, und den Tag pushen.
+3. Der Tag löst [`.github/workflows/release.yml`](../.github/workflows/release.yml) aus, der ein `linux/amd64`-Image baut, nach GHCR pusht und anschließend ein GitHub Release erstellt.
+4. Der Workflow kann auch manuell gestartet werden, indem ein vorhandener Tag angegeben und ein Entwurfs-Release gewählt wird.
+5. Commit-SHA, Image-Digest, Compose-Revision, Migrationsversion (falls vorhanden) und verantwortliche Person festhalten; beim Deployment den Digest verwenden und sich nicht allein auf bewegliche Tags verlassen.
 
-镜像名称由仓库路径决定，Tag 由语义化版本派生；预发布版本不会自动更新 `latest`。
+Der Image-Name ergibt sich aus dem Repository-Pfad, der Tag wird aus der semantischen Version abgeleitet; Vorabversionen aktualisieren `latest` nicht automatisch.
 
-## 桌面端发布
+## Desktop-Release
 
-[`.github/workflows/desktop-release.yml`](../.github/workflows/desktop-release.yml) 在 `v*` tag 或手动触发时构建：
+[`.github/workflows/desktop-release.yml`](../.github/workflows/desktop-release.yml) baut bei einem `v*`-Tag oder manueller Auslösung:
 
-- macOS arm64：`.app` 与 `.dmg`
-- macOS x86_64：`.app` 与 `.dmg`
-- Windows x86_64：NSIS `.exe` 与 MSI `.msi`
+- macOS arm64: `.app` und `.dmg`
+- macOS x86_64: `.app` und `.dmg`
+- Windows x86_64: NSIS-`.exe` und MSI-`.msi`
 
-缺少签名材料时 workflow 会生成未签名构建，只适合内部验证，不应作为公测安装包。
+Fehlt das Signaturmaterial, erzeugt der Workflow unsignierte Builds, die nur für interne Verifikation taugen und nicht als Installationspaket für die öffentliche Beta verwendet werden dürfen.
 
-### 签名与更新材料
+### Signatur- und Update-Material
 
-macOS 代码签名需要 `APPLE_CERTIFICATE`、`APPLE_CERTIFICATE_PASSWORD` 和
-`APPLE_SIGNING_IDENTITY`。公证需要 `APPLE_ID`、`APPLE_PASSWORD`、`APPLE_TEAM_ID`，并与当前
-workflow 注入的 secrets 保持一致。Windows 需要 `WINDOWS_CERTIFICATE`、
-`WINDOWS_CERTIFICATE_PASSWORD`，或已安装证书的 `WINDOWS_CERTIFICATE_THUMBPRINT`。证书、密码和
-API private key 只能来自受保护的 release environment，不能写入仓库、release config、命令行参数或日志。
+Die macOS-Codesignierung benötigt `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD` und
+`APPLE_SIGNING_IDENTITY`. Die Notarisierung benötigt `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID` und muss mit den derzeit vom Workflow injizierten Secrets übereinstimmen. Windows benötigt `WINDOWS_CERTIFICATE`,
+`WINDOWS_CERTIFICATE_PASSWORD` oder `WINDOWS_CERTIFICATE_THUMBPRINT` für ein bereits installiertes Zertifikat. Zertifikate, Passwörter und
+API-Private-Keys dürfen nur aus einem geschützten Release-Environment stammen und nicht in das Repository, die Release-Konfiguration, Kommandozeilenargumente oder Logs geschrieben werden.
 
-Tauri 更新包同时需要：
+Für Tauri-Update-Pakete werden außerdem benötigt:
 
 - `PHYSICSOS_DESKTOP_UPDATE_PUBKEY`
 - `PHYSICSOS_DESKTOP_UPDATE_ENDPOINT`
 - `TAURI_SIGNING_PRIVATE_KEY`
-- `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`（私钥有密码时）
+- `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` (wenn der private Schlüssel ein Passwort hat)
 
-发布前运行 `pnpm run desktop:release-config`；它会拒绝开发 key、占位域名、非 HTTPS endpoint 和仍指向开发页的构建。`update-host` 只托管 `latest.json` 清单，不托管安装包；安装包和对应 `.sig` 需要先上传到稳定 HTTPS 地址，再通过 `update-host` 的管理接口登记版本、发布或回滚。接口和通道规则见 [`overlays/harness/files/packages/physicsos/update-host/README.md`](../overlays/harness/files/packages/physicsos/update-host/README.md)。
+Vor dem Release `pnpm run desktop:release-config` ausführen; es lehnt Entwicklungsschlüssel, Platzhalterdomains, Nicht-HTTPS-Endpunkte und Builds ab, die noch auf die Entwicklungsseite zeigen. `update-host` hostet nur das Manifest `latest.json`, nicht die Installationspakete; Installationspakete und die zugehörigen `.sig`-Dateien müssen zuerst an eine stabile HTTPS-Adresse hochgeladen und anschließend über die Verwaltungsschnittstelle von `update-host` als Version registriert, veröffentlicht oder zurückgerollt werden. Schnittstellen- und Kanalregeln siehe [`overlays/harness/files/packages/physicsos/update-host/README.md`](../overlays/harness/files/packages/physicsos/update-host/README.md).
 
-`update-host` 对服务端收到的签名只做形状检查，不能替代密码学验签。发布前必须让客户端或 Tauri
-CLI 用嵌入的公钥验证安装包与 `.sig`；校验失败时不得登记新版本。
+`update-host` prüft die auf dem Server eingehende Signatur nur auf ihre Form; das ersetzt keine kryptografische Verifikation. Vor dem Release müssen der Client oder die Tauri-
+CLI Installationspaket und `.sig` mit dem eingebetteten öffentlichen Schlüssel verifizieren; schlägt die Prüfung fehl, darf keine neue Version registriert werden.
 
-## 数据库备份与恢复
+## Datenbank-Backup und Wiederherstellung
 
-发布前按 [`13-DEPLOYMENT-OPERATIONS.md`](./13-DEPLOYMENT-OPERATIONS.md) 完成 PostgreSQL、Redis 和 `app_data` 的协调备份，并验证备份 manifest。恢复属于破坏性操作，必须安排维护窗口、明确恢复点并完成恢复演练；不要在本页复制或改写恢复命令。
+Vor dem Release ist gemäß [`13-DEPLOYMENT-OPERATIONS.md`](./13-DEPLOYMENT-OPERATIONS.md) ein koordiniertes Backup von PostgreSQL, Redis und `app_data` durchzuführen und das Backup-Manifest zu verifizieren. Eine Wiederherstellung ist ein destruktiver Vorgang; sie erfordert ein Wartungsfenster, einen klar benannten Wiederherstellungspunkt und eine abgeschlossene Wiederherstellungsübung. Wiederherstellungsbefehle werden auf dieser Seite weder kopiert noch umgeschrieben.
 
-## 发布前检查清单
+## Checkliste vor dem Release
 
-- [ ] 候选 commit 的 CI、lint、测试和构建全部通过。
-- [ ] `.env` 与七类生产 secret 文件未被提交，权限和轮换状态已确认。
-- [ ] PostgreSQL、Redis 和 `app_data` 已有可验证备份，恢复演练结果已记录。
-- [ ] `docker compose config --quiet`、`/healthz` 和 `/readyz` 通过，反代与 `PHYSICOS_TRUSTED_PROXIES` 已核对。
-- [ ] 镜像 digest、桌面安装包 checksum 和签名材料已记录。
-- [ ] `latest.json` 的版本、平台、URL 和签名与实际上传产物一致。
-- [ ] 发布说明写明已知限制、回滚方式、数据迁移影响和操作人。
+- [ ] CI, Lint, Tests und Build des Kandidaten-Commits sind vollständig bestanden.
+- [ ] `.env` und die sieben Arten von Produktions-Secret-Dateien sind nicht committet; Berechtigungen und Rotationsstand sind bestätigt.
+- [ ] Für PostgreSQL, Redis und `app_data` existiert ein verifizierbares Backup, das Ergebnis der Wiederherstellungsübung ist dokumentiert.
+- [ ] `docker compose config --quiet`, `/healthz` und `/readyz` bestehen; Reverse Proxy und `PHYSICOS_TRUSTED_PROXIES` sind geprüft.
+- [ ] Image-Digest, Prüfsummen der Desktop-Installationspakete und Signaturmaterial sind dokumentiert.
+- [ ] Version, Plattform, URL und Signatur in `latest.json` stimmen mit den tatsächlich hochgeladenen Artefakten überein.
+- [ ] Die Release Notes nennen bekannte Einschränkungen, Rollback-Weg, Auswirkungen der Datenmigration und die durchführende Person.

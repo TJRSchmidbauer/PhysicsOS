@@ -1,20 +1,20 @@
-# 架构决策记录（ADR）
+# Architekturentscheidungsprotokolle (ADR)
 
-本目录用轻量 ADR 记录 PhysicsOS 的架构决策：一条决策一个文件，编号单调递增、不复用、不回收。
+Dieses Verzeichnis dokumentiert die Architekturentscheidungen von PhysicsOS in schlanken ADRs: eine Entscheidung pro Datei, die Nummern steigen monoton, werden nicht wiederverwendet und nicht neu vergeben.
 
-## 流程
+## Ablauf
 
-1. 复制 [`0000-template.md`](./0000-template.md)，重命名为 `NNNN-<短标题>.md`（`NNNN` 取当前最大编号 + 1，四位补零）。
-2. 填写背景、决定、后果、替代方案四节，并写明状态（提议 / 已接受 / 已废弃 / 已被取代）。
-3. 与相关代码一并提交 PR 评审；被接受的 ADR 合并后不再改写正文。
-4. 若结论变化，新增一条 ADR，并在新旧两条里互相标注取代关系。
+1. [`0000-template.md`](./0000-template.md) kopieren und in `NNNN-<kurzer-titel>.md` umbenennen (`NNNN` ist die aktuell höchste Nummer + 1, vierstellig mit führenden Nullen).
+2. Die vier Abschnitte Kontext, Entscheidung, Konsequenzen und Alternativen ausfüllen und den Status angeben (vorgeschlagen / akzeptiert / verworfen / ersetzt).
+3. Zusammen mit dem zugehörigen Code als PR zur Review einreichen; nach dem Merge wird der Text einer akzeptierten ADR nicht mehr umgeschrieben.
+4. Ändert sich die Schlussfolgerung, wird eine neue ADR angelegt, und beide ADRs verweisen gegenseitig auf die Ersetzungsbeziehung.
 
-## 索引
+## Index
 
-以下条目尚未回填，只登记标题，等对应决策正式定稿后再写成 ADR；在写之前它们不代表已生效的结论。
+Die folgenden Einträge sind noch nicht nachgetragen; es ist nur der Titel vermerkt. Sie werden erst dann als ADR ausgearbeitet, wenn die jeweilige Entscheidung endgültig feststeht. Bis dahin gelten sie nicht als wirksame Schlussfolgerungen.
 
-| 编号 | 标题                    | 状态   |
-| ---- | ----------------------- | ------ |
-| —    | Overlay 机制            | 待回填 |
-| —    | Postgres + Redis 运行时 | 待回填 |
-| —    | 桌面壳服务器模式        | 待回填 |
+| Nr. | Titel                   | Status        |
+| --- | ----------------------- | ------------- |
+| —   | Overlay-Mechanismus     | Nachzutragen  |
+| —   | Postgres + Redis Runtime | Nachzutragen |
+| —   | Server-Modus der Desktop-Shell | Nachzutragen |

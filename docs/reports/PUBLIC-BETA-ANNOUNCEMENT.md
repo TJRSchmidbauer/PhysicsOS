@@ -1,36 +1,36 @@
-# PhysicsOS 正式公测公告 · 第一版
+# PhysicsOS Offizielle öffentliche Beta · Erste Version
 
-> 本文件是产品内「平台公告」弹窗的正文底稿，发布通过
-> `PUT /physicsos/notice/platform-notice`（SUPER_ADMIN，服务端自增 version，正文按
-> Markdown 渲染）。产品内公告是唯一对学生/老师可见的那一份，本文件只是入库留档，
-> 便于措辞可评审、可回溯。
+> Diese Datei ist die Textvorlage für das In-Product-Popup „Plattform-Ankündigung“; veröffentlicht wird sie über
+> `PUT /physicsos/notice/platform-notice` (SUPER_ADMIN, die Version wird serverseitig hochgezählt, der Text wird als
+> Markdown gerendert). Die Ankündigung im Produkt ist die einzige, die Schüler/Lehrkräfte sehen; diese Datei dient nur der Ablage,
+> damit der Wortlaut prüfbar und zurückverfolgbar ist.
 
-## 标题
+## Titel
 
-PhysicsOS 正式公测 · 第一版
+PhysicsOS Offizielle öffentliche Beta · Erste Version
 
-## 正文
+## Text
 
-**探索一个物理世界，不必先有实验室。**
+**Eine physikalische Welt zu erkunden, setzt kein Labor voraus.**
 
-一道斜面题，可以变成亲手推动的物块；一束只活在公式里的磁场，可以变成看得见轨迹的粒子。
-PhysicsOS 把物理题编译成**可以运行的物理世界**——每一步数值都由物理引擎算出来并校验，
-而不是画上去的动画。
+Eine Aufgabe zur schiefen Ebene kann zu einem Klotz werden, den man mit den eigenen Händen anschiebt; ein Magnetfeld, das nur in Formeln lebt, kann zu einem Teilchen mit sichtbarer Trajektorie werden.
+PhysicsOS kompiliert Physikaufgaben zu **lauffähigen physikalischen Welten** – jeder Zahlenwert wird von der Physik-Engine berechnet und verifiziert,
+statt als Animation aufgemalt zu sein.
 
-**第一版还给不了太多。** 题量在补，实验在加，界面还会继续改。
-所以我们把它开源出来——**诚邀各位开发者一起维护，只为学生与老师的一间永远亮着灯的实验室。**
+**Die erste Version kann noch nicht viel leisten.** Aufgaben werden ergänzt, Experimente kommen hinzu, die Oberfläche wird weiter verändert.
+Deshalb machen wir es als Open Source öffentlich – **wir laden alle Entwicklerinnen und Entwickler herzlich ein, es gemeinsam zu pflegen – für ein Labor, in dem für Schüler und Lehrkräfte immer das Licht brennt.**
 
-**你可以做什么**
+**Was du tun kannst**
 
-- **学生**：从首页开始探索，或直接粘一道题进去；遇到不对的地方，点侧栏「反馈」。
-- **老师**：出卷专区可按教材章节组卷；缺的题、错的标准，直接告诉我们。
-- **开发者**：欢迎来仓库提 issue / PR，物理引擎、实验、题目规范都欢迎 ——
+- **Schüler**: Starte auf der Startseite mit dem Erkunden oder füge direkt eine Aufgabe ein; wenn etwas nicht stimmt, klicke in der Seitenleiste auf „Feedback“.
+- **Lehrkräfte**: Im Klausurbereich lassen sich Klausuren nach Lehrbuchkapiteln zusammenstellen; fehlende Aufgaben oder falsche Standards teilt uns einfach direkt mit.
+- **Entwickler**: Issues / PRs im Repository sind willkommen, ob Physik-Engine, Experimente oder Aufgabenstandards –
   <https://github.com/122-syf-wcy/PhysicsOS>
 
-PhysicsOS · 2026 年 9 月
+PhysicsOS · September 2026
 
-## 措辞备选（那一句）
+## Alternative Formulierungen (für „den einen Satz“)
 
-1. 只为学生与老师的一间永远亮着灯的实验室。（采用）
-2. 只为学生与老师的一次看得见、摸得着的思考。
-3. 只为学生与老师把物理世界交到他们手上。
+1. Für ein Labor, in dem für Schüler und Lehrkräfte immer das Licht brennt. (übernommen)
+2. Für ein Nachdenken von Schülern und Lehrkräften, das man sehen und anfassen kann.
+3. Für Schüler und Lehrkräfte, damit sie die physikalische Welt in die Hand nehmen.

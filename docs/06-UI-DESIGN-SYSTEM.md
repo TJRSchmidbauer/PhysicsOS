@@ -1,24 +1,24 @@
 # PhysicsOS UI Design System
 
-> 文件：`docs/06-UI-DESIGN-SYSTEM.md`  
-> 文档定位：PhysicsOS Web / Desktop UI 设计系统与视觉工程规范  
-> 视觉事实源：`UI/原型图/`、`UI/组件图/`
+> Datei: `docs/06-UI-DESIGN-SYSTEM.md`  
+> Dokumentzweck: UI-Designsystem und visuelle Engineering-Spezifikation für PhysicsOS Web / Desktop  
+> Visuelle Faktenquellen: `UI/原型图/` (Prototypen), `UI/组件图/` (Komponentenbilder)
 >
-> 本文件不是“设计参考”，而是前端实现时必须遵守的视觉规范。
+> Diese Datei ist keine „Designreferenz“, sondern die visuelle Spezifikation, die bei der Frontend-Implementierung verbindlich einzuhalten ist.
 >
-> **原型图定义页面视觉事实，组件图定义组件形态，本文件负责把视觉规则工程化。**
+> **Die Prototypen definieren die visuellen Fakten der Seiten, die Komponentenbilder die Gestalt der Komponenten, und diese Datei überführt die visuellen Regeln in Engineering-Form.**
 
 ---
 
-# 1. 设计目标
+# 1. Designziele
 
-PhysicsOS 不应呈现为传统教育 SaaS、政务后台、暗黑科技平台或满屏卡片管理系统。
+PhysicsOS soll nicht wie ein klassisches Bildungs-SaaS, eine Behörden-Verwaltungsoberfläche, eine dunkle Tech-Plattform oder ein mit Karten überfülltes Verwaltungssystem wirken.
 
-目标视觉：
+Ziel-Optik:
 
-> **明亮、精密、科学、克制、高级、空间感强、信息密度高但不压迫。**
+> **Hell, präzise, wissenschaftlich, zurückhaltend, hochwertig, mit starkem Raumgefühl, hoher Informationsdichte, aber nicht erdrückend.**
 
-核心关键词：
+Kernschlagwörter:
 
 ```text
 Bright
@@ -31,7 +31,7 @@ Readable
 Interactive
 ```
 
-PhysicsOS 的真正主角是：
+Die wahren Hauptdarsteller von PhysicsOS sind:
 
 ```text
 Physics World
@@ -45,103 +45,103 @@ Energy
 Data
 ```
 
-UI 只是承载这些内容的“精密仪器外壳”。
+Die UI ist nur das „Präzisionsgerätegehäuse“, das diese Inhalte trägt.
 
 ---
 
-# 2. 视觉事实源优先级
+# 2. Priorität der visuellen Faktenquellen
 
-实现冲突时按以下优先级处理：
+Bei Implementierungskonflikten gilt folgende Priorität:
 
 ```text
-页面原型图
+Seitenprototypen
 >
-组件图
+Komponentenbilder
 >
-本设计系统
+Dieses Designsystem
 >
-第三方组件库默认样式
+Standardstile von Komponentenbibliotheken Dritter
 ```
 
-如果 shadcn / Radix / Tailwind 默认样式与原型冲突：
+Wenn die Standardstile von shadcn / Radix / Tailwind dem Prototyp widersprechen:
 
-> 必须覆盖默认样式，而不是修改原型方向。
+> Müssen die Standardstile überschrieben werden, statt die Richtung des Prototyps zu ändern.
 
 ---
 
-# 3. 品牌视觉
+# 3. Markenvisualität
 
-品牌：
+Marke:
 
 ```text
 PhysicsOS
 ```
 
-Logo：
+Logo:
 
 ```text
-蓝色几何空间结构图形
+Blaues geometrisches Raumstruktur-Symbol
 +
-PhysicsOS 字标
+PhysicsOS-Wortmarke
 ```
 
-视觉特征：
+Visuelle Merkmale:
 
 ```text
-科学
-几何
-空间
-秩序
-精密
+Wissenschaftlich
+Geometrisch
+Räumlich
+Ordnung
+Präzision
 ```
 
-禁止：
+Verboten:
 
 ```text
-卡通化
-重霓虹
-重金属质感
-大面积紫色
-复杂高饱和渐变
+Cartoonisierung
+Starkes Neon
+Schwere Metalloptik
+Großflächiges Violett
+Komplexe, hochgesättigte Verläufe
 ```
 
 ---
 
-# 3.1 IP 形象「小 Q」
+# 3.1 Maskottchen „Kleines Q“ (小 Q)
 
-PhysicsOS 有一个 IP 形象：蓝色光泽球体 + 白色面罩 + 一圈电子轨道环。它把品牌几何（蓝、空间、轨道）给了一张脸，是产品里唯一允许“拟人化”的元素。
+PhysicsOS hat ein Maskottchen: eine glänzende blaue Kugel + weiße Gesichtsmaske + ein Elektronenbahn-Ring. Es gibt der Markengeometrie (Blau, Raum, Bahn) ein Gesicht und ist das einzige Element im Produkt, das „vermenschlicht“ sein darf.
 
-资产：
+Assets:
 
 ```text
-UI/generated/mascot/                       原始透明 PNG（生成模型输出经 cutout 处理）
-apps/web/public/physicsos/mascot/          网页用 WebP：{wave,think,search}-{160,320,640}.webp
-scripts/design/cutout-mascot.py            白底渲染 → 透明切图（保留柔和阴影）
-ui-physicsos/src/client/Mascot.tsx         唯一的渲染组件（姿态 / 尺寸 / 悬浮）
+UI/generated/mascot/                       Original-PNG mit Transparenz (Ausgabe des Generierungsmodells nach Cutout)
+apps/web/public/physicsos/mascot/          WebP für das Web: {wave,think,search}-{160,320,640}.webp
+scripts/design/cutout-mascot.py            Rendering auf Weiß → transparenter Ausschnitt (weicher Schatten bleibt erhalten)
+ui-physicsos/src/client/Mascot.tsx         Die einzige Render-Komponente (Pose / Größe / Schweben)
 ```
 
-三个姿态各有语义，不得混用：
+Die drei Posen haben jeweils eigene Bedeutung und dürfen nicht vermischt werden:
 
 ```text
-wave     问候 —— 首页 Hero、AI 助教入口按钮
-think    思考 / 讲解 —— AI 助教空态、推导、加载
-search   寻找 —— 实验中心头部、学习记录空态、无结果
+wave     Begrüßung —— Hero der Startseite, Einstiegsbutton des KI-Assistenten
+think    Nachdenken / Erklären —— Leerzustand des KI-Assistenten, Herleitung, Laden
+search   Suchen —— Kopfbereich des Experimentzentrums, Leerzustand des Lernverlaufs, keine Ergebnisse
 ```
 
-规则：
+Regeln:
 
 ```text
-业务代码只通过 <Mascot pose size /> 使用，不直接引用 webp
-一个视图最多出现一个小 Q
-不出现在 PhysicsCanvas 内部（画布只画物理）
-不与物理数据同框争夺焦点
+Geschäftscode nutzt es nur über <Mascot pose size />, ohne direkte Referenz auf die webp-Dateien
+Pro Ansicht höchstens ein Kleines Q
+Erscheint nicht im Inneren des PhysicsCanvas (der Canvas zeichnet nur Physik)
+Konkurriert nicht im selben Bildausschnitt mit Physikdaten um den Fokus
 ```
 
 ---
 
-# 4. 基础颜色 Token
+# 4. Basis-Farbtokens
 
-推荐：
+Empfohlen:
 
 ```css
 :root {
@@ -185,39 +185,39 @@ search   寻找 —— 实验中心头部、学习记录空态、无结果
 }
 ```
 
-品牌主色永远以自然蓝为核心。
+Die Markenhauptfarbe ist stets ein natürliches Blau.
 
-绿色用于：
-
-```text
-验证通过
-试题空间 CTA
-成功状态
-```
-
-橙色用于：
+Grün wird verwendet für:
 
 ```text
-警告
-能量类强调
-难度
+Verifikation bestanden
+CTA im Aufgabenraum
+Erfolgszustände
 ```
 
-红色用于：
+Orange wird verwendet für:
 
 ```text
-错误
-冲突
-失败
+Warnungen
+Energiebezogene Hervorhebungen
+Schwierigkeit
 ```
 
-禁止把紫色作为主要品牌色。
+Rot wird verwendet für:
+
+```text
+Fehler
+Konflikte
+Fehlschläge
+```
+
+Violett darf nicht die Hauptmarkenfarbe sein.
 
 ---
 
-# 5. 页面背景
+# 5. Seitenhintergrund
 
-默认：
+Standard:
 
 ```css
 background:
@@ -225,51 +225,51 @@ background:
   linear-gradient(180deg, #fbfcfe 0%, #f7f9fc 100%);
 ```
 
-工作区 Canvas 背景可使用：
+Der Canvas-Hintergrund des Arbeitsbereichs kann verwenden:
 
 ```text
 #FBFDFF
 ```
 
-配极轻蓝灰网格。
+mit einem sehr leichten blaugrauen Raster.
 
 ---
 
-# 6. AI 组件裁剪背景规范
+# 6. Hintergrundregel für das KI-gestützte Zuschneiden von Komponenten
 
-为了方便 AI / CV / 前端人工裁剪组件图：
+Damit KI / CV / Frontend-Entwickler Komponentenbilder leicht manuell zuschneiden können:
 
-> **组件图统一使用近纯白、无纹理、低干扰背景。**
+> **Komponentenbilder verwenden einheitlich einen fast reinweißen, texturlosen, störungsarmen Hintergrund.**
 
-建议：
+Empfohlen:
 
 ```text
-背景色：#FFFFFF 或 #FAFBFD
-组件之间间距：至少 48px
-每个组件完整独立
-不重叠
-不带复杂背景图
-不带阴影叠层遮挡
-不在组件背后放渐变大光斑
+Hintergrundfarbe: #FFFFFF oder #FAFBFD
+Abstand zwischen Komponenten: mindestens 48px
+Jede Komponente vollständig eigenständig
+Keine Überlappung
+Keine komplexen Hintergrundbilder
+Keine verdeckenden Schattenstapel
+Keine großen Verlaufs-Lichtflecken hinter Komponenten
 ```
 
-如果需要透明素材：
+Wenn transparentes Material benötigt wird:
 
 ```text
-单独导出透明 PNG
+Separat als transparentes PNG exportieren
 ```
 
-对于 AI 自动切图总览图：
+Für Übersichtsbilder zum automatischen KI-Zuschneiden:
 
 ```text
-优先 #FFFFFF
+Bevorzugt #FFFFFF
 ```
 
 ---
 
-# 7. 字体体系
+# 7. Schriftsystem
 
-中文：
+Chinesisch:
 
 ```text
 PingFang SC
@@ -278,7 +278,7 @@ Noto Sans SC
 system-ui
 ```
 
-英文/数字：
+Englisch/Ziffern:
 
 ```text
 Inter
@@ -286,7 +286,7 @@ SF Pro Display
 system-ui
 ```
 
-公式：
+Formeln:
 
 ```text
 KaTeX
@@ -294,7 +294,7 @@ KaTeX
 
 ---
 
-# 8. 字号体系
+# 8. Schriftgrößensystem
 
 ```text
 Display XL    44 / 52 / 700
@@ -312,15 +312,15 @@ Micro         11 / 16 / 400
 
 ---
 
-# 9. 间距系统
+# 9. Abstandssystem
 
-基础单位：
+Basiseinheit:
 
 ```text
 4px
 ```
 
-推荐：
+Empfohlen:
 
 ```text
 4
@@ -337,36 +337,36 @@ Micro         11 / 16 / 400
 
 ---
 
-# 10. 圆角
+# 10. Eckenradien
 
 ```text
-4px  极小控件
+4px  Sehr kleine Steuerelemente
 6px  Input
-8px  默认 Button
+8px  Standard-Button
 10px Mini Card
 12px Panel / Card
 16px Hero Card
-20px 大型首页入口卡片
+20px Große Einstiegskarten der Startseite
 ```
 
 ---
 
-# 11. 边框与阴影
+# 11. Rahmen und Schatten
 
-默认：
+Standard:
 
 ```css
 border: 1px solid #e8ecf2;
 ```
 
-选中：
+Ausgewählt:
 
 ```css
 border-color: #8bb4ff;
 box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.08);
 ```
 
-阴影：
+Schatten:
 
 ```css
 --shadow-xs: 0 1px 2px rgba(20, 33, 61, 0.04);
@@ -378,17 +378,17 @@ box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.08);
 
 # 12. Glass
 
-只用于：
+Nur verwendet für:
 
 ```text
-导航
-浮动 Toolbar
+Navigation
+Schwebende Toolbar
 Inspector
-Hero 数据浮层
+Hero-Datenüberlagerung
 Modal
 ```
 
-推荐：
+Empfohlen:
 
 ```css
 background: rgba(255, 255, 255, 0.76);
@@ -400,7 +400,7 @@ border: 1px solid rgba(222, 229, 239, 0.72);
 
 # 13. Button
 
-分类：
+Kategorien:
 
 ```text
 Primary
@@ -409,15 +409,15 @@ Ghost
 Danger
 ```
 
-Primary：
+Primary:
 
 ```text
-蓝底白字
-高度 36–40px
-圆角 8px
+Blauer Hintergrund, weiße Schrift
+Höhe 36–40px
+Eckenradius 8px
 ```
 
-首页 CTA：
+CTA der Startseite:
 
 ```text
 42–46px
@@ -427,30 +427,30 @@ Primary：
 
 # 14. Input / Select
 
-默认高度：
+Standardhöhe:
 
 ```text
 34–38px
 ```
 
-Focus：
+Focus:
 
 ```text
-蓝色边框 + 轻外环
+Blauer Rahmen + leichter äußerer Ring
 ```
 
-数值输入提供：
+Zahleneingaben bieten:
 
 ```text
 NumericStepper
 ```
 
-支持：
+mit Unterstützung für:
 
 ```text
-步长
-单位
-科学计数法
+Schrittweite
+Einheit
+Wissenschaftliche Notation
 min/max
 ```
 
@@ -458,50 +458,50 @@ min/max
 
 # 15. Tabs
 
-Section Tabs：
+Section Tabs:
 
 ```text
-属性
-可观察量
-数据
-图像
-高级选项
+Eigenschaften
+Beobachtbare Größen
+Daten
+Diagramme
+Erweiterte Optionen
 ```
 
-激活：
+Aktiv:
 
 ```text
-蓝字 + 底部 2px 蓝线
+Blaue Schrift + 2px blaue Linie unten
 ```
 
 ---
 
 # 16. Chip / Status
 
-Chip 用于：
+Chips werden verwendet für:
 
 ```text
-学科
-知识点
-难度
-状态
+Fach
+Wissenspunkt
+Schwierigkeit
+Status
 ```
 
-状态：
+Status:
 
 ```text
-已保存 Green
-运行中 Blue
-未开始 Amber
-未通过 Red
-草稿 Gray
+Gespeichert Green
+Läuft Blue
+Nicht begonnen Amber
+Nicht bestanden Red
+Entwurf Gray
 ```
 
 ---
 
 # 17. Card
 
-按领域区分：
+Nach Domäne unterschieden:
 
 ```text
 Entry Card
@@ -513,48 +513,48 @@ Panel Card
 Summary Card
 ```
 
-不要所有内容统一一套 Card。
+Nicht alle Inhalte in ein einheitliches Card-Schema pressen.
 
 ---
 
-# 18. 首页入口卡
+# 18. Einstiegskarten der Startseite
 
-两张核心入口：
+Zwei zentrale Einstiege:
 
 ```text
 Physics Lab
 Question Space
 ```
 
-要求：
+Anforderungen:
 
 ```text
-左文右图
-强视觉资产
-主 CTA
-大量留白
+Text links, Bild rechts
+Starkes visuelles Asset
+Primärer CTA
+Viel Weißraum
 ```
 
 ---
 
 # 19. Top Navigation
 
-Web：
+Web:
 
 ```text
 Logo
-首页
-物理实验室
-试题空间
-学习记录
-资源库
-我的
-全局搜索
-通知
-头像
+Startseite
+Physiklabor
+Aufgabenraum
+Lernverlauf
+Ressourcenbibliothek
+Mein Bereich
+Globale Suche
+Benachrichtigungen
+Avatar
 ```
 
-高度：
+Höhe:
 
 ```text
 60–64px
@@ -564,11 +564,11 @@ Logo
 
 # 20. Desktop Sidebar
 
-支持：
+Unterstützt:
 
 ```text
-展开
-折叠
+Aufgeklappt
+Eingeklappt
 Hover
 Active
 ```
@@ -577,29 +577,29 @@ Active
 
 # 21. Workspace Toolbar
 
-包含：
+Enthält:
 
 ```text
-新建
-打开
-保存
-另存为
-运行
-暂停
-停止
-重置
-参数扫描
-导出
-截图
-撤销
-重做
+Neu
+Öffnen
+Speichern
+Speichern unter
+Ausführen
+Pause
+Stopp
+Zurücksetzen
+Parameterdurchlauf
+Exportieren
+Screenshot
+Rückgängig
+Wiederholen
 ```
 
 ---
 
 # 22. Scene Tree
 
-节点状态：
+Knotenzustände:
 
 ```text
 normal
@@ -614,20 +614,20 @@ disabled
 
 # 23. Inspector
 
-分组：
+Gruppen:
 
 ```text
-粒子属性
-初始条件
-磁场设置
-高级设置
+Teilcheneigenschaften
+Anfangsbedingungen
+Magnetfeldeinstellungen
+Erweiterte Einstellungen
 ```
 
 ---
 
 # 24. Observation Panel
 
-条目：
+Einträge:
 
 ```text
 Checkbox
@@ -641,19 +641,19 @@ Drag Handle
 
 # 25. Physics Canvas
 
-Canvas 必须是视觉中心。
+Der Canvas muss das visuelle Zentrum sein.
 
-网格：
+Raster:
 
 ```text
-主网格 #DCE6F5
-次网格 #EEF3FA
-坐标轴 #75859A
+Hauptraster #DCE6F5
+Nebenraster #EEF3FA
+Koordinatenachsen #75859A
 ```
 
 ---
 
-# 26. Physics 语义色
+# 26. Physik-Semantikfarben
 
 ```text
 Velocity      Green
@@ -671,53 +671,53 @@ Error         Red
 
 # 27. Magnetic Field
 
-纸内：
+In die Zeichenebene hinein:
 
 ```text
 ×
 ```
 
-纸外：
+Aus der Zeichenebene heraus:
 
 ```text
 ·
 ```
 
-使用低饱和蓝灰。
+Verwendet ein wenig gesättigtes Blaugrau.
 
 ---
 
 # 28. Trajectory
 
 ```text
-实时：2px 蓝色实线
-预测：蓝色虚线
-历史：降低 alpha
+Echtzeit: 2px blaue durchgezogene Linie
+Vorhersage: blaue gestrichelte Linie
+Verlauf: reduziertes Alpha
 ```
 
 ---
 
 # 29. Timeline
 
-支持：
+Unterstützt:
 
 ```text
-播放
-暂停
-前进
-后退
-倍率
-当前时间
-总时间
+Abspielen
+Pause
+Vorwärts
+Rückwärts
+Geschwindigkeitsfaktor
+Aktuelle Zeit
+Gesamtzeit
 Slider
-关键事件标记
+Markierungen für Schlüsselereignisse
 ```
 
 ---
 
 # 30. Data / Chart / Table
 
-Data Card：
+Data Card:
 
 ```text
 Label
@@ -726,27 +726,27 @@ Value
 Unit
 ```
 
-图表：
+Diagramme:
 
 ```text
-浅色网格
-弱坐标轴
-统一语义色
+Helles Raster
+Dezente Achsen
+Einheitliche Semantikfarben
 ```
 
-表格：
+Tabellen:
 
 ```text
-紧凑
-数字右对齐
-单位明确
+Kompakt
+Zahlen rechtsbündig
+Einheiten eindeutig
 ```
 
 ---
 
 # 31. Agent Panel
 
-结构：
+Struktur:
 
 ```text
 Header
@@ -756,188 +756,189 @@ Quick Actions
 Input
 ```
 
-状态应具体：
+Zustände sollten konkret sein:
 
 ```text
-正在理解题目
-正在创建场景
-正在计算
-正在验证
-正在调整可视化
+Aufgabe wird verstanden
+Szene wird erstellt
+Berechnung läuft
+Verifikation läuft
+Visualisierung wird angepasst
 ```
 
 ---
 
 # 32. Question Space
 
-视觉核心：
+Visueller Kern:
 
 ```text
-题目正文
-题图
-已知条件
-求解目标
-可视化
-解析步骤
-相关题
+Aufgabentext
+Aufgabenbild
+Gegebene Bedingungen
+Gesuchte Größen
+Visualisierung
+Lösungsschritte
+Verwandte Aufgaben
 ```
 
 ---
 
-# 33. 题目正文
+# 33. Aufgabentext
 
-要求：
+Anforderungen:
 
 ```text
-宽行距
-公式清晰
-题图比例正确
-题号层级明确
+Großzügiger Zeilenabstand
+Klare Formeln
+Korrekte Proportionen des Aufgabenbilds
+Eindeutige Hierarchie der Aufgabennummern
 ```
 
 ---
 
-# 34. AI 解析
+# 34. KI-Analyse
 
-步骤使用：
+Schritte verwenden:
 
 ```text
-编号圆点
-标题
-解释
-公式
+Nummerierte Punkte
+Titel
+Erklärung
+Formel
 ```
 
 ---
 
-# 35. 首页 Hero
+# 35. Hero der Startseite
 
-Hero 应展示真实物理视觉：
+Der Hero soll echte physikalische Visualisierungen zeigen:
 
 ```text
-轨迹
-场
-实验装置
-公式淡化背景
+Trajektorien
+Felder
+Versuchsaufbauten
+Formeln als dezenter Hintergrund
 ```
 
-而不是普通营销 Banner。
+und kein gewöhnliches Marketing-Banner sein.
 
 ---
 
 # 36. Loading / Empty / Error
 
-Loading：
+Loading:
 
 ```text
-Skeleton + 局部 Progress
+Skeleton + lokaler Progress
 ```
 
-Empty：
+Empty:
 
 ```text
-轻插画 + 说明 + CTA
+Leichte Illustration + Erklärung + CTA
 ```
 
-Error：
+Error:
 
 ```text
-明确错误类别 + 可恢复动作
+Eindeutige Fehlerkategorie + wiederherstellende Aktion
 ```
 
 ---
 
-# 37. 动效
+# 37. Animationen
 
-常规：
+Regulär:
 
 ```text
 120–220ms
 ```
 
-页面：
+Seite:
 
 ```text
 200–320ms
 ```
 
-曲线：
+Kurve:
 
 ```css
 cubic-bezier(.2,.8,.2,1)
 ```
 
-## 37.1 动效分层
+## 37.1 Ebenen der Animation
 
-动效只有三层，每层有明确的 token（见 `chrome.ts`）：
-
-```text
-响应    --physics-motion-fast/base/slow (120–180ms)   按钮、行、chip 的悬停与按下
-入场    --physics-motion-entrance (460ms) + --physics-ease-emphasized
-        页面骨架“围绕画布装配”：工具栏自上落下、场景树自左滑入、
-        Inspector 自右滑入、画布中央呼吸放大、时间轴与数据面板自下升起；
-        列表内元素以 --physics-card-index / --physics-row-index 错峰
-物理事件  PhysicsCanvas effects（碰撞 / 进出场 / 关键点冲击波）
-```
-
-## 37.2 物理事件动效
-
-播放时钟越过一个 `TimelineEvent`，画布在事件发生处打出一次冲击波（`CanvasEffect`）：
+Es gibt nur drei Animationsebenen, jede mit eindeutigen Tokens (siehe `chrome.ts`):
 
 ```text
-impact / plate-impact   红色双环 + 八向火花（碰撞、打到极板、落地）
-enter / exit            场色虚线宽环（进入 / 离开场区）
-launch / apex / generic 琥珀色小脉冲（起点、最高点）
+Reaktion    --physics-motion-fast/base/slow (120–180ms)   Hover und Drücken von Buttons, Zeilen, Chips
+Einblendung --physics-motion-entrance (460ms) + --physics-ease-emphasized
+            Das Seitengerüst „baut sich um den Canvas herum auf“: Toolbar fällt von oben,
+            Szenenbaum gleitet von links ein, Inspector von rechts,
+            Canvas in der Mitte vergrößert sich atmend, Timeline und Datenpanel steigen von unten auf;
+            Elemente in Listen werden über --physics-card-index / --physics-row-index gestaffelt
+Physik-Ereignis  PhysicsCanvas effects (Kollision / Ein- und Austritt / Schockwelle an Schlüsselpunkten)
 ```
 
-锚点只取运行时已声明的事实：同 id 的 KeyPoint，否则当前帧的运动物体；跳转（seek）不触发。实现见 `physics/event-effects.ts`，动效本身不承载任何物理量。
+## 37.2 Animationen für Physik-Ereignisse
 
-## 37.3 运行态
+Überschreitet die Wiedergabeuhr ein `TimelineEvent`, löst der Canvas am Ereignisort eine Schockwelle aus (`CanvasEffect`):
 
-时钟运行时（`data-physicsos-running="true"`）：运行按钮加外环并呼吸、画布外框加一圈蓝色、当前时刻读数转为蓝色、运动物体带柔光。
+```text
+impact / plate-impact   Roter Doppelring + achtfacher Funkenflug (Kollision, Aufprall auf die Platte, Landung)
+enter / exit            Gestrichelter breiter Ring in Feldfarbe (Eintritt in / Austritt aus dem Feldbereich)
+launch / apex / generic Kleiner bernsteinfarbener Puls (Startpunkt, höchster Punkt)
+```
 
-## 37.4 首页物理小场景
+Als Anker dienen nur zur Laufzeit bereits deklarierte Fakten: der KeyPoint mit gleicher id, sonst der bewegte Körper im aktuellen Frame; ein Sprung (seek) löst nichts aus. Implementierung siehe `physics/event-effects.ts`; die Animation selbst trägt keine physikalischen Größen.
 
-首页 Hero 右侧是一个装饰性的弹性碰撞世界（`HomePlayground`）：若干小球在无摩擦盒子里运动，与墙、彼此、小 Q 的身体（静态圆形碰撞体）发生弹性碰撞，留下轨迹尾迹并在接触点闪一圈；指针靠近会轻轻推开小球。它**不是**物理结果，不进入 `PhysicsScene`，不显示任何数值。
+## 37.3 Laufzustand
 
-所有入场与循环动效在 `prefers-reduced-motion: reduce` 下关闭。
+Läuft die Uhr (`data-physicsos-running="true"`): Der Ausführen-Button erhält einen äußeren Ring und atmet, der Canvas-Rahmen erhält eine blaue Einfassung, die Anzeige der aktuellen Zeit wird blau, und bewegte Körper erhalten einen weichen Schein.
+
+## 37.4 Kleine Physik-Szene der Startseite
+
+Rechts im Hero der Startseite befindet sich eine dekorative Welt elastischer Stöße (`HomePlayground`): Einige kleine Kugeln bewegen sich in einem reibungsfreien Kasten, stoßen elastisch mit den Wänden, untereinander und mit dem Körper des Kleinen Q (statischer kreisförmiger Kollisionskörper), hinterlassen Bahnspuren und lassen am Berührpunkt einen Ring aufblitzen; nähert sich der Zeiger, werden die Kugeln sanft weggeschoben. Es ist **kein** physikalisches Ergebnis, gelangt nicht in die `PhysicsScene` und zeigt keinerlei Zahlenwerte an.
+
+Alle Einblend- und Schleifenanimationen werden unter `prefers-reduced-motion: reduce` abgeschaltet.
 
 ---
 
-# 38. 图标
+# 38. Icons
 
-统一线性图标体系。
+Einheitliches lineares Icon-System.
 
-物理专用图标自行维护：
+Physikspezifische Icons werden selbst gepflegt:
 
 ```text
-力
-磁场
-电场
-实验器材
+Kraft
+Magnetfeld
+Elektrisches Feld
+Versuchsgeräte
 ```
 
-禁止 Emoji 替代正式图标。
+Emojis dürfen offizielle Icons nicht ersetzen.
 
 ---
 
-# 39. 3D 教育资产
+# 39. 3D-Bildungsassets
 
-要求：
+Anforderungen:
 
 ```text
-浅色
-精细
-真实但不过度写实
-统一材质
-柔和阴影
+Hell
+Fein
+Realistisch, aber nicht übertrieben fotorealistisch
+Einheitliches Material
+Weiche Schatten
 ```
 
 ---
 
-# 40. 响应式
+# 40. Responsives Verhalten
 
-重点：
+Schwerpunkte:
 
 ```text
 1366×768
@@ -946,13 +947,13 @@ launch / apex / generic 琥珀色小脉冲（起点、最高点）
 1920×1080
 ```
 
-Workspace 为桌面横屏优先。
+Der Workspace ist primär für den Desktop im Querformat ausgelegt.
 
 ---
 
 # 41. 1366
 
-优先折叠：
+Zuerst eingeklappt werden:
 
 ```text
 Observation
@@ -960,13 +961,13 @@ Agent
 Bottom Data
 ```
 
-不压缩 Canvas 到不可用。
+Der Canvas wird nicht bis zur Unbrauchbarkeit gestaucht.
 
 ---
 
 # 42. 1920
 
-允许：
+Erlaubt, dass
 
 ```text
 Inspector
@@ -974,13 +975,13 @@ Observation
 Agent
 ```
 
-同时存在。
+gleichzeitig vorhanden sind.
 
 ---
 
 # 43. Accessibility
 
-必须：
+Erforderlich:
 
 ```text
 Keyboard
@@ -992,21 +993,21 @@ Reduced Motion
 
 ---
 
-# 44. 数字与公式
+# 44. Zahlen und Formeln
 
-物理数据：
+Physikalische Daten:
 
 ```css
 font-variant-numeric: tabular-nums;
 ```
 
-科学计数：
+Wissenschaftliche Notation:
 
 ```text
 1.60 × 10⁻¹⁹
 ```
 
-输入可用：
+Für die Eingabe möglich:
 
 ```text
 1.60e-19
@@ -1014,7 +1015,7 @@ font-variant-numeric: tabular-nums;
 
 ---
 
-# 45. 组件分层
+# 45. Komponentenschichtung
 
 ```text
 Primitive
@@ -1023,7 +1024,7 @@ Domain Component
 Feature Component
 ```
 
-Domain Component：
+Domain Component:
 
 ```text
 QuantityInput
@@ -1038,13 +1039,13 @@ FieldDirectionSelector
 
 # 46. Token Source
 
-建议：
+Empfohlen:
 
 ```text
 packages/ui/src/tokens/
 ```
 
-保存：
+Enthält:
 
 ```text
 color
@@ -1058,47 +1059,47 @@ physics semantic colors
 
 ---
 
-# 47. 禁止散落 Hex
+# 47. Keine verstreuten Hex-Werte
 
-业务代码不得随处硬编码颜色。
+Geschäftscode darf Farben nicht überall hartkodieren.
 
 ---
 
-# 48. 一比一复刻验收
+# 48. Abnahme der 1:1-Nachbildung
 
-重点：
+Schwerpunkte:
 
 ```text
-整体布局
-尺寸
-相对间距
-视觉层级
-主色
-边框
-圆角
-字体
-图标
-Canvas 比例
+Gesamtlayout
+Maße
+Relative Abstände
+Visuelle Hierarchie
+Hauptfarbe
+Rahmen
+Eckenradien
+Schrift
+Icons
+Canvas-Proportionen
 ```
 
 ---
 
-# 49. 视觉容差
+# 49. Visuelle Toleranz
 
-建议：
+Empfohlen:
 
 ```text
-主要尺寸误差 <= 4px
-主要间距误差 <= 4px
-圆角误差 <= 2px
-主色明显偏差不可接受
+Abweichung bei Hauptmaßen <= 4px
+Abweichung bei Hauptabständen <= 4px
+Abweichung beim Eckenradius <= 2px
+Deutliche Abweichung der Hauptfarbe nicht akzeptabel
 ```
 
 ---
 
-# 50. AI UI 开发规则
+# 50. Regeln für die UI-Entwicklung durch KI
 
-必须先读：
+Vorab zu lesen:
 
 ```text
 UI/原型图
@@ -1107,34 +1108,34 @@ UI/组件图
 07-UI-PAGE-SPECS.md
 ```
 
-禁止：
+Verboten:
 
 ```text
-自行换风格
-大面积紫色
-默认 shadcn 样式直接交付
-满屏卡片
-Emoji 图标
+Den Stil eigenmächtig wechseln
+Großflächiges Violett
+Standard-shadcn-Stile unverändert ausliefern
+Mit Karten überfüllte Seiten
+Emoji-Icons
 ```
 
 ---
 
 # 51. UI Definition of Done
 
-必须：
+Erforderlich:
 
 ```text
-与原型布局一致
-Token 一致
-响应式可用
-Focus 可用
-无明显布局跳动
-无占位素材
-无默认组件风格残留
+Layout stimmt mit dem Prototyp überein
+Tokens stimmen überein
+Responsiv nutzbar
+Focus nutzbar
+Keine auffälligen Layoutsprünge
+Keine Platzhalter-Assets
+Keine Reste von Standard-Komponentenstilen
 ```
 
 ---
 
-# 52. 一句话 UI 原则
+# 52. UI-Prinzip in einem Satz
 
-> **PhysicsOS 的 UI 必须像一套精密、明亮、可信的数字科学仪器，而不是一套套着教育内容的通用 SaaS 模板。**
+> **Die UI von PhysicsOS muss sich wie ein präzises, helles, vertrauenswürdiges digitales wissenschaftliches Instrument anfühlen und nicht wie eine generische SaaS-Vorlage, in die Bildungsinhalte eingesetzt wurden.**

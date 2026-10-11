@@ -1,19 +1,19 @@
-# PhysicsOS UI Page Specifications
+# PhysicsOS UI-Seitenspezifikationen
 
-> 文件：`docs/07-UI-PAGE-SPECS.md`  
-> 文档定位：PhysicsOS 页面级一比一复刻与布局规范  
-> 依赖：`06-UI-DESIGN-SYSTEM.md`
+> Datei: `docs/07-UI-PAGE-SPECS.md`  
+> Dokumentzweck: Seitenweise 1:1-Nachbildung und Layout-Spezifikation von PhysicsOS  
+> Abhängigkeit: `06-UI-DESIGN-SYSTEM.md`
 
 ---
 
-# 1. 页面集合
+# 1. Seitenübersicht
 
-当前核心：
+Aktueller Kern:
 
 ```text
-01 首页
-02 物理实验室工作区
-03 试题空间
+01 Startseite
+02 Physik-Labor-Arbeitsbereich
+03 Aufgabenraum
 04 Desktop Workspace
 ```
 
@@ -21,17 +21,17 @@
 
 # 2. Web Shell
 
-Top Navigation：
+Top Navigation:
 
 ```text
-高度 62px
-左右 padding 28–36px
-Logo 区 160–180px
-Nav gap 34–44px
-Search 280–320px
+Höhe 62px
+Links/rechts Padding 28–36px
+Logo-Bereich 160–180px
+Nav-Abstand 34–44px
+Suche 280–320px
 ```
 
-内容区左右安全区：
+Sicherer Seitenrand des Inhaltsbereichs links/rechts:
 
 ```text
 24–32px
@@ -39,23 +39,23 @@ Search 280–320px
 
 ---
 
-# 3. 首页
+# 3. Startseite
 
-设计基准：
+Designbasis:
 
 ```text
 1600×900
 ```
 
-Hero：
+Hero:
 
 ```text
 350–390px
-左文案 42–48%
-右视觉 52–58%
+Text links 42–48%
+Visual rechts 52–58%
 ```
 
-主标题：
+Haupttitel:
 
 ```text
 36–44px
@@ -63,45 +63,45 @@ Hero：
 
 ---
 
-# 4. 首页双入口
+# 4. Doppelter Einstieg der Startseite
 
 ```text
-2 columns
-gap 18–24px
-height 170–190px
+2 Spalten
+Abstand 18–24px
+Höhe 170–190px
 ```
 
-卡内：
+Innerhalb der Karte:
 
 ```text
-左 42%
-右 58%
+Links 42%
+Rechts 58%
 ```
 
 ---
 
-# 5. 首页信息区
+# 5. Informationsbereich der Startseite
 
-推荐：
+Empfohlen:
 
 ```text
-最近继续 24%
-热门专题 46%
-最近文件 30%
+Zuletzt fortgesetzt 24%
+Beliebte Themen 46%
+Zuletzt verwendete Dateien 30%
 ```
 
-底部：
+Unten:
 
 ```text
-学习路径 66%
-学科分类 34%
+Lernpfad 66%
+Fächerkategorien 34%
 ```
 
 ---
 
 # 6. Physics Workspace
 
-结构：
+Struktur:
 
 ```text
 Top Nav
@@ -115,7 +115,7 @@ Bottom Data
 
 # 7. Workspace Grid
 
-1600 推荐：
+Empfehlung bei 1600:
 
 ```text
 Left Scene Panel 250px
@@ -129,21 +129,21 @@ Gap 12px
 
 # 8. Left Panel
 
-包含：
+Enthält:
 
 ```text
-场景与对象
-图层控制
-场景设置
+Szene und Objekte
+Ebenensteuerung
+Szeneneinstellungen
 ```
 
-内部滚动。
+Interner Scroll.
 
 ---
 
 # 9. Canvas
 
-必须至少保持工作区：
+Muss mindestens folgenden Anteil des Arbeitsbereichs behalten:
 
 ```text
 45%+
@@ -153,7 +153,7 @@ Gap 12px
 
 # 10. Timeline
 
-高度：
+Höhe:
 
 ```text
 64–78px
@@ -163,61 +163,61 @@ Gap 12px
 
 # 11. Bottom Data
 
-高度：
+Höhe:
 
 ```text
 220–270px
 ```
 
-1366 下变为 Tabs。
+Bei 1366 wird daraus Tabs.
 
 ---
 
 # 12. Inspector
 
-Tabs：
+Tabs:
 
 ```text
-属性
-可观察量
-数据
+Eigenschaften
+Beobachtbare Größen
+Daten
 ```
 
-分组：
+Gruppen:
 
 ```text
-粒子属性
-初始条件
-磁场设置
+Teilcheneigenschaften
+Anfangsbedingungen
+Magnetfeldeinstellungen
 ```
 
 ---
 
 # 13. Observation / Agent
 
-右栏可以：
+Die rechte Spalte kann Folgendes enthalten:
 
 ```text
-可观察量
-实时数据
-AI 助手
+Beobachtbare Größen
+Echtzeitdaten
+KI-Assistent
 ```
 
-纵向堆叠。
+Vertikal gestapelt.
 
 ---
 
-# 14. 试题空间
+# 14. Aufgabenraum
 
-三栏：
+Drei Spalten:
 
 ```text
-历史记录
-题目 + 可视化
-AI 解析
+Verlauf
+Aufgabe + Visualisierung
+KI-Analyse
 ```
 
-1600：
+1600:
 
 ```text
 Left 235px
@@ -227,50 +227,50 @@ Right 390–420px
 
 ---
 
-# 15. 左侧历史
+# 15. Linker Verlauf
 
-顶部：
+Oben:
 
 ```text
-上传题目
-新建题目
+Aufgabe hochladen
+Neue Aufgabe
 ```
 
-下：
+Darunter:
 
 ```text
-历史记录
-我的题集
+Verlauf
+Meine Aufgabensammlungen
 ```
 
 ---
 
-# 16. 题目正文
+# 16. Aufgabentext
 
-顶部：
+Oben:
 
 ```text
-返回
-标题
+Zurück
+Titel
 Tags
-收藏
-加入错题本
-更多
+Favorit
+Zum Fehlerheft hinzufügen
+Mehr
 ```
 
-正文：
+Text:
 
 ```text
-题干
-题图
-子问
+Aufgabenstellung
+Aufgabenbild
+Teilfragen
 ```
 
-下：
+Darunter:
 
 ```text
-已知条件
-求解目标
+Gegebene Bedingungen
+Gesuchte Größen
 ```
 
 ---
@@ -278,42 +278,42 @@ Tags
 # 17. Tabs
 
 ```text
-题目理解
-可视化
-解析步骤
-变式练习
+Aufgabenverständnis
+Visualisierung
+Lösungsschritte
+Variationsübungen
 ```
 
 ---
 
-# 18. 可视化区
+# 18. Visualisierungsbereich
 
 ```text
 Physics Canvas
 +
-场景信息 / 参数调整
+Szeneninformationen / Parameteranpassung
 ```
 
 ---
 
-# 19. 右侧 AI
+# 19. KI-Bereich rechts
 
 ```text
-AI 解析
-完成状态
-解析步骤
-推荐相关题
+KI-Analyse
+Fertigstellungsstatus
+Lösungsschritte
+Empfohlene verwandte Aufgaben
 ```
 
 ---
 
-# 20. 底部操作
+# 20. Untere Aktionen
 
 ```text
-上一题
-下一题
-加入错题本
-在物理世界中打开
+Vorherige Aufgabe
+Nächste Aufgabe
+Zum Fehlerheft hinzufügen
+In der Physikwelt öffnen
 ```
 
 ---
@@ -334,8 +334,8 @@ Bottom Status Bar
 # 22. Desktop Sidebar
 
 ```text
-展开 210px
-折叠 64px
+Aufgeklappt 210px
+Eingeklappt 64px
 ```
 
 ---
@@ -352,11 +352,11 @@ Bottom Status Bar
 
 ```text
 Object Tree 210px
-Main Canvas flexible
+Main Canvas flexibel
 Property Panel 320px
 ```
 
-下：
+Darunter:
 
 ```text
 Data Table + Charts
@@ -370,13 +370,13 @@ Data Table + Charts
 38–42px
 ```
 
-显示：
+Anzeige:
 
 ```text
-仿真时间
-时间步长
-网格
-精度
+Simulationszeit
+Zeitschritt
+Gitter
+Genauigkeit
 Engine Version
 ```
 
@@ -395,19 +395,19 @@ Engine Version
 
 # 27. Medium
 
-策略：
+Strategie:
 
 ```text
-Observation / Agent 合并 Tab
-左侧缩窄
-Bottom Data Tab 化
+Observation / Agent als gemeinsamer Tab
+Linke Spalte verschmälert
+Bottom Data als Tabs
 ```
 
 ---
 
 # 28. Compact
 
-使用：
+Verwendet:
 
 ```text
 Drawer
@@ -417,31 +417,31 @@ Floating Inspector
 
 ---
 
-# 29. 页面滚动
+# 29. Seitenscroll
 
-首页：
+Startseite:
 
 ```text
-整页
+Gesamte Seite
 ```
 
-Workspace：
+Workspace:
 
 ```text
-页面不滚动，Panel 独立滚动
+Seite scrollt nicht, Panels scrollen unabhängig
 ```
 
-Question：
+Question:
 
 ```text
-Center / Right 独立滚动
+Center / Right scrollen unabhängig
 ```
 
 ---
 
 # 30. Loading / Error
 
-每页必须设计：
+Jede Seite muss entwerfen:
 
 ```text
 loading
@@ -452,7 +452,7 @@ permission denied
 
 ---
 
-# 31. 路由
+# 31. Routen
 
 ```text
 /
@@ -467,9 +467,9 @@ permission denied
 
 ---
 
-# 32. Screenshot 验收
+# 32. Screenshot-Abnahme
 
-至少：
+Mindestens:
 
 ```text
 1440×900
@@ -481,49 +481,49 @@ permission denied
 
 # 33. Pixel Review
 
-检查：
+Prüfen:
 
 ```text
-导航高度
+Navigationshöhe
 Logo
-列宽
-面板高度
-Canvas 占比
-字体
+Spaltenbreite
+Panelhöhe
+Canvas-Anteil
+Schrift
 CTA
-状态
+Zustände
 ```
 
 ---
 
-# 34. AI 页面复刻
+# 34. Seitennachbildung durch KI
 
-先：
+Zuerst:
 
 ```text
-读原型
-拆布局
-确认尺寸
-再写组件
+Prototyp lesen
+Layout zerlegen
+Maße bestätigen
+dann Komponenten schreiben
 ```
 
-禁止凭印象做“相似版本”。
+Es ist verboten, nach Gefühl eine „ähnliche Version“ zu bauen.
 
 ---
 
 # 35. Definition of Done
 
 ```text
-布局匹配
-尺寸匹配
-各状态存在
-真实功能接通
-主分辨率无溢出
-视觉差异可接受
+Layout stimmt überein
+Maße stimmen überein
+Alle Zustände vorhanden
+Echte Funktionen angebunden
+Keine Überläufe bei den Hauptauflösungen
+Visuelle Abweichungen akzeptabel
 ```
 
 ---
 
-# 36. 一句话页面规范
+# 36. Seitenspezifikation in einem Satz
 
-> **页面不是“做得像”，而是以原型为视觉事实源，把布局、比例、层级和交互状态工程化复刻出来。**
+> **Bei Seiten geht es nicht darum, „ähnlich auszusehen“, sondern den Prototyp als visuelle Faktenquelle zu nehmen und Layout, Proportionen, Hierarchie und Interaktionszustände ingenieurmäßig nachzubauen.**

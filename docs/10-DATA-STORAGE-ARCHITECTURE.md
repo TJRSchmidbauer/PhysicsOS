@@ -1,26 +1,26 @@
-# PhysicsOS Data & Storage Architecture
+# PhysicsOS Daten- und Speicherarchitektur
 
-> 文件：`docs/10-DATA-STORAGE-ARCHITECTURE.md`  
-> 文档定位：PhysicsOS 数据事实源、持久化、缓存、事件、对象存储与检索体系
+> Datei: `docs/10-DATA-STORAGE-ARCHITECTURE.md`  
+> Dokumentzweck: Faktenquellen, Persistenz, Cache, Events, Objektspeicher und Suchsystem von PhysicsOS
 
 ---
 
-# 1. 最高原则
+# 1. Oberstes Prinzip
 
-不同数据必须有明确事实源。
+Unterschiedliche Daten müssen klare Faktenquellen haben.
 
-禁止：
+Verboten:
 
 ```text
-一个数据库保存一切语义
-一个 Vector Store 什么都当 Memory
-Redis 保存唯一永久数据
-Harness Session 代替 Physics Event
+Eine Datenbank speichert jede Semantik
+Ein Vector Store gilt für alles als Memory
+Redis hält die einzigen dauerhaften Daten
+Harness Session ersetzt Physics Event
 ```
 
 ---
 
-# 2. 总体存储
+# 2. Gesamtspeicher
 
 ```text
 PostgreSQL
@@ -33,24 +33,24 @@ Harness Session Store
 
 ---
 
-# 3. 三大事实源
+# 3. Drei Faktenquellen
 
 ```text
 Business DB
-→ 业务事实
+→ Geschäftsfakten
 
 Physics Event Store
-→ 物理世界事实
+→ Fakten der physikalischen Welt
 
 Harness Session Store
-→ Agent 运行事实
+→ Fakten der Agent-Ausführung
 ```
 
 ---
 
 # 4. PostgreSQL
 
-保存：
+Speichert:
 
 ```text
 User
@@ -74,9 +74,9 @@ Audit Metadata
 
 # 5. Physics Event Store
 
-逻辑上单独定义。
+Logisch getrennt definiert.
 
-记录：
+Erfasst:
 
 ```text
 scene_id
@@ -89,15 +89,15 @@ trace
 occurred_at
 ```
 
-Event 不可修改。
+Events sind unveränderlich.
 
 ---
 
 # 6. Scene Snapshot
 
-Metadata 可存 PostgreSQL。
+Metadata kann in PostgreSQL liegen.
 
-大 Snapshot：
+Große Snapshots:
 
 ```text
 Object Storage
@@ -107,7 +107,7 @@ Object Storage
 
 # 7. Object Storage
 
-保存：
+Speichert:
 
 ```text
 PDF
@@ -126,7 +126,7 @@ Temporary Normalized File
 
 # 8. Redis
 
-只用于：
+Nur verwendet für:
 
 ```text
 Cache
@@ -142,7 +142,7 @@ Short-lived Session Data
 
 # 9. Vector Store
 
-用于：
+Verwendet für:
 
 ```text
 Curriculum Retrieval
@@ -151,13 +151,13 @@ Knowledge Retrieval
 Teacher Material Retrieval
 ```
 
-不存 PhysicsScene 真实状态。
+Speichert nicht den realen Zustand von PhysicsScene.
 
 ---
 
 # 10. Harness Session Store
 
-保存：
+Speichert:
 
 ```text
 Agent model-visible session events
@@ -167,41 +167,41 @@ Conversation
 Compaction Events
 ```
 
-## 10.1 Session Format 与迁移（0.1.7，`67e8444` 实测）
+## 10.1 Session-Format und Migration (0.1.7, gemessen mit `67e8444`)
 
-对生产备份的**只读**核对结论（34/34 生产 session log）：
+Ergebnis der **schreibgeschützten** Prüfung eines Produktions-Backups (34/34 Produktions-Session-Logs):
 
-- 全部为磁盘 **`format version: 0`**；0.1.7 经 `historicalSessionFormatCatalog`（`vendor/deepseek-harness/packages/session/session-format-catalog`）读取旧格式。
-- 迁移是**增量**的：读取改写 **0** 个文件；只有强制写入才产生新的 `session.v4.jsonl.zstd`，原 `session.jsonl.zstd` **逐字节不变**。
-- v0→v4 保留 message / turn / step 计数（v0 的 chunk 行折叠进 v4 的 `assistant/attempt`）。
+- Alle liegen im Disk-Format **`format version: 0`** vor; 0.1.7 liest das alte Format über `historicalSessionFormatCatalog` (`vendor/deepseek-harness/packages/session/session-format-catalog`).
+- Die Migration ist **inkrementell**: Das Lesen schreibt **0** Dateien um; nur ein erzwungenes Schreiben erzeugt eine neue `session.v4.jsonl.zstd`, die ursprüngliche `session.jsonl.zstd` bleibt **Byte für Byte unverändert**.
+- v0→v4 bewahrt die Zähler für message / turn / step (die chunk-Zeilen von v0 werden in v4 zu `assistant/attempt` zusammengefasst).
 
-**后果（须明说）**：上一版本仍能读迁移前的内容，但升级后写入落在 v4 文件，旧版本会忽略这些文件 —— 因此升级前的 **on-box sessions 快照 + `pg_dump` 是真正的前置条件**，不是形式。部署侧备份步骤见 `docs/13-DEPLOYMENT-OPERATIONS.md`。
+**Konsequenz (muss klar gesagt werden)**: Die Vorversion kann den Inhalt vor der Migration weiterhin lesen, aber nach dem Upgrade landen Schreibvorgänge in der v4-Datei, die die alte Version ignoriert – daher sind ein **On-Box-Sessions-Snapshot + `pg_dump` vor dem Upgrade** eine echte Voraussetzung, keine Formalität. Die Backup-Schritte auf der Deployment-Seite stehen in `docs/13-DEPLOYMENT-OPERATIONS.md`.
 
 ---
 
 # 11. ID
 
-统一稳定 ID。
+Einheitliche, stabile IDs.
 
-推荐全项目选一种：
+Empfohlen, projektweit eine Variante zu wählen:
 
 ```text
 UUIDv7
 ```
 
-或：
+oder:
 
 ```text
 ULID
 ```
 
-不可混乱。
+Nicht durcheinander.
 
 ---
 
-# 12. 时间
+# 12. Zeit
 
-数据库统一：
+Datenbank einheitlich:
 
 ```text
 UTC
@@ -211,7 +211,7 @@ UTC
 
 # 13. User
 
-建议字段：
+Empfohlene Felder:
 
 ```text
 id
@@ -270,16 +270,16 @@ submitted_at
 
 # 17. LearningState
 
-必须版本化。
+Muss versioniert sein.
 
-建议保留：
+Empfohlen zu behalten:
 
 ```text
 revision
 updated_at
 ```
 
-重要更新可另外留 Event / Evidence。
+Wichtige Updates können zusätzlich Event / Evidence hinterlassen.
 
 ---
 
@@ -299,9 +299,9 @@ updated_at
 
 ---
 
-# 19. PhysicsEvent 索引
+# 19. PhysicsEvent-Index
 
-至少：
+Mindestens:
 
 ```text
 (scene_id, revision) UNIQUE
@@ -389,7 +389,7 @@ hash
 
 # 25. Audit
 
-记录：
+Erfasst:
 
 ```text
 actor
@@ -405,19 +405,19 @@ timestamp
 
 # 26. Soft Delete
 
-业务资源可以使用：
+Geschäftsressourcen können verwenden:
 
 ```text
 deleted_at
 ```
 
-但 Physics Event 不软删历史事件。
+Physics Events werden jedoch nicht weich gelöscht, die Ereignishistorie bleibt erhalten.
 
 ---
 
 # 27. Hard Delete
 
-用户主动删除个人数据时：
+Löscht ein Nutzer aktiv seine persönlichen Daten:
 
 ```text
 business record
@@ -426,19 +426,19 @@ derived cache
 vector chunks
 ```
 
-按策略清理。
+werden gemäß Richtlinie bereinigt.
 
 ---
 
 # 28. Hash
 
-文件建议：
+Für Dateien empfohlen:
 
 ```text
 SHA-256
 ```
 
-用于：
+Verwendet für:
 
 ```text
 integrity
@@ -450,31 +450,31 @@ artifact verification
 
 # 29. Dedup
 
-可以：
+Möglich:
 
 ```text
-同一用户内按 hash 去重
+Deduplizierung per Hash innerhalb desselben Nutzers
 ```
 
-跨用户去重需考虑隐私。
+Nutzerübergreifende Deduplizierung muss den Datenschutz berücksichtigen.
 
 ---
 
 # 30. Encryption
 
-传输：
+Transport:
 
 ```text
 TLS
 ```
 
-敏感静态数据按部署环境启用加密。
+Sensible ruhende Daten werden je nach Deployment-Umgebung verschlüsselt.
 
 ---
 
 # 31. Backup
 
-必须覆盖：
+Muss abdecken:
 
 ```text
 PostgreSQL
@@ -484,13 +484,13 @@ Object Storage metadata
 Critical Assets
 ```
 
-> 升级到 0.1.7 前，**Harness Session Store 的 on-box 快照 + `pg_dump` 是硬前置**：旧 release 读不了升级后写入的 `session.v4.jsonl.zstd`（见 §10.1）。只备份其中一个不足以回滚。
+> Vor dem Upgrade auf 0.1.7 sind **ein On-Box-Snapshot des Harness Session Store + `pg_dump` harte Voraussetzung**: Die alte Release kann die nach dem Upgrade geschriebene `session.v4.jsonl.zstd` nicht lesen (siehe §10.1). Nur eines von beiden zu sichern genügt für ein Rollback nicht.
 
 ---
 
 # 32. Restore
 
-恢复时验证：
+Bei der Wiederherstellung prüfen:
 
 ```text
 hash
@@ -503,7 +503,7 @@ foreign references
 
 # 33. Retention
 
-定义：
+Definiert den Lebenszyklus von:
 
 ```text
 Temporary OCR Asset
@@ -513,13 +513,11 @@ Old Job Log
 Application Log
 ```
 
-生命周期。
-
 ---
 
 # 34. Vector Chunk
 
-必须携带：
+Muss tragen:
 
 ```text
 source_id
@@ -533,21 +531,21 @@ created_at
 
 # 35. Re-embedding
 
-Embedding 模型升级后支持重新生成。
+Nach einem Upgrade des Embedding-Modells wird eine Neuerzeugung unterstützt.
 
-旧 embedding 可逐步淘汰。
+Alte Embeddings können schrittweise ausgemustert werden.
 
 ---
 
-# 36. Scene 不进 Vector Truth
+# 36. Scene gehört nicht in die Vector Truth
 
-PhysicsScene 是结构化世界，不应被转成 embedding 后作为唯一 Scene 来源。
+PhysicsScene ist eine strukturierte Welt und sollte nicht in ein Embedding umgewandelt und als einzige Scene-Quelle verwendet werden.
 
 ---
 
 # 37. Cache Key
 
-至少包含版本：
+Enthält mindestens die Version:
 
 ```text
 scene:{id}:{revision}
@@ -560,40 +558,40 @@ simulation:{hash}
 
 # 38. Cache Invalidation
 
-Revision 变化后相关 Cache 必须失效。
+Nach einer Revisionsänderung müssen die zugehörigen Caches ungültig werden.
 
 ---
 
 # 39. Migration
 
-数据库建议：
+Für die Datenbank empfohlen:
 
 ```text
 Flyway
 ```
 
-或等价方案。
+oder eine gleichwertige Lösung.
 
 ---
 
 # 40. Contract Migration
 
-区分：
+Zu unterscheiden:
 
 ```text
 Database Schema Migration
 Domain Contract Migration
 ```
 
-两者不是一回事。
+Beides ist nicht dasselbe.
 
 ---
 
-# 41. Large Simulation Data
+# 41. Große Simulationsdaten
 
-不要全部塞 PostgreSQL row。
+Nicht vollständig in PostgreSQL-Zeilen stopfen.
 
-采用：
+Verwenden:
 
 ```text
 chunk
@@ -606,32 +604,32 @@ metadata index
 
 # 42. JSONB
 
-适合：
+Geeignet für:
 
 ```text
 metadata
 extensible config
 ```
 
-不应该把所有核心关系都藏在 JSONB。
+Nicht alle Kernbeziehungen sollten in JSONB versteckt werden.
 
 ---
 
-# 43. Search
+# 43. Suche
 
-普通筛选：
+Normale Filterung:
 
 ```text
 PostgreSQL
 ```
 
-全文：
+Volltext:
 
 ```text
 Search Index if needed
 ```
 
-语义：
+Semantisch:
 
 ```text
 Vector Store
@@ -641,13 +639,13 @@ Vector Store
 
 # 44. Consistency
 
-PhysicsScene：
+PhysicsScene:
 
 ```text
 revision immutable
 ```
 
-Business Resource：
+Business Resource:
 
 ```text
 optimistic locking
@@ -657,7 +655,7 @@ optimistic locking
 
 # 45. Event Compaction
 
-允许优化存储，但不能破坏：
+Speicheroptimierung ist erlaubt, darf aber nicht beschädigen:
 
 ```text
 semantic replay
@@ -669,7 +667,7 @@ revision
 
 # 46. Snapshot Policy
 
-建议按：
+Empfohlen, in Kombination zu erzeugen nach:
 
 ```text
 event count
@@ -678,31 +676,29 @@ manual save
 branch
 ```
 
-综合创建。
-
 ---
 
 # 47. Simulation Retention
 
-普通临时模拟可以只保留最近或摘要。
+Gewöhnliche temporäre Simulationen dürfen nur die jüngsten oder eine Zusammenfassung behalten.
 
-被用户保存 / 题目关联 / 教师发布的结果应持久化。
+Ergebnisse, die vom Nutzer gespeichert, mit einer Aufgabe verknüpft oder von Lehrkräften veröffentlicht wurden, sollten persistiert werden.
 
 ---
 
 # 48. Privacy
 
-Learning State 与学生错误记录：
+Learning State und Fehlerprotokolle von Schülern:
 
 ```text
-最小访问权限
+Minimale Zugriffsrechte
 ```
 
 ---
 
 # 49. Observability
 
-监控：
+Überwachen:
 
 ```text
 DB latency
@@ -717,7 +713,7 @@ event append latency
 
 # 50. Data Definition of Done
 
-新数据模型必须明确：
+Ein neues Datenmodell muss festlegen:
 
 ```text
 Owner
@@ -732,6 +728,6 @@ Test
 
 ---
 
-# 51. 一句话数据架构
+# 51. Datenarchitektur in einem Satz
 
-> **PhysicsOS 不建立一个混沌的“AI 数据池”，而是让业务事实、物理世界事实、Agent 运行事实和检索数据拥有独立、可恢复、可追踪的存储边界。**
+> **PhysicsOS baut keinen chaotischen „KI-Datenpool“ auf, sondern gibt Geschäftsfakten, Fakten der physikalischen Welt, Agent-Laufzeitfakten und Retrieval-Daten jeweils eigene, wiederherstellbare und nachverfolgbare Speichergrenzen.**

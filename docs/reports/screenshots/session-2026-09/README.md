@@ -1,26 +1,26 @@
-# 2026-09 会话验证截图
+# Verifikations-Screenshots der Sitzung 2026-09
 
-这批图片执行的是**过程留证**，不是本项目的验收基准。
+Diese Bilder dienen der **Prozessdokumentation** und sind keine Abnahmebasis dieses Projekts.
 
-它们原本散落在仓库根目录（一周内多轮 UI 打磨时随手 `playwright` 截图落在那），
-2026-09-21 收口时统一归到这里，让仓库根只剩源码与配置。
+Sie lagen ursprünglich verstreut im Wurzelverzeichnis des Repositorys (bei den mehrfachen UI-Feinschliff-Runden innerhalb einer Woche wurden
+Screenshots per `playwright` nebenbei dort abgelegt) und wurden beim Abschluss am 2026-09-21 hier zusammengeführt, sodass im Wurzelverzeichnis nur noch Quellcode und Konfiguration liegen.
 
-按主题分组：
+Nach Themen gruppiert:
 
-| 前缀                                                         | 主题                                              |
-| ------------------------------------------------------------ | ------------------------------------------------- |
-| `audit-*`                                                    | 全域审计（首页 / 实验室 / 选题器 / 题目）         |
-| `authgate-*`                                                 | 登录注册门                                        |
-| `lab-agent-*`                                                | 实验室 AI 助教抽屉形态（停靠 / 侧栏 / 顶点）      |
-| `library-*`                                                  | 资源库（surface / v2 章节 / 真题卷库）            |
-| `paper-*`                                                    | 出卷专区（v2–v5 迭代 / 重设计 / 状态 / 校验任务） |
-| `*-card*.png` / `old-conv-card.png` / `turn-card-docked.png` | 会话卡片与回合卡片                                |
-| `answer-with-analysis.png`                                   | 解析卷回答                                        |
+| Präfix                                                       | Thema                                                          |
+| ------------------------------------------------------------ | -------------------------------------------------------------- |
+| `audit-*`                                                    | Domänenweites Audit (Startseite / Labor / Auswahl / Aufgabe)   |
+| `authgate-*`                                                 | Login- und Registrierungsschranke                              |
+| `lab-agent-*`                                                | Drawer-Formen des KI-Assistenten im Labor (angedockt / Seitenleiste / Scheitelpunkt) |
+| `library-*`                                                  | Ressourcenbibliothek (Surface / v2-Kapitel / Originalklausur-Bibliothek) |
+| `paper-*`                                                    | Klausurbereich (Iterationen v2–v5 / Redesign / Zustände / Verifikationsaufgaben) |
+| `*-card*.png` / `old-conv-card.png` / `turn-card-docked.png` | Sitzungskarten und Rundenkarten                                |
+| `answer-with-analysis.png`                                   | Antwort mit Lösungsanalyse                                     |
 
-**正式验收证据在上一级目录**（`docs/reports/screenshots/*.png`），命名带
-视口尺寸（`-1440x900` / `-1600x900` / `-1920x1080`），由
-`tests/acceptance/*-acceptance.mjs` 的脚本产出，并在对应报告里逐条引用。
+**Die offiziellen Abnahmenachweise liegen eine Ebene höher** (`docs/reports/screenshots/*.png`); ihre Namen tragen
+die Viewport-Größe (`-1440x900` / `-1600x900` / `-1920x1080`), sie werden von den Skripten
+`tests/acceptance/*-acceptance.mjs` erzeugt und in den jeweiligen Berichten einzeln zitiert.
 
-本目录内的图**没有**门禁脚本、也未被任何报告引用——迭代过程中同一页面可能有
-多个版本（例如 `paper-v2` → `paper-v5`），保留是为了回溯当时的中间态。
-要判断"现在长什么样"，请看上一级的正式截图或在本地跑对应 acceptance 脚本。
+Die Bilder in diesem Verzeichnis haben **kein** Gate-Skript und werden von keinem Bericht zitiert – im Verlauf der Iteration kann dieselbe Seite
+in mehreren Versionen vorliegen (z. B. `paper-v2` → `paper-v5`); sie werden aufbewahrt, um den damaligen Zwischenstand nachvollziehen zu können.
+Um zu beurteilen, „wie es jetzt aussieht“, sind die offiziellen Screenshots eine Ebene höher heranzuziehen oder das passende Acceptance-Skript lokal auszuführen.
