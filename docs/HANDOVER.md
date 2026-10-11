@@ -1,28 +1,27 @@
-# 交接说明（换机 / 新环境上手指南）
+# Übergabeanweisung (Wechsel des Geräts / Erste Schritte in einer neuen Umgebung)
 
-本文件写给"在另一台机器上继续开发 PhysicsOS"的人。读完这一页就能把环境跑起来，
-并知道当前代码处于什么状态、哪些做完了、哪些没做。
+Diese Datei richtet sich an alle, die PhysicsOS auf einem anderen Rechner weiterentwickeln möchten. Nach dem Lesen dieser Seite ist die Umgebung einsatzbereit und es ist klar, in welchem Zustand sich der Code aktuell befindet, was bereits erledigt ist und was noch offensteht.
 
 ---
 
-## 1. 当前分支与这次的工作
+## 1. Aktueller Branch und derzeitige Arbeiten
 
-| 项     | 值                                                            |
-| ------ | ------------------------------------------------------------- |
-| 仓库   | `https://github.com/122-syf-wcy/PhysicsOS.git`                |
-| 分支   | `codex/experiment-studio-polish`（与 `main` 同一提交）        |
-| 分支头 | `1f41b3a`（2026-09-26，P0-P2 收口工作在工作区，尚未提交）      |
-| 内容   | 实验工作室 → 账户体系 → 管理后台 → 资源库 → 出卷专区 → 全校共享 `/api` 账号隔离 → P0-P2 收口 |
+| Eintrag | Wert                                                                    |
+| ------- | ----------------------------------------------------------------------- |
+| Repository | `https://github.com/122-syf-wcy/PhysicsOS.git`                           |
+| Branch | `codex/experiment-studio-polish` (identisch mit `main`)                  |
+| Commit | `1f41b3a` (26.09.2026; Arbeiten zur Konsolidierung von P0–P2 liegen noch im Arbeitsverzeichnis und wurden noch nicht committed) |
+| Inhalt | Experimentierstudio → Kontosystem → Admin-Konsole → Ressourcenbibliothek → Prüfungsstudio → Schulweite `/api`-Kontoisolation → Konsolidierung P0–P2 |
 
-当前 P0-P2 收口计划见
-[`docs/superpowers/plans/2026-09-26-p0-p2-program.md`](superpowers/plans/2026-09-26-p0-p2-program.md)。
-计划覆盖生产部署、密码恢复、跨设备学习记录、班级作业、物理内容扩展、桌面壳和工程门禁。
+Der aktuelle Konsolidierungsplan für P0–P2 ist unter
+[`docs/superpowers/plans/2026-09-26-p0-p2-program.md`](superpowers/plans/2026-09-26-p0-p2-program.md)
+zu finden. Der Plan umfasst den Produktionsbetrieb, Passwortwiederherstellung, geräteübergreifenden Lernverlauf, Klassenaufgaben, Erweiterung der Physikinhalte, Desktop-Hülle und technische Zugangskontrollen.
 
-> **本节此前写的是 `feat/circuit-living-effects` / `794b9d0`，已过期。**
-> 那条分支早已 fast-forward 进 `main`（`git branch --contains 794b9d0` 可见），
-> 现状是 `main` 与 `codex/experiment-studio-polish` 指向同一个提交。
+> **Dieser Abschnitt bezog sich zuvor auf `feat/circuit-living-effects` / `794b9d0` und ist nicht mehr aktuell.**
+> Dieser Branch wurde bereits per Fast-Forward in `main` integriert (zu überprüfen mit `git branch --contains 794b9d0`).
+> Derzeit zeigen `main` und `codex/experiment-studio-polish` auf denselben Commit.
 
-`main` 已包含全部历史，直接：
+Da `main` bereits die vollständige Historie enthält, kann direkt wie folgt vorgegangen werden:
 
 ```bash
 git clone https://github.com/122-syf-wcy/PhysicsOS.git
@@ -30,132 +29,107 @@ git clone https://github.com/122-syf-wcy/PhysicsOS.git
 
 ---
 
-## 1.1 一周的工作面（2026-09-12 → 09-21）
+## 1.1 Arbeitsumfang der Woche (12.09.2026 – 21.09.2026)
 
-这段工作**曾经整整一周没有提交**（335 个文件、+16724/−5747 行只存在于工作区，
-一次 `apply` 误操作或磁盘故障就全没了）。09-21 已按主题补成交付：
+In dieser Woche wurden die Arbeiten **eine ganze Woche lang nicht committed** (335 Dateien, +16.724/−5.747 Zeilen existierten ausschließlich im Arbeitsverzeichnis; ein Fehler beim `apply` oder ein Festplattenausfall hätte den gesamten Stand verloren). Am 21.09. wurden die Arbeiten dann thematisch nachgeliefert:
 
-| 主题                   | 代表内容                                                                                                          |
+| Thema | Inhalt |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `fix(packages)`        | 09-14 审计的 5 条 P0 物理正确性缺陷全修（题给时长 / 斜抛发射条件 / 平行板偏转 / 牛二水平合力 / 比较类题诚实拒识） |
-| `feat(question-paper)` | 出卷域模型新包：细目表 / 组卷算法 / 检查 / 版本哈希 / markdown 导出                                               |
-| `feat(auth-host)`      | 学校一级租户账户体系：argon2id、HttpOnly 会话、限流、CSRF、`/physicsos/auth`                                      |
-| 管理后台               | 申请审批 / 学校 / 用户 / 审计四 tab，`/physicsos/admin`，路由级角色 + 租户收窄                                    |
-| `feat(ui)`             | 登录注册门、侧栏学校身份、资源库（926 项配套资源）、出卷专区、题库录入                                            |
-| 实验台                 | 器材精灵接入、自由拖动 + 导线自动重排、开关/滑变画布直接操作                                                      |
-| 资产                   | 器材精灵（电路 + 力学）、资源库/登录页素材、KaTeX、官网静态站                                                     |
-| 门禁                   | `auth-host`/`paper-host` 接入 `pnpm typecheck/lint/test`；`lint` 与 `test` 全绿                                   |
+| `fix(packages)` | Alle fünf am 14.09. überprüften P0-Fehler zur physikalischen Korrektheit behoben (vorgegebene Zeitspanne / Abwurfbedingungen beim Schrägwurf / Ablenkung zwischen parallelen Platten / Horizontale Resultierende beim zweiten Newtonschen Gesetz / ehrliches Verweigern bei Vergleichsaufgaben) |
+| `feat(question-paper)` | Neues Paket für den Prüfungsbereich: Feinplan / Zusammenstellung / Prüfung / Versions-Hash / Markdown-Export |
+| `feat(auth-host)` | Kontosystem mit Schulen als erster Mandantenebene: argon2id, HttpOnly-Sitzung, Ratenbegrenzung, CSRF, `/physicsos/auth` |
+| Admin-Konsole | Vier Tabs: Antragsprüfung / Schule / Benutzer / Audit-Protokoll, `/physicsos/admin`, rollenbasierte Routen + Mandanteneinschränkung |
+| `feat(ui)` | Anmelde- und Registrierungsportal, Schulidentität in Seitenleiste, Ressourcenbibliothek (926 begleitende Ressourcen), Prüfungsstudio, Aufgabenbankeingabe |
+| Experimentierarbeitsplatz | Integration von Material-Sprites, freies Verschieben + automatisches Neuanordnen von Leitungen, direkte Bedienung von Schaltern/Schiebereglern in der Zeichenfläche |
+| Assets | Material-Sprites (Stromkreis + Mechanik), Ressourcenbibliothek/Login-Seitenmaterial, KaTeX, statische Website |
+| Zugangskontrollen | `auth-host`/`paper-host` in `pnpm typecheck/lint/test` integriert; `lint` und `test` vollständig erfolgreich |
 
-**未做**：见 `docs/reports/BACKLOG.md`（`GUIZHOU_SCHOOL_ROSTER_HIGH_SCHOOL_GAP`、
-`DSH_CREDENTIALS_SCHEMA_SKEW` 等）。
+**Noch offen:** Siehe `docs/reports/BACKLOG.md` (`GUIZHOU_SCHOOL_ROSTER_HIGH_SCHOOL_GAP`, `DSH_CREDENTIALS_SCHEMA_SKEW` u. a.).
 
 ---
 
-## 2. 环境搭建（按顺序）
+## 2. Einrichten der Umgebung (in Reihenfolge)
 
-### 2.1 依赖与子模块
+### 2.1 Abhängigkeiten und Submodule
 
-`vendor/deepseek-harness` 是 pin 住的 submodule，克隆后是空的，必须先物化：
+`vendor/deepseek-harness` ist ein fest verankertes Submodul. Nach dem Klonen ist es zunächst leer und muss initialisiert werden:
 
 ```bash
 git submodule update --init --recursive
 pnpm install
 ```
 
-### 2.1.1 Node 版本：**必须 ≥ 24.7，且 OpenSSL 带 argon2id**
+### 2.1.1 Node-Version: **Muss ≥ 24.7 sein und über ein OpenSSL mit argon2id verfügen**
 
-`auth-host` 用 `node:crypto` 的 argon2id 做口令哈希，没有它插件**拒绝加载**，
-整个 web 服务起不来。这不是"建议版本"——它是硬门槛，故根 `engines.node`
-已从 `>=20.19.0` 提到 `>=24.7.0`。
+`auth-host` verwendet argon2id aus `node:crypto` zum Hashen von Passwörtern. Ohne diese Funktion verweigert das Plugin das Laden, sodass der gesamte Web-Dienst nicht gestartet werden kann. Dies ist keine Empfehlung, sondern eine zwingende Voraussetzung. Aus diesem Grund wurde `engines.node` im Root von `>=20.19.0` auf `>=24.7.0` angehoben.
 
-两个坑：
+Zwei häufige Stolperfallen:
 
-- **"有函数"不等于"能算"**。有的构建暴露了 `crypto.argon2Sync`，但底层
-  OpenSSL 没有 argon2id，调用时抛 `ERR_CRYPTO_ARGON2_NOT_SUPPORTED`。
-  本机就撞上过一个 vendored Node 24.18.1 属于这种情况。
-  `passwords.ts` 现在用最低合法参数真跑一次来判定能力，报错是单行的：
-  `auth-host requires a working argon2id: … (Node v24.18.1; needs >= 24.7 built
-against an OpenSSL with argon2id)`。裸 `typeof … === 'function'` 判据已废弃。
-- **`pnpm exec` 会继承调用方的 PATH**，所以从某个自带 Node 的宿主里跑
-  `pnpm …`，脚本里的 `node` 可能是那个宿主版本而非你的 `node -v`。
-  症状是测试在 auth-host 上批量失败。核对：
-  `pnpm -C vendor/deepseek-harness exec node -v` 不适用时，直接在脚本里
-  `node -v` 打印一次；必要时 `PATH="/opt/homebrew/bin:$PATH" pnpm test`。
+- **„Funktion vorhanden“ bedeutet nicht „funktionsfähig“.** Einige Node-Builds exportieren zwar `crypto.argon2Sync`, verfügen aber über kein OpenSSL mit argon2id. In diesem Fall wird beim Aufruf `ERR_CRYPTO_ARGON2_NOT_SUPPORTED` geworfen. Auf diesem System trat dieser Fall bei einem vendored Node 24.18.1 auf.
+  `passwords.ts` prüft die Funktionsfähigkeit nun, indem es argon2id einmal mit minimal zulässigen Parametern tatsächlich ausführt. Bei einem Fehler wird eine einzeilige Meldung ausgegeben:
+  `auth-host requires a working argon2id: … (Node v24.18.1; needs >= 24.7 built against an OpenSSL with argon2id)`. Der alte Prüfansatz `typeof … === 'function'` wurde daher verworfen.
+- **`pnpm exec` erbt den `PATH` des aufrufenden Systems.** Wird `pnpm …` aus einer Umgebung aufgerufen, in der bereits eine andere Node-Installation im `PATH` liegt, kann `node` innerhalb von Skripten genau diese Version (und nicht die über `node -v` angezeigte) sein.
+  Symptom: Tests in auth-host schlagen massenhaft fehl. Zur Überprüfung:
+  Ist `pnpm -C vendor/deepseek-harness exec node -v` nicht aussagekräftig, lassen Sie `node -v` direkt im betreffenden Skript ausgeben. Falls nötig, kann der Pfad gezielt angepasst werden, z. B. `PATH="/opt/homebrew/bin:$PATH" pnpm test`.
 
 ```bash
-node -v                                   # 期望 v24.7+ 且 argon2 可用
+node -v                                   # Erwartet v24.7+ mit argon2-Unterstützung
 node -e "console.log(typeof require('node:crypto').argon2Sync)"   # function
 ```
 
-### 2.2 把 overlay 铺进 vendor（关键步骤）
+### 2.2 Übertragen des Overlays in `vendor` (wichtiger Schritt)
 
-本仓库**不直接改 vendor**。`overlays/harness/files/` 才是 PhysicsOS 自有代码的
-真身，由脚本叠加进 vendor 工作区：
+In diesem Repository wird **nicht direkt in `vendor`** geändert. Der eigentliche Quellcode von PhysicsOS befindet sich in `overlays/harness/files/`. Dieses Overlay wird über ein Skript in den `vendor`-Arbeitsbereich übertragen:
 
 ```bash
 node scripts/overlay/harness-overlay.mjs apply
 ```
 
-`apply` 是叠加复制，不会删除 vendor 里已有的 `node_modules/` 与 `lib/`。
+`apply` führt eine überlagernde Kopie durch und löscht weder `node_modules/` noch `lib/` im `vendor`-Verzeichnis.
 
-反过来，如果你在 vendor 里直接改了代码，必须回写，否则下次 `apply` 会覆盖掉：
+Werden hingegen Änderungen direkt in `vendor` vorgenommen, müssen diese zurückgespeichert werden, da sie sonst beim nächsten `apply` überschrieben würden:
 
 ```bash
 node scripts/overlay/harness-overlay.mjs capture
 ```
 
-**这是最容易踩的坑**：不要只改 vendor 就以为改完了。
+**Der häufigste Stolperstein:** Es reicht nicht, nur `vendor` zu ändern.
 
-> ⚠️ **`OVERLAY_PATHS` 漏一个包 = 那个包只活在 vendor 里 = 会被静默丢掉。**
-> `paper-host`（出卷专区整个后端，13 个文件）就曾经如此：它在 submodule 里是
-> 未跟踪状态（`?? packages/physicsos/`），不在 overlay、父仓库也看不到它
-> （`git ls-files | grep paper-host` 为空）。于是 HANDOVER 里那条"新机器上手"
-> 流程走完，出卷专区后端**根本不存在**，`git clean -fdx` 或任何一次 submodule
-> 重建都会删掉它。09-21 已补进 overlay 并验证 `apply` 能逐字节重建。
+> ⚠️ **Wird ein Paket in `OVERLAY_PATHS` vergessen, existiert es nur noch in `vendor` und geht stillschweigend verloren.**
+> Genau so erging es einst `paper-host` (das gesamte Backend des Prüfungsstudios, 13 Dateien): Im Submodul war es als unverfolgte Datei (`?? packages/physicsos/`) vorhanden, nicht jedoch im Overlay, und auch im übergeordneten Repository war es nicht sichtbar (`git ls-files | grep paper-host` war leer). In der Folge fehlte nach Durchlaufen des im Handbuch beschriebenen Prozesses für neue Rechner das Backend des Prüfungsstudios **vollständig**, und `git clean -fdx` oder jeder Neuaufbau des Submoduls hätte es gelöscht. Am 21.09. wurde es in das Overlay aufgenommen und verifiziert, dass `apply` es byte-genau wiederherstellt.
 >
-> **加新 host 插件时的检查清单**（三步都要做，缺一不可）：
+> **Checkliste zum Hinzufügen eines neuen Host-Plugins** (alle drei Schritte sind erforderlich):
 >
-> 1. `overlays/harness/files/...` 下建目录（排除 `node_modules` / `lib`）
-> 2. `scripts/overlay/harness-overlay.mjs` 的 `OVERLAY_PATHS` 加路径
-> 3. `cordis.patch.yml` 挂载 + `package.json` 加依赖 + 重建
+> 1. Verzeichnis unter `overlays/harness/files/...` erstellen (ohne `node_modules` / `lib`)
+> 2. Pfad in `OVERLAY_PATHS` innerhalb von `scripts/overlay/harness-overlay.mjs` eintragen
+> 3. Einbindung in `cordis.patch.yml` + Hinzufügen der Abhängigkeit zu `package.json` + Neuaufbau
 >
-> 自查：`git -C vendor/deepseek-harness status --short | grep '^??'` 列出的每条
-> 未跟踪路径都应该能在 `OVERLAY_PATHS` 里找到对应项。
+> Selbstprüfung: Jeder Eintrag mit `??` aus `git -C vendor/deepseek-harness status --short | grep '^??'` muss einem entsprechenden Eintrag in `OVERLAY_PATHS` zugeordnet werden können.
 
-> ⚠️ `overlays/harness/upstream-changes.patch` 必须是**完整版**（约 43 个上游
-> 文件、1860+ 行，声明并渲染 `sidebar.brand/nav/new`、`conversation.hero.*`、
-> `conversation.surface` 等 PhysicsOS 自定义槽位）。`ecc7286` 曾误把它削到
-> 14 行，已恢复为 `8c50de7` 版——若新机器上 `typecheck:web` 报
-> `"sidebar.nav" not in SlotMap` 之类错误，先检查这个 patch 是否完整。
+> ⚠️ `overlays/harness/upstream-changes.patch` muss in **vollständiger Version** vorliegen (ca. 43 Upstream-Dateien, über 1860 Zeilen). Er deklariert und rendert die PhysicsOS-spezifischen Slots `sidebar.brand/nav/new`, `conversation.hero.*`, `conversation.surface` usw. In `ecc7286` wurde der Patch versehentlich auf 14 Zeilen reduziert; er wurde inzwischen wieder auf die Version `8c50de7` zurückgesetzt. Sollte `typecheck:web` auf einem neuen Rechner Fehler wie `"sidebar.nav" not in SlotMap"` melden, ist zunächst zu prüfen, ob der Patch vollständig ist.
 
-> ⚠️ **`apply` 不会恢复 `lib/` 与 `node_modules/`。**（`node_modules` 是
-> pnpm 的 workspace link，`lib` 是构建产物。）如果你把整个包目录挪走再
-> `apply` 回来，拿到的只有源码——必须重跑 `pnpm install` 与包内
-> `pnpm run bundle`，否则类型解析会退化成 `any`，`oxlint` 的 type-aware
-> 规则会从几十条暴涨到上千条 `no-unsafe-*`。这个症状很好认：
-> 报错数量突然一个数量级变化，就是类型解析断了，不是代码坏了。
+> ⚠️ **`apply` stellt weder `lib/` noch `node_modules/` wieder her.** (`node_modules` sind Workspace-Links von pnpm, `lib/` enthält Build-Artefakte.) Wird ein gesamtes Paketverzeichnis verschoben und anschließend über `apply` wiederhergestellt, liegen nur noch die Quelldateien vor. In diesem Fall müssen sowohl `pnpm install` als auch der paketinterne Build (`pnpm run bundle`) erneut ausgeführt werden. Andernfalls kann die Typauflösung auf `any` zurückfallen und die typbewussten Regeln von `oxlint` (z. B. `no-unsafe-*`) können von einigen Dutzend auf über tausend Fehler ansteigen. Dieses Symptom ist ein klarer Hinweis auf unterbrochene Typauflösung und nicht auf fehlerhaften Code.
 
-### 2.4 新机器首次构建顺序（实测）
+### 2.4 Build-Reihenfolge für einen neuen Rechner (erprobt)
 
-`pnpm dev` 起服务前，vendor 侧需要先有这些产物（overlay apply 之后）：
+Bevor `pnpm dev` den Dienst startet, müssen auf der `vendor`-Seite nach dem `apply` des Overlays folgende Artefakte vorliegen:
 
 ```bash
 cd vendor/deepseek-harness
-pnpm install                       # 生成 workspace link 条目；lefthook postinstall 失败可忽略
+pnpm install                       # Erstellt Workspace-Links; lefthook postinstall kann bei Fehlschlag ignoriert werden
 ./node_modules/.bin/tsc -b tsconfig.host.json
 ./node_modules/.bin/tsdown --config tsdown.config.ts --env.DSH_BUILD_FACE=host
-./node_modules/.bin/tsc -b tsconfig.client.json   # 上游测试文件有既有类型报错，与 overlay 无关
+./node_modules/.bin/tsc -b tsconfig.client.json   # Vorhandene Typfehler in Upstream-Testdateien, nicht durch Overlay verursacht
 ./node_modules/.bin/tsdown --config tsdown.config.ts --env.DSH_BUILD_FACE=client
-pnpm --filter @deepseek-ai/dsh-web-frontend exec vite build   # 前端 dist
+pnpm --filter @deepseek-ai/dsh-web-frontend exec vite build   # Frontend dist
 ```
 
-首次 `pnpm dsh dev` 若报 profile 缺包，先跑 `pnpm dsh plugin --profile web install`
-初始化 `~/.dsh/profiles/`。
+Falls beim ersten `pnpm dsh dev` gemeldet wird, dass Profilpakete fehlen, zuerst `pnpm dsh plugin --profile web install` ausführen.
+Initialisiert `~/.dsh/profiles/`.
 
-### 2.3 `.env`（不随仓库走，必须手工重建）
+### 2.3 `.env` (wird nicht mit dem Repository versioniert und muss manuell erstellt werden)
 
-`.env` 被 `.gitignore` 忽略，里面是生图网关凭据。新机器上从 `.env.example` 复制
-并填值：
+`.env` wird von `.gitignore` ausgeschlossen und enthält die Zugangsdaten für das Bildgenerierungsgateway. Kopieren Sie auf einem neuen Rechner `.env.example` und tragen Sie die erforderlichen Werte ein:
 
 ```
 PHYSICSOS_IMAGE_PRIMARY_BASE_URL=
@@ -166,18 +140,16 @@ PHYSICSOS_IMAGE_SECONDARY_API_KEY=
 PHYSICSOS_IMAGE_SECONDARY_MODEL=
 ```
 
-当前在用的主网关是 `https://image.haqiuhaqiu.xyz`，模型 `gpt-image-2.5-sunburst`。
-注意两套凭据**域名不通用**：`imageapi.top` 的 key 在 haqiuhaqiu 上是
-`INVALID_API_KEY`，反之亦然；`imageapi.top` 这套可作备选（同一模型在列）。
-密钥由持有人单独交接，**不要写进任何被提交的文件**。
+Derzeit wird als primäres Gateway `https://image.haqiuhaqiu.xyz` mit dem Modell `gpt-image-2.5-sunburst` verwendet.
+Zu beachten: Die beiden Zugangsschlüssel sind **nicht domänenübergreifend austauschbar**. Ein Schlüssel für `imageapi.top` erzeugt bei `haqiuhaqiu` den Fehler `INVALID_API_KEY` und umgekehrt. `imageapi.top` kann als Backup dienen (verwendet dasselbe Modell).
+Die Schlüssel werden vom jeweiligen Verantwortlichen separat übergeben und dürfen **auf keinen Fall** in Dateien geschrieben werden, die committet werden.
 
-### 2.3.1 Agent 模型路由（`~/.dsh`，不在仓库里）
+### 2.3.1 Agent-Modellrouting (`~/.dsh`, nicht im Repository)
 
-物理助教走 Harness 的 `llm-pi-ai` provider（`llm-deepseek` 硬编码 text-only，
-发不出图）。配置写在 **Harness home**（`~/.dsh/`），不是仓库 `.env`：
+Der Physik-Tutor nutzt den `llm-pi-ai`-Provider des Harness (`llm-deepseek` ist fest auf text-only verdrahtet und kann keine Bilder ausgeben). Die Konfiguration liegt im **Harness-Home** (`~/.dsh/`), nicht in der `.env` des Repositories:
 
-- `~/.dsh/.env`：`PHYSICSOS_MODEL_API_KEY=<持有人交接的 sk-… key>`
-- `~/.dsh/settings.yaml` 追加 provider profile + 默认模型：
+- `~/.dsh/.env`: `PHYSICSOS_MODEL_API_KEY=<vom Verantwortlichen übergebener sk-…-Schlüssel>`
+- `~/.dsh/settings.yaml`: Provider-Profil + Standardmodell ergänzen:
 
 ```yaml
 llm-pi-ai:
@@ -188,14 +160,14 @@ llm-pi-ai:
       baseURL: https://ai.anna.tf/v1
       apiKeyEnv: PHYSICSOS_MODEL_API_KEY
       transport: sse
-      # 网关 WAF 拦 OpenAI SDK 默认 UA（OpenAI/JS * → 403），必须自定义
+      # Gateway-WAF blockiert die Standard-UA des OpenAI SDK (OpenAI/JS * → 403), daher muss sie angepasst werden
       headers:
         User-Agent: physicsos-dev/1.0
       compat:
         thinkingFormat: deepseek
       defaultInput: [text, image]
       models:
-        - id: DeepSeek V4.1 Flash # 必须用这个确切 id（区分大小写）
+        - id: DeepSeek V4.1 Flash # Genau diese ID muss verwendet werden (Groß-/Kleinschreibung beachten)
           name: DeepSeek V4.1 Flash
           contextWindow: 1000000
           maxTokens: 8192
@@ -205,38 +177,35 @@ agent-default-model:
   model: DeepSeek V4.1 Flash
 ```
 
-验证：`node tests/agent/real-model-smoke.mjs`（需要上面两个文件就位；headless
-全链路，断言 anna 路由 + physics_solve_question 调用 + physics/scene 事件）。
+Überprüfung: `node tests/agent/real-model-smoke.mjs` (benötigt die beiden obigen Dateien; vollständige Headless-Prüfung mit Assertion von anna-Routing, Aufruf von `physics_solve_question` und `physics/scene`-Ereignissen).
 
 ---
 
-### 2.5 `~/.dsh/.credentials.yaml` 的 schema 偏差（会挡住启动）
+### 2.5 Schema-Abweichung in `~/.dsh/.credentials.yaml` (blockiert den Start)
 
-**症状**：`pnpm dev` 起不来，报
+**Symptom:** `pnpm dev` startet nicht und meldet:
 
 ```
 credentials-local: the value for "version" in ~/.dsh/.credentials.yaml must be a string
 ```
 
-**原因**：这个文件有两个不兼容的写法。
+**Ursache:** Diese Datei kennt zwei inkompatible Schreibweisen.
 
-- 本仓库 pin 的 harness 里，`credentials-local` 把 YAML **根节点**当成一张扁平表
-  （键 → 字符串密钥），逐条 `credentialRef()` 校验键名是不是 POSIX 标识符。
-- DSH Desktop 2.x 会把它改写成**嵌套文档**：
+- Im in diesem Repository verwendeten (gepinnten) Harness behandelt `credentials-local` den **Wurzelknoten** der YAML als flache Tabelle (Schlüssel → String-Geheimnis) und prüft jeden Eintrag über `credentialRef()` darauf, ob der Schlüsselname ein gültiger POSIX-Bezeichner ist.
+- DSH Desktop 2.x schreibt die Datei jedoch als **verschachteltes Dokument** um:
 
 ```yaml
-version: 1 # ← 数字，不是字符串
+version: 1 # ← Zahl, kein String
 records:
-  client-connection/browser-session: { … } # ← 键名不是 POSIX 标识符
+  client-connection/browser-session: { … } # ← Schlüsselname ist kein POSIX-Bezeichner
 refs:
   LUCK_API_KEY: sk-…
   CLINE_API_KEY: sk_…
 ```
 
-于是旧解析器读到根键 `version: 1` 就抛错，服务**完全起不来**。这不是代码缺陷，
-是**宿主版本与 vendored harness 的偏差**——文件被谁改写过，重启就会踩到。
+Der alte Parser begegnet dann dem Root-Schlüssel `version: 1` und wirft einen Fehler, sodass der Dienst **gar nicht startet**. Dies ist kein Codefehler, sondern eine Abweichung zwischen Host-Version und vendored Harness – die Datei wurde offenbar von einer anderen Version überschrieben, und ein Neustart führt zu diesem Problem.
 
-**临时绕开**（不要动 DSH Desktop 的那个文件，它可能是新版格式）：
+**Vorübergehende Umgehung** (die Datei der DSH-Desktop-Installation sollte nicht verändert werden, da sie möglicherweise ein neues Format verwendet):
 
 ```bash
 H=/tmp/dsh-physicsos-home
@@ -244,137 +213,100 @@ mkdir -p "$H/storages"
 for f in profiles settings.yaml .env .anonymous-user-id; do
   ln -s "$HOME/.dsh/$f" "$H/$f"
 done
-# 只把 refs 那段重建成扁平映射（注意 0600 权限）
+# Nur den refs-Abschnitt in eine flache Zuordnung umformen (auf 0600-Berechtigungen achten)
 DSH_HOME="$H" pnpm -C vendor/deepseek-harness dsh web
 ```
 
-`DSH_HOME` 是官方支持的覆盖点（`packages/util/home-paths`）。注意 `profiles/`
-要用 symlink——它带约 300MB `node_modules`，拷不动。
+`DSH_HOME` ist ein offiziell unterstützter Überschreibungspunkt (`packages/util/home-paths`). Beim Verlinken von `profiles/` sollte ein Symlink verwendet werden – dieses Verzeichnis enthält etwa 300 MB an `node_modules` und lässt sich nicht sinnvoll kopieren.
 
-`tests/acceptance/support.mjs` 的 `startIsolatedServer()` 做的就是这件事，
-可以直接抄。
+Genau diesen Ansatz verfolgt `startIsolatedServer()` in `tests/acceptance/support.mjs` und kann als Vorlage dienen.
 
-**根治方向**（未做）：把 pin 的 harness 升到能读嵌套文档的版本，或让宿主与
-仓库共用同一份 credentials 实现。见 `docs/reports/BACKLOG.md` 的
-`DSH_CREDENTIALS_SCHEMA_SKEW`。
+**Dauerhafte Lösung (noch offen):** Das gepinnde Harness auf eine Version aktualisieren, die verschachtelte Credential-Dateien lesen kann, oder den Host und das Repository dazu bringen, dieselbe Credentials-Implementierung zu verwenden. Siehe `docs/reports/BACKLOG.md` unter `DSH_CREDENTIALS_SCHEMA_SKEW`.
 
 ---
 
-### 2.6 题库数据从哪来（`scripts/ingest-ceval-physics.mjs`）
+### 2.6 Herkunft der Aufgabenbankdaten (`scripts/ingest-ceval-physics.mjs`)
 
-题库（`bank_items`）的真实数据由一条可重复执行的脚本灌入：
+Die tatsächlichen Daten der Aufgabenbank (`bank_items`) werden über ein wiederholbar ausführbares Skript importiert:
 
 ```bash
-node scripts/ingest-ceval-physics.mjs --dry-run   # 只映射并打印样例
-node scripts/ingest-ceval-physics.mjs             # 写入 :3080
+node scripts/ingest-ceval-physics.mjs --dry-run   # Nur Mapping ausführen und Beispiel anzeigen
+node scripts/ingest-ceval-physics.mjs             # In :3080 schreiben
 node scripts/ingest-ceval-physics.mjs --base http://127.0.0.1:3099
-node scripts/ingest-ceval-physics.mjs --retag     # 改关键词表后重新打标
+node scripts/ingest-ceval-physics.mjs --retag     # Nach Änderung der Schlagwortliste neu taggen
 ```
 
-**批量核验**：388 条一次落下后，逐张点不现实。出卷专区 → 真题资料库 → 待核验区
-有范围筛选 + 「批量核验入库 / 批量退回」，二次确认里明说"接受该来源不等于逐题
-校对"。接口是 `POST /physicsos/paper/bank/items/review-batch`（≤500 条/请求）。
-注意 **`verified` 的内容是冻结的**：`PUT /bank/items/:id` 会 409 `FROZEN`，
-要改先退回 pending。
+**Stapelüberprüfung:** Nachdem 388 Aufgaben auf einmal importiert wurden, ist eine manuelle Einzelprüfung nicht praktikabel. Im Prüfungsstudio → Ressourcensammlung „Originalprüfungen“ → Bereich „Zur Prüfung“ gibt es eine Bereichsauswahl sowie die Aktionen „Ausgewählte als geprüft übernehmen“ und „Ausgewählte zurückweisen“. In der Bestätigung wird ausdrücklich darauf hingewiesen, dass das Übernehmen der Quelle nicht einer vollständigen Prüfung jeder einzelnen Aufgabe gleichkommt. Die Schnittstelle ist `POST /physicsos/paper/bank/items/review-batch` (max. 500 Aufgaben pro Anfrage).
 
-数据源是 **C-Eval**（`ceval/ceval-exam`，CC BY-NC-SA 4.0）的
-`middle_school_physics` + `high_school_physics`，共 401 道单选题。
-选它是因为它是本环境下唯一**有明确许可、且机器可读**的中国中学物理题源；
-商业题库付费且有版权，省级考试院不公开整卷。
+Wichtiger Hinweis: Aufgaben mit Status `verified` sind **gesperrt**. Ein `PUT /bank/items/:id` auf eine bereits geprüfte Aufgabe führt zu `409 FROZEN`. Zum Ändern muss die Aufgabe zunächst auf `pending` zurückgesetzt werden.
 
-脚本是幂等的（服务端按题干指纹去重，重复跑只会得到"已存在"）。默认
-**先起服务**——它就是个 HTTP 客户端，不直接写存储文件。
+Als Datenquelle dient **C-Eval** (`ceval/ceval-exam`, CC BY-NC-SA 4.0) mit den Sets `middle_school_physics` und `high_school_physics`, insgesamt 401 Aufgaben im Multiple-Choice-Format. Diese Quelle wurde gewählt, da sie in dieser Umgebung die einzige mit klarer Lizenz und maschinenlesbarem Format für chinesische Physikaufgaben der Mittel- und Oberstufe ist. Kommerzielle Aufgabenbanken sind kostenpflichtig und urheberrechtlich geschützt, vollständige Prüfungsbögen der Provinzprüfungsämter sind nicht öffentlich zugänglich.
 
-> **这批数据不是贵州真题**，也没与任何试卷核对过。因此每条都是
-> `status: pending`（待教师核验）、`reuseModes: ['adapt']`（只能当改写骨架，
-> 不会原样印成试卷）、`answerTier: web-public`，并且把数据源**没有提供**的
-> 字段（官方考点/难度/能力/分值）逐条登记在 `anomalies` 里——审核界面直接
-> 可见。考点标签是机器从题干+选项推的，标了 `knowledge-derived-from-stem`。
+Das Skript ist idempotent: Der Server dedupliziert Aufgaben anhand eines Fingerabdrucks des Aufgabentexts. Ein erneuter Lauf liefert daher nur „bereits vorhanden“. Standardmäßig muss der Dienst **zuvor gestartet sein** – das Skript ist ein reiner HTTP-Client und schreibt nicht direkt in Speicherdateien.
+
+> **Hinweis:** Bei diesen Aufgaben handelt es sich nicht um echte Prüfungen aus Guizhou und sie wurden mit keinem vorhandenen Prüfungsbogen abgeglichen. Aus diesem Grund hat jede Aufgabe den Status `pending` (muss durch Lehrkräfte geprüft werden), `reuseModes: ['adapt']` (darf nur als Gerüst zum Überarbeiten genutzt werden, nicht unverändert in Prüfungen übernommen werden), `answerTier: web-public`. Felder, die von der Quelle nicht bereitgestellt werden (offizielle Themenbereiche/Schwierigkeitsgrad/Fähigkeiten/Punkte), werden pro Aufgabe in `anomalies` vermerkt und sind direkt in der Prüfansicht sichtbar. Die Themenbereichs-Tags werden maschinell aus Aufgabentext und Antwortoptionen abgeleitet und mit `knowledge-derived-from-stem` gekennzeichnet.
 >
-> 详细取舍见 `docs/reports/MILESTONES.md` 的 `QUESTION_BANK_DATA_V1` 与
-> `docs/reports/BACKLOG.md` 的 `PAPER_STUDIO_DATA_STATE`。
+> Details zu Auswahlkriterien finden sich in `docs/reports/MILESTONES.md` unter `QUESTION_BANK_DATA_V1` sowie in `docs/reports/BACKLOG.md` unter `PAPER_STUDIO_DATA_STATE`.
 
-**卷库（`source_papers`）仍是 4 张卷**：C-Eval 提供题目集合，不含卷级元数据
-（年份/地区/学校），凭空补卷名就是编。扩卷库需要真实卷源。
+**Prüfungssammlung (`source_papers`):** Derzeit sind nur vier Prüfungsbögen erfasst. C-Eval liefert nur eine Sammlung von Aufgaben, jedoch keine metadaten auf Prüfungsbogenebene (Jahr/Region/Schule). Das willkürliche Hinzufügen von Prüfungsbogennamen wäre nicht korrekt. Für eine Erweiterung der Sammlung sind echte Prüfungsbögen als Quelle erforderlich.
 
-> ⚠️ `pnpm format`（`prettier --check .`）**全仓 751 个文件不通过**，包括几个
-> 早于本轮就存在的脚本。它不在 `lint`/`test` 门禁里，所以一直没暴露。别被它
-> 的红吓到，也别顺手 `--write`——先补 `.prettierignore` 排除 `vendor/` 与
-> 生成物，见 `BACKLOG.md` 的 `PNPM_FORMAT_IS_RED`。
+> ⚠️ `pnpm format` (`prettier --check .`) schlägt derzeit für **alle 751 Dateien** im Repository fehl, darunter auch einige Skripte, die bereits vor dieser Iteration existierten. Dieser Check ist nicht Teil der Zugangskontrollen `lint`/`test` und war daher bislang nicht sichtbar. Lassen Sie sich davon nicht verunsichern und führen Sie nicht einfach `--write` aus. Ergänzen Sie stattdessen zunächst `.prettierignore`, um `vendor/` und generierte Dateien auszuschließen. Details siehe `BACKLOG.md` unter `PNPM_FORMAT_IS_RED`.
 
 ---
 
-## 3. 常用命令
+## 3. Häufig verwendete Befehle
 
 ```bash
-pnpm dev              # 起 Web 开发服务
-pnpm typecheck:web    # 类型检查（client 侧）
-pnpm lint:web         # oxlint（client 侧）
-pnpm test:web         # vitest（client 侧测试）
+pnpm dev              # Startet den Web-Entwicklungsdienst
+pnpm typecheck:web    # Typprüfung (Client-Seite)
+pnpm lint:web         # oxlint (Client-Seite)
+pnpm test:web         # Vitest (Client-Seitige Tests)
 ```
 
-`typecheck` / `lint` / `test` 都有 `:core` / `:web` / `:agent` 三个分片，裸命令是
-串行跑全部。
+`typecheck`, `lint` und `test` sind jeweils in drei Teilbereiche unterteilt (`:core`, `:web`, `:agent`). Ohne Angabe eines Teilbereichs laufen sie seriell für alle.
 
-**2026-09-21 起三条门禁全绿**（此前 `lint` 与 `test` 都有既存红）：
+**Seit dem 21.09.2026 sind alle drei Zugangskontrollen vollständig erfolgreich** (zuvor wiesen `lint` und `test` bereits vorhandene Fehler auf):
 
-| 命令             | 覆盖                                                             | 结果      |
+| Befehl | Abdeckung | Ergebnis |
 | ---------------- | ---------------------------------------------------------------- | --------- |
-| `pnpm typecheck` | core + web + **tool-physicsos / auth-host / paper-host**         | 0 错      |
-| `pnpm lint`      | core（eslint）+ web（oxlint 171 文件）+ 三个 host 插件           | 0 错 0 警 |
-| `pnpm test`      | core + web（44 文件 686 测试）+ 三个 host 插件（7 文件 91 测试） | 全绿      |
+| `pnpm typecheck` | core + web + **tool-physicsos / auth-host / paper-host** | 0 Fehler |
+| `pnpm lint` | core (eslint) + web (oxlint, 171 Dateien) + drei Host-Plugins | 0 Fehler, 0 Warnungen |
+| `pnpm test` | core + web (44 Dateien, 686 Tests) + drei Host-Plugins (7 Dateien, 91 Tests) | Alle erfolgreich |
 
-> `test:agent` 此前**只跑 `tool-physicsos`**，`auth-host` 的 4 个 spec 与
-> `paper-host` 的 1 个 spec 不在任何日常门禁里——只有跑 harness 自己的 vitest
-> 才会被 `packages/*/*/tests/**` 命中。现改为 `vitest run packages/physicsos`。
-> `typecheck:agent` / `lint:agent` 同步覆盖三个包。接线当场暴露出 141 项从未
-> 检查过的 lint 错误（已清偿）。
+> `test:agent` lief zuvor **ausschließlich für `tool-physicsos`**. Die 4 Specs von `auth-host` und die 1 Spec von `paper-host` waren in keiner der täglichen Zugangskontrollen enthalten – sie wurden nur dann ausgeführt, wenn Vitest des Harness selbst auf `packages/*/*/tests/**` traf. Jetzt wird stattdessen `vitest run packages/physicsos` ausgeführt. `typecheck:agent` und `lint:agent` decken nun ebenfalls alle drei Pakete ab. Durch diese Erweiterung wurden 141 bisher nicht geprüfte Lint-Fehler aufgedeckt und behoben.
 
-### 3.0 浏览器验收（`tests/acceptance/*.mjs`）
+### 3.0 Browserakzeptanztests (`tests/acceptance/*.mjs`)
 
 ```bash
-node tests/acceptance/auth-acceptance.mjs        # 账户体系 + 管理后台（自带隔离服务）
-node tests/acceptance/library-home-acceptance.mjs  # 需要先 pnpm dev（连 3080）
+node tests/acceptance/auth-acceptance.mjs        # Kontosystem + Admin-Konsole (mit eigenem isoliertem Dienst)
+node tests/acceptance/library-home-acceptance.mjs  # Erfordert vorab gestartetes `pnpm dev` (Verbindung zu Port 3080)
 ```
 
-`auth-acceptance.mjs` **自带服务**：临时 `DSH_HOME` + 独立端口 3099 +
-由它自己决定密码的 `SUPER_ADMIN`，跑完什么都不留下，因此可重复执行、
-不依赖也不破坏你本机的 dev 数据。它要求运行它的 `node` 能算 argon2id，
-否则一行报错说清原因。
+`auth-acceptance.mjs` **startet seinen eigenen Dienst**: Temporäres `DSH_HOME`, eigener Port 3099 und ein vom Skript selbst erstellter `SUPER_ADMIN` mit zufälligem Passwort. Nach Abschluss hinterlässt der Test keine Spuren, ist daher wiederholbar und beeinträchtigt weder die Entwicklungsdaten noch die Konfiguration des Rechners. Das zum Ausführen verwendete `node` muss argon2id unterstützen, andernfalls wird eine klare einzeilige Fehlermeldung ausgegeben.
 
-其余套件连 `http://127.0.0.1:3080`，所以要先把 `pnpm dev` 起着。
+Die übrigen Tests verbinden sich mit `http://127.0.0.1:3080`, daher muss `pnpm dev` zuvor gestartet sein.
 
-### 3.1 改了前端源码，界面不会自己变（必读）
+### 3.1 Nach Änderungen am Frontendquellcode wird die Oberfläche nicht automatisch aktualisiert (unbedingt lesen)
 
-Web 服务加载的是**预打包产物**，不是 `src/`：
+Der Web-Dienst lädt **vorgepackte Build-Artefakte**, nicht den `src/`-Ordner:
 
 ```
 vendor/deepseek-harness/packages/client/ui-physicsos/lib/client.js
 ```
 
-改 `overlays/harness/files/packages/client/ui-physicsos/src/` 之后必须重新打包，
-否则浏览器里跑的仍是旧代码：
+Nach Änderungen an `overlays/harness/files/packages/client/ui-physicsos/src/` muss daher ein erneuter Build durchgeführt werden, da der Browser sonst weiterhin den alten Code ausführt:
 
 ```bash
 pnpm -C vendor/deepseek-harness --filter @deepseek-ai/dsh-client-ui-physicsos run bundle
 ```
 
-（想常驻增量构建就用同目录的 `run watch`。）刷新页面即生效；页面 `<head>` 里
-`client.js?rev=` 的值变化说明服务端换包成功。
+Für eine fortlaufende inkrementelle Neuerstellung kann stattdessen `run watch` im selben Verzeichnis verwendet werden. Ein Neuladen der Seite reicht dann aus. Wenn der Wert von `client.js?rev=` im `<head>` der Seite wechselt, wurde das neue Bundle erfolgreich vom Server ausgeliefert.
 
-**这个坑很隐蔽**：`pnpm test:web` 跑的是 `src/`，全绿；应用跑的是 `lib/`。
-2026-09-14 就踩过一次——`circuit-renderer.tsx` 里修好的仪表读数改动进了 `src/`
-没进 `lib/`，浏览器验收看到的还是修复前的画面，误判为"没修好"。
+**Wichtiger Hinweis:** `pnpm test:web` führt Tests gegen `src/` aus (und kann daher erfolgreich sein), während die Anwendung tatsächlich `lib/` lädt. Am 14.09.2026 wurde dies bereits einmal deutlich: Eine Korrektur an den Messwertanzeigen in `circuit-renderer.tsx` war in `src/` vorhanden, aber noch nicht in `lib/`. Bei den Browserakzeptanztests wurde daher noch die alte Anzeige gezeigt und fälschlicherweise angenommen, der Fix sei fehlgeschlagen.
 
-Agent 侧同理：`dsh-tool-physicsos` 把 `@physicsos/*` 源码内联进
-`vendor/deepseek-harness/packages/physicsos/tool-physicsos/lib/index.js`，
-改 `packages/` 下任何 physics 源码后必须 `pnpm run build:agent` 并重启
-`pnpm dev`，否则 `physics_solve_question` 等工具返回旧行为（2026-09-14 力学
-endTime 修复在浏览器里仍报 v=30/200m，就是这个原因——重建后恢复 v=20/75m）。
-`grep "关键改动代码片段" lib/index.js` 可直接确认 bundle 新旧。
+Dasselbe gilt für die Agent-Seite: `dsh-tool-physicsos` bindet den Quellcode von `@physicsos/*` direkt in `vendor/deepseek-harness/packages/physicsos/tool-physicsos/lib/index.js` ein. Nach Änderungen an physikbezogenem Quellcode unter `packages/` muss daher `pnpm run build:agent` ausgeführt und `pnpm dev` neu gestartet werden. Andernfalls liefern Werkzeuge wie `physics_solve_question` weiterhin das alte Verhalten (die am 14.09.2026 korrigierte `endTime`-Berechnung in der Mechanik meldete im Browser weiterhin v=30/200m – genau aus diesem Grund. Nach dem Neuaufbau wurde wieder v=20/75m angezeigt). Durch eine Suche nach dem Kommentar zu den wesentlichen Codeänderungen in `lib/index.js` lässt sich direkt feststellen, ob das Bundle aktuell ist.
 
-**三个 host 插件同理**（`auth-host` / `paper-host` / `tool-physicsos`）：
-服务加载的是各自的 `lib/index.js`，不是 `src/`。改完源码必须重建再重启：
+**Dasselbe gilt für die drei Host-Plugins** (`auth-host` / `paper-host` / `tool-physicsos`): Der Dienst lädt jeweils `lib/index.js`, nicht `src/`. Nach Änderungen am Quellcode muss daher neu gebaut und der Dienst neu gestartet werden:
 
 ```bash
 cd vendor/deepseek-harness
@@ -384,19 +316,14 @@ for p in auth-host paper-host tool-physicsos; do
 done
 ```
 
-**注意顺序**：`tsdown` 的入口是 `lib/types/index.js`（`tsc` 产物），
-**必须先 `tsc -b` 再 `tsdown`**；直接跑 `tsdown` 打的是上一次的旧产物，
-表现是"路由/数据明明在源码里却 404 或查不到"。
-（包内有 `pnpm run bundle` 按正确顺序跑两步，但它会触发 pnpm 的依赖检查，
-在 lefthook postinstall 失败的环境里会被打断——所以上面给的是直连写法。）
+**Reihenfolge beachten:** Der Einstiegspunkt von `tsdown` ist `lib/types/index.js` (Ergebnis von `tsc`). Es muss daher **zuerst `tsc -b` und danach `tsdown`** ausgeführt werden. Wird `tsdown` direkt aufgerufen, wird das alte Artefakt des vorherigen Durchlaufs gebündelt; die Folge sind Fehler wie „Route/Daten sind im Quellcode vorhanden, liefern aber 404 oder sind nicht auffindbar“.
+(Innerhalb des Pakets führt `pnpm run bundle` beide Schritte in der richtigen Reihenfolge aus. Es löst jedoch die Abhängigkeitsprüfung von pnpm aus.)
+In Umgebungen, in denen `lefthook postinstall` fehlschlägt, kann der Paketbuild unterbrochen werden – daher wird oben die direkte Ausführung verwendet.
 
-> 2026-09-21 就踩过一次：往名录里加了 15 所学校、`apply` 也同步了、
-> 单测全绿，但隔离服务注册新校名仍然 `SCHOOL_NOT_FOUND`——因为
-> `auth-host/lib` 还是旧的。重建后 4 所全部 201。
-> **症状识别**：单测（跑 `src/`）与真实服务（跑 `lib/`）结论不一致。
+> Am 21.09.2026 trat folgender Fall auf: 15 Schulen wurden zum Verzeichnis hinzugefügt, `apply` wurde synchronisiert und alle Unit-Tests waren erfolgreich, doch bei der Registrierung neuer Schulnamen im isolierten Dienst wurde weiterhin `SCHOOL_NOT_FOUND` zurückgegeben – weil `auth-host/lib` noch den alten Stand enthielt. Nach dem Neuaufbau wurden alle neuen Schulen korrekt mit 201 akzeptiert.
+> **Erkennungsmerkmal:** Unit-Tests (gegen `src/`) und der echte Dienst (gegen `lib/`) kommen zu unterschiedlichen Ergebnissen.
 
-排查手法：`lib/client.js.map` 的 `sourcesContent` 里存着**打包当时**的全部源码，
-把它和当前 `src/` 逐文件 diff，就能看出 `lib/` 落后在哪：
+Zur Fehlerdiagnose: Die Datei `lib/client.js.map` enthält in `sourcesContent` den vollständigen Quellcode zum Zeitpunkt des Bundlings. Ein Vergleich dieses Inhalts mit dem aktuellen `src/` pro Datei zeigt unmittelbar, in welchen Bereichen `lib/` veraltet ist:
 
 ```bash
 node -e '
@@ -407,854 +334,726 @@ console.log(m.sourcesContent[i])' | diff - overlays/harness/files/packages/clien
 
 ---
 
-## 4. 视觉层在哪里
+## 4. Wo befindet sich die Darstellungsschicht?
 
-电学台（以及全部领域）的渲染代码在：
+Der Rendering-Code für den Stromkreisarbeitsplatz (und für alle anderen Bereiche) liegt unter:
 
 ```
 overlays/harness/files/packages/client/ui-physicsos/src/client/physics/
 ```
 
-| 文件                            | 作用                                                 |
+| Datei | Funktion |
 | ------------------------------- | ---------------------------------------------------- |
-| `*-renderer.tsx`                | 各领域 SVG 渲染器（`circuit-renderer.tsx` 是电学台） |
-| `renderers.module.css`          | 渲染器样式（导线、电流、灯光都在这里）               |
-| `scene-visual-model.ts`         | 渲染层消费的视觉模型契约                             |
-| `*-visual-bridge.ts`            | 引擎结果 → 视觉模型的桥（数值诚实性的关键层）        |
-| `tests/circuit.client.spec.tsx` | 电学台测试                                           |
+| `*-renderer.tsx` | SVG-Renderer je Bereich (`circuit-renderer.tsx` für den Stromkreisarbeitsplatz) |
+| `renderers.module.css` | Stile für Renderer (Leitungen, Strom, Beleuchtung usw.) |
+| `scene-visual-model.ts` | Vertrag des visuellen Modells für die Darstellungsschicht |
+| `*-visual-bridge.ts` | Brücke zwischen Engine-Ergebnissen und dem visuellen Modell (entscheidend für numerische Korrektheit) |
+| `tests/circuit.client.spec.tsx` | Tests für den Stromkreisarbeitsplatz |
 
-设计 token（`--physics-*`）**不在 CSS 文件里**，而是以字符串形式注入 DOM，位于：
+Design-Tokens (`--physics-*`) werden **nicht in CSS-Dateien** definiert, sondern als Strings in das DOM injiziert. Der entsprechende Code befindet sich in:
 
 ```
 overlays/harness/files/packages/client/ui-physicsos/src/client/chrome.ts
 ```
 
-新加变量必须加在这里。在样式表里凭空写一个 `var(--physics-xxx)` 且未定义，
-会静默画不出东西。
+Neue Variablen müssen dort hinzugefügt werden. Wird in einem Stylesheet `var(--physics-xxx)` verwendet, ohne dass die Variable definiert ist, bleibt die betroffene Darstellung ohne sichtbares Ergebnis.
 
 ---
 
-## 5. 器材精灵流水线（生图）
+## 5. Pipeline zur Erstellung von Material-Sprites (Bildgenerierung)
 
-三支脚本，都在 `scripts/design/`：
+Drei Skripte befinden sich unter `scripts/design/`:
 
 ```bash
-# 1) 生成（约 60 秒/张；并发 3；从 .env 读凭据；不打印密钥）
-node scripts/design/generate-parts3d.mjs              # 全部
-node scripts/design/generate-parts3d.mjs lamp-off     # 只生成指定 id
+# 1) Generierung (ca. 60 s pro Bild; 3 parallele Aufträge; liest Credentials aus .env; gibt keine Geheimnisse aus)
+node scripts/design/generate-parts3d.mjs              # Alle
+node scripts/design/generate-parts3d.mjs lamp-off     # Nur angegebene ID
 
-# 2) 后处理：裁到实体轮廓、按统一基准归一化、压缩、写 manifest.json
+# 2) Nachbearbeitung: Zuschneiden auf den Objektumriss, Normalisierung auf einheitliche Referenz, Komprimierung, Schreiben von manifest.json
 python scripts/design/postprocess-parts3d.py
 
-# 3) 像素验收：边缘截断 / 多件同框 / 轮廓是否是"只剩一根线"
+# 3) Pixelprüfung: Abschneiden am Rand / mehrere Objekte im selben Frame / unzulässige Konturlinien
 python scripts/design/verify-parts3d.py
 ```
 
-产出落在：
+Die Ausgabedateien werden gespeichert unter:
 
 ```
 overlays/harness/files/apps/web/public/physicsos/parts3d/
 ```
 
-（注意是 **overlay 侧**的 `apps/web/public/`，不是仓库根的 `apps/web/public/`。
-写到根目录的话 `apply` 不会同步，等于白生成。）
+(Wichtiger Hinweis: Dies ist der `apps/web/public/`-Pfad **auf der Overlay-Seite**, nicht im Repository-Root. Werden Dateien direkt im Root-Verzeichnis abgelegt, werden sie bei `apply` nicht synchronisiert und gehen verloren.)
 
-网关行为（已实测）：返回 `data[0].url`（无 base64）；`size: 1024x1024`；
-`background: "transparent"` 真实生效，出图自带 alpha，无需抠图；单张约 60–120 秒。
+Gateway-Verhalten (praktisch erprobt): Liefert `data[0].url` zurück (kein Base64); `size: 1024x1024`; `background: "transparent"` wirkt tatsächlich, die erzeugten Bilder bringen bereits Alpha mit, ein Freistellen ist nicht nötig; ein Bild dauert etwa 60–120 Sekunden.
 
-风格统一靠 `generate-parts3d.mjs` 里的 `STYLE` 常量（3/4 视角、左上主光、共用
-参照尺度）。**改风格就要重生成全套**，否则新旧器材的相机与光向对不上。
+Die stilistische Einheitlichkeit beruht auf der `STYLE`-Konstante in `generate-parts3d.mjs` (3/4-Ansicht, Hauptlicht von links oben, gemeinsamer Referenzmaßstab). **Bei einer Stiländerung muss der gesamte Satz neu generiert werden**, sonst passen Kamera und Lichtrichtung alter und neuer Materialien nicht zusammen.
 
-第一版器材清单（10 件）：`lamp-off`、`lamp-on`、`resistor`、`rheostat`、`battery`、
-`switch-open`、`switch-closed`、`ammeter`、`voltmeter`、`terminal`。
+Erste Materialliste (10 Teile): `lamp-off`, `lamp-on`, `resistor`, `rheostat`, `battery`, `switch-open`, `switch-closed`, `ammeter`, `voltmeter`, `terminal`.
 
 ---
 
-## 6. 当前状态：做完的 / 没做的
+## 6. Aktueller Status: Erledigt / Offen
 
-### 已完成并有证据
+### Erledigt (mit Nachweisen)
 
-- **电流流光**：深色圆点改为金色虚线路径，每帧推进 `stroke-dashoffset`，速率
-  ∝|I|（钳制 8–90 px/s），方向随解出的电流符号。逐段 KCL 诚实性未变——动的只是
-  虚线相位，几何仍是导线自身的折线。
-- **灯泡分层辉光**：单个径向渐变圆盘改为三段同色温叠层（bloom / disc / core，
-  后两者 `mix-blend-mode: screen`），并补灯丝路径；灯丝与光晕共用同一个归一化
-  `glow`，不会互相矛盾。
-- **电缆导线**：1.6px 中灰细线升级为带高光与轻微投影的电缆。
-- **精灵流水线 + 10 件器材**：已生成、已归一化、已通过像素验收、已入库。
-- **器材精灵已接进渲染层**（本轮）：`parts3d-catalog.ts` 静态目录与
-  `manifest.json` 保持 parity（有测试看守）；`circuit-renderer.tsx` 按
-  `kind` 选精灵，用 `solidBox` 归一化摆放，矢量符号保留为回退
-  （无映射 / `<image>` onError，失败按 component id 逐个记）。开关开/合、
-  滑变滑块指针、A/V 表盘字母、电流箭头、辉光中心均已实机验证。
-- **器材自由拖动 + 导线自动跟随**（本轮）：新增场景命令
-  `SetComponentPlacement`（`physics-scene/src/scene-runtime.ts`）——校验
-  circuitId/componentId、有限坐标、可选 90° 步进旋转，写
-  `circuit.metadata.layout.components`；相连导线按"物理导线"模型重排
-  （`circuitLayoutPlace` → `rerouteWire`，`circuit/circuit-scene.ts`）：
-  未动一侧的弯折全部保留，移动端拉到旧脊线上补一个桥接弯，矩形回路
-  在拖动后仍是矩形而不是被斜线割裂；发 `ComponentPlacementChanged` 事件。
-  该命令是展示元数据而非物理事实：**不 fork 题面场景**
-  （`experimental-branch.ts` 的 `FACT_COMMANDS` 明确缺席）、
-  **不回卷时间轴**（`rewind: false`）。渲染器侧走指针拖拽：命中区是盖住
-  `solidBox` 的透明 rect（精灵图 `pointer-events: none`），<3px 视为点击；
-  拖动中 runtime 只做预览快照（钉住视口防自动缩放），松手才提交一次正式
-  命令；`pointercancel` 走 `cancelComponentPlacement` 回弹。预览与提交都
-  对元件中心做 **0.5 栅格吸附**——自由拖动但落点对齐，这是拖动后画面
-  依然协调的关键。逆投影 `sx/sy` 加在 `RendererProjection` 上
-  （`PhysicsCanvas`），其他领域渲染器不受影响。
-- **开关/滑片画布直接操作**（本轮）：`ComponentControlChannel`
-  （`renderer-registry.tsx`）与拖拽通道并列，经 `PhysicsCanvas` 转发；
-  运行时四方法 `setSwitchState`/`previewSliderPosition`/`commitSliderPosition`/
-  `cancelSliderPosition`（`circuit-workspace-runtime.ts`）。手势状态机
-  在 `circuit-renderer.tsx`：按下滑变滑块柱（按 `sliderRail` 实测几何
-  判定）直接推，不按整件拖；开关 <3px 释放为拨动、过阈值为位移；
-  `pointercancel` 走 `cancelSliderPosition` 回弹。滑块预览只画不重放、
-  在 t=0 按抓取位求解（`sliderPositionAt` 恒等式），表盘与标注实时跟手；
-  松手一条 `SetSliderPosition` 命令进版本。键盘：`data-control="switch-*"`
-  （role=switch，Enter/Space）与 `data-control="slider-*"`（role=slider，
-  方向键 ±5%、Home/End）。QuestionSpace 不挂该通道，题面画布保持只读。
-- **力学器材精灵接入**（本轮，C1–C3）：`mechanics-parts3d-catalog.ts`
-  新增，锚点取自 `parts3d/mechanics/manifest.json` 实测值——`anchorLine`
-  （plank 顶面线段）、`anchorPoint`（block/cart/weight-hook 底部接触点）、
-  `radius`+圆心（ball）。`primitives.tsx` 的 `Body` 按 kind 选精灵：
-  球心锚定用中心对齐，其余用底部接触点压到场景几何上；`Incline` 用
-  `plank` 锚线旋转到斜边（正交侧视旋转是精确变换），楔形支撑与地面
-  排线保留代码绘制；矢量/轨迹/尺寸线/打点全部不动。无映射或
-  `<image>` onError 时回退原矢量画法。`verify-parts3d.py` 已合并
-  mechanics manifest（`mechanics/` 前缀），24 件全过；parity 测试
-  同步按前缀识别力学条目。
-- **实验结构化元数据**（P0，本轮）：新增 `physics/experiment-summaries.ts`——
-  44 个模板逐个声明 `coreModel/parameters/feedback/errors` + 人教版教材映射
-  - 搜索别名 + 分步指南，与 `experiment-templates.ts` 分离映射（照
-    `experiment-artwork.tsx` 先例，模板文件零侵入）。parity 测试
-    `experiment-summaries.client.spec.ts`（7 用例）看守：每模板必有且四条非空，
-    已实现模板必有教材映射与指南，别名非空且条内唯一。工作台数据面板新增
-    「要点」页签渲染四件套卡片 + 教材映射；实验中心搜索纳入别名。
-- **实验工具**（P1，本轮）：工具栏「实验指南」模态
-  （`ExperimentGuidePanel.tsx`，分步 + 预期现象 + 教材映射）；数据面板头
-  「数据导出」按钮把当前数据表写成 CSV 下载。
-- **MathText → KaTeX**（P2 定案，本轮）：用户拍板换渲染方式后，
-  `MathText.tsx` 改为 `toTexExpression` 归一化（`math-symbol.ts`：unicode
-  方言→TeX，`½`→`\tfrac`、`ᵢ`→`_{i}`、`√`→`\sqrt`、希腊字母、全角标点、
-  CJK→`\text{}`、≥4 字母散文词→`\mathrm{}`）+ `renderTexToReact`
-  （`dsh-client-ui-primitives` 新导出，KaTeX 排版）。`katex.min.css` 与
-  字体作为静态资产挂在 `/physicsos/katex/`（组件挂载时注入 `<link>` 一次）。
-  SVG 侧 `MathLabel` 仍走 `parseMathSymbol`——画布标签无分式需求。
-- **P3-a 力学补强批**（本轮，7 个新模板）：
-  - `force-composition` 力的合成：3-4-5 自由物体，`appliedForce`+新增
-    `appliedForces` 多力字段（`mechanics-scene-factory.ts`），合力 5 N 直接
-    可验；**无重力场**——mg/N 力对只会互相抵消还添两个虚构箭头。
-  - `concurrent-equilibrium` 共点力平衡：8 N 三力互成 120°，ΣF 严格为零。
-  - `apparent-weight` 超重失重：竖直匀加速（m=60, a=2），inspector 派生
-    「视重」行 N=m(g+a)=708 N，竖直加速度非零时自动出现。
-  - `chase-meeting` 追及相遇：复用 collision 双体（y 车道错开 1.4 m >
-    两半径和，永不碰撞），t=2 s 在 x=2 m 相遇，x–t 图交点即结论。
-  - `vt-area` v–t 图像与位移：v₀=2、a=1.5 梯形面积。
-  - `hooke-law` / `friction-static`：引擎无弹簧变力与静/动摩擦求解器，
-    诚实标 `comingSoon`，`createScene` 抛错而非假实现。
-  - **observation 层补发 custom 力**：此前 `applied` 力观测完全缺失
-    （`FORCE_STYLES.applied` 是死配置），现按 `scene.forces` 逐个发布，
-    visual bridge 去重编号 F₁/F₂/F₃。
-  - **bridge 轨道判定收紧**：`isLinearModel→画轨道`改为
-    `isHorizontalLinear`（v0y≈0 且 ay≈0）——竖直与斜向运动不再被画上
-    水平轨道，车形只在真水平一维用 cart，其余用 block。
+- **Stromflussanimation:** Der dunkle Punkt wurde durch einen goldfarbenen gestrichelten Pfad ersetzt. Pro Frame wird `stroke-dashoffset` fortgeschrieben, die Geschwindigkeit ist proportional zu |I| (begrenzt auf 8–90 px/s), die Richtung folgt dem berechneten Stromvorzeichen. Die KCL-Konsistenz pro Segment bleibt unverändert – nur die Phase der gestrichelten Linie ändert sich, die Geometrie bleibt die ursprüngliche Polylinie der Leitung.
+- **Mehrschichtige Glühbirnenleuchtwirkung:** Eine einzelne radiale Verlaufsscheibe wurde durch drei übereinandergelegte Schichten gleicher Farbtemperatur ersetzt (Bloom / Scheibe / Kern, die letzten beiden mit `mix-blend-mode: screen`). Zusätzlich wurde der Glühfadenpfad ergänzt. Glühfaden und Leuchtschein teilen denselben normalisierten `glow`-Wert, sodass keine Widersprüche entstehen.
+- **Leitungen:** Eine 1,6 px dünne mittelgraue Linie wurde zu einer Leitung mit Glanzlicht und leichter Schattierung aufgewertet.
+- **Sprite-Pipeline + 10 Materialien:** Generiert, normalisiert, per Pixelprüfung abgenommen und eingepflegt.
+- **Material-Sprites in die Darstellungsschicht integriert** (diese Iteration): Der statische Katalog `parts3d-catalog.ts` bleibt mit `manifest.json` in Übereinstimmung (durch Tests abgesichert). `circuit-renderer.tsx` wählt das Sprite anhand von `kind` aus und platziert es normalisiert über `solidBox`. Vektorsymbole bleiben als Fallback erhalten (kein Mapping / `<image>`-onError; Fehler werden pro `component id` einzeln protokolliert). Schalter auf/zu, Schiebereglerzeiger, A/V-Skalenbuchstaben, Strompfeile und Leuchtmittelpunkte wurden alle im Betrieb verifiziert.
+- **Freies Verschieben von Materialien + automatisches Folgen der Leitungen** (diese Iteration): Neue Szenenanweisung `SetComponentPlacement` (`physics-scene/src/scene-runtime.ts`) – prüft `circuitId`/`componentId`, endliche Koordinaten und optionale Rotation in 90°-Schritten und schreibt nach `circuit.metadata.layout.components`. Verbundene Leitungen werden nach dem Modell „physikalische Leitung“ neu angeordnet (`circuitLayoutPlace` → `rerouteWire`, `circuit/circuit-scene.ts`): Alle Knicke auf der nicht bewegten Seite bleiben erhalten, das bewegte Ende erhält an der alten Leitungsachse einen Brückenknick, und ein rechteckiger Kreislauf bleibt nach dem Verschieben rechteckig statt von diagonalen Linien zerschnitten zu werden. Es wird ein `ComponentPlacementChanged`-Ereignis ausgelöst. Diese Anweisung beschreibt Darstellungsmetadaten, keine physikalischen Fakten: Sie **forkt die Aufgabenszene nicht** (in den `FACT_COMMANDS` von `experimental-branch.ts` ausdrücklich nicht enthalten) und **spult die Zeitachse nicht zurück** (`rewind: false`). Auf der Rendererseite erfolgt das Ziehen per Pointer: Die Trefferfläche ist ein transparentes Rect über `solidBox` (Spritebild mit `pointer-events: none`); weniger als 3 px gelten als Klick. Während des Ziehens führt die Laufzeit nur eine Vorschauaufnahme durch (Viewport wird fixiert, um automatisches Zoomen zu verhindern); erst beim Loslassen wird eine formelle Anweisung übermittelt; `pointercancel` löst über `cancelComponentPlacement` ein Zurückspringen aus. Vorschau und Übermittlung rasten die Komponentenmitte auf **0,5 Raster** ein – frei verschiebbar, aber am Ziel ausgerichtet. Dies ist der Schlüssel dafür, dass das Bild nach dem Verschieben weiterhin stimmig bleibt. Die inverse Projektion `sx/sy` wird an `RendererProjection` (`PhysicsCanvas`) ergänzt; andere Bereichsrenderer sind nicht betroffen.
+- **Direkte Bedienung von Schaltern/Schiebern auf der Zeichenfläche** (diese Iteration): `ComponentControlChannel` (`renderer-registry.tsx`) läuft parallel zum Drag-Kanal und wird über `PhysicsCanvas` weitergeleitet. Die Laufzeit stellt vier Methoden bereit: `setSwitchState`/`previewSliderPosition`/`commitSliderPosition`/`cancelSliderPosition` (`circuit-workspace-runtime.ts`). Die Gesten-Zustandsmaschine in `circuit-renderer.tsx`: Wird der Schiebereglerbalken gedrückt (anhand der an `sliderRail` gemessenen Geometrie), wird direkt geschoben, nicht das gesamte Bauteil gezogen. Beim Schalter gilt Loslassen unter 3 px als Umschalten, darüber als Verschieben; `pointercancel` löst über `cancelSliderPosition` ein Zurückspringen aus. Die Schiebervorschau zeichnet nur und spult nicht zurück; bei t=0 wird anhand der Griffposition gelöst (`sliderPositionAt`-Gleichung), Anzeige und Beschriftung folgen in Echtzeit. Beim Loslassen wird eine `SetSliderPosition`-Anweisung in die Version übernommen. Tastatur: `data-control="switch-*"` (role=switch, Enter/Space) und `data-control="slider-*"` (role=slider, Pfeiltasten ±5 %, Home/End). QuestionSpace verwendet diesen Kanal nicht; die Aufgabenzeichenfläche bleibt schreibgeschützt.
+- **Integration der Mechanik-Material-Sprites** (diese Iteration, C1–C3): Neue Datei `mechanics-parts3d-catalog.ts`; die Ankerpunkte stammen aus den in `parts3d/mechanics/manifest.json` gemessenen Werten – `anchorLine` (Oberkante des Brettes), `anchorPoint` (unterer Kontaktpunkt von Block/Wagen/Gewichtshaken), `radius` + Mittelpunkt (Kugel). `Body` in `primitives.tsx` wählt das Sprite anhand von `kind`: Bei Kugelmittelpunkt-Anker wird die Mitte ausgerichtet, sonst wird der untere Kontaktpunkt auf die Szenengeometrie gedrückt. `Incline` dreht die `plank`-Ankerlinie auf die Schräge (die orthogonale Seitenansichtsrotation ist eine exakte Transformation). Keilauflage und Bodenlinien werden weiterhin im Code gezeichnet; Vektoren/Bahnen/Maßlinien/Punktmarkierungen bleiben alle unverändert. Ohne Mapping oder bei `<image>`-onError wird auf die ursprüngliche Vektorzeichnung zurückgegriffen. `verify-parts3d.py` führt das Mechanics-Manifest zusammen (Präfix `mechanics/`), alle 24 Teile bestanden; der Paritäts-Test erkennt Mechanikeinträge nun ebenfalls am Präfix.
+- **Strukturierte Versuchsmetadaten** (P0, diese Iteration): Neue Datei `physics/experiment-summaries.ts` – 44 Vorlagen deklarieren jeweils `coreModel/parameters/feedback/errors` + Zuordnung zum Lehrbuch (Volksbildung) + Suchalias + Schritt-für-Schritt-Anleitung, getrennt vom Mapping in `experiment-templates.ts` (nach dem Vorbild von `experiment-artwork.tsx`, ohne Eingriff in die Vorlagendateien). Der Paritäts-Test `experiment-summaries.client.spec.ts` (7 Fälle) stellt sicher: jede Vorlage muss vorhanden sein und alle vier Angaben nicht leer, implementierte Vorlagen müssen Lehrbuchzuordnung und Anleitung besitzen, Aliase müssen nicht leer und innerhalb eines Eintrags eindeutig sein. Das Datenpanel des Arbeitsplatzes enthält nun den Tab „Kernpunkte“, der die vier Karten + Lehrbuchzuordnung rendert; die Suche im Versuchszentrum bezieht Aliase mit ein.
+- **Versuchswerkzeuge** (P1, diese Iteration): Der Dialog „Versuchsanleitung“ in der Symbolleiste (`ExperimentGuidePanel.tsx`, Schritte + erwartete Erscheinungen + Lehrbuchzuordnung); die Schaltfläche „Datenexport“ im Kopf des Datenpanels schreibt die aktuelle Datentabelle als CSV-Download.
+- **MathText → KaTeX** (P2-Entscheidung, diese Iteration): Nach der Entscheidung des Nutzers, die Darstellungsweise zu wechseln, wurde `MathText.tsx` auf die Normalisierung `toTexExpression` umgestellt (`math-symbol.ts`: Unicode-Dialekt → TeX, `½`→`\tfrac`, `ᵢ`→`_{i}`, `√`→`\sqrt`, griechische Buchstaben, Vollwinkel-Satzzeichen, CJK→`\text{}`, Fließtextwörter mit ≥4 Buchstaben→`\mathrm{}`) + `renderTexToReact` (neuer Export aus `dsh-client-ui-primitives`, KaTeX-Satz). `katex.min.css` und die Schriften werden als statische Assets unter `/physicsos/katex/` bereitgestellt (beim Mounten der Komponente wird einmalig `<link>` injiziert). Auf der SVG-Seite verwendet `MathLabel` weiterhin `parseMathSymbol` – die Beschriftungen der Zeichenfläche benötigen keine Brüche.
+- **P3-a Mechanik-Erweiterungspaket** (diese Iteration, 7 neue Vorlagen):
+  - `force-composition` Kräftezerlegung/Zusammensetzung: freier Körper im 3-4-5-Verhältnis, `appliedForce` + neues Feld `appliedForces` für mehrere Kräfte (`mechanics-scene-factory.ts`), resultierende Kraft 5 N direkt nachprüfbar; **kein Schwerkraftfeld** – mg/N-Kräftepaare heben sich nur gegenseitig auf und würden zwei fiktive Pfeile hinzufügen.
+  - `concurrent-equilibrium` Gleichgewicht zentraler Kräfte: 8 N, drei Kräfte im 120°-Winkel, ΣF exakt null.
+  - `apparent-weight` Übergewicht/Leichtigkeit: vertikale gleichförmige Beschleunigung (m=60, a=2), der Inspector leitet die Zeile „Scheingewicht“ N=m(g+a)=708 N ab, die bei vertikaler Beschleunigung ungleich null automatisch erscheint.
+  - `chase-meeting` Verfolgung und Treffen: nutzt das Kollisions-Zweikörpersystem (y-Spur um 1,4 m versetzt > Summe der beiden Radien, daher nie kollidierend), Treffen bei t=2 s, x=2 m; der Schnittpunkt der x–t-Kurven ist die Lösung.
+  - `vt-area` v–t-Diagramm und Weg: v₀=2, a=1,5, Trapezfläche.
+  - `hooke-law` / `friction-static`: Die Engine besitzt keinen Löser für veränderliche Federkräfte oder Haft-/Gleitreibung. Ehrlich als `comingSoon` gekennzeichnet; `createScene` wirft einen Fehler, statt eine Scheinimplementierung zu liefern.
+  - **Beobachtungsschicht gibt benutzerdefinierte Kräfte aus:** Zuvor fehlten Beobachtungen zu `applied`-Kräften vollständig (`FORCE_STYLES.applied` war eine tote Konfiguration). Nun wird jede Kraft aus `scene.forces` einzeln ausgegeben; die Visual Bridge nummeriert dedupliziert als F₁/F₂/F₃.
+  - **Bahnerkennung der Bridge verschärft:** `isLinearModel→Bahn zeichnen` wurde zu `isHorizontalLinear` (v0y≈0 und ay≈0) – vertikale und schräge Bewegungen erhalten keine horizontale Bahn mehr. Die Wagenform wird nur bei echter eindimensionaler Horizontalbewegung als `cart` verwendet, sonst als `block`.
 
-### 未完成
+### Offen
 
-- `manifest.json` 的锚点来自**几何约定**（`anchorSource: "geometry-convention"`），
-  不是逐件目视测量。电池/滑变/灯泡的 `axis` 已修正为 `base`（接线柱在底座/顶面，
-  非左右两端）；如需更精确的接线锚点仍要逐件实测。
-- `lamp-off` / `lamp-on` 尚未启用：当前视觉模型里没有独立的"灯泡"类型，耗散负载
-  一律按电阻元件绘制。等场景侧有了灯泡类型再接。
-- `terminal` 精灵尚无对应组件类型，未接。
-- 力学精灵已接 `Body`/`Incline`；`Platform`、weight-hook 悬挂件等仍走矢量，
-  其余领域（波动、感应……）未动。
-- plank 精灵两端带金属卡具、略超出楔形斜边（锚线占图宽 ~92%），视觉上
-  像板架在三角上而非板即斜面——C4 决策点待定是否裁端部余量。
-- 直接操作目前只覆盖开关与滑变滑片；其他器材（如电表）无可操作件。
+- Die Ankerpunkte in `manifest.json` basieren auf **geometrischen Konventionen** (`anchorSource: "geometry-convention"`), nicht auf einer visuellen Vermessung jedes einzelnen Bauteils. Für Batterie, Schieberegler und Glühbirne wurde `axis` bereits auf `base` korrigiert (Anschlüsse befinden sich an Basis/Oberseite, nicht an den seitlichen Enden). Für noch genauere Anschlussankerpunkte ist eine Vermessung der einzelnen Bauteile erforderlich.
+- `lamp-off` / `lamp-on` sind noch nicht aktiviert: Im aktuellen visuellen Modell gibt es noch keinen eigenen Typ für Glühbirnen; dissipative Lasten werden derzeit einheitlich als Widerstandskomponente dargestellt. Die Integration erfolgt, sobald die Szenenseite einen eigenen Lampentyp bereitstellt.
+- Für den `terminal`-Sprite gibt es noch keinen entsprechenden Komponententyp; er ist daher noch nicht angebunden.
+- Mechanik-Sprites sind bereits für `Body` und `Incline` angebunden. `Platform`, Haken mit Gewicht u. a. werden noch als Vektorgrafiken dargestellt. Andere Bereiche (Wellen, Induktion usw.) sind noch unverändert.
+- Das Plank-Sprite hat an beiden Enden Metallklammern, die geringfügig über die Schrägkante des Keils hinausragen (die Ankerlinie nimmt ca. 92% der Bildbreite ein). Optisch wirkt es daher eher wie eine auf einem Keil gelagerte Platte als wie eine Platte, die direkt die Schräge bildet – ob die überstehenden Ränder beschnitten werden sollen, ist noch zu entscheiden (C4-Entscheidungspunkt).
+- Die direkte Bedienung deckt derzeit nur Schalter und den Schiebereglerzeiger ab. Andere Bauteile (z. B. Messgeräte) haben noch keine bedienbaren Elemente.
 
-### 验证证据与已知问题
+### Prüfnachweise und bekannte Probleme
 
-- `pnpm typecheck:web` 干净通过（需在完整 `upstream-changes.patch` 已 apply、
-  上游引用图已构建的前提下）。
-- `circuit.client.spec.tsx` **29/29 通过**，含 5 个精灵专项用例与 7 个拖拽
-  专项（预览不改 revision、视口钉住、半格吸附、落点提交+导线重排、指针事件
-  链路、亚阈值点击、pointercancel 回弹）。
-- `circuit-scene-runtime.test.ts` **13/13 通过**，含
-  `SetComponentPlacement` 的位移落库/脊线保留重排/非有限坐标拒绝。
-- **真实浏览器验证**（Chromium + Playwright，`tests/acceptance/support.mjs`
-  门禁）：串联电路 5 精灵 `<image>` 全部 200、矢量体互斥、开关断开时
-  `switch-open.png` + 电流归零；变阻器模板 6 精灵 + 滑块在位；R1 真机拖拽
-  中预览逐帧跟随指针、落点像素级一致、7 条导线路径全部重排、开关同样可拖；
-  console/page error/失败请求/4xx5xx 四项全零。截图证据：
-  `docs/reports/screenshots/parts3d-{series-lab,series-switch-open,rheostat-lab,series-r1-dragged}.png`。
-- **力学精灵实机验证**（本轮）：Playwright 逐实验重载（避开单页导航态），
-  斜面/平抛/匀速直线三实验 `sprite-*` `<image>` 实际加载且 href 指向
-  `/physicsos/parts3d/mechanics/*.png`，plank `rotate=30` 与场景倾角一致，
-  四项门禁全零。截图：
-  `docs/reports/screenshots/parts3d-mechanics-{incline,projectile,cart}.png`。
-- `upstream-changes.patch` 里的 `pnpm-lock.yaml` hunk 已摘除——lockfile 由
-  `pnpm install` 生成（含 `engine-collision` 等 link 条目），hunk 内的
-  旧清单已过时，`git apply --3way` 会在其上制造假冲突。
-- 拖动落点若改变布局包围盒，提交时视口自动重 fit（画幅整体缩放）——
-  属预期行为：落点在场景坐标系里是准的，只是投影缩放变了。
-- 首启有两个引导弹窗（内测声明 → API key 引导），验收脚本需依次点
-  `Continue` / `Configure later`（或中文 `继续` / `稍后配置`）。
-- 上游 `tsc -b tsconfig.client.json` 全量图有既有报错（`@types/react` 双版本
-  的 `ReactNode`/`bigint` 冲突、`numeric-audit` 严格性），与本改动无关；
-  官方 `typecheck:web` 范围干净。
-- `pnpm lint:web` 有报错，全部落在本次未改动的文件上，属既有问题。
-- 本机验证用 `node_modules/playwright` 是手工符号链接（指向 vendor store），
-  已被 `.gitignore`，勿提交。
-- **P3-a 浏览器实测**（本轮）：picker 列出全部 7 个新条目；力的合成画布
-  F₁/F₂/ΣF 箭头齐备、读数页签「合力 5 N」；共点力平衡三施加力箭头、无
-  多余合力箭头；超重失重读数页签「视重 708 N」；追及相遇双球精灵在位；
-  推导页签 MathText 分式节点 6 处实渲染；console/page/失败请求/4xx5xx
-  四门全零。截图：`docs/reports/screenshots/p3a-*.png`。
-- **KaTeX 浏览器实测**（本轮）：`tests/acceptance/katex-mathtext-acceptance.mjs`
-  11/11——样式表/字体可达且仅注入一次、读数页签 KaTeX 节点在位、vt-area
-  推导页签 `.katex .mfrac` 分式实渲染、无遗留 `.frac` 旧节点、四门零错误。
-  注意：web 运行时把 `dsh-client-ui-primitives` 别名到 `src/index.ts` 打进
-  `apps/web/dist`，改其导出后必须 `vite build` 重建 web 壳并重载页面。
-- **工作台布局塌陷已修**（本轮）：根因是并行会话把 `conversation.surface`
-  移入 `scrollBody` 并加 `position:relative`——`.cover`（`absolute;
-inset:0`）改为相对 scrollBody 定位后，`[data-conversation-scroll] .cover`
-  的 `padding-bottom: calc(--dsh-composer-height + 12px)` 生效；无会话
-  直接开实验室时 composer seat 装的是 ~956px 居中 hero，padding 把
-  cover 内容盒吃到 ~10px。修复：`min(--dsh-composer-height, 220px)` 封顶，
-  只清出停靠输入框的真实高度。实测 `.body` 0→568px、画布 svg 450px。
-- **播放契约统一 + 动画优化**（本轮）：
-  - **重播死按钮修复**：`setRunning(true)` 在 `currentTime >= total` 时归零
-    重播，补齐 mechanics/collision/composite/electric/circuit 五个 runtime
-    （wave/lever/acoustics/fluid/thermal/induction 本来就有）。
-  - **周期模型循环**：mechanics 的 `uniform_linear_motion`/`inclined_plane`/
-    `newton_second_law` 到窗口边缘取模回绕（名义窗口无物理终点，演示循环）；
-    `projectile_motion` 停在落地、`uniformly_accelerated_motion` 停在末态
-    （填满的 v–t 面积即读数）。`CYCLIC_MODELS` 常量在
-    `mechanics-runtime-bridge.ts`，注释与实现已对齐。
-  - **播完态 UI**：`ended`（total>0 且 !running 且 time>=total）→ 工具栏
-    按钮文案 `lab.replay` 重播 + transport 换刷新图标/aria。
-  - **键盘**：document 级 keydown——Space 播放暂停、←/→ 步进 ±10%、Home
-    复位。可编辑元素（input/textarea/select/contentEditable）全让；
-    按钮/链接只让 Space/Enter（原生激活），方向键照常步进。
-  - **数据表当前行**：行是均匀时间采样，`round(time/total*(rows-1))`
-    得播放头所在行，`.dataRowCurrent` 用 `--physics-highlight`（同图表
-    游标语义色）淡染。
-  - **场景切换淡入**：`.canvas` 24ms `canvasIn` fade，section 按
-    `domain:title` 当 key——只在切实验时重挂，改参数不重放；
-    prefers-reduced-motion 兜底。
-  - 验证：`mechanics.client.spec.tsx` 播放契约 4 例（循环/落地停+重播/
-    匀加速停+重播/碰撞重播）、`workspace-presentation` 键盘+重播 2 例；
-    全量 610/610；浏览器 `tests/acceptance/playback-acceptance.mjs`
-    12/12（键盘端到端、重播、运行态、数据行高亮、四门零错误）。
-    截图：`docs/reports/screenshots/animation-running-state.png`。
+- `pnpm typecheck:web` läuft fehlerfrei (vorausgesetzt, der vollständige `upstream-changes.patch` wurde angewendet und das Upstream-Abhängigkeitsdiagramm ist aufgebaut).
+- `circuit.client.spec.tsx`: **29/29 bestanden**, einschließlich 5 Spritespezifischer Testfälle und 7 Drag-&-Drop-spezifischer Tests (Vorschau ändert keine Revision, Viewport bleibt fixiert, halbe Rasterung, Commit am Zielort + Neuanordnung von Leitungen, Pointer-Event-Kette, Klick unter Schwellenwert, `pointercancel`-Rücksprung).
+- `circuit-scene-runtime.test.ts`: **13/13 bestanden**, einschließlich Verschiebungsspeicherung bei `SetComponentPlacement`, Erhalt der Rückenlinie bei Neuanordnung, Ablehnung nicht-endlicher Koordinaten.
+- **Echter Browsertest** (Chromium + Playwright, Zugangskontrolle in `tests/acceptance/support.mjs`): Reihenschaltung, alle 5 Sprite-`<image>` 200, Vektorkörper schließen sich gegenseitig aus, bei geöffnetem Schalter `switch-open.png` + Strom fällt auf null; Rheostat-Vorlage mit 6 Sprites + Schieber vorhanden; beim echten Ziehen von R1 folgt die Vorschau Frame für Frame dem Zeiger, der Zielort stimmt pixelgenau, alle 7 Leitungswege werden neu angeordnet, auch der Schalter lässt sich ziehen; console-/page-Fehler, fehlgeschlagene Anfragen und 4xx/5xx jeweils null. Screenshot-Nachweise: `docs/reports/screenshots/parts3d-{series-lab,series-switch-open,rheostat-lab,series-r1-dragged}.png`.
+- **Mechanik-Sprites im Betrieb verifiziert** (diese Iteration): Mit Playwright wurden die Versuche nacheinander neu geladen (unter Umgehung des Single-Page-Navigationszustands). Bei den drei Versuchen „schiefe Ebene / schräger Wurf / gleichförmig geradlinige Bewegung“ werden die `sprite-*`-`<image>`-Elemente tatsächlich geladen und ihr `href` zeigt auf `/physicsos/parts3d/mechanics/*.png`; beim Plank stimmt `rotate=30` mit dem Neigungswinkel der Szene überein. Alle vier Zugangskontrollen null. Screenshots: `docs/reports/screenshots/parts3d-mechanics-{incline,projectile,cart}.png`.
+- Der `pnpm-lock.yaml`-Abschnitt im `upstream-changes.patch` wurde entfernt – die Lockfile wird durch `pnpm install` erzeugt (enthält Link-Einträge wie `engine-collision`). Die alte Liste im Patch ist veraltet; `git apply --3way` würde darauf falsche Konflikte erzeugen.
+- Ändert ein Ziehvorgang die Bounding-Box des Layouts, wird der Viewport beim Übermitteln automatisch neu eingepasst (Gesamtbild wird skaliert) – das ist beabsichtigt: Der Zielort ist im Szenenkoordinatensystem korrekt, lediglich die Projektionsskalierung hat sich geändert.
+- Beim ersten Start erscheinen zwei Hinweisdialoge (Beta-Hinweis → API-Key-Einführung). Das Abnahmeskript muss nacheinander `Continue` / `Configure later` (bzw. die entsprechenden deutschen Beschriftungen) anklicken.
+- `tsc -b tsconfig.client.json` für den gesamten Upstream-Baum weist vorhandene Fehler auf (Konflikt zwischen zwei Versionen von `@types/react` bei `ReactNode`/`bigint`, Strengeprüfungen von `numeric-audit`), die nichts mit dieser Änderung zu tun haben; der offizielle Bereich `typecheck:web` ist fehlerfrei.
+- `pnpm lint:web` meldet Fehler, die ausschließlich Dateien betreffen, die in dieser Iteration nicht geändert wurden, und daher vorbestehen.
+- Das für lokale Tests verwendete `node_modules/playwright` ist ein manuell erstellter Symlink (verweist auf den Vendor-Store) und wird über `.gitignore` ausgeschlossen; nicht committen.
+- **P3-a im Browsertest** (diese Iteration): Der Picker listet alle 7 neuen Einträge; auf der Zeichenfläche der Kräftezusammensetzung sind die Pfeile F₁/F₂/ΣF vollständig und der Lesebereich zeigt „resultierende Kraft 5 N“; beim Gleichgewicht zentraler Kräfte sind drei angreifende Kraftpfeile vorhanden und kein überflüssiger resultierender Pfeil; der Lesebereich zu Übergewicht/Leichtigkeit zeigt „Scheingewicht 708 N“; bei Verfolgung und Treffen sind die beiden Kugel-Sprites vorhanden; im Register „Herleitung“ werden die MathText-Bruchknoten an 6 Stellen tatsächlich gerendert; console-/page-Fehler, fehlgeschlagene Anfragen und 4xx/5xx jeweils null. Screenshots: `docs/reports/screenshots/p3a-*.png`.
+- **KaTeX im Browsertest** (diese Iteration): `tests/acceptance/katex-mathtext-acceptance.mjs` 11/11 – Stylesheet/Schriften erreichbar und nur einmal injiziert, KaTeX-Knoten im Lesebereich vorhanden, im Herleitungs-Tab von vt-area wird `.katex .mfrac` tatsächlich gerendert, keine alten `.frac`-Knoten mehr, alle vier Zugangskontrollen null Fehler. Hinweis: Die Web-Laufzeit löst `dsh-client-ui-primitives` auf `src/index.ts` auf und bindet dies in `apps/web/dist` ein. Nach Änderungen an dessen Exporten muss daher `vite build` ausgeführt und die Web-Hülle neu erstellt sowie die Seite neu geladen werden.
+- **Eingestürztes Arbeitsplatz-Layout behoben** (diese Iteration): Ursache war, dass eine parallele Sitzung `conversation.surface` in `scrollBody` verschoben und mit `position:relative` versehen hatte. Nachdem `.cover` (`absolute; inset:0`) relativ zu `scrollBody` positioniert wurde, wirkt `padding-bottom: calc(--dsh-composer-height + 12px)` von `[data-conversation-scroll] .cover`. Ohne Sitzung wird beim direkten Öffnen des Labors im Composer-Sitz ein zentrierter Hero von ~956 px platziert, wodurch das Padding die Cover-Inhaltsbox auf ~10 px zusammendrückt. Behebung: `min(--dsh-composer-height, 220px)` als Obergrenze, sodass nur die tatsächliche Höhe der angedockten Eingabezeile freigehalten wird. Gemessen: `.body` 0→568 px, Canvas-SVG 450 px.
+- **Vereinheitlichung des Wiedergabevertrags + Animationsoptimierung** (diese Iteration):
+  - **Behebung des toten Wiederholen-Buttons**: `setRunning(true)` setzt auf null zurück und wiederholt, wenn `currentTime >= total`. Ergänzt in fünf Laufzeiten: mechanics/collision/composite/electric/circuit (wave/lever/acoustics/fluid/thermal/induction hatten dies bereits).
+  - **Zyklische Modelle:** Bei `uniform_linear_motion`/`inclined_plane`/`newton_second_law` der Mechanik erfolgt am Fensterrand ein Modulo-Umlauf (das nominelle Fenster hat kein physikalisches Ende, Demonstrationsschleife); `projectile_motion` bleibt beim Aufprall stehen, `uniformly_accelerated_motion` im Endzustand (die gefüllte v–t-Fläche ist der Messwert). Die Konstante `CYCLIC_MODELS` liegt in `mechanics-runtime-bridge.ts`; Kommentar und Implementierung stimmen überein.
+  - **UI nach Ende der Wiedergabe:** `ended` (total>0 und !running und time>=total) → Schaltfläche in der Symbolleiste mit der Beschriftung `lab.replay` (Wiederholen) + Transport wechselt auf Aktualisierungssymbol/aria.
+  - **Tastatur:** keydown auf Dokumentebene – Space startet/pausiert, ←/→ schreitet um ±10 % vor/zurück, Home setzt zurück. Editierbare Elemente (input/textarea/select/contentEditable) nehmen nichts an; Schaltflächen/Links nur Leertaste/Enter (native Aktivierung), Pfeiltasten schreiten wie gewohnt fort.
+  - **Aktuelle Zeile in der Datentabelle:** Die Zeilen sind gleichmäßig abgetastete Zeitpunkte; `round(time/total*(rows-1))` liefert die Zeile des Abspielkopfs, `.dataRowCurrent` wird mit `--physics-highlight` (semantische Farbe des Diagrammcursors) leicht eingefärbt.
+  - **Einblenden beim Szenenwechsel:** `.canvas` erhält einen 24 ms `canvasIn`-Fade; der Abschnitt verwendet `domain:title` als Schlüssel und wird nur beim Versuchswechsel neu angebunden, Parameteränderungen spielen nicht neu ab; `prefers-reduced-motion` dient als Absicherung.
+  - Überprüfung: `mechanics.client.spec.tsx` 4 Fälle zum Wiedergabevertrag (Schleife / Stopp beim Aufprall + Wiederholen / Stopp bei gleichförmig beschleunigter Bewegung + Wiederholen / Kollisionswiederholung), `workspace-presentation` 2 Fälle zu Tastatur + Wiederholen; Gesamtlauf 610/610; im Browser `tests/acceptance/playback-acceptance.mjs` 12/12 (Tastatur durchgängig, Wiederholen, Betriebszustand, Hervorhebung der Datenzeile, vier Zugangskontrollen null Fehler). Screenshot: `docs/reports/screenshots/animation-running-state.png`.
+  - Überprüfung: `mechanics.client.spec.tsx` 4 Fälle zum Wiedergabevertrag (Schleife / Stopp beim Aufprall + Wiederholen /
+    Stopp bei gleichförmig beschleunigter Bewegung + Wiederholen / Kollisionswiederholung), `workspace-presentation` 2 Fälle zu Tastatur + Wiederholen;
+    Gesamtlauf 610/610; im Browser `tests/acceptance/playback-acceptance.mjs`
+    12/12 (Tastatur durchgängig, Wiederholen, Betriebszustand, Hervorhebung der Datenzeile, vier Zugangskontrollen null Fehler).
+    Screenshot: `docs/reports/screenshots/animation-running-state.png`.
 
 ---
 
-## 7. 宣传官网（新增）
+## 7. Werbe-Website (neu)
 
-静态站点在 overlay 的 public 树里，**无构建步骤**：
+Die statische Site liegt im public-Baum des Overlays, **kein Build-Schritt**:
 
 ```
 overlays/harness/files/apps/web/public/physicsos/website/
 ```
 
-本地预览与素材再生成：
+Lokale Vorschau und Neuerzeugung der Assets:
 
 ```bash
 cd overlays/harness/files/apps/web/public/physicsos/website
 python3 -m http.server 4192 --bind 127.0.0.1
 
-node scripts/design/website-shots.mjs     # 需先 pnpm dev（3080）
+node scripts/design/website-shots.mjs     # erfordert vorher pnpm dev (3080)
 ```
 
-hero 背景是 `lib/flow-field.js` 里的 WebGL2 流场着色器，做法与 DeepSeek Harness
-官网 hero 同类（深色站 + 发光蓝场），参数按 PhysicsOS 重调。真正让它发光的是
-着色器末尾的 bloom / 光源 / 暗角三步，不是噪声本身；调色板亮端必须接近白。
-细节与降级行为见该目录 `README.md`。
+Der hero-Hintergrund ist der WebGL2-Flow-Field-Shader in `lib/flow-field.js`; die
+Machart ist dieselbe wie beim hero der DeepSeek-Harness-Website (dunkle Site + leuchtendes blaues Feld), die Parameter sind für PhysicsOS neu abgestimmt. Was ihn wirklich leuchten lässt, sind
+die drei letzten Schritte des Shaders (bloom / Lichtquelle / Vignette), nicht das Rauschen selbst; das helle Ende der Palette muss nahezu weiß sein.
+Details und Degradationsverhalten siehe `README.md` in diesem Verzeichnis.
 
-**一个教训**：本轮曾只读源码不渲染参考站，把参考站误判为"白色正文"，
-做出来差距很大。改视觉前先把参考页截出来看。
+**Eine Lektion**: In dieser Iteration wurde die Referenzseite nur im Quelltext gelesen, ohne sie zu rendern, und fälschlich als „weißer Textkörper" eingeschätzt;
+das Ergebnis wich stark ab. Bevor man das Visuelle ändert, sollte man zuerst einen Screenshot der Referenzseite machen.
 
-**页面上的数字要跟产品一起核对**：hero 写「43 个可运行实验模板 / 80 道内置题」，
-依据是实验库实际标题与实际题目数——实验模板共 45 个，回旋加速器与弦驻波
-标记「即将支持」故不计入。改产品后重跑截图脚本，图片会更新，数字要人工改。
-
----
-
-## 8. 自由搭建电路（已提交）
-
-学生可以自己选器材、自己接线，电路由现有 DC 引擎真实求解。入口两处：
-实验中心「自由搭建电路」卡片，以及电学台（`surface.openBuilder`）。
-
-- **装配模型**：`ui-physicsos/src/client/physics/circuit-builder.ts`。
-  草稿 = 元件 + 整数网号 + 摆放；增删/移动/旋转/改参/并网/拆网全是纯函数，
-  `draftToScene` 投影成 `createCircuitScene` 的入参，`draftFromScene` 反向读回。
-  **场景是唯一真源**，草稿只是它的一个视图，不要在别处再存一份电路。
-- **结构提交不走命令词表**：`SceneCommandType` 是冻结的「改参数」集合，没有 AddComponent/Connect。
-  结构改动走运行时**原地换 `SceneRuntime`**（`applyDraftEdit`），**不要**改用 `surface.open`——
-  `LabWorkspace` 的 `runtimeKey` 含 `scene.revision` 且当作 React `key`，那样每次编辑都会重挂工作区。
-- **解不出来也要画**：`PhysicsWorkspace` 在 `status==='failed'` 时原本整块替换画布；装配模式
-  （`buildMode`）下改为保留原理图、无读数，引擎原因内联显示。`RuntimeErrorView.condition` 把引擎的
-  条件名带出来，由 shell 映射到 `lab.condition.*` 的 zh/en 文案。
-- **接线**：画布上每个接线柱是可聚焦目标（`data-terminal`）。按住拖到另一个接线柱完成接线
-  （鼠标走 window release，触摸/笔走 pointer capture）；键盘 Enter/Space 也能点选接线。
-- **器材只有 6 种**（电源/开关/定值电阻/滑动变阻器/电流表/电压表）——即引擎建模的那 6 种。
-  元件 id 沿用 AI 助教别名约定（`bat`/`sw`/`am`/`vm`/`rv`/`r0…`），
-  换成 `c1`/`c2` 会让「指一下电流表」失效（`physics-agent.ts` 的别名表）。
-- **验证**：`tests/circuit-builder.client.spec.tsx`（32 例）；
-  真机脚本 `scripts/design/qa-build.mjs`（放一个电阻拖成并联，主电流 0.6 A → 1.2 A）。
-  Playwright 浏览器缓存可能与本仓 pin 的版本不符，用 `PHYSICSOS_CHROMIUM=<chrome 可执行文件>` 指过去。
-
-已知未做：画布上拖拽**放置**新元件（拖拽**移动**已有元件早就有了）；自建电路命名保存/另存为模板
-（目前只随「最近空间」按固定 sceneId 恢复一份）；手机尺寸未单独验收。
+**Die Zahlen auf der Seite müssen mit dem Produkt abgeglichen werden**: Der hero nennt „43 ausführbare Versuchsvorlagen / 80 integrierte Aufgaben",
+Grundlage sind die tatsächlichen Titel der Versuchsbibliothek und die tatsächliche Aufgabenzahl – es gibt insgesamt 45 Versuchsvorlagen; Zyklotron und stehende Saitenwelle sind
+als „demnächst verfügbar" markiert und zählen daher nicht. Nach Produktänderungen das Screenshot-Skript erneut ausführen; die Bilder werden aktualisiert, die Zahlen müssen manuell geändert werden.
 
 ---
 
-## 9. 下一步建议顺序
+## 8. Freies Aufbauen von Stromkreisen (committet)
 
-1. 用真实截图逐件校准非轴向器材的接线锚点，把 `anchorSource` 从几何约定换成
-   实测值（当前电池/电表/开关的视觉锚点已是 `base` 语义，精度可再提）。
-2. 视需要给场景增加灯泡类型，启用 `lamp-off` / `lamp-on`。
-3. 把同一套流水线推广到其他领域——每添一个领域要先定该领域的器材清单与相机约定。
+Schüler können selbst Geräte auswählen und selbst verdrahten; der Stromkreis wird real von der vorhandenen DC-Engine gelöst. Zwei Einstiege:
+die Karte „Freies Aufbauen von Stromkreisen" im Versuchszentrum sowie der Elektrotisch (`surface.openBuilder`).
 
----
+- **Aufbaumodell**: `ui-physicsos/src/client/physics/circuit-builder.ts`.
+  Entwurf = Komponenten + ganzzahlige Netznamen + Platzierung; Hinzufügen/Entfernen/Verschieben/Drehen/Parameter ändern/Verbinden/Trennen sind alles reine Funktionen,
+  `draftToScene` projiziert in die Eingabeparameter von `createCircuitScene`, `draftFromScene` liest umgekehrt zurück.
+  **Die Szene ist die einzige Quelle der Wahrheit**, der Entwurf ist nur eine Sicht darauf; lege den Stromkreis nicht anderswo ein zweites Mal ab.
+- **Struktur-Commits laufen nicht über die Befehlsliste**: `SceneCommandType` ist eine eingefrorene Menge von „Parameteränderungen", es gibt kein AddComponent/Connect.
+  Strukturänderungen laufen über die Laufzeit als **In-Place-Austausch des `SceneRuntime`** (`applyDraftEdit`), **nicht** über `surface.open` –
+  der `runtimeKey` von `LabWorkspace` enthält `scene.revision` und dient als React `key`; das würde den Arbeitsbereich bei jeder Bearbeitung neu einhängen.
+- **Auch wenn nicht lösbar, trotzdem zeichnen**: `PhysicsWorkspace` ersetzte bei `status==='failed'` ursprünglich die ganze Zeichenfläche; im Aufbaumodus
+  (`buildMode`) wird stattdessen das Schaltbild beibehalten, ohne Messwerte, der Engine-Grund wird inline angezeigt. `RuntimeErrorView.condition` bringt den
+  Bedingungsnamen der Engine heraus, der von der Shell auf die zh/en-Texte von `lab.condition.*` abgebildet wird.
+- **Verdrahtung**: Jeder Anschluss auf der Zeichenfläche ist ein fokussierbares Ziel (`data-terminal`). Gedrückt halten und zu einem anderen Anschluss ziehen schließt die Verbindung
+  (Maus über window release, Touch/Stift über pointer capture); mit der Tastatur kann man per Enter/Space ebenfalls Anschlüsse auswählen.
+- **Es gibt nur 6 Gerätetypen** (Stromquelle/Schalter/Festwiderstand/Schiebewiderstand/Amperemeter/Voltmeter) – genau die 6, die die Engine modelliert.
+  Die Komponenten-ids folgen der Alias-Konvention des AI-Lernassistenten (`bat`/`sw`/`am`/`vm`/`rv`/`r0…`),
+  würde man sie in `c1`/`c2` ändern, verlöre „zeig auf das Amperemeter" seine Wirkung (Alias-Tabelle in `physics-agent.ts`).
+- **Überprüfung**: `tests/circuit-builder.client.spec.tsx` (32 Fälle);
+  Echtgerät-Skript `scripts/design/qa-build.mjs` (einen Widerstand platzieren und zu einer Parallelschaltung ziehen, Hauptstrom 0,6 A → 1,2 A).
+  Der Playwright-Browsercache stimmt möglicherweise nicht mit der im Repo gepinnten Version überein; mit `PHYSICSOS_CHROMIUM=<chrome ausführbare Datei>` darauf verweisen.
 
-## 10. 解题入口收口：试题空间下线，解题卡进会话（已提交）
-
-试题空间（QuestionWorkspace，~1900 行）整体下线，能力并入会话与学习记录，
-**流水线自始至终只有一条**：`processQuestion`（question-core 确定性解析 →
-引擎求解 → 校验 → 建场景），主会话与旧试题空间共用，不新增第二条解题路径。
-
-- **`physics/scene` 事件带 `solve` 载荷**（`tool-physicsos/types.ts`
-  `PhysicsSceneSolveSummary`）：knowns/targets/answers/steps/verification/
-  issues/goldenQuestionId。`physics_solve_question` 在 `cause:'solved'`
-  快照上发布；command 修订的快照不带 solve，`scene-chat-node` 折叠时
-  **保留**旧 solve（per-scene 与 per-turn 两层 fold 都保）。
-- **解题卡 = `SceneChatCard` 内的 `SolveSection`**：已知量 chips（点击点亮
-  画布对应元件，`question-highlights.ts` 从旧 QW 提取成共享模块，纯视觉
-  `setHighlight`，不动场景）、求解目标、答案、解题步骤、验证徽章、题面问题；
-  golden 题命中题库时内嵌 `LabSelfCheckCard`（与实验室自测同一组件、同一
-  `recordAttempt` 记录路径）。
-- **`physics_solve_question` 新增可选 `questionId` 参数**：练习链路把题库 id
-  原样交接——模型转述题干不等于逐字命中，`questionId` 命中即按题库原文求解，
-  `goldenQuestionId` 才不断链（runtime `solveQuestion(text, questionId?)`）。
-- **练习闭环迁移**：`practiceQuestion(questionId)`（`index.ts`）把题库题干
-  - questionId 提示词塞进当前会话（`submitToTutor`），成功即回对话面等卡片
-    流入；学习记录页顶置「题库练习」列表；错题行分流：实验 attempt →
-    `重做实验` 深链回同模板 Lab；题目 attempt → `重新练习` 走 practiceQuestion。
-- **面收敛**：`openSurface` 只剩 `home | lab | record`；侧栏剩 首页/物理实验室；
-  学习记录入口在 sidebar footer；首页「输入试题」门户卡指向 record。
-- **验收**：`tests/acceptance/learning-acceptance.mjs` CASE C-G 全绿——
-  真实模型链路跑通「题库练习 → tutor 调 physics_solve_question → 解题卡
-  （已知量/步骤/验证/自测 + 可播画布）流入会话」。
-
-**布局塌陷教训**：并行会话把 `conversation.surface` 挪进 `scrollBody` 后，
-各 surface 根的 `padding-bottom: calc(var(--dsh-composer-height) + …)` 会吃到
-hero 态的 ~956px 变量——四处（LabWorkspace/ExperimentPicker/LabEmptyState/
-LearningRecordWorkspace）全部改成 `min(…, 220px)` 封顶，只清停靠输入框的真实高度。
+Bekannt offen: **Platzieren** neuer Komponenten per Ziehen auf der Zeichenfläche (das **Verschieben** vorhandener Komponenten per Ziehen gibt es schon lange); benanntes Speichern selbstgebauter Stromkreise / Speichern als Vorlage
+(derzeit wird nur mit „letzter Bereich" eine einzige unter fester sceneId wiederhergestellt); Mobiltelefon-Größen wurden nicht separat abgenommen.
 
 ---
 
-## 11. 弹簧/单摆/摩擦模型 + 力学器材精灵（已提交）
+## 9. Vorgeschlagene Reihenfolge für die nächsten Schritte
 
-对标 liziwuli 后按"单位引擎解锁实验数"排的第一批：四个新解析模型
-（`spring_statics`/`spring_oscillator`/`simple_pendulum`/`horizontal_friction`）
+1. Anhand echter Screenshots Stück für Stück die Verdrahtungsanker nicht-axialer Geräte kalibrieren und `anchorSource` von geometrischer Konvention auf
+   gemessene Werte umstellen (die visuellen Anker von Batterie/Messgerät/Schalter haben bereits `base`-Semantik, die Genauigkeit lässt sich weiter erhöhen).
+2. Bei Bedarf einen Glühlampentyp zur Szene hinzufügen und `lamp-off` / `lamp-on` aktivieren.
+3. Dieselbe Pipeline auf weitere Domänen übertragen – für jede neue Domäne zuerst die Geräteliste und die Kamera-Konvention festlegen.
 
-- 5 个模板（hooke-law、friction-static 由占位做实；spring-oscillator、
-  simple-pendulum、friction-mu 新增），全链走
-  `PhysicsScene → Engine → Verifier → Observation → PhysicsCanvas`。
+---
 
-* **场景事实走约束/观察量**：弹簧 k/L₀/anchor/axis 挂在 `spring` 约束
-  （`spring-1`），摆长/pivot 挂在 `rope` 约束（`rope-1`），摩擦台 μs 在
-  body 材质、ramp/cap 在 `obs-friction-surface` 几何观察量。新场景命令
+## 10. Abschluss der Lösungseinstiege: Aufgabenbereich abgeschaltet, Lösungskarte in die Sitzung (committet)
+
+Der Aufgabenbereich (QuestionWorkspace, ~1900 Zeilen) wird vollständig abgeschaltet, seine Fähigkeiten gehen in Sitzung und Lernverlauf über;
+**es gibt durchgängig nur eine Pipeline**: `processQuestion` (deterministische Analyse im question-core →
+Engine-Lösung → Validierung → Szenenaufbau), gemeinsam von Hauptsitzung und altem Aufgabenbereich genutzt, es wird kein zweiter Lösungspfad hinzugefügt.
+
+- **Das `physics/scene`-Ereignis trägt eine `solve`-Nutzlast** (`tool-physicsos/types.ts`
+  `PhysicsSceneSolveSummary`): knowns/targets/answers/steps/verification/
+  issues/goldenQuestionId. `physics_solve_question` wird auf dem `cause:'solved'`-
+  Schnappschuss veröffentlicht; command-revidierte Schnappschüsse tragen kein solve, beim Einklappen von `scene-chat-node`
+  wird das alte solve **beibehalten** (sowohl die per-scene- als auch die per-turn-Faltung).
+- **Lösungskarte = `SolveSection` innerhalb von `SceneChatCard`**: Chips der bekannten Größen (Klick leuchtet die
+  entsprechende Komponente auf der Zeichenfläche auf; `question-highlights.ts` aus dem alten QW als geteiltes Modul extrahiert, rein visuelles
+  `setHighlight`, ohne die Szene zu verändern), Lösungsziel, Antwort, Lösungsschritte, Überprüfungs-Badge, Aufgabenstellung;
+  trifft eine golden-Aufgabe die Aufgabensammlung, wird `LabSelfCheckCard` eingebettet (dieselbe Komponente wie der Labor-Selbsttest, derselbe
+  `recordAttempt`-Erfassungspfad).
+- **`physics_solve_question` erhält den optionalen Parameter `questionId`**: Die Übungskette übergibt die Aufgabensammlungs-id
+  unverändert – das Umschreiben des Aufgabentexts durch das Modell ist kein wörtlicher Treffer; bei einem `questionId`-Treffer wird nach dem Original der Aufgabensammlung gelöst,
+  erst `goldenQuestionId` reißt die Kette nicht ab (runtime `solveQuestion(text, questionId?)`).
+- **Migration des Übungskreislaufs**: `practiceQuestion(questionId)` (`index.ts`) packt den Aufgabentext der Aufgabensammlung
+  - den questionId-Prompt – in die aktuelle Sitzung (`submitToTutor`); bei Erfolg geht es zurück zur Gesprächsfläche und wartet auf die einströmende
+    Karte; die Lernverlaufsseite stellt die Liste „Aufgabensammlungs-Übung" oben an; die Fehleraufgabenzeile teilt sich auf: Versuch-attempt →
+    `Versuch wiederholen` als Deep-Link zurück zur selben Vorlagen-Lab; Aufgaben-attempt → `Übung wiederholen` läuft über practiceQuestion.
+- **Flächenkonvergenz**: `openSurface` kennt nur noch `home | lab | record`; in der Sidebar bleiben Startseite/Physiklabor;
+  der Lernverlaufseinstieg liegt im sidebar footer; die Portal-Karte „Aufgabe eingeben" der Startseite zeigt auf record.
+- **Abnahme**: `tests/acceptance/learning-acceptance.mjs` CASE C-G alle grün –
+  die echte Modellkette läuft durch „Aufgabensammlungs-Übung → tutor ruft physics_solve_question auf → Lösungskarte
+  (bekannte Größen/Schritte/Überprüfung/Selbsttest + abspielbare Zeichenfläche) strömt in die Sitzung".
+
+**Lektion zum Layoutkollaps**: Nachdem eine parallele Sitzung `conversation.surface` in `scrollBody` verschoben hatte,
+verbrauchten die `padding-bottom: calc(var(--dsh-composer-height) + …)` der einzelnen surface-Wurzeln
+die ~956px-Variable des hero-Zustands – an vier Stellen (LabWorkspace/ExperimentPicker/LabEmptyState/
+LearningRecordWorkspace) alle auf `min(…, 220px)` gedeckelt, sodass nur die tatsächliche Höhe der angedockten Eingabezeile freigehalten wird.
+
+---
+
+## 11. Feder-/Pendel-/Reibungsmodelle + Mechanik-Gerätesprites (committet)
+
+Mit liziwuli als Referenz die erste Charge, sortiert nach „Anzahl der durch die Engine je Einheit freigeschalteten Versuche": vier neue analytische Modelle
+(`spring_statics`/`spring_oscillator`/`simple_pendulum`/`horizontal_friction`)
+
+- 5 Vorlagen (hooke-law, friction-static aus Platzhaltern realisiert; spring-oscillator,
+  simple-pendulum, friction-mu neu), die ganze Kette läuft über
+  `PhysicsScene → Engine → Verifier → Observation → PhysicsCanvas`.
+
+* **Szenenfakten laufen über Constraints/Observables**: Feder-k/L₀/anchor/axis hängen am `spring`-Constraint
+  (`spring-1`), Pendellänge/pivot am `rope`-Constraint (`rope-1`), die Reibungsbank-μs im
+  body-Material, ramp/cap im geometrischen Observablen `obs-friction-surface`. Neue Szenenbefehle
   `SetSpringConstant`/`SetPendulumLength`/`SetStaticFrictionCoefficient`
-  （`agent-tools/scene-commands.ts` 同步登记）。
-* **观察层修正**：竖直悬挂体不再发幻影 `normal` 箭头（仅竖向 connector
-  时抑制；水平振子的滑轨支持力保留）。`spring_force` 是矢量——
-  inspector 派生行取模长显示。
-* **读数跟播放头**：`buildSnapshot` 优先取当前帧 `state.derived`，仿真级
-  聚合兜底——拉力/摩擦力这类随时间量不再钉死在末态。
-* **高亮接真实元素 id**：`spring`/`pendulum` 视觉带场景约束 id，
-  inspector 的 highlights 全部指向渲染出的元素。
-* **statics 回稳**：改 k/m/g 时除参数命令外再发一次 `SetBodyPosition`
-  把物块落回新平衡点——静止模型描述的是稳定后的状态，两条命令两个事件，
-  审计链诚实。
+  (in `agent-tools/scene-commands.ts` synchron registriert).
+* **Korrekturen der Beobachtungsschicht**: vertikal aufgehängte Körper senden keine Phantom-`normal`-Pfeile mehr (nur bei vertikalem connector
+  unterdrückt; die Schienenstützkraft des horizontalen Oszillators bleibt erhalten). `spring_force` ist ein Vektor –
+  die abgeleitete inspector-Zeile zeigt den Betrag.
+* **Messwerte folgen dem Abspielkopf**: `buildSnapshot` bevorzugt `state.derived` des aktuellen Frames, simulationsweite
+  Aggregation als Fallback – zeitabhängige Größen wie Zug-/Reibungskraft werden nicht mehr auf dem Endzustand festgenagelt.
+* **Hervorhebungen an echte Element-ids gebunden**: `spring`/`pendulum`-Visuals tragen die Szenen-Constraint-id,
+  die highlights des inspector zeigen sämtlich auf die gerenderten Elemente.
+* **statics-Beruhigung**: beim Ändern von k/m/g wird zusätzlich zum Parameterbefehl noch einmal `SetBodyPosition`
+  gesendet, um den Klotz auf den neuen Gleichgewichtspunkt zurückzusetzen – das statische Modell beschreibt den Zustand nach dem Einschwingen; zwei Befehle, zwei Ereignisse,
+  die Audit-Kette ist ehrlich.
 
-### 素材决策（imageapi.top / gpt-image-2.5-sunburst）
+### Asset-Entscheidung (imageapi.top / gpt-image-2.5-sunburst)
 
-走既有 `generate-mechanics-parts.mjs` 管线（侧视正交 + 透明底 + 1m 基准）。
-本批新增两件**静态器材**：
+Läuft über die vorhandene `generate-mechanics-parts.mjs`-Pipeline (orthogonale Seitenansicht + transparenter Hintergrund + 1 m-Basis).
+Diese Charge fügt zwei **statische Geräte** hinzu:
 
-| id              | 用途                 | 锚点（实测 alpha 轮廓）                                  |
+| id              | Zweck                 | Anker (gemessene Alpha-Kontur)                           |
 | --------------- | -------------------- | -------------------------------------------------------- |
-| `spring-scale`  | 摩擦台拉力仪器本体   | 钩尖 (0.9613, 0.51)，`flip` 镜像后贴物块受力面，逐帧跟随 |
-| `support-clamp` | hooke-law/单摆悬挂点 | 挂环内底 (0.326, 0.91)，杆部伸出画外                     |
+| `spring-scale`  | Körper des Zugkraftmessgeräts der Reibungsbank | Hakenspitze (0.9613, 0.51), nach `flip`-Spiegelung an der Kraftangriffsfläche des Klotzes, folgt Frame für Frame |
+| `support-clamp` | hooke-law/Pendelaufhängepunkt | Innenboden des Aufhängerings (0.326, 0.91), Stab ragt aus dem Bild |
 
-- **渲染路径**：`SceneVisualModel.apparatus` 通用精灵槽 +
-  `Apparatus` 原语（加载失败静默退回参数化台架）。动态几何
-  （弹簧圈长度、摆线角度）仍是参数化 SVG——长度方向就是物理量，
-  不能用位图。
-- **没生成的**：弹簧圈、摆球（已有 `ball` 精灵直接复用）、测力计
-  刻度盘（读数由派生行承担，位图刻度是死数字）。
-- **注意**：dev server 服务 `apps/web/dist`（构建产物），新增 PNG 要
-  同步进 dist 或重建 web 才生效——`public/` 下的新文件不会自动上线。
-- 锚点已写入 manifest（`anchorSource: alpha-silhouette-measurement`），
-  catalog parity 测试（`mechanics-parts3d.client.spec.tsx`）值守。
+- **Rendering-Pfad**: generischer Sprite-Slot `SceneVisualModel.apparatus` +
+  `Apparatus`-Primitive (bei Ladefehler stiller Rückfall auf parametrisierten Aufbau). Dynamische Geometrie
+  (Federwindungslänge, Fadenwinkel) bleibt parametrisiertes SVG – die Längsrichtung ist die physikalische Größe,
+  dafür geht keine Bitmap.
+- **Nicht generiert**: Federwindungen, Pendelkugel (vorhandener `ball`-Sprite wird direkt wiederverwendet), Kraftmesser-
+  Skalenscheibe (Messwerte übernimmt die abgeleitete Zeile, Bitmap-Skalen sind tote Zahlen).
+- **Hinweis**: Der dev-Server liefert `apps/web/dist` (Build-Artefakt); neue PNGs müssen
+  mit ins dist synchronisiert oder das Web neu erstellt werden, um wirksam zu werden – neue Dateien unter `public/` gehen nicht automatisch online.
+- Die Anker sind ins manifest geschrieben (`anchorSource: alpha-silhouette-measurement`),
+  der catalog-parity-Test (`mechanics-parts3d.client.spec.tsx`) überwacht dies.
 
-### 验收
+### Abnahme
 
-- 单测：ui-physicsos 619/619（含 3 个新精灵用例 + parity 锚点核对）；
-  engine/observation/scene 各包全绿。
-- 浏览器验收 `mechanics-springs-acceptance.mjs` A–E 全绿（含精灵
-  DOM 断言），console/network 门禁零错误。
+- Unit-Tests: ui-physicsos 619/619 (inkl. 3 neuer Sprite-Fälle + parity-Ankerabgleich);
+  engine/observation/scene-Pakete alle grün.
+- Browser-Abnahme `mechanics-springs-acceptance.mjs` A–E alle grün (inkl. Sprite-
+  DOM-Assertions), console/network-Gates null Fehler.
 
-### 第二批器材（量角器 / 导轨 / 刻度尺）+ 物块换装
+### Zweite Gerätecharge (Winkelmesser / Schiene / Lineal) + Klotz-Umrüstung
 
-| id               | 用途                           | 锚点                                                              |
+| id               | Zweck                           | Anker                                                              |
 | ---------------- | ------------------------------ | ----------------------------------------------------------------- |
-| `protractor`     | 单摆悬点后方量角盘（摆角可读） | 直径边中点 (0.499, 0.129)，正对盘心轴钉；生成图带底座，已裁只留盘 |
-| `track-rail`     | 一切水平一维场景的承载导轨     | 轨顶面中点 (0.5, 0.388)；`width` 字段按轨道跨度拉伸               |
-| `ruler-vertical` | 胡克台伸长量读数尺             | 尺顶铜箍中点 (0.49, 0.047)                                        |
+| `protractor`     | Winkelmesserscheibe hinter dem Pendelaufhängepunkt (Winkel ablesbar) | Mittelpunkt der Durchmesserkante (0.499, 0.129), genau gegenüber dem Scheibenachsenstift; das erzeugte Bild hat einen Sockel, weggeschnitten bis nur die Scheibe bleibt |
+| `track-rail`     | Tragschiene für alle horizontalen eindimensionalen Szenen     | Mittelpunkt der Schienenoberkante (0.5, 0.388); das `width`-Feld wird auf die Schienenspannweite gedehnt               |
+| `ruler-vertical` | Lineal zum Ablesen der Dehnung der Hooke-Bank             | Mittelpunkt des Messingrings am Linealkopf (0.49, 0.047)                                        |
 
-- `ApparatusSpriteVisual.width`：显式场景宽度（拉伸用），缺省仍按
-  aspect 自适应；`track-rail` 靠它铺满 `trackGround` 跨度。
-- `BodyVisual.kind` 新增 `'weight-hook'`：胡克台挂**钩码**（教科书画法），
-  矢量兜底走 block 分支；弹簧振子物块换 `cart`（气垫导轨滑块），
-  水平摩擦保持 `block`（木块）。
-- 渲染顺序：apparatus 画在 spring/pendulum rig **之前**——量角器盘在
-  摆线后方、导轨在物块下方、夹具环包住弹簧顶节。
-- **坑**：`generate-mechanics-parts.mjs` 的过滤参数是裸位置参数
-  （`node … protractor track-rail`），`--only=x` 会被当成 flag 滤掉
-  导致**全量重生成**覆盖已校好的精灵。重出旧件必须单独跑后处理
-  重新实测锚点；本批误触发后已从 vendor 回滚旧 PNG。
-- 验收：ui-physicsos 622/622（+3 用例：量角器/刻度尺锚点、导轨跨度、
-  钩码/小车换装）；浏览器 A–E 全绿，新增断言 rulers/protractors/
-  rails/weightHooks/cartSprites 计数。
+- `ApparatusSpriteVisual.width`: explizite Szenenbreite (zum Dehnen), standardmäßig weiterhin
+  aspect-adaptiv; `track-rail` füllt damit die `trackGround`-Spannweite.
+- `BodyVisual.kind` erhält `'weight-hook'`: die Hooke-Bank hängt **Hakengewichte** auf (Lehrbuchdarstellung),
+  der Vektor-Fallback läuft über den block-Zweig; der Federoszillator-Klotz wird zu `cart` (Luftkissenschienen-Schlitten),
+  horizontale Reibung bleibt `block` (Holzklotz).
+- Rendering-Reihenfolge: apparatus wird **vor** dem spring/pendulum-rig gezeichnet – die Winkelmesserscheibe liegt
+  hinter dem Faden, die Schiene unter dem Klotz, der Spannring umschließt das obere Federstück.
+- **Fallstrick**: Die Filterargumente von `generate-mechanics-parts.mjs` sind nackte Positionsargumente
+  (`node … protractor track-rail`), `--only=x` wird als flag herausgefiltert
+  und führt zu einer **vollständigen Neugenerierung**, die bereits kalibrierte Sprites überschreibt. Beim erneuten Erzeugen alter Teile muss die Nachbearbeitung separat laufen
+  und die Anker neu vermessen werden; in dieser Charge wurde nach versehentlicher Auslösung die alte PNG aus vendor zurückgerollt.
+- Abnahme: ui-physicsos 622/622 (+3 Fälle: Winkelmesser-/Lineal-Anker, Schienenspannweite,
+  Hakengewicht/Schlitten-Umrüstung); Browser A–E alle grün, neue Assertions zählen rulers/protractors/
+  rails/weightHooks/cartSprites.
 
-### 第三批：画布图元精修 + 电路导线圆角 + 选择器 hover
+### Dritte Charge: Feinschliff der Zeichenflächen-Primitive + abgerundete Schaltungsleiter + Selektor-hover
 
-电路精灵（电池/电阻/开关/电表/灯泡）早已接入，本批补的是剩余视觉欠账：
+Schaltungs-Sprites (Batterie/Widerstand/Schalter/Messgerät/Glühlampe) waren längst eingebunden; diese Charge begleicht die restlichen visuellen Schulden:
 
-- **`wirePath`（circuit-renderer.tsx）**：`M…L…` 硬折线改为 Q 段圆角
-  （`WIRE_BEND_PX` 上限，两侧线段各截半取最小），导体线缆化；
-  预览导线、电荷珠路径同走此函数，电气端点不变。
-- **`SpringCoil` 双股螺旋**：L 折线锯齿 → 正反相位双正弦股（前股实线
-  - 背股透明感），螺旋景深；长度仍随场景坐标逐帧参数化。
-- **力箭头加重**：stroke 加宽 + drop-shadow，与线缆同族质感。
-- **实验选择器 hover**：卡片描边着色/抬升/阴影过渡，播放键实心化；
-  `focus-visible` 描边保留；`prefers-reduced-motion` 下全部过渡关闭。
-- 验收：电路 acceptance 全绿（断言已改为 sprite 计数，修了一处
-  检查器 tab 时序）；力学 acceptance 回归全绿；截图目检：
-  导线圆角、螺旋弹簧、hover 抬升均生效。
-- lint：本批文件零错误（`no-non-null-assertion` 禁 `!`——数组索引
-  改显式 `=== undefined` 收窄）。
+- **`wirePath` (circuit-renderer.tsx)**: `M…L…`-harte Knicklinien werden zu abgerundeten Q-Segmenten
+  (`WIRE_BEND_PX` als Obergrenze, beidseitige Liniensegmente je zur Hälfte beschnitten, das Minimum genommen), der Leiter wird zum Kabel;
+  Vorschauleitungen und Ladungskugel-Pfade laufen durch dieselbe Funktion, die elektrischen Endpunkte bleiben unverändert.
+- **`SpringCoil` als doppelgängige Spirale**: L-Zickzack → zwei Sinusstränge in gegenphasiger Phase (vorderer Strang durchgezogen
+  - hinterer Strang transparent wirkend), spiralige Tiefenwirkung; die Länge bleibt pro Frame nach Szenenkoordinaten parametrisiert.
+- **Kraftpfeile kräftiger**: stroke verbreitert + drop-shadow, verwandte Haptik wie die Kabel.
+- **Versuchsselektor hover**: Kartenrand eingefärbt/angehoben/Schattenübergang, Abspieltaste wird gefüllt;
+  `focus-visible`-Rand bleibt erhalten; bei `prefers-reduced-motion` werden alle Übergänge deaktiviert.
+- Abnahme: Schaltungs-acceptance alle grün (Assertions wurden auf sprite-Zählung umgestellt, eine
+  inspector-tab-Timing-Sache behoben); Mechanik-acceptance-Regression alle grün; Screenshot-Sichtprüfung:
+  abgerundete Leiter, Spiralenfeder, hover-Anhebung wirken alle.
+- lint: null Fehler in den Dateien dieser Charge (`no-non-null-assertion` verbietet `!` – Array-Indizes
+  werden explizit mit `=== undefined` eingegrenzt).
 
-### 卡片配图与播放键修正（用户反馈）
+### Korrekturen an Kartenbildern und Abspieltaste (Nutzerfeedback)
 
-- 卡片配图 `object-fit: contain → cover`（仅栅格 img）：生成的方形图版在
-  16:10 画板里不再左右留边；inline SVG 舞台仍走 contain 保完整器材。
-- `entryPlay` 播放键从 `.art` 内绝对定位挪到 `.tagColumn` 行尾
-  （`margin-left:auto`）——不再遮挡配图右下角；hover 实心化规则不变。
-- 实测 picker 滚动链正常（`.panel` overflow:auto，5601/628 滚到底），
-  「下面看不全」实为播放键压图 + 配图留边的观感问题。
+- Kartenbild `object-fit: contain → cover` (nur Raster-img): das erzeugte quadratische Bildlayout lässt
+  in der 16:10-Zeichenfläche keine Ränder mehr links/rechts; die inline-SVG-Bühne bleibt bei contain, um die vollständigen Geräte zu erhalten.
+- Die `entryPlay`-Abspieltaste wird von der absoluten Positionierung in `.art` ans Zeilenende von `.tagColumn`
+  verschoben (`margin-left:auto`) – verdeckt nicht mehr die rechte untere Ecke des Bildes; die hover-Füllregel bleibt unverändert.
+- In der Praxis ist die picker-Scrollkette in Ordnung (`.panel` overflow:auto, 5601/628 bis zum Ende gescrollt);
+  „unten nicht vollständig sichtbar" war tatsächlich ein Wahrnehmungsproblem durch die auf dem Bild aufliegende Abspieltaste + Bildränder.
 
-### 画布标注冲突修正（用户反馈「文字数据重叠」）
+### Korrektur von Beschriftungskonflikten auf der Zeichenfläche (Nutzerfeedback „Text und Daten überlappen")
 
-- `tickLabelAvoid` 扩展用于力学：发射点贴 y 轴时（|x| < 0.45·majorGrid），
-  其行附近 [y−0.2Δ, y+0.6Δ] 的 y 刻度数字消隐（刻度线保留）——`起点`
-  标签不再和 `50` 刻度叠印。比挪标签更稳：标签远离点位就读不出归属。
-- `地面` 表面标签从右端移到左端下方：右端本就是 `x/m` 轴名 + 标尺的角落。
-- `y/m` 轴名从左侧（刻度同侧，撞顶部刻度）移到轴线右侧 start 锚定，
-  并向右边界内钳制（全负 x 场景防溢出）。
-- `.surfaceLabel` 补 canvas-bg 光晕描边（其余标签类早已有）。
-- DOM 级重叠检测（全 text bbox 两两比对）：密场景（h=45m 台+θ）与
-  平地斜抛均 0 冲突；622/622 回归、改动面 lint 0。
+- `tickLabelAvoid` wird für die Mechanik erweitert: wenn der Abschusspunkt an der y-Achse klebt (|x| < 0.45·majorGrid),
+  werden die y-Skalenziffern im Bereich [y−0.2Δ, y+0.6Δ] um seine Zeile ausgeblendet (Skalenstriche bleiben) – die `Startpunkt`-
+  Beschriftung überlagert nicht mehr die `50`-Skala. Stabiler als das Verschieben der Beschriftung: entfernt sich die Beschriftung vom Ort, ist ihre Zugehörigkeit nicht mehr ablesbar.
+- Die `Boden`-Flächenbeschriftung wandert vom rechten Ende unter das linke Ende: das rechte Ende ist ohnehin die Ecke von `x/m`-Achsname + Maßstab.
+- Der `y/m`-Achsname wandert von links (auf der Skalenseite, stößt an die obere Skala) nach rechts der Achse, start-verankert,
+  und wird in die rechte Grenze geklemmt (Überlaufschutz bei Szenen mit durchweg negativem x).
+- `.surfaceLabel` erhält eine canvas-bg-Halo-Kontur (die übrigen Label-Klassen haben sie längst).
+- DOM-Ebene-Überlappungsprüfung (alle text-bbox paarweise verglichen): dichte Szene (h=45m-Tisch+θ) und
+  flacher Schrägwurf beide 0 Konflikte; 622/622-Regression, lint 0 im geänderten Umfang.
 
-### 实验面与会话内容隔离（用户反馈「选实验还显示别会话内容」）
+### Isolation von Versuchsfläche und Sitzungsinhalt (Nutzerfeedback „beim Versuchswechsel werden noch fremde Sitzungsinhalte angezeigt")
 
-Lab 注册在 `conversation.surface` 槽位，是盖在当前会话上的覆盖层；外壳
-`ConversationRoot` 的 session header（标题/面包屑/视图 tab）、会话视图与
-sticky composer 都在覆盖层之外——选「非弹性碰撞」时旧会话「斜抛运动…」
-标题仍露在顶部。
+Das Lab ist im Slot `conversation.surface` registriert und ist eine Overlay-Schicht über der aktuellen Sitzung; der session header der Hülle
+`ConversationRoot` (Titel/Brotkrumen/Ansicht-tab), die Sitzungsansicht und
+der sticky composer liegen alle außerhalb der Overlay-Schicht – wählt man „Inelastischer Stoß", lugt der Titel der alten Sitzung „Schräger Wurf …“
+noch oben hervor.
 
-修法（`LabWorkspace.module.css`，纯 CSS、零跨包代码依赖）：当
-`[data-slot='conversation.surface']` 内出现 `[data-physicsos-surface]` 时
-（`:has()` 读 DOM 真实状态，surface 'home' 返回 null 即自动解除），隐藏：
+Lösung (`LabWorkspace.module.css`, reines CSS, null paketübergreifende Code-Abhängigkeit): Wenn
+innerhalb von `[data-slot='conversation.surface']` ein `[data-physicsos-surface]` auftritt
+(`:has()` liest den echten DOM-Zustand; gibt surface 'home' null zurück, hebt es sich automatisch auf), wird ausgeblendet:
 
-- `[data-slot='conversation.session.header'] > *`——session 标题区
-- `[data-slot='conversation.session'] > *`——被盖住的转录/视图
-- `[data-composer-seat]`——composer 输入条
+- `[data-slot='conversation.session.header'] > *` – der session-Titelbereich
+- `[data-slot='conversation.session'] > *` – das überdeckte Transkript/die Ansicht
+- `[data-composer-seat]` – die composer-Eingabezeile
 
-关键坑位：slot 锚点 div 带**内联** `display: contents`（scoped-slots.tsx
-`ANCHOR_STYLE`，文档化的「dynamic styles 定位缝」契约），样式表只能藏
-其子元素不能藏锚点本身；composer seat 无内联样式可直接 `display:none`。
+Kritischer Fallstrick: Das slot-Anker-div trägt **inline** `display: contents` (scoped-slots.tsx
+`ANCHOR_STYLE`, der dokumentierte Vertrag „Positionierungsfuge für dynamische Styles"); ein Stylesheet kann nur
+seine Kindelemente verbergen, nicht den Anker selbst; der composer seat hat keine Inline-Styles und kann direkt `display:none` sein.
 
-**为什么不保留 composer**：seat 是 `position:sticky;bottom:0`，其贴底
-依赖前置内容把自然位推过视口底——转录隐藏后 seat 自然位跳到顶部，
-遮挡 lab 工具栏（实测拦截「返回对话」点击）。且 lab 自带 AI 助教抽屉，
-辅导通道不丢。
+**Warum der composer nicht beibehalten wird**: Der seat ist `position:sticky;bottom:0`; sein Ankleben am Boden
+hängt davon ab, dass vorangehender Inhalt seine natürliche Position über die Viewport-Unterkante hinausschiebt – wird das Transkript verborgen, springt die natürliche Position des seat nach oben
+und verdeckt die lab-Symbolleiste (blockierte in der Praxis den Klick „Zurück zum Gespräch"). Zudem hat das lab eine eigene KI-Lernassistent-Schublade,
+der Nachhilfekanal geht also nicht verloren.
 
-验证（真实会话「斜抛运动求最大高度与飞行时间」）：开 lab 前 header=block/
-session=flex/seat=flex；开 lab 后三者 none、无陈旧标题、截图整版干净；
-「返回对话」后全部恢复、surface 卸载；门禁零错误。覆盖 picker/lab/record/
-paper 全部 surface 形态（均带 `data-physicsos-surface`）。
+Überprüfung (echte Sitzung „Schräger Wurf: maximale Höhe und Flugzeit bestimmen"): vor dem Öffnen des lab header=block/
+session=flex/seat=flex; nach dem Öffnen alle drei none, kein veralteter Titel, Screenshot der ganzen Seite sauber;
+nach „Zurück zum Gespräch" alles wiederhergestellt, surface entladen; Gates null Fehler. Deckt picker/lab/record/
+paper alle surface-Formen ab (alle mit `data-physicsos-surface`).
 
-### 验收脚本陈旧契约修复（mechanics-acceptance.mjs）
+### Reparatur veralteter Verträge im Abnahmeskript (mechanics-acceptance.mjs)
 
-与本次改动无关的存量测试债，为拿到干净回归信号顺手修了：
+Ein Alt-Test-Schuldenstand ohne Bezug zu dieser Änderung, nebenbei behoben, um ein sauberes Regressionssignal zu bekommen:
 
-- `derivedRows`：行容器 `.derived` 的值子节点类名已是 `derivedReading`
-  （脚本还找旧的 `derivedValue`），名称内嵌 MathText 需剔除 math 节点
-  （否则 key 带 "RRR" 尾巴）。
-- 检查器 tab 互斥（属性=参数输入、读数=派生行），读写序列每次都要先选
-  tab；revision bump 触发 runtimeKey 重挂载，inspector 回落 属性。
-- CASE H：agent 命令后右栏被 AgentDrawer 占据，需先 Esc 再读检查器。
-- CASE C/D/F：整个段落依赖已退休的「试题空间」入口（练习已迁入辅导会话），
-  包 `if (entry exists)` 守卫——入口缺席时大声 SKIP 而非硬崩；按新练习流
-  重写是独立任务（learning-acceptance CASE G 已覆盖辅导链路端到端）。
-- 结果：E/A/B/G/H + 响应式 + 浏览器门禁全绿。
+- `derivedRows`: Der Klassenname des Wert-Kindknotens des Zeilencontainers `.derived` ist bereits `derivedReading`
+  (das Skript suchte noch das alte `derivedValue`); Namen mit eingebettetem MathText benötigen das Entfernen der math-Knoten
+  (sonst hat der key einen „RRR"-Schwanz).
+- Die inspector-tabs sind gegenseitig exklusiv (Eigenschaft=Parametereingabe, Messwert=abgeleitete Zeile); jede Lese-/Schreibsequenz muss zuerst den
+  tab wählen; ein revision bump löst das Neuanhängen des runtimeKey aus, der inspector fällt auf Eigenschaft zurück.
+- CASE H: Nach einem agent-Befehl ist die rechte Spalte vom AgentDrawer belegt; erst Esc drücken, dann den inspector lesen.
+- CASE C/D/F: Der ganze Absatz hängt am bereits pensionierten Einstieg „Aufgabenbereich" (die Übungen sind in die Nachhilfesitzung migriert);
+  in eine `if (entry exists)`-Wache gehüllt – fehlt der Einstieg, wird laut SKIP gemeldet statt hart abzustürzen; das Neuschreiben gemäß dem neuen Übungsfluss
+  ist eine eigenständige Aufgabe (learning-acceptance CASE G deckt die Nachhilfekette bereits end-to-end ab).
+- Ergebnis: E/A/B/G/H + Responsive + Browser-Gates alle grün.
 
-**composer 净空 padding 清除**（用户反馈「下方留白」）：四个 surface
-（picker/LabEmptyState/record/lab cover）曾各留 ~180-250px padding-bottom
-给 sticky composer 让位；composer 隐藏后这些净空全成死白。已全部删除
-（`ExperimentPicker`/`LabEmptyState`/`LearningRecordWorkspace`/`LabWorkspace`
-的 `[data-conversation-scroll]` 覆盖块）——实测 picker 死白 250px→24px
-（仅剩 root 对称 padding）、lab 画布吃下全部高度。隔离规则回归全绿。
+**Entfernung des freigehaltenen composer-paddings** (Nutzerfeedback „Leerraum unten"): Vier surfaces
+(picker/LabEmptyState/record/lab cover) behielten je ~180-250px padding-bottom
+frei, um dem sticky composer Platz zu machen; nach Ausblenden des composer wurden diese Freiräume zu totem Weiß. Alle wurden entfernt
+(die `[data-conversation-scroll]`-Overlay-Blöcke von `ExperimentPicker`/`LabEmptyState`/`LearningRecordWorkspace`/`LabWorkspace`)
+– gemessen picker totes Weiß 250px→24px
+(nur noch das symmetrische root-padding), die lab-Zeichenfläche nimmt die volle Höhe ein. Die Isolationsregeln-Regression ist alle grün.
 
-### 浮力物块直接拖拽（用户反馈「物体下去页面无变化」）
+### Direktes Ziehen des Auftriebsklotzes (Nutzerfeedback „beim Heruntergehen des Körpers ändert sich die Seite nicht")
 
-播放/单步/拖时间轴的动画链路本就健康（探针实测 blockY 195→239→301、
-读数随时间走）——用户真正想要的交互是**像粒子先生一样直接抓住物块
-往下按**，画布此前零拖拽响应。
+Die Animationskette Wiedergabe/Einzelschritt/Zeitachse-Ziehen ist ohnehin gesund (Sonde gemessen blockY 195→239→301,
+Messwerte laufen mit der Zeit) – die Interaktion, die der Nutzer wirklich wollte, ist **den Klotz wie bei „Herr Partikel" direkt zu greifen
+und nach unten zu drücken**; die Zeichenfläche reagierte zuvor überhaupt nicht auf Ziehen.
 
-实现：复用 `ComponentDragChannel`（电路拖拽同款通道，workspace 检测到
-runtime 实现三方法即自动接线）。`FluidWorkspaceRuntime` 实现
+Umsetzung: Wiederverwendung von `ComponentDragChannel` (derselbe Kanal wie beim Schaltungsziehen; die workspace erkennt am
+runtime drei implementierte Methoden und verdrahtet automatisch). `FluidWorkspaceRuntime` implementiert
 `previewComponentPlacement`/`commitComponentPlacement`/`cancelComponentPlacement`
-——拖块即沿下放路径刷浸入时钟：指针 scene-y → 底面深度 → `t=depth/lowerRate`
-→ `seek()`。读数/力箭头/V_排/相位全部来自引擎真实状态，不是 UI 假动画。
-`dragBaseline` 记录抓取起点（time+running），cancel 原样弹回；越界由
-seek 天然钳到 [0, settleTime]（漂浮场景钳在平衡深度，与松绳模型一致）。
+– das Ziehen des Klotzes aktualisiert entlang des Absenkphads die Eintauchuhr: Zeiger scene-y → Bodenabstandstiefe → `t=depth/lowerRate`
+→ `seek()`. Messwerte/Kraftpfeile/V_verdr/Phase kommen alle aus dem echten Engine-Zustand, keine UI-Fake-Animation.
+`dragBaseline` zeichnet den Greifstartpunkt auf (time+running), cancel springt unverändert zurück; das Überschreiten der Grenze wird von
+seek naturgemäß auf [0, settleTime] geklemmt (schwebende Szenen werden auf die Gleichgewichtstiefe geklemmt, konsistent mit dem losen-Seil-Modell).
 
-`fluid-renderer.tsx` 物块 `<g>` 接 pointerdown/move/up/cancel（电路同款
-`sceneAt` 反投影 + 3px 拖拽阈值 + `setPointerCapture` jsdom 守卫），
-`.fluidDraggable`/`.fluidDragging` 光标态。
+`fluid-renderer.tsx` verbindet das Klotz-`<g>` mit pointerdown/move/up/cancel (dieselbe
+`sceneAt`-Rückprojektion wie bei der Schaltung + 3px-Ziehschwelle + `setPointerCapture`-jsdom-Wächter),
+`.fluidDraggable`/`.fluidDragging`-Cursorzustände.
 
-**关键坑**：受力箭头（Vectors）画在物块上层，G/F_示 箭头正好穿过块体
-中心——按下时 `elementFromPoint` 命中 `line.vectorLine`，块组永远收不到
-pointerdown。修法：Vectors 原语根 `<g>` 加 `pointerEvents="none"`
-（矢量标注本就只读，全域禁用命中，顺带防住后续域接入拖拽时同款坑）。
+**Kritischer Fallstrick**: Die Kraftpfeile (Vectors) sind über dem Klotz gezeichnet; die G/F_app-Pfeile verlaufen genau durch den Klotz-
+mittelpunkt – beim Drücken trifft `elementFromPoint` auf `line.vectorLine`, die Klotzgruppe empfängt
+niemals pointerdown. Lösung: Die Vectors-Primitive-Wurzel `<g>` erhält `pointerEvents="none"`
+(Vektorannotationen sind ohnehin nur lesbar; domänenweit Treffer deaktiviert, was nebenbei denselben Fallstrick bei künftigem Anschluss von Ziehen in weiteren Domänen verhindert).
 
-验证：单测 623/623（新增拖拽用例：非块组件不响应、中心贴液面=半浸、
-过深钳 settle、cancel 回弹、commit 落位）；浏览器实测双向拖拽
-（t=0→4.33s 已浸没→拖回 t=0 未入水，光标 grab/grabbing 切换正确）；
-力学验收回归全绿、门禁零错误、typecheck 干净、overlay 已 capture。
+Überprüfung: Unit-Tests 623/623 (neuer Ziehfall: Nicht-Klotz-Komponenten reagieren nicht, Mitte an der Flüssigkeitsoberfläche = halb eingetaucht,
+zu tief klemmt auf settle, cancel springt zurück, commit setzt ab); im Browser beidseitiges Ziehen gemessen
+(t=0→4,33s eingetaucht → zurückgezogen auf t=0 nicht eingetaucht, Cursorwechsel grab/grabbing korrekt);
+Mechanik-Abnahmeregression alle grün, Gates null Fehler, typecheck sauber, overlay erfasst (capture).
 
-### 检查器默认视图「无变化」修复（浮力实验用户反馈续）
+### Behebung „keine Veränderung" in der Standardansicht des inspector (Fortsetzung des Nutzerfeedbacks zum Auftriebsversuch)
 
-用户二次反馈「物体下去页面无变化」。排查结论：播放/单步/时间轴/拖拽
-四条交互链在当前 bundle 全部健康（实测 t 前进、块体移动、读数跟随），
-真缺陷是**检查器默认「属性」tab 视觉死区**——参数是静态输入，「派生量」
-section 只渲染空头标题（其 derived 行只在「读数」tab 下出现），用户盯
-着默认面板时数值确实一动不动。
+Der Nutzer meldete zum zweiten Mal „beim Heruntergehen des Körpers ändert sich die Seite nicht". Diagnoseergebnis: Die vier Interaktionsketten
+Wiedergabe/Einzelschritt/Zeitachse/Ziehen sind im aktuellen bundle alle gesund (gemessen läuft t vorwärts, der Klotz bewegt sich, Messwerte folgen);
+der echte Mangel ist die **visuelle Totzone des standardmäßigen inspector-tabs „Eigenschaft"** – die Parameter sind statische Eingaben, der Abschnitt „abgeleitete Größen“
+rendert nur eine leere Überschrift (seine derived-Zeilen erscheinen nur unter dem tab „Messwert"); während der Nutzer
+auf das Standardpanel schaut, rührt sich der Zahlenwert tatsächlich nicht.
 
-修复（`workspace-parts.tsx` InspectorTabs）：属性 tab 现在为每个 section
-在字段下方同屏渲染 `SectionDerived` 读数行——拖物块/播放时派生量实时
-跳动（浸入状态 未入水→已完全浸没 实测切换）；全空 section 才跳过标题。
-顺带覆盖所有域：力学属性 tab 默认即见 飞行时间/射程/最大高度 活读数，
-参数仍居上不破坏「先输入后读数」的既有分层。
+Lösung (`workspace-parts.tsx` InspectorTabs): Der Eigenschaft-tab rendert nun für jeden Abschnitt
+unterhalb der Felder gleichzeitig die `SectionDerived`-Messwertzeilen – beim Ziehen des Klotzes/Abspielen springen die abgeleiteten Größen in Echtzeit
+(Eintauchzustand „nicht eingetaucht"→„vollständig eingetaucht" gemessen umgeschaltet); nur ganz leere Abschnitte überspringen die Überschrift.
+Nebenbei sind alle Domänen abgedeckt: Im Mechanik-Eigenschaft-tab sieht man standardmäßig die Live-Messwerte Flugzeit/Wurfweite/maximale Höhe,
+die Parameter bleiben oben und brechen die bestehende Schichtung „erst Eingabe, dann Messwert" nicht.
 
-浮力物块拖拽补可发现性：块组内嵌 SVG `<title>`（悬停提示「拖动物块改变
-浸入深度，读数实时跟随」），grab/grabbing 光标态上轮已就位。
+Auffindbarkeit des Auftriebsklotz-Ziehens nachgerüstet: Die Klotzgruppe bettet ein SVG `<title>` ein (Hover-Hinweis „Klotz ziehen, um die
+Eintauchtiefe zu ändern; Messwerte folgen in Echtzeit"), die grab/grabbing-Cursorzustände wurden in der letzten Runde umgesetzt.
 
-验证：单测 623/623、typecheck 干净、属性 tab 实测派生量填充且随拖拽更新、
-力学跨域布局正常、门禁零错误、overlay 已 capture。
+Überprüfung: Unit-Tests 623/623, typecheck sauber, Eigenschaft-tab gemessen mit gefüllten abgeleiteten Größen und Aktualisierung beim Ziehen,
+Mechanik-domänenübergreifendes Layout in Ordnung, Gates null Fehler, overlay erfasst (capture).
 
-### 画布读数卡片可拖拽（遮挡问题修复）
+### Ziehbare Messwertkarte auf der Zeichenfläche (Behebung des Verdeckungsproblems)
 
-用户反馈左上读数卡片（声学「回声读数」等）会挡住画面。根因：
-`PhysicsCanvas` 把读数卡硬编码在 `(PAD.left+8, PAD.top+8)`，无避让。
+Der Nutzer meldete, dass die Messwertkarte oben links (Akustik „Echo-Messwert" usw.) das Bild verdeckt. Ursache:
+`PhysicsCanvas` verdrahtete die Messwertkarte hart auf `(PAD.left+8, PAD.top+8)`, ohne Ausweichen.
 
-修复（`PhysicsCanvas.tsx` + `PhysicsCanvas.module.css`）：卡片改为可拖拽
-画布 chrome——本地 `readoutPos` 状态存 viewBox 坐标（非物理状态，不走
-场景命令）；`<g>` 挂 pointer 手势（viewPoint 反投影 client→viewBox、
-2px 拖拽阈值、pointer capture 带 jsdom 守卫），grab/grabbing 光标 +
-`<title>` 悬停提示。双重钳制：拖动时 setReadoutPos 钳在画布内，渲染期
-再钳一次（读数变宽/画布变窄后停放位置自动收回）。隔离：拖拽中
-handleMove 早退不追 hover；`suppressClickRef` 吞掉卡片按下-抬起派生的
-click，永不误触轨迹 seek；pointerdown/move stopPropagation 防外泄。
+Lösung (`PhysicsCanvas.tsx` + `PhysicsCanvas.module.css`): Die Karte wird zu ziehbarer
+Zeichenflächen-chrome – der lokale `readoutPos`-Zustand speichert viewBox-Koordinaten (kein physikalischer Zustand, läuft nicht über
+Szenenbefehle); das `<g>` hängt pointer-Gesten ein (viewPoint-Rückprojektion client→viewBox,
+2px-Ziehschwelle, pointer capture mit jsdom-Wächter), grab/grabbing-Cursor +
+`<title>`-Hover-Hinweis. Doppelte Klemmung: Beim Ziehen wird setReadoutPos in die Zeichenfläche geklemmt, in der Renderphase
+noch einmal (wird der Messwert breiter/die Zeichenfläche schmaler, zieht sich die Ablageposition automatisch zurück). Isolation: Beim Ziehen
+kehrt handleMove früh zurück und jagt keinem hover nach; `suppressClickRef` verschluckt den vom Drücken-Loslassen der Karte abgeleiteten
+click und löst nie versehentlich den Bahn-seek aus; pointerdown/move stopPropagation verhindert ein Durchsickern.
 
-验证：单测 626/626（新 spec：阈值不动/拖动落位/远角钳制/release click
-不 seek/异指针与 cancel 忽略/无布局 rect 不炸）；浏览器实测拖拽移动、
-松手保持、越界钳回画布内，cursor:grab 生效，门禁零错误；typecheck
-干净、overlay 已 capture（3 文件逐字节同步）。
+Überprüfung: Unit-Tests 626/626 (neue spec: unter der Schwelle keine Bewegung / Ziehen setzt ab / Klemmung in der fernen Ecke / release-click
+löst kein seek aus / fremder Zeiger und cancel werden ignoriert / ohne Layout-rect kein Absturz); im Browser Ziehen/Bewegen gemessen,
+Loslassen hält, Grenzüberschreitung wird in die Zeichenfläche zurückgeklemmt, cursor:grab wirkt, Gates null Fehler; typecheck
+sauber, overlay erfasst (capture) (3 Dateien byteweise synchron).
 
-### 学习记录页实质化（用户反馈「没有实现」）
+### Substanzialisierung der Lernverlaufsseite (Nutzerfeedback „nicht implementiert")
 
-表面已实现但体感空壳：只列错题（0 条时全空）、答对记录无处可见、
-知识点面板零数据时无空态、80 题 chip 无分组糊成墙。
+Oberflächlich implementiert, aber sich wie eine leere Hülle anfühlend: nur Fehleraufgaben aufgelistet (bei 0 Einträgen ganz leer), richtige Antworten nirgends sichtbar,
+das Wissenspunkt-Panel ohne Leerzustand bei null Daten, die 80 Aufgaben-Chips ohne Gruppierung zu einer Wand verklebt.
 
-修复（`LearningRecordWorkspace.tsx` + `.module.css` + `locales.ts` +
-question-core `golden-questions.ts`/`index.ts`）：
+Lösung (`LearningRecordWorkspace.tsx` + `.module.css` + `locales.ts` +
+question-core `golden-questions.ts`/`index.ts`):
 
-- **最近自测 feed**：「最近错题」扩成统一自测账本——全部 attempt
-  （答对+答错）按时间倒序列出，答对挂绿底「答对」徽章
-  （`data-result="correct"`）、答错挂错误类型徽章，保留题面/你的回答/
-  重新练习/重做实验按钮。核心诉求落地：记录页终于能看到「记录」。
-- **知识点掌握空态**：无已练叶子节点时显示引导文案
-  「完成自测后，这里会按知识点显示你的掌握情况」，不再裸空白盒。
-- **题库按 domain 分组**：question-core 把 id 前缀推断抽成
-  `goldenQuestionDomain()`（factory 复用同一份），题库分 8 组
-  （磁场与洛伦兹力/电场/复合场/力学/电路/几何光学/电磁感应/振动与波）
-  带小标题，不再是一面 chip 墙。
+- **Feed der letzten Selbsttests**: „letzte Fehleraufgaben" wird zu einem einheitlichen Selbsttest-Journal erweitert – alle attempts
+  (richtig + falsch) zeitlich absteigend aufgelistet; richtige tragen ein grün hinterlegtes „Richtig"-Badge
+  (`data-result="correct"`), falsche ein Fehlertyp-Badge; Aufgabenstellung/deine Antwort/
+  „Übung wiederholen"/„Versuch wiederholen"-Tasten bleiben erhalten. Kernanliegen umgesetzt: Die Verlaufsseite zeigt endlich den „Verlauf".
+- **Leerzustand der Wissenspunkt-Beherrschung**: Gibt es keine geübten Blattknoten, wird ein Hinweistext angezeigt
+  „Nach Abschluss eines Selbsttests wird hier nach Wissenspunkt dein Beherrschungsstand angezeigt", kein blanker Kasten mehr.
+- **Aufgabensammlung nach domain gruppiert**: question-core extrahiert die id-Präfix-Inferenz in
+  `goldenQuestionDomain()` (die factory verwendet dieselbe wieder), die Aufgabensammlung teilt sich in 8 Gruppen
+  (Magnetfeld und Lorentzkraft/Elektrisches Feld/Kombiniertes Feld/Mechanik/Stromkreis/Geometrische Optik/Elektromagnetische Induktion/Schwingungen und Wellen)
+  mit Zwischenüberschriften, keine chip-Wand mehr.
 
-验证：learning spec 26/26（新增：答对行进账本带绿徽章/孤儿题空态文案/
-8 组标题齐全）、ui-physicsos 629/629、question-core 412/412、两包
-typecheck 干净、浏览器实测分组/徽章/掌握度柱全渲染、门禁零错误、
-overlay 4 文件逐字节同步。
+Überprüfung: learning spec 26/26 (neu: Zeile „richtig" im Journal mit grünem Badge/Leerzustandstext für verwaiste Aufgaben/
+alle 8 Gruppenüberschriften vorhanden), ui-physicsos 629/629, question-core 412/412, beide Pakete
+typecheck sauber, im Browser Gruppierung/Badges/Beherrschungsbalken vollständig gerendert, Gates null Fehler,
+overlay 4 Dateien byteweise synchron.
 
-### Auth V1 收口：组合测试 + 两个真 bug 修复 + 素材上线
+### Auth V1 Abschluss: Kompositionstest + Reparatur zweier echter Bugs + Asset-Onlinegang
 
-**REAL Loader 组合测试**（`auth-host/tests/composition.spec.ts`，包规约要求）：
-cordis.yml 起 webserver(port 0) + storage + storage-json(tmpdir) +
-storage-domain(backend json) + auth-host 全链，真 HTTP 打
-`/physicsos/auth`：schools 200 → register 201+HttpOnly cookie →
-me 200（schoolId/username/role=STUDENT）→ logout 200 → me 401。
-`loadYaml` 用 `(root)=>lines` 回调拿到 mkdtemp 后的路径再渲染 yaml。
+**REAL-Loader-Kompositionstest** (`auth-host/tests/composition.spec.ts`, von der Paketkonvention gefordert):
+cordis.yml startet webserver(port 0) + storage + storage-json(tmpdir) +
+storage-domain(backend json) + auth-host als ganze Kette, echtes HTTP schlägt
+`/physicsos/auth`: schools 200 → register 201+HttpOnly cookie →
+me 200 (schoolId/username/role=STUDENT) → logout 200 → me 401.
+`loadYaml` nutzt den `(root)=>lines`-Callback, um den Pfad nach mkdtemp zu erhalten, und rendert dann yaml.
 
-**顺手修出两个真 bug**：
+**Nebenbei zwei echte Bugs repariert**:
 
-- `invariant.ts`：伴生插件 fiber 级 `inject=['invariants','storageDomain']`
-  会被测试基建在组合就绪前挂载 → `storageDomain` 未提供即失败。
-  按 message-feedback 范式改为 fiber inject 仅 `invariants`，
-  `storageDomain` 挪到 `InvariantInstaller.inject`（检查器子 fiber
-  等待服务）——Object.assign 字面量丢上下文类型，参数需显式标注。
-  另修同文件跨行 `as` 断言：tsc 接受但 vitest 的 oxc transform
-  报 parse error，收进单行。
-- `index.ts`：`ctx.effect(async function*)` 的完成 Promise 只在卸载时
-  await——fiber 激活时路由可能尚未注册，生产启动存在 404 窗口期。
-  改 `async apply` + `await ctx.effect`（directory-picker-auto 范式），
-  激活即含路由注册，组合测试从 404 变 200。
+- `invariant.ts`: Das fiber-level `inject=['invariants','storageDomain']` des Begleit-Plugins
+  wird von der Test-Infrastruktur vor der Bereitschaft der Komposition eingehängt → schlägt fehl, weil `storageDomain` nicht bereitgestellt ist.
+  Nach dem message-feedback-Muster wird fiber inject auf nur `invariants` geändert,
+  `storageDomain` wandert zu `InvariantInstaller.inject` (das Sub-fiber des Prüfers
+  wartet auf den Dienst) – das Object.assign-Literal verliert den Kontexttyp, Parameter müssen explizit annotiert werden.
+  Zusätzlich wird in derselben Datei eine mehrzeilige `as`-Assertion korrigiert: tsc akzeptiert sie, aber der oxc-transform
+  von vitest meldet einen parse error; in eine Zeile zusammengezogen.
+- `index.ts`: Das Abschluss-Promise von `ctx.effect(async function*)` wird nur beim Unmount
+  awaitet – bei fiber-Aktivierung ist die Route möglicherweise noch nicht registriert, beim Produktionsstart gibt es ein 404-Fenster.
+  Umgestellt auf `async apply` + `await ctx.effect` (directory-picker-auto-Muster);
+  die Aktivierung enthält dann die Routenregistrierung, der Kompositionstest wechselt von 404 auf 200.
 
-**密码框对齐**（用户反馈）：`.input` 无 `box-sizing`，
-`.passwordWrap .input{width:100%}` 按 content-box 渲染 =
-100%+58px padding。加 `border-box`（`.input` + SchoolPicker `.search`），
-像素实测密码框右缘 847→789 与账号/学校/按钮完全对齐。
+**Ausrichtung des Passwortfelds** (Nutzerfeedback): `.input` hat kein `box-sizing`,
+`.passwordWrap .input{width:100%}` rendert nach content-box =
+100%+58px padding. `border-box` hinzugefügt (`.input` + SchoolPicker `.search`);
+pixelgenau gemessene rechte Kante des Passwortfelds 847→789, völlig ausgerichtet mit Konto/Schule/Tasten.
 
-**素材前缀冲突**：`frontend-static` 只认领未匹配路径，
-`/physicsos/auth/horizon.png` 被 auth 前缀路由吃掉返回 JSON 404。
-素材迁出 API 前缀：`public/physicsos/login/horizon.png`，CSS 同步改。
-备选图与 manifest 移出 public → `apps/web/design-assets/`（新增
-OVERLAY_PATHS 条目，apply/capture 双向往返，dist 不带冗余素材）。
+**Asset-Präfixkonflikt**: `frontend-static` beansprucht nur nicht gematchte Pfade,
+`/physicsos/auth/horizon.png` wurde von der auth-Präfixroute geschluckt und gab JSON-404 zurück.
+Assets aus dem API-Präfix herausgezogen: `public/physicsos/login/horizon.png`, CSS entsprechend geändert.
+Alternativbilder und manifest aus public heraus → `apps/web/design-assets/` (neuer
+OVERLAY_PATHS-Eintrag, apply/capture in beide Richtungen, dist ohne redundante Assets).
 
-**library-hero.png**：LibraryWorkspace 引用的资源库卡片图已生成
-（透明底，轨道+书本+烧瓶，与 horizon 同语言）→
-`public/physicsos/library/library-hero.png`，双端口实测 200。
-新网关 `image.haqiuhaqiu.xyz` 需专用 key：旧 key 报 INVALID_API_KEY，
-用户提供的新 key 已验证 `/v1/models` 200 + 出图正常，`.env` 已更新。
+**library-hero.png**: Das von LibraryWorkspace referenzierte Ressourcenbibliotheks-Kartenbild wurde generiert
+(transparenter Hintergrund, Umlaufbahn+Buch+Kolben, gleiche Bildsprache wie horizon) →
+`public/physicsos/library/library-hero.png`, an beiden Ports gemessen 200.
+Neues Gateway `image.haqiuhaqiu.xyz` benötigt einen eigenen key: alter key meldet INVALID_API_KEY,
+der vom Nutzer bereitgestellte neue key wurde mit `/v1/models` 200 + Bildausgabe normal überprüft, `.env` ist aktualisiert.
 
-**验证**：auth-host 18/18（17 route + 1 REAL composition）、
-auth.client 18/18、tsc -b 干净、client lib + web dist 已重建、
-浏览器实测 gate 三视图/对齐/背景全渲染。已知遗留（用户 WIP，
-未动）：`library.*` en 文案缺口致 locales 对齐 spec 红、
-`LabWorkspace`/`LibraryWorkspace` 若干 typecheck 错。
+**Überprüfung**: auth-host 18/18 (17 route + 1 REAL composition),
+auth.client 18/18, tsc -b sauber, client lib + web dist neu erstellt,
+im Browser gate drei Ansichten/Ausrichtung/Hintergrund vollständig gerendert. Bekannte Altlasten (Nutzer-WIP,
+unangetastet): die en-Textlücke bei `library.*` lässt die locales-Ausrichtungs-spec rot werden,
+mehrere typecheck-Fehler in `LabWorkspace`/`LibraryWorkspace`.
 
-### 出卷专区工作台重设计（用户反馈「UI 布局需要重新打造」）
+### Neuentwurf des Prüfungsstudio-Arbeitsbereichs (Nutzerfeedback „UI-Layout muss neu gestaltet werden")
 
-`PaperWorkspace.tsx` + `.module.css` 改版，全部 API 流程不变：
+Überarbeitung von `PaperWorkspace.tsx` + `.module.css`, alle API-Abläufe unverändert:
 
-- **头部**：40px 高 hero → 紧凑工具栏（标题+一行副标+复核人），
-  hero 图降为右侧淡背景。
-- **导航**：四枚胶囊 tab → 流程步骤条（1 新建试卷 → 2 草稿与审核
-  → 3 已定稿，下划线激活态+计数徽章），「真题资料库」独立右置。
-- **新建试卷**：单列表单 → 三步向导（选择试卷结构 / 划定考试范围 /
-  设定难度配比，编号徽章 stepCard）+ 右侧粘性「试卷摘要」卡
-  （结构/满分/卷型/章节数/难度目标+CTA）。难度配比改 MixBar
-  三段比例条（基础绿/中档蓝/提高黄）。
-- **任务卡**：标题取 `document.title`（回退卷型+blueprintId），
-  状态徽章右上、meta 行加版本号+日期、`review` 态显示
-  「n/N 题已审」进度条。
-- **任务详情**：新增 StageRail 阶段轨道（细目表→AI 起草→自动检查
-  →逐题审核→定稿导出，完成打勾/当前高亮/失败红）。
-- **资料库表单**：纯 placeholder 网格 → 标签化字段（`.fld` 小标题+
-  `.fldWide` 通栏），录入原卷/逐题考点/CSV 三卡同改。
+- **Kopf**: 40px hoher hero → kompakte Symbolleiste (Titel + einzeilige Unterüberschrift + Prüfperson),
+  das hero-Bild wird zu einem dezenten Hintergrund rechts.
+- **Navigation**: vier Pill-tabs → Prozessschrittleiste (1 Prüfungsbogen anlegen → 2 Entwurf und Prüfung
+  → 3 finalisiert, Unterstreichungs-Aktivzustand + Zählbadge), die „Altklausuren-Bibliothek" separat rechts platziert.
+- **Prüfungsbogen anlegen**: einspaltiges Formular → Dreischritt-Assistent (Bogenstruktur wählen / Prüfungsumfang festlegen /
+  Schwierigkeitsverteilung setzen, nummeriertes Badge stepCard) + rechts klebende „Bogenzusammenfassung"-Karte
+  (Struktur/Punktzahl/Bogentyp/Kapitelzahl/Schwierigkeitsziel + CTA). Die Schwierigkeitsverteilung wird zu einem MixBar-
+  Dreisegment-Balken (Grundniveau grün/Mittel blau/Erhöht gelb).
+- **Aufgabenkarte**: Titel aus `document.title` (Fallback Bogentyp+blueprintId),
+  Status-Badge oben rechts, meta-Zeile mit Versionsnummer+Datum, im `review`-Zustand wird
+  ein Fortschrittsbalken „n/N Aufgaben geprüft" angezeigt.
+- **Aufgabendetails**: neue StageRail-Phasenschiene (Feinplan→AI-Entwurf→automatische Prüfung
+  →Aufgabe-für-Aufgabe-Review→Finalisierung/Export, erledigt mit Häkchen/aktuell hervorgehoben/fehlgeschlagen rot).
+- **Bibliotheksformular**: reines placeholder-Raster → beschriftete Felder (`.fld` Zwischenüberschrift +
+  `.fldWide` volle Breite); die drei Karten Erfassung Originalbogen/Aufgabe-für-Aufgabe-Prüfpunkte/CSV werden gleich mitgeändert.
 
-新 spec `tests/paper-workspace.client.spec.tsx`（4 例：步骤条/
-向导+摘要/任务卡进度/StageRail）。663/663 绿、typecheck 干净、
-浏览器四 tab 实测全渲染、console 零错误。**注意**：改完必须
+Neue spec `tests/paper-workspace.client.spec.tsx` (4 Fälle: Schrittleiste/
+Assistent+Zusammenfassung/Aufgabenkartenfortschritt/StageRail). 663/663 grün, typecheck sauber,
+im Browser vier tabs vollständig gerendert, console null Fehler. **Hinweis**: Nach der Änderung ist zwingend
 `node scripts/overlay/harness-overlay.mjs capture`——
-`apply` 会把 vendor 回滚成 overlay 旧版（本轮被回滚两次，已 capture）。
+`apply` rollt vendor auf die alte overlay-Version zurück (in dieser Runde zweimal zurückgerollt, dann capture).
 
-### 管理后台 V1：申请 → 审批 → 建校 → 校管理员 全链路
+### Admin-Konsole V1: Antrag → Genehmigung → Schulanlage → Schulverwalter, ganze Kette
 
-后端 `auth-host`（不新开包，同 domain 唯一写权限）：
+Backend `auth-host` (kein neues Paket, einzige Schreibberechtigung derselben domain):
 
-- `domain.ts`：新增 `school_requests`/`admin_audit` 两张表 +
+- `domain.ts`: zwei neue Tabellen `school_requests`/`admin_audit` +
   `schoolRequestWire`/`approveRequestWire`/`rejectRequestWire`/
   `createSchoolWire`/`schoolStatusWire`/`createUserWire`/`userStatusWire`/
-  `resetPasswordWire` wire schema。`createUserWire.role` 枚举不含
-  `SUPER_ADMIN`——线上根本造不出超管。
-- `service.ts`：`AdminActor` + `ROLE_RANK` 角色矩阵 + `manageRank`。
-  审批建校+种子校管理员、手动建校、学校启停、用户列表（校管理员
-  schoolId 过滤强制收窄到自己租户）、建号（校管理员省略 schoolId
-  落自己租户；填了别的租户 403）、禁用（连带吊销全部 session；
-  self-target 先于角色检查返回 400）、重置密码（连带吊销）、
-  会话吊销、审计追加/租户收窄读取。
-- `routes.ts`：`POST /auth/school-requests`（匿名允许，独立
-  `applyAttemptLimit` IP 桶——不挤占登录额度）+
-  `/physicsos/admin` 前缀全量管理路由（cookie 会话解析 →
-  AdminActor → 服务层强制角色/租户）。
-- `index.ts` + `bootstrap.ts`：`Config.bootstrapAdmins` 幂等种子
-  （不存在才建）。`cordis.patch.yml` 用 `!!js` 读
-  `PHYSICSOS_ADMIN_PASSWORD` 种 `PHYSICSOS-OPEN:admin` SUPER_ADMIN；
-  env 缺失则不种。
+  `resetPasswordWire` wire schema. Die `createUserWire.role`-Enumeration enthält kein
+  `SUPER_ADMIN` – in Produktion lässt sich gar kein Superadmin erzeugen.
+- `service.ts`: `AdminActor` + `ROLE_RANK`-Rollenmatrix + `manageRank`.
+  Genehmigung Schulanlage + Seed-Schulverwalter, manuelle Schulanlage, Schul-Start/Stopp, Nutzerliste (Schulverwalter
+  wird per schoolId-Filter zwingend auf den eigenen Mandanten eingegrenzt), Kontoanlage (Schulverwalter lässt schoolId weg
+  und landet im eigenen Mandanten; wird ein anderer Mandant angegeben, 403), Deaktivierung (mit Widerruf aller session;
+  self-target liefert 400 vor der Rollenprüfung), Passwort-Reset (mit Widerruf),
+  Sitzungswiderruf, Audit-Anhängen/Mandanten-eingegrenztes Lesen.
+- `routes.ts`: `POST /auth/school-requests` (anonym erlaubt, eigener
+  `applyAttemptLimit`-IP-Eimer – belegt kein Login-Kontingent) +
+  `/physicsos/admin`-Präfix mit vollständigen Verwaltungsrouten (cookie-Sitzungsauflösung →
+  AdminActor → servicenahe erzwungene Rolle/Mandant).
+- `index.ts` + `bootstrap.ts`: `Config.bootstrapAdmins` als idempotentes Seeding
+  (nur anlegen, wenn nicht vorhanden). `cordis.patch.yml` liest mit `!!js`
+  `PHYSICSOS_ADMIN_PASSWORD` und sät `PHYSICSOS-OPEN:admin` SUPER_ADMIN;
+  fehlt die env, wird nicht gesät.
 
-前端 `ui-physicsos`：
+Frontend `ui-physicsos`:
 
-- `auth-api.ts`：`submitSchoolRequest` + `createAdminApi()`
-  （`/physicsos/admin` 客户端，user 路径 `schoolId:username` 编码）。
-- `AdminWorkspace.tsx` 新 surface：角色塑形 tab——超管见
-  申请/学校/用户/审计，校管理员只见 用户/审计（本租户）；
-  非管理员渲染 forbidden 文案（菜单隐藏只是便利，边界在 host）。
-- `SchoolPicker` 空态接申请加入表单（校名用搜索词预填，
-  联系方式必填，busy/done/error 三态）。
-- `SidebarFooter` 账户菜单加「管理后台」入口（仅
-  SCHOOL_ADMIN/SUPER_ADMIN）；`surface-store` 加 `'admin'`；
-  `LabWorkspace` 分发 admin surface；`index.ts` 注入
-  `adminApi`/`openAdmin`/`hooks.auth`。
+- `auth-api.ts`: `submitSchoolRequest` + `createAdminApi()`
+  (`/physicsos/admin`-Client, user-Pfad als `schoolId:username` kodiert).
+- `AdminWorkspace.tsx` als neue surface: rollengetriebener tab – Superadmin sieht
+  Anträge/Schulen/Nutzer/Audit, der Schulverwalter nur Nutzer/Audit (eigener Mandant);
+  Nicht-Administratoren sehen einen forbidden-Text (das Ausblenden des Menüs ist nur Komfort, die Grenze liegt im host).
+- Der `SchoolPicker`-Leerzustand enthält das Antragsformular (Schulname mit Suchbegriff vorbelegt,
+  Kontaktangabe erforderlich, drei Zustände busy/done/error).
+- Das Kontomenü in `SidebarFooter` erhält den Einstieg „Admin-Konsole" (nur
+  SCHOOL_ADMIN/SUPER_ADMIN); `surface-store` erhält `'admin'`;
+  `LabWorkspace` verteilt die admin surface; `index.ts` injiziert
+  `adminApi`/`openAdmin`/`hooks.auth`.
 
-**本轮修的两个真 bug**：
+**Die zwei echten Bugs dieser Runde**:
 
-- `cookies.ts`：非记住会话发 `Max-Age=0` = 浏览器立即过期 →
-  非「记住此设备」登录在真浏览器里永远登不进（curl 测不出，
-  此前能登是因为勾了 remember 拿到 30 天 cookie）。修为
-  `maxAgeSeconds<=0` 时省略 Max-Age 属性（会话 cookie 语义），
-  auth.spec 补对称断言。
-- `createUser`：校管理员 UI 不渲染 schoolId 字段 → 空串提交 →
-  wire `min(1)` 400，校管理员永远建不了号。修为 wire 可选 +
-  服务层省略时落 actor 租户（显式异租户仍 403），前端省略空值。
+- `cookies.ts`: Nicht-merken-Sitzungen senden `Max-Age=0` = Browser läuft sofort ab →
+  eine Anmeldung ohne „Dieses Gerät merken" kommt im echten Browser nie hinein (mit curl nicht messbar;
+  zuvor funktionierte es, weil remember angehakt war und ein 30-Tage-cookie kam). Korrigiert zu:
+  bei `maxAgeSeconds<=0` wird das Max-Age-Attribut weggelassen (Session-cookie-Semantik),
+  auth.spec um ein symmetrisches Assertion ergänzt.
+- `createUser`: Die Schulverwalter-UI rendert das schoolId-Feld nicht → Leerstring wird übermittelt →
+  wire `min(1)` 400, der Schulverwalter kann nie ein Konto anlegen. Korrigiert: wire optional +
+  fehlt es, landet die Service-Schicht im Mandanten des actor (explizit anderer Mandant bleibt 403); das Frontend lässt den Leerwert weg.
 
-**验证**：auth-host 45/45（auth 18 + admin 25 + composition 2，
-含真实链 bootstrap→匿名申请→审批→校管理员登录）；
-auth.client 23/23；tsc 干净；lib/dist 已重建。浏览器实测：
-匿名申请 201+成功文案、超管登录、菜单「管理后台」、申请列表、
-审批表单全字段、UI 审批→建校+管理员、两个新校管理员登录、
-租户收窄（只见自己学校/跨租户 403/requests 403）、审计落账。
-两树逐字节一致（IDE 陈旧缓冲区曾多次回退，最终 overlay 为准
-replay + diff 核对）。
-
----
-
-## 真题卷库（资源库 · 原卷区升级）——已完成
-
-资源库「真题卷」tab 从简单卡片网格升级为完整卷库：学段 tab +
-卷类型/地区动态筛选组（从数据派生，无值不渲染）、含金量置顶
-→ 年份 → 录入时间排序、徽章行（类型/含金量/地区/学校）、
-可展开逐题清单（题号/题型/分值/考点/能力/完整题干）。
-
-数据链（全可选字段向后兼容）：
-
-- `packages/question-paper`（顶层包）：`SourcePaper` +`region`/
-  `school`/`kind`/`featured`；`SourcePaperKind` = real/mock/
-  monthly/midterm/final/joint；`KnowledgeAnnotation` +`stem`。
-- `paper-host`：`domain.ts` wire schema 同步、`service.ts`
-  落库透传——**改完必须 `tsdown` 重建 `lib/`，`dsh web`
-  吃 `lib/index.js` 不吃 src**（tsx 只转译入口链）。
-- `paper-api.ts` wire Row 同步。
-- `PaperWorkspace` 录入原卷表单 +地区/学校/卷类型/含金量；
-  逐题考点 +题干（必填，真题板块按题展示；CSV 保持索引
-  导入不含题干——朴素逗号切分吃不下含逗号的题面）。
-- 浏览端只用 `status==='verified'` 的卷与考点。
-
-**验证**：`library-papers.client.spec.tsx` 6/6（verified 过滤/
-徽章/排序/筛选/展开题干/空态）；`paper-workspace.client.spec.tsx`
-6/6（stub 补 `listBankItems` 等 4 个 Bank 方法）；UI 全套
-681/681；tsc 干净；浏览器实测月考卡徽章+题干渲染、筛选 chip、
-featured 置顶。
-
-**运维坑（这轮踩实了）**：
-
-- `harness-overlay.mjs apply` 会把 vendor 回滚成 overlay 旧版
-  ——本日被批量回退 3 次（含 IDE 陈旧缓冲区同步）。规则：
-  **改 overlay 副本 → apply 推 vendor → 立刻 diff 核对**。
-- `dsh web` 多实例共存会共享 `~/.dsh/storages/
-physicsos_paper.json` 但各自冻结启动时的代码——旧实例会
-  静默丢新字段（wire schema 不认识的键直接剥掉，POST 返回
-  201 但没存）。排障顺序：lsof 看全部监听端口 → 拿真实 PID
-  （nohup 包一层 shell，$! 不是 node PID）→ kill → 重启。
-- 存储文件直改有效但只在服务重启后生效（内存态会回写覆盖）。
-
-**已知边界**：题干仅逐题表单可录（CSV 不支持）；pending 卷
-不出现在卷库（管理端台账可见）；搜索 haystack 已含卷名/
-地区/学校。
-
-### 登录/注册契约 V2：账号密码全局解析，学校改自由填写（2026-09-19）
-
-用户反馈"登录不该选学校、注册学校自己填、预置大学是错的"。
-本轮把学校从公开 wire 上整体拿掉——它仍是内部一级租户，但
-名单不再对外暴露：
-
-- `loginWire` → `{username, password, rememberDevice?, schoolId?}`；
-  `login()` 遍历 active 用户×active 学校做全局解析，密码唯一匹配
-  即登录。同名同密跨校才回 `SCHOOL_REQUIRED`（409）+ `error.candidates`，
-  UI 出现消歧下拉重试带 `schoolId`——正常路径永远看不到学校。
-  候选上限 16（argon2 放大有界）；账号限流桶改 `acct:username`。
-- `registerWire` → `{schoolName?, schoolId?, ...}`（≥1）；
-  校名精确→子串唯一解析到 active 租户。0 → `SCHOOL_NOT_FOUND`
-  （UI 自动展开"申请开通"面板，校名随申请提交）；多 →
-  `SCHOOL_AMBIGUOUS` + candidates → 消歧重试。
-- `forgotWire` → `{username, schoolId?}`；唯一候选才落重置行，
-  歧义静默 200（防枚举）。
-- `GET /physicsos/auth/schools` 公开列表删除——学校名单不再
-  可枚举；`AuthApiError.candidates` 承载消歧数据。
-- `SEED_SCHOOLS` 只留 `PHYSICSOS-OPEN`（超管挂靠运营租户）；
-  六所大学种子删除。dev storage 已清（其下零用户零孤儿），
-  剩余租户 PHYSICSOS-OPEN / SYZX-EXP / GY1Z。
-- SchoolPicker 组件+CSS 双删；AuthGate 三视图重写（登录无学校、
-  注册自由文本+申请面板、找回仅账号）；locales 删 7 键加 5 键。
-- 存储键仍 `(schoolId, username)`——租户隔离、session、
-  admin 收窄全部不动；`schoolId` 在三处 wire 均保留为可选
-  消歧参数（admin spec 原样通过）。
-
-**验证**：auth-host 50/50（auth 23 含 REQUIRED/AMBIGUOUS/自由文本、
-admin 25、composition 2 真实链）；auth.client 23/23（含消歧选择器
-+申请面板）；ui-physicsos 681/681；tsc 干净；lib/bundle/dist 重建。
-浏览器实测：登录仅账号密码进 shell、注册自由填校名、SCHOOL_NOT_FOUND
-→申请面板→申请落库 pending、admin 登录后「管理后台」入口正常。
-
-**排障要点**：dev 双实例 `:3080/:3081` 共享 `~/.dsh/storages/
-physicsos_auth.json`——清数据必须重启实例（内存态回写覆盖文件）。
+**Überprüfung**: auth-host 45/45 (auth 18 + admin 25 + composition 2,
+inkl. echter Kette bootstrap→anonymer Antrag→Genehmigung→Schulverwalter-Login);
+auth.client 23/23; tsc sauber; lib/dist neu erstellt. Im Browser gemessen:
+anonymer Antrag 201+Erfolgstext, Superadmin-Login, Menü „Admin-Konsole", Antragsliste,
+Genehmigungsformular alle Felder, UI-Genehmigung→Schulanlage+Administrator, zwei neue Schulverwalter-Logins,
+Mandanteneingrenzung (sieht nur die eigene Schule/mandantenübergreifend 403/requests 403), Audit verbucht.
+Beide Bäume byteweise identisch (der IDE-Pufferspeicher war mehrfach zurückgesprungen; letztlich gilt overlay
+replay + diff-Abgleich).
 
 ---
 
-## 2026-09-19 · 注册自助开通（self-provisioning）
+## Altklausuren-Bibliothek (Ressourcenbibliothek · Upgrade des Originalbogen-Bereichs) – abgeschlossen
 
-**变更**：注册填写的校名解析不到时**自动建成 active 学校租户**
-（`s_` 前缀 id），注册永不在"未开通学校"上死胡同——"申请开通"
-入口从登录门整体移除。
+Der tab „Altklausuren" in der Ressourcenbibliothek wird von einem einfachen Kartenraster zu einer vollständigen Bogenbibliothek aufgewertet: Schulstufen-tab +
+dynamische Filtergruppen Bogentyp/Region (aus den Daten abgeleitet, ohne Wert nicht gerendert), Sortierung nach Wertigkeit oben
+→ Jahr → Erfassungszeit, Badge-Zeile (Typ/Wertigkeit/Region/Schule),
+erweiterbare Aufgabe-für-Aufgabe-Liste (Aufgabennummer/Aufgabentyp/Punktzahl/Prüfpunkt/Kompetenz/vollständiger Aufgabentext).
 
-- `service.register()`：`schoolName` 0 匹配 → `provisionSchool()`
-  建租户（active，名字取输入 trim 原样）→ 照常注册。
-  `SCHOOL_NOT_FOUND` 仅留给显式 `schoolId` 无效路径。
-- AuthGate：applyOpen/applyContact/applyBusy/applyDone/applyError
-  五状态、`submitApply`、申请面板 JSX、`authApi` prop 全删；
-  index.ts gate inject 不再传 authApi。
-- `AuthApi.submitSchoolRequest` 删除（无调用方）；
-  `SchoolRequestRow` 保留（AdminApi/AdminWorkspace 仍在用——
-  `/school-requests` 端点与审批流不动，是机构正式开通路径）。
-- locales 删 7 键×2（auth.apply._、auth.school.apply_）；
-  AuthGate.module.css 删 applyToggle/applyPanel/applyHint。
-- 歧义保护不变：`SCHOOL_AMBIGUOUS`+candidates 仍在（多校同名）；
-  `SCHOOL_REQUIRED`+candidates 仍在（跨校同名同密登录）。
+Datenkette (alle optionalen Felder rückwärtskompatibel):
 
-**验证**：auth-host 73/73（auth.spec 两条改为断言自助建校：未知校名
-→201+s_ 租户、禁用校名→新建独立租户不复用）；auth.client 23/23
-（新增"无申请步骤"用例）；tsc 干净（残留报错全在 library/paper
-用户 WIP spec）。lib/bundle/dist 已重建，:3080 已重启。
-线上实测：`POST /register {schoolName:"遵义市第四中学"}` → 201，
-落库 `s_MMVLLixqUqlz` active；浏览器注册视图无"申请"字样。
+- `packages/question-paper` (Top-Level-Paket): `SourcePaper` +`region`/
+  `school`/`kind`/`featured`; `SourcePaperKind` = real/mock/
+  monthly/midterm/final/joint; `KnowledgeAnnotation` +`stem`.
+- `paper-host`: `domain.ts` wire schema synchron, `service.ts`
+  speichert durchgereicht – **nach der Änderung muss `tsdown` `lib/` neu erstellen, `dsh web`
+  nimmt `lib/index.js`, nicht src** (tsx transpiliert nur die Einstiegskette).
+- `paper-api.ts` wire Row synchron.
+- `PaperWorkspace`-Formular zur Erfassung des Originalbogens +Region/Schule/Bogentyp/Wertigkeit;
+  Aufgabe-für-Aufgabe-Prüfpunkt +Aufgabentext (erforderlich, der Altklausuren-Block zeigt je Aufgabe; CSV behält den Index-
+  Import ohne Aufgabentext – eine naive Kommasplittung verträgt keine Aufgabentexte mit Kommas).
+- Die Browserseite verwendet nur Bögen und Prüfpunkte mit `status==='verified'`.
 
-**注意**：自助建校意味着每个校名变体都是独立租户（"贵阳二中"与
-"贵阳第二中学"是两所）。租户归并/改名是后续管理面工作；
-storage 现有租户 PHYSICSOS-OPEN/SYZX-EXP/GY1Z/s_*。
+**Überprüfung**: `library-papers.client.spec.tsx` 6/6 (verified-Filter/
+Badges/Sortierung/Filter/Aufgabentext aufklappen/Leerzustand); `paper-workspace.client.spec.tsx`
+6/6 (stub ergänzt `listBankItems` und 4 weitere Bank-Methoden); UI-Gesamtsuite
+681/681; tsc sauber; im Browser Monatsklausur-Karte mit Badges+Aufgabentext gerendert, Filter-chip,
+featured oben angeheftet.
+
+**Betriebs-Fallstricke (in dieser Runde handfest erlebt)**:
+
+- `harness-overlay.mjs apply` rollt vendor auf die alte overlay-Version zurück
+  – an diesem Tag dreimal in Serie zurückgerollt (inkl. IDE-Pufferspeicher-Synchronisierung). Regel:
+  **overlay-Kopie ändern → apply auf vendor → sofort per diff abgleichen**.
+- Mehrere koexistierende `dsh web`-Instanzen teilen `~/.dsh/storages/
+physicsos_paper.json`, frieren aber jeweils den Code beim Start ein – alte Instanzen
+  verlieren still neue Felder (Keys, die das wire schema nicht kennt, werden direkt abgeschält; POST gibt
+  201 zurück, speichert aber nichts). Fehlersuche-Reihenfolge: lsof alle lauschenden Ports → echte PID holen
+  (nohup umhüllt eine Shell, $! ist nicht die node-PID) → kill → Neustart.
+- Eine Direktänderung der Speicherdatei ist wirksam, aber erst nach Dienstneustart (der In-Memory-Zustand schreibt sie sonst zurück und überschreibt sie).
+
+**Bekannte Grenzen**: Der Aufgabentext kann nur im Aufgabe-für-Aufgabe-Formular erfasst werden (CSV unterstützt es nicht); pending-Bögen
+erscheinen nicht in der Bogenbibliothek (im Admin-Journal sichtbar); die Such-haystack enthält bereits Bogenname/
+Region/Schule.
+
+### Login-/Registrierungsvertrag V2: globale Auflösung von Konto und Passwort, Schule nun frei eintragbar (2026-09-19)
+
+Nutzerfeedback „beim Anmelden sollte man die Schule nicht wählen, bei der Registrierung die Schule selbst eintragen; die vorbelegten Hochschulen sind falsch".
+In dieser Runde wird die Schule insgesamt aus der öffentlichen wire entfernt – sie bleibt ein interner Mandant erster Ordnung, aber
+die Liste wird nicht mehr nach außen exponiert:
+
+- `loginWire` → `{username, password, rememberDevice?, schoolId?}`;
+  `login()` durchläuft active Nutzer×active Schulen zur globalen Auflösung; bei eindeutigem Passworttreffer
+  wird angemeldet. Nur bei gleichem Namen und gleichem Passwort über Schulen hinweg kommt `SCHOOL_REQUIRED` (409) + `error.candidates` zurück,
+  und die UI zeigt eine Disambiguierungs-Dropdown für einen neuen Versuch mit `schoolId` – der Normalfall sieht die Schule nie.
+  Kandidatenobergrenze 16 (argon2-Verstärkung begrenzt); der Konto-Drosselungseimer wechselt zu `acct:username`.
+- `registerWire` → `{schoolName?, schoolId?, ...}` (≥1);
+  exakter Schulname→eindeutiger Teilstring wird auf einen active Mandanten aufgelöst. 0 → `SCHOOL_NOT_FOUND`
+  (die UI klappt automatisch das Panel „Freischaltung beantragen" auf, der Schulname wird mit dem Antrag übermittelt); mehr →
+  `SCHOOL_AMBIGUOUS` + candidates → Disambiguierung erneut.
+- `forgotWire` → `{username, schoolId?}`; nur ein eindeutiger Kandidat legt eine Reset-Zeile an,
+  bei Mehrdeutigkeit still 200 (Enumeration-Schutz).
+- Die öffentliche Liste `GET /physicsos/auth/schools` wird entfernt – die Schulliste ist nicht mehr
+  aufzählbar; `AuthApiError.candidates` trägt die Disambiguierungsdaten.
+- `SEED_SCHOOLS` behält nur `PHYSICSOS-OPEN` (Superadmin hängt am Betriebsmandanten);
+  die sechs Hochschul-Seeds werden entfernt. dev storage ist geleert (darunter null Nutzer, null Waisen),
+  verbleibende Mandanten PHYSICSOS-OPEN / SYZX-EXP / GY1Z.
+- SchoolPicker-Komponente + CSS beide gelöscht; AuthGate drei Ansichten neu geschrieben (Login ohne Schule,
+  Registrierung Freitext + Antragspanel, Wiederherstellung nur Konto); locales 7 Keys gelöscht, 5 Keys hinzugefügt.
+- Der Speicherschlüssel bleibt `(schoolId, username)` – Mandantentrennung, session,
+  admin-Eingrenzung alle unverändert; `schoolId` bleibt in allen drei wires als optionaler
+  Disambiguierungsparameter (admin spec läuft unverändert durch).
+
+**Überprüfung**: auth-host 50/50 (auth 23 inkl. REQUIRED/AMBIGUOUS/Freitext,
+admin 25, composition 2 echte Kette); auth.client 23/23 (inkl. Disambiguierungsselektor
++Antragspanel); ui-physicsos 681/681; tsc sauber; lib/bundle/dist neu erstellen.
+Im Browser gemessen: Login nur mit Konto und Passwort in die shell, Registrierung mit freiem Schulnamen, SCHOOL_NOT_FOUND
+→Antragspanel→Antrag landet pending in der Datenbank, nach admin-Login funktioniert der Einstieg „Admin-Konsole".
+
+**Fehlersuche-Hinweis**: Zwei dev-Instanzen `:3080/:3081` teilen `~/.dsh/storages/
+physicsos_auth.json` – zum Löschen von Daten müssen die Instanzen neu gestartet werden (der In-Memory-Zustand schreibt die Datei zurück und überschreibt sie).
+
+---
+
+## 19.09.2026 · Registrierung mit automatischer Kontenaktivierung (Self-Provisioning)
+
+**Änderung:** Wird bei der Registrierung ein Schulname eingegeben, der keinem vorhandenen Eintrag zugeordnet werden kann, wird automatisch ein neuer, aktiver Schulmandant mit einer ID im Präfix `s_` erstellt. Die Registrierung blockiert daher nicht mehr mit dem Hinweis „Schule noch nicht freigeschaltet“. Der Menüeintrag „Schule beantragen“ wurde vollständig aus dem Anmeldeportal entfernt.
+
+- `service.register()`: `schoolName` 0 Treffer → `provisionSchool()`
+  legt einen Mandanten an (active, Name wie eingegeben getrimmt) → reguläre Registrierung.
+  `SCHOOL_NOT_FOUND` bleibt nur dem expliziten ungültigen `schoolId`-Pfad vorbehalten.
+- AuthGate: applyOpen/applyContact/applyBusy/applyDone/applyError
+  fünf Zustände, `submitApply`, Antragspanel-JSX, `authApi`-prop alle gelöscht;
+  index.ts gate inject übergibt authApi nicht mehr.
+- `AuthApi.submitSchoolRequest` gelöscht (kein Aufrufer);
+  `SchoolRequestRow` bleibt (AdminApi/AdminWorkspace verwenden es weiterhin –
+  der `/school-requests`-Endpunkt und der Genehmigungsfluss bleiben unangetastet; er ist der offizielle Freischaltungspfad für Institutionen).
+- locales löscht 7 Keys×2 (auth.apply._, auth.school.apply_);
+  AuthGate.module.css löscht applyToggle/applyPanel/applyHint.
+- Der Mehrdeutigkeitsschutz bleibt unverändert: `SCHOOL_AMBIGUOUS`+candidates weiterhin vorhanden (mehrere Schulen mit gleichem Namen);
+  `SCHOOL_REQUIRED`+candidates weiterhin vorhanden (schulübergreifender Login mit gleichem Namen und gleichem Passwort).
+
+**Überprüfung:** auth-host 73/73 (zwei Fälle in `auth.spec` bestätigen nun die automatische Erstellung: unbekannter Schulname → 201 mit neuer `s_`-Mandanten-ID; deaktivierter Schulname → neue unabhängige Mandanten-ID, keine Wiederverwendung); auth.client 23/23 (neuer Testfall „kein Antragsvorgang“). `tsc` ist fehlerfrei (verbleibende Fehler betreffen ausschließlich noch nicht abgeschlossene Specs in `library/paper`). `lib/`, Bundles und `dist/` wurden neu erstellt, Dienst auf Port 3080 neu gestartet.
+
+Praxisprüfung: `POST /register {schoolName:"Mittelschule Nr. 4 Zunyi"}` → 201, Eintrag in `s_MMVLLixqUqlz` als aktiv. Im Browser-Registrierungsformular erscheint kein Hinweis auf einen Antrag mehr.
+
+**Hinweis:** Durch die automatische Erstellung ist jede Variante eines Schulnamens ein eigener Mandant („Guiyang Nr. 2“ und „Zweite Mittelschule Guiyang“ werden als zwei separate Schulen behandelt). Die Zusammenführung oder Umbenennung von Mandanten ist eine künftige Aufgabe im Verwaltungsbereich. Die aktuellen Mandanten im Speicher sind PHYSICSOS-OPEN/SYZX-EXP/GY1Z/s_*.

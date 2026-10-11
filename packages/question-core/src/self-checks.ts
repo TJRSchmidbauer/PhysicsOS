@@ -1,15 +1,15 @@
 /**
- * Self-check bank for mistake diagnosis (错题诊断).
+ * Selbsttest-Bank für die Fehlerdiagnose.
  *
- * Each golden question carries a short conceptual quiz. Every WRONG option is
- * annotated with the mistake it embodies — 概念 (concept) / 方向 (direction) /
- * 建模 (modeling) — plus a student-readable explanation and review pointers.
- * Where the running Verifier asserts the exact fact the explanation relies on,
- * the option references that check id so the UI can show the live PASS/FAIL as
- * evidence instead of an unbacked claim.
+ * Jede Goldfrage enthält ein kurzes konzeptionelles Quiz. Jede FALSCHE Option ist
+ * mit dem Fehler annotiert, den sie verkörpert — Konzept / Richtung /
+ * Modellierung — plus einer für Lernende lesbaren Erklärung und Wiederholungshinweisen.
+ * Wo der laufende Verifier genau die Tatsache zusichert, auf die die Erklärung sich stützt,
+ * verweist die Option auf diese Check-ID, damit die UI den Live-PASS/FAIL als
+ * Beleg statt einer unbelegten Behauptung anzeigen kann.
  *
- * This file is DATA. It never computes physics; explanations state laws and
- * point to Verifier checks — the numbers live in the Runtime.
+ * Diese Datei ist DATEN. Sie berechnet nie Physik; Erklärungen nennen Gesetze und
+ * verweisen auf Verifier-Checks — die Zahlen liegen in der Runtime.
  */
 
 export type MistakeType = 'concept' | 'direction' | 'modeling'
@@ -17,9 +17,9 @@ export type MistakeType = 'concept' | 'direction' | 'modeling'
 export interface SelfCheckMistake {
   readonly type: MistakeType
   readonly explanation: string
-  /** Review pointers, e.g. 左手定则. */
+  /** Wiederholungshinweise, z. B. Linke-Hand-Regel. */
   readonly review: readonly string[]
-  /** Verifier check id whose live status backs the explanation, when one exists. */
+  /** Verifier-Check-ID, deren Live-Status die Erklärung stützt, falls vorhanden. */
   readonly evidenceCheckId?: string
 }
 
@@ -33,36 +33,36 @@ export interface SelfCheckOption {
 export interface SelfCheckItem {
   readonly id: string
   readonly prompt: string
-  /** Reinforcement shown after a correct answer. */
+  /** Bestärkung, die nach einer richtigen Antwort angezeigt wird. */
   readonly takeaway: string
   readonly options: readonly SelfCheckOption[]
 }
 
-/* --------------------------------------------------------------- families -- */
+/* ---------------------------------------------------------------- Familien -- */
 
 export const MAGNETIC_WORK: SelfCheckItem = {
   id: 'magnetic-no-work',
-  prompt: '洛伦兹力对做圆周运动的带电粒子做功吗？',
-  takeaway: '洛伦兹力始终垂直于速度方向，不做功，粒子速率保持不变。',
+  prompt: 'Verrichtet die Lorentzkraft an einem geladenen Teilchen, das eine Kreisbewegung ausführt, Arbeit?',
+  takeaway: 'Die Lorentzkraft steht stets senkrecht zur Geschwindigkeitsrichtung, verrichtet keine Arbeit, und der Betrag der Geschwindigkeit des Teilchens bleibt konstant.',
   options: [
-    { id: 'no-work', label: '不做功，速率保持不变', correct: true },
+    { id: 'no-work', label: 'Verrichtet keine Arbeit, Geschwindigkeit bleibt konstant', correct: true },
     {
       id: 'positive-work',
-      label: '做正功，速度越来越大',
+      label: 'Verrichtet positive Arbeit, die Geschwindigkeit wird immer größer',
       mistake: {
         type: 'concept',
-        explanation: '洛伦兹力方向始终垂直于速度方向，功率 F·v = 0，不可能改变速率。',
-        review: ['洛伦兹力方向（左手定则）', '功的定义 W = F·s·cosθ'],
+        explanation: 'Die Richtung der Lorentzkraft steht stets senkrecht zur Geschwindigkeitsrichtung, die Leistung F·v = 0, eine Änderung des Geschwindigkeitsbetrags ist unmöglich.',
+        review: ['Richtung der Lorentzkraft (Linke-Hand-Regel)', 'Definition der Arbeit W = F·s·cosθ'],
         evidenceCheckId: 'magnetic_force_does_no_work',
       },
     },
     {
       id: 'negative-work',
-      label: '做负功，粒子逐渐减速',
+      label: 'Verrichtet negative Arbeit, das Teilchen wird allmählich langsamer',
       mistake: {
         type: 'concept',
-        explanation: '洛伦兹力与速度始终垂直，既不做正功也不做负功；减速需要沿速度反方向的力。',
-        review: ['洛伦兹力不做功', '动能定理'],
+        explanation: 'Die Lorentzkraft steht stets senkrecht zur Geschwindigkeit, sie verrichtet weder positive noch negative Arbeit; Abbremsen erfordert eine Kraft entgegen der Geschwindigkeitsrichtung.',
+        review: ['Lorentzkraft verrichtet keine Arbeit', 'Arbeit-Energie-Theorem'],
         evidenceCheckId: 'magnetic_force_does_no_work',
       },
     },
@@ -71,27 +71,27 @@ export const MAGNETIC_WORK: SelfCheckItem = {
 
 const LORENTZ_RULE: SelfCheckItem = {
   id: 'lorentz-direction-rule',
-  prompt: '判断带电粒子在磁场中受到的洛伦兹力方向，应该用哪个规则？',
+  prompt: 'Mit welcher Regel bestimmt man die Richtung der Lorentzkraft, die ein geladenes Teilchen im Magnetfeld erfährt?',
   takeaway:
-    '洛伦兹力方向用左手定则：磁感线穿入掌心，四指指向正电荷速度方向，拇指即为受力方向；负电荷取反。',
+    'Die Richtung der Lorentzkraft bestimmt man mit der Linke-Hand-Regel: Die Feldlinien treten in die Handfläche ein, die vier Finger zeigen in die Geschwindigkeitsrichtung der positiven Ladung, und der Daumen gibt die Kraftrichtung an; bei negativer Ladung kehrt sich die Richtung um.',
   options: [
-    { id: 'left-hand', label: '左手定则（负电荷时方向取反）', correct: true },
+    { id: 'left-hand', label: 'Linke-Hand-Regel (bei negativer Ladung umgekehrte Richtung)', correct: true },
     {
       id: 'right-hand',
-      label: '右手定则',
+      label: 'Rechte-Hand-Regel',
       mistake: {
         type: 'direction',
-        explanation: '右手定则用于判断导体切割磁感线产生的感应电流方向；受力方向判断用左手定则。',
-        review: ['左手定则', '右手定则的适用场景'],
+        explanation: 'Die Rechte-Hand-Regel dient zur Bestimmung der Richtung des induzierten Stroms, der entsteht, wenn ein Leiter Feldlinien schneidet; die Kraftrichtung bestimmt man mit der Linke-Hand-Regel.',
+        review: ['Linke-Hand-Regel', 'Anwendungsfälle der Rechte-Hand-Regel'],
       },
     },
     {
       id: 'ampere-rule',
-      label: '安培定则（右手螺旋）',
+      label: 'Ampèresche Regel (Rechte-Hand-Schraubenregel)',
       mistake: {
         type: 'direction',
-        explanation: '安培定则判断电流产生磁场的方向，不判断受力方向。',
-        review: ['左手定则', '安培定则的适用场景'],
+        explanation: 'Die Ampèresche Regel bestimmt die Richtung des vom Strom erzeugten Magnetfelds, nicht die Kraftrichtung.',
+        review: ['Linke-Hand-Regel', 'Anwendungsfälle der Ampèreschen Regel'],
       },
     },
   ],
@@ -99,27 +99,27 @@ const LORENTZ_RULE: SelfCheckItem = {
 
 export const RADIUS_MASS: SelfCheckItem = {
   id: 'radius-vs-mass',
-  prompt: '速度和电荷量相同的两种粒子进入同一匀强磁场，质量更大的粒子？',
-  takeaway: 'r = mv/(qB)：同速同荷时，半径与质量成正比 —— 这正是质谱仪区分同位素的原理。',
+  prompt: 'Zwei Teilchen mit gleicher Geschwindigkeit und gleicher Ladungsmenge treten in dasselbe homogene Magnetfeld ein. Was gilt für das Teilchen mit der größeren Masse?',
+  takeaway: 'r = mv/(qB): Bei gleicher Geschwindigkeit und gleicher Ladung ist der Radius proportional zur Masse — genau dies ist das Prinzip, mit dem das Massenspektrometer Isotope unterscheidet.',
   options: [
-    { id: 'larger-radius', label: '轨道半径更大', correct: true },
+    { id: 'larger-radius', label: 'Größerer Bahnradius', correct: true },
     {
       id: 'smaller-radius',
-      label: '轨道半径更小',
+      label: 'Kleinerer Bahnradius',
       mistake: {
         type: 'concept',
         explanation:
-          '由 qvB = mv²/r 得 r = mv/(qB)，质量在分子上：质量越大，同样的洛伦兹力越难把它拉弯。',
-        review: ['向心力方程 qvB = mv²/r', '质谱仪原理'],
+          'Aus qvB = mv²/r folgt r = mv/(qB), die Masse steht im Zähler: Je größer die Masse, desto schwerer kann dieselbe Lorentzkraft sie auf eine gekrümmte Bahn zwingen.',
+        review: ['Zentripetalkraft-Gleichung qvB = mv²/r', 'Prinzip des Massenspektrometers'],
       },
     },
     {
       id: 'same-radius',
-      label: '轨道半径相同',
+      label: 'Gleicher Bahnradius',
       mistake: {
         type: 'concept',
-        explanation: '半径 r = mv/(qB) 与质量有关；若半径与质量无关，质谱仪就无法把同位素分开了。',
-        review: ['r = mv/(qB)', '质谱仪原理'],
+        explanation: 'Der Radius r = mv/(qB) hängt von der Masse ab; wäre der Radius massenunabhängig, könnte das Massenspektrometer die Isotope nicht trennen.',
+        review: ['r = mv/(qB)', 'Prinzip des Massenspektrometers'],
       },
     },
   ],
@@ -127,29 +127,29 @@ export const RADIUS_MASS: SelfCheckItem = {
 
 export const SELECTOR_CONDITION: SelfCheckItem = {
   id: 'selector-condition',
-  prompt: '速度选择器中，粒子恰好沿直线通过的条件是？',
-  takeaway: '|qE| = |qvB| 两力平衡，即 v = E/B；该条件与电荷正负、电荷量大小都无关。',
+  prompt: 'Was ist die Bedingung dafür, dass ein Teilchen im Geschwindigkeitswähler geradlinig hindurchfliegt?',
+  takeaway: '|qE| = |qvB|, die beiden Kräfte sind im Gleichgewicht, also v = E/B; diese Bedingung ist unabhängig vom Vorzeichen und vom Betrag der Ladung.',
   options: [
-    { id: 'v-eq-eb', label: 'v = E/B，电场力与洛伦兹力平衡', correct: true },
+    { id: 'v-eq-eb', label: 'v = E/B, elektrische Feldkraft und Lorentzkraft sind im Gleichgewicht', correct: true },
     {
       id: 'only-positive',
-      label: '只有正电荷才能直线通过',
+      label: 'Nur positive Ladungen können geradlinig hindurchfliegen',
       mistake: {
         type: 'concept',
         explanation:
-          '电荷变号时电场力与洛伦兹力同时反向，平衡关系不变；速度选择器对正负电荷同样有效。',
-        review: ['速度选择条件 |qE| = |qvB|', '电场力与洛伦兹力方向'],
+          'Wechselt die Ladung das Vorzeichen, kehren sich elektrische Feldkraft und Lorentzkraft gleichzeitig um, die Gleichgewichtsbeziehung bleibt unverändert; der Geschwindigkeitswähler wirkt für positive und negative Ladungen gleichermaßen.',
+        review: ['Bedingung der Geschwindigkeitsauswahl |qE| = |qvB|', 'Richtungen der elektrischen Feldkraft und der Lorentzkraft'],
         evidenceCheckId: 'velocity_selection_condition',
       },
     },
     {
       id: 'fast-enough',
-      label: '速度足够大就能冲过去',
+      label: 'Bei ausreichend großer Geschwindigkeit kommt es einfach durch',
       mistake: {
         type: 'concept',
         explanation:
-          '速度越大洛伦兹力越大，两力失衡反而偏转得越厉害；只有恰好 v = E/B 的粒子沿直线通过。',
-        review: ['洛伦兹力 F = qvB 与速度成正比', '速度选择条件'],
+          'Je größer die Geschwindigkeit, desto größer die Lorentzkraft; die beiden Kräfte geraten aus dem Gleichgewicht und die Ablenkung wird sogar stärker; nur Teilchen mit genau v = E/B fliegen geradlinig hindurch.',
+        review: ['Lorentzkraft F = qvB ist proportional zur Geschwindigkeit', 'Bedingung der Geschwindigkeitsauswahl'],
         evidenceCheckId: 'velocity_selection_condition',
       },
     },
@@ -158,28 +158,28 @@ export const SELECTOR_CONDITION: SelfCheckItem = {
 
 export const SELECTOR_TOO_FAST: SelfCheckItem = {
   id: 'selector-too-fast',
-  prompt: '若入射速度大于 E/B，粒子将？',
-  takeaway: '速度偏大时洛伦兹力 |qvB| 占优，粒子向洛伦兹力一侧偏转，被选择器挡下。',
+  prompt: 'Was geschieht mit dem Teilchen, wenn die Eintrittsgeschwindigkeit größer als E/B ist?',
+  takeaway: 'Ist die Geschwindigkeit zu groß, überwiegt die Lorentzkraft |qvB|, das Teilchen wird zur Seite der Lorentzkraft abgelenkt und vom Wähler zurückgehalten.',
   options: [
-    { id: 'toward-magnetic', label: '向洛伦兹力一侧偏转', correct: true },
+    { id: 'toward-magnetic', label: 'Ablenkung zur Seite der Lorentzkraft', correct: true },
     {
       id: 'toward-electric',
-      label: '向电场力一侧偏转',
+      label: 'Ablenkung zur Seite der elektrischen Feldkraft',
       mistake: {
         type: 'direction',
         explanation:
-          '电场力 |qE| 与速度无关，洛伦兹力 |qvB| 随速度增大；速度偏大时是洛伦兹力占优。',
-        review: ['|F_E| = qE 与速度无关', '|F_B| = qvB 与速度成正比'],
+          'Die elektrische Feldkraft |qE| ist geschwindigkeitsunabhängig, die Lorentzkraft |qvB| wächst mit der Geschwindigkeit; bei zu großer Geschwindigkeit überwiegt die Lorentzkraft.',
+        review: ['|F_E| = qE ist geschwindigkeitsunabhängig', '|F_B| = qvB ist proportional zur Geschwindigkeit'],
         evidenceCheckId: 'velocity_selection_condition',
       },
     },
     {
       id: 'still-straight',
-      label: '仍沿直线通过',
+      label: 'Fliegt weiterhin geradlinig hindurch',
       mistake: {
         type: 'concept',
-        explanation: '直线通过要求两力严格平衡；v ≠ E/B 时合力不为零，粒子必然偏转。',
-        review: ['速度选择条件 v = E/B'],
+        explanation: 'Geradliniges Hindurchfliegen erfordert ein striktes Gleichgewicht der beiden Kräfte; bei v ≠ E/B ist die resultierende Kraft nicht null und das Teilchen wird zwangsläufig abgelenkt.',
+        review: ['Bedingung der Geschwindigkeitsauswahl v = E/B'],
         evidenceCheckId: 'velocity_selection_condition',
       },
     },
@@ -188,27 +188,27 @@ export const SELECTOR_TOO_FAST: SelfCheckItem = {
 
 export const SPECTROMETER_SPEED: SelfCheckItem = {
   id: 'spectrometer-speed',
-  prompt: '离子进入质谱仪的磁偏转区后，速率如何变化？',
-  takeaway: '偏转区只有磁场，洛伦兹力不做功，速率不变，轨迹是匀速圆周。',
+  prompt: 'Wie ändert sich der Betrag der Geschwindigkeit, nachdem ein Ion in den magnetischen Ablenkbereich des Massenspektrometers eingetreten ist?',
+  takeaway: 'Im Ablenkbereich existiert nur ein Magnetfeld, die Lorentzkraft verrichtet keine Arbeit, der Geschwindigkeitsbetrag bleibt konstant, die Bahn ist ein gleichförmiger Kreis.',
   options: [
-    { id: 'constant', label: '保持不变（洛伦兹力不做功）', correct: true },
+    { id: 'constant', label: 'Bleibt konstant (Lorentzkraft verrichtet keine Arbeit)', correct: true },
     {
       id: 'speeds-up',
-      label: '越转越快',
+      label: 'Dreht sich immer schneller',
       mistake: {
         type: 'concept',
-        explanation: '偏转区内只有磁场，洛伦兹力垂直于速度不做功，动能与速率都不变。',
-        review: ['洛伦兹力不做功', '纯磁场区速率守恒'],
+        explanation: 'Im Ablenkbereich gibt es nur ein Magnetfeld, die Lorentzkraft steht senkrecht zur Geschwindigkeit und verrichtet keine Arbeit, kinetische Energie und Geschwindigkeitsbetrag bleiben konstant.',
+        review: ['Lorentzkraft verrichtet keine Arbeit', 'Geschwindigkeitsbetrag im reinen Magnetfeld bleibt erhalten'],
         evidenceCheckId: 'speed_conserved_in_pure_magnetic',
       },
     },
     {
       id: 'slows-down',
-      label: '逐渐减速直到停下',
+      label: 'Wird allmählich langsamer bis zum Stillstand',
       mistake: {
         type: 'concept',
-        explanation: '磁场力不消耗动能；没有阻力时粒子在磁场中永远以相同速率转圈。',
-        review: ['洛伦兹力不做功'],
+        explanation: 'Die Magnetfeldkraft verbraucht keine kinetische Energie; ohne Widerstand kreist das Teilchen im Magnetfeld für immer mit demselben Geschwindigkeitsbetrag.',
+        review: ['Lorentzkraft verrichtet keine Arbeit'],
         evidenceCheckId: 'speed_conserved_in_pure_magnetic',
       },
     },
@@ -217,28 +217,28 @@ export const SPECTROMETER_SPEED: SelfCheckItem = {
 
 export const CROSSED_NET_FORCE: SelfCheckItem = {
   id: 'crossed-net-force',
-  prompt: '带电粒子同时处于正交的 E、B 场中，合力应当怎样求？',
-  takeaway: 'ΣF = qE + qv×B（再加 mg 若考虑重力）：先分别求出各力，再做矢量合成。',
+  prompt: 'Wie bestimmt man die resultierende Kraft auf ein geladenes Teilchen, das sich gleichzeitig in zueinander orthogonalen E- und B-Feldern befindet?',
+  takeaway: 'ΣF = qE + qv×B (plus mg, falls die Schwerkraft berücksichtigt wird): Zuerst bestimmt man die einzelnen Kräfte, dann bildet man die Vektorsumme.',
   options: [
-    { id: 'vector-sum', label: '各力的矢量和 ΣF = qE + qv×B', correct: true },
+    { id: 'vector-sum', label: 'Vektorsumme der Kräfte ΣF = qE + qv×B', correct: true },
     {
       id: 'scalar-sum',
-      label: '把各力大小直接相加',
+      label: 'Die Beträge der Kräfte werden direkt addiert',
       mistake: {
         type: 'concept',
-        explanation: '力是矢量：方向相反的两个力大小相加会算出完全错误的合力，必须按矢量合成。',
-        review: ['力的矢量合成', '复合场受力分析'],
+        explanation: 'Kraft ist ein Vektor: Addiert man die Beträge zweier entgegengesetzt gerichteter Kräfte, erhält man eine völlig falsche resultierende Kraft; es muss die Vektorsumme gebildet werden.',
+        review: ['Vektoraddition von Kräften', 'Kraftanalyse im kombinierten Feld'],
         evidenceCheckId: 'composite_force_superposition',
       },
     },
     {
       id: 'dominant-only',
-      label: '只考虑其中较大的那个力',
+      label: 'Nur die größere der beiden Kräfte wird berücksichtigt',
       mistake: {
         type: 'modeling',
         explanation:
-          '两个同量级的力都会改变运动；丢掉任何一个都会得到错误轨迹。速度选择器正是两力共同作用的结果。',
-        review: ['受力分析的完整性', '复合场 F = qE + qv×B'],
+          'Zwei Kräfte gleicher Größenordnung verändern beide die Bewegung; lässt man eine davon weg, erhält man eine falsche Bahn. Der Geschwindigkeitswähler ist gerade das Ergebnis des Zusammenwirkens beider Kräfte.',
+        review: ['Vollständigkeit der Kraftanalyse', 'Kombiniertes Feld F = qE + qv×B'],
         evidenceCheckId: 'composite_force_superposition',
       },
     },
@@ -247,28 +247,28 @@ export const CROSSED_NET_FORCE: SelfCheckItem = {
 
 export const THREE_FIELD_GRAVITY: SelfCheckItem = {
   id: 'three-field-gravity',
-  prompt: '质子、电子这类微观粒子在复合场问题中，重力通常如何处理？',
+  prompt: 'Wie wird die Schwerkraft bei mikroskopischen Teilchen wie Protonen und Elektronen in Problemen mit kombinierten Feldern üblicherweise behandelt?',
   takeaway:
-    '微观粒子的重力比电磁力小十几个数量级，通常忽略；带电小球、液滴类宏观对象则必须考虑重力。',
+    'Die Schwerkraft mikroskopischer Teilchen ist um mehr als zehn Größenordnungen kleiner als die elektromagnetische Kraft und wird üblicherweise vernachlässigt; bei makroskopischen Objekten wie geladenen Kügelchen oder Tröpfchen muss die Schwerkraft dagegen berücksichtigt werden.',
   options: [
-    { id: 'neglect-micro', label: '微观粒子忽略重力，宏观带电小球必须考虑', correct: true },
+    { id: 'neglect-micro', label: 'Bei mikroskopischen Teilchen wird die Schwerkraft vernachlässigt, bei makroskopischen geladenen Kügelchen muss sie berücksichtigt werden', correct: true },
     {
       id: 'always-include',
-      label: '任何时候都必须把重力算进去，否则就是错的',
+      label: 'Die Schwerkraft muss immer mitgerechnet werden, sonst ist es falsch',
       mistake: {
         type: 'modeling',
         explanation:
-          '建模要看数量级：质子 mg ≈ 10⁻²⁶ N，而典型电磁力 ≈ 10⁻¹⁵ N，重力的影响完全淹没在电磁力里。',
-        review: ['数量级估算', '建模时的近似处理'],
+          'Bei der Modellierung kommt es auf die Größenordnung an: Für ein Proton gilt mg ≈ 10⁻²⁶ N, die typische elektromagnetische Kraft beträgt ≈ 10⁻¹⁵ N, der Einfluss der Schwerkraft geht in der elektromagnetischen Kraft völlig unter.',
+        review: ['Abschätzung der Größenordnung', 'Näherungen bei der Modellierung'],
       },
     },
     {
       id: 'never-include',
-      label: '复合场问题一律不考虑重力',
+      label: 'In Problemen mit kombinierten Feldern wird die Schwerkraft grundsätzlich nicht berücksichtigt',
       mistake: {
         type: 'modeling',
-        explanation: '带电液滴、小球类问题中 mg 与 qE 同量级，重力正是平衡条件的一部分，不能丢。',
-        review: ['三力平衡条件', '典型题：带电液滴悬浮'],
+        explanation: 'In Problemen mit geladenen Tröpfchen oder Kügelchen haben mg und qE dieselbe Größenordnung, die Schwerkraft ist gerade Teil der Gleichgewichtsbedingung und darf nicht weggelassen werden.',
+        review: ['Bedingung des Kräftegleichgewichts bei drei Kräften', 'Typische Aufgabe: schwebendes geladenes Tröpfchen'],
       },
     },
   ],
@@ -276,26 +276,26 @@ export const THREE_FIELD_GRAVITY: SelfCheckItem = {
 
 const PROJECTILE_HORIZONTAL: SelfCheckItem = {
   id: 'projectile-horizontal-velocity',
-  prompt: '平抛运动过程中，水平方向的分速度如何变化？',
-  takeaway: '水平方向不受力，分速度保持 v₀ 不变；竖直方向做自由落体。两个分运动互不影响。',
+  prompt: 'Wie ändert sich die horizontale Geschwindigkeitskomponente während eines waagerechten Wurfs?',
+  takeaway: 'In horizontaler Richtung wirkt keine Kraft, die Geschwindigkeitskomponente bleibt v₀ unverändert; in vertikaler Richtung liegt ein freier Fall vor. Die beiden Teilbewegungen beeinflussen sich gegenseitig nicht.',
   options: [
-    { id: 'constant', label: '保持不变', correct: true },
+    { id: 'constant', label: 'Bleibt konstant', correct: true },
     {
       id: 'decreases',
-      label: '逐渐减小',
+      label: 'Nimmt allmählich ab',
       mistake: {
         type: 'concept',
-        explanation: '忽略空气阻力时水平方向合力为零，速度分量不变；"感觉会慢下来"混入了阻力直觉。',
-        review: ['运动的独立性', '牛顿第一定律'],
+        explanation: 'Vernachlässigt man den Luftwiderstand, ist die resultierende Kraft in horizontaler Richtung null und die Geschwindigkeitskomponente bleibt konstant; das Gefühl, sie werde langsamer, ist eine eingemischte Intuition zum Widerstand.',
+        review: ['Unabhängigkeit der Bewegungen', 'Erstes Newtonsches Gesetz'],
       },
     },
     {
       id: 'increases',
-      label: '逐渐增大',
+      label: 'Nimmt allmählich zu',
       mistake: {
         type: 'concept',
-        explanation: '重力只沿竖直方向，增大的只是竖直分速度；水平分速度与它无关。',
-        review: ['运动的合成与分解'],
+        explanation: 'Die Schwerkraft wirkt nur in vertikaler Richtung, nur die vertikale Geschwindigkeitskomponente wächst; die horizontale Geschwindigkeitskomponente ist davon unberührt.',
+        review: ['Zusammensetzung und Zerlegung von Bewegungen'],
       },
     },
   ],
@@ -303,26 +303,26 @@ const PROJECTILE_HORIZONTAL: SelfCheckItem = {
 
 const PROJECTILE_TIME: SelfCheckItem = {
   id: 'projectile-flight-time',
-  prompt: '平抛运动的落地时间由什么决定？',
-  takeaway: 't = √(2h/g)：只由下落高度和重力加速度决定，与水平初速度、质量都无关。',
+  prompt: 'Wovon hängt die Flugzeit eines waagerechten Wurfs bis zum Boden ab?',
+  takeaway: 't = √(2h/g): hängt nur von der Fallhöhe und der Erdbeschleunigung ab, unabhängig von der horizontalen Anfangsgeschwindigkeit und der Masse.',
   options: [
-    { id: 'height-only', label: '只由下落高度（和 g）决定', correct: true },
+    { id: 'height-only', label: 'Hängt nur von der Fallhöhe (und g) ab', correct: true },
     {
       id: 'initial-speed',
-      label: '水平初速度越大，飞行时间越长',
+      label: 'Je größer die horizontale Anfangsgeschwindigkeit, desto länger die Flugzeit',
       mistake: {
         type: 'modeling',
-        explanation: '水平运动与竖直运动相互独立；初速度只决定射程 x = v₀t，不改变下落时间。',
-        review: ['运动的独立性', 't = √(2h/g)'],
+        explanation: 'Horizontale und vertikale Bewegung sind voneinander unabhängig; die Anfangsgeschwindigkeit bestimmt nur die Wurfweite x = v₀t und ändert die Fallzeit nicht.',
+        review: ['Unabhängigkeit der Bewegungen', 't = √(2h/g)'],
       },
     },
     {
       id: 'mass',
-      label: '质量越大落得越快',
+      label: 'Je größer die Masse, desto schneller fällt es',
       mistake: {
         type: 'concept',
-        explanation: '自由落体加速度与质量无关（忽略空气阻力时），伽利略斜塔实验正是这个结论。',
-        review: ['自由落体运动', 'g 与质量无关'],
+        explanation: 'Die Fallbeschleunigung hängt nicht von der Masse ab (bei vernachlässigtem Luftwiderstand); genau dies ist das Ergebnis von Galileis Experiment am Schiefen Turm von Pisa.',
+        review: ['Freier Fall', 'g ist unabhängig von der Masse'],
       },
     },
   ],
@@ -330,27 +330,27 @@ const PROJECTILE_TIME: SelfCheckItem = {
 
 const UNIFORM_ACCELERATION: SelfCheckItem = {
   id: 'uniform-acceleration-meaning',
-  prompt: '匀变速直线运动中，加速度如何变化？',
-  takeaway: '"匀变速"指加速度恒定：速度均匀变化，位移随时间按二次关系增长。',
+  prompt: 'Was gilt für die Beschleunigung bei einer gleichmäßig beschleunigten geradlinigen Bewegung?',
+  takeaway: '"Gleichmäßig beschleunigt" bedeutet konstante Beschleunigung: Die Geschwindigkeit ändert sich gleichmäßig, die Verschiebung wächst quadratisch mit der Zeit.',
   options: [
-    { id: 'constant', label: '恒定不变', correct: true },
+    { id: 'constant', label: 'Bleibt konstant', correct: true },
     {
       id: 'grows',
-      label: '随速度一起增大',
+      label: 'Wächst zusammen mit der Geschwindigkeit',
       mistake: {
         type: 'concept',
         explanation:
-          '加速度描述速度的变化率；匀变速运动中变化率本身是常数，增大的是速度不是加速度。',
-        review: ['加速度定义 a = Δv/Δt'],
+          'Die Beschleunigung beschreibt die Änderungsrate der Geschwindigkeit; bei einer gleichmäßig beschleunigten Bewegung ist diese Änderungsrate selbst konstant, es wächst die Geschwindigkeit, nicht die Beschleunigung.',
+        review: ['Definition der Beschleunigung a = Δv/Δt'],
       },
     },
     {
       id: 'zero',
-      label: '加速度为零',
+      label: 'Die Beschleunigung ist null',
       mistake: {
         type: 'concept',
-        explanation: '加速度为零是匀速直线运动；匀变速要求 a ≠ 0 且保持不变。',
-        review: ['匀速与匀变速的区别'],
+        explanation: 'Beschleunigung null bedeutet gleichförmige geradlinige Bewegung; gleichmäßig beschleunigt erfordert a ≠ 0 und konstant.',
+        review: ['Unterschied zwischen gleichförmiger und gleichmäßig beschleunigter Bewegung'],
       },
     },
   ],
@@ -358,26 +358,26 @@ const UNIFORM_ACCELERATION: SelfCheckItem = {
 
 const NEWTON_SECOND: SelfCheckItem = {
   id: 'newton-constant-force',
-  prompt: '物体受到恒定的合外力作用时，它做什么运动？',
-  takeaway: 'F = ma：恒力产生恒定加速度，物体做匀变速运动（方向与初速度共线时为匀变速直线运动）。',
+  prompt: 'Welche Bewegung führt ein Körper aus, wenn auf ihn eine konstante resultierende Kraft wirkt?',
+  takeaway: 'F = ma: Eine konstante Kraft erzeugt eine konstante Beschleunigung, der Körper führt eine gleichmäßig beschleunigte Bewegung aus (sind Kraftrichtung und Anfangsgeschwindigkeit kollinear, ist es eine gleichmäßig beschleunigte geradlinige Bewegung).',
   options: [
-    { id: 'uniform-acceleration', label: '匀变速运动（加速度恒定）', correct: true },
+    { id: 'uniform-acceleration', label: 'Gleichmäßig beschleunigte Bewegung (konstante Beschleunigung)', correct: true },
     {
       id: 'uniform-speed',
-      label: '匀速运动',
+      label: 'Gleichförmige Bewegung',
       mistake: {
         type: 'concept',
-        explanation: '匀速运动的条件是合力为零；只要有恒定的合外力，速度就会持续变化。',
-        review: ['牛顿第二定律 F = ma', '牛顿第一定律'],
+        explanation: 'Die Bedingung für eine gleichförmige Bewegung ist eine verschwindende resultierende Kraft; solange eine konstante resultierende Kraft wirkt, ändert sich die Geschwindigkeit fortlaufend.',
+        review: ['Zweites Newtonsches Gesetz F = ma', 'Erstes Newtonsches Gesetz'],
       },
     },
     {
       id: 'stays-still',
-      label: '保持静止',
+      label: 'Bleibt in Ruhe',
       mistake: {
         type: 'concept',
-        explanation: '受非零合力的物体不可能保持静止，它会从静止开始加速。',
-        review: ['牛顿第二定律'],
+        explanation: 'Ein Körper mit einer resultierenden Kraft ungleich null kann nicht in Ruhe bleiben, er beginnt aus der Ruhe heraus zu beschleunigen.',
+        review: ['Zweites Newtonsches Gesetz'],
       },
     },
   ],
@@ -385,27 +385,27 @@ const NEWTON_SECOND: SelfCheckItem = {
 
 const INCLINE_NORMAL: SelfCheckItem = {
   id: 'incline-normal-direction',
-  prompt: '斜面上物体受到的支持力方向是？',
+  prompt: 'Wie ist die Richtung der Normalkraft, die auf einen Körper auf einer schiefen Ebene wirkt?',
   takeaway:
-    '支持力垂直于接触面：斜面上的支持力垂直于斜面向上，大小为 mg·cosθ（无其他竖直外力时）。',
+    'Die Normalkraft steht senkrecht auf der Berührungsfläche: Auf einer schiefen Ebene wirkt sie senkrecht zur Ebene nach oben und ihr Betrag ist mg·cosθ (wenn keine weiteren vertikalen äußeren Kräfte wirken).',
   options: [
-    { id: 'perpendicular', label: '垂直于斜面向上', correct: true },
+    { id: 'perpendicular', label: 'Senkrecht zur schiefen Ebene nach oben', correct: true },
     {
       id: 'vertical',
-      label: '竖直向上',
+      label: 'Senkrecht nach oben',
       mistake: {
         type: 'direction',
-        explanation: '支持力是接触面的弹力，方向总是垂直于接触面；竖直向上只在水平面上成立。',
-        review: ['弹力方向', '受力分析：斜面模型'],
+        explanation: 'Die Normalkraft ist die Federkraft der Berührungsfläche und zeigt stets senkrecht zur Berührungsfläche; senkrecht nach oben gilt nur auf einer horizontalen Fläche.',
+        review: ['Richtung der Federkraft', 'Kraftanalyse: Modell der schiefen Ebene'],
       },
     },
     {
       id: 'along-incline',
-      label: '沿斜面向上',
+      label: 'Entlang der schiefen Ebene nach oben',
       mistake: {
         type: 'direction',
-        explanation: '沿斜面方向的是摩擦力（若有）；支持力与斜面垂直。',
-        review: ['支持力与摩擦力的方向区分'],
+        explanation: 'Entlang der schiefen Ebene wirkt die Reibungskraft (falls vorhanden); die Normalkraft steht senkrecht zur Ebene.',
+        review: ['Unterscheidung der Richtungen von Normalkraft und Reibungskraft'],
       },
     },
   ],
@@ -413,26 +413,26 @@ const INCLINE_NORMAL: SelfCheckItem = {
 
 const UNIFORM_LINEAR_MOTION: SelfCheckItem = {
   id: 'uniform-motion-condition',
-  prompt: '物体做匀速直线运动时，它受到的合力是？',
-  takeaway: '匀速直线运动的条件是合力为零（牛顿第一定律）：速度大小方向都不变，s = vt 才成立。',
+  prompt: 'Wie groß ist die resultierende Kraft auf einen Körper, der eine gleichförmige geradlinige Bewegung ausführt?',
+  takeaway: 'Die Bedingung für eine gleichförmige geradlinige Bewegung ist eine verschwindende resultierende Kraft (Erstes Newtonsches Gesetz): Betrag und Richtung der Geschwindigkeit bleiben unverändert, erst dann gilt s = vt.',
   options: [
-    { id: 'zero', label: '合力为零', correct: true },
+    { id: 'zero', label: 'Die resultierende Kraft ist null', correct: true },
     {
       id: 'constant-nonzero',
-      label: '受到恒定的非零合力',
+      label: 'Eine konstante resultierende Kraft ungleich null wirkt',
       mistake: {
         type: 'concept',
-        explanation: '恒定非零合力产生恒定加速度，速度会持续变化，不可能保持匀速。',
-        review: ['牛顿第一定律', '牛顿第二定律 F = ma'],
+        explanation: 'Eine konstante resultierende Kraft ungleich null erzeugt eine konstante Beschleunigung, die Geschwindigkeit ändert sich fortlaufend, eine gleichförmige Bewegung ist unmöglich.',
+        review: ['Erstes Newtonsches Gesetz', 'Zweites Newtonsches Gesetz F = ma'],
       },
     },
     {
       id: 'forward-force',
-      label: '必须有向前的牵引力',
+      label: 'Es muss eine nach vorn gerichtete Antriebskraft geben',
       mistake: {
         type: 'concept',
-        explanation: '维持匀速不需要净力；牵引力存在时只是恰好抵消了阻力，合力仍为零。',
-        review: ['牛顿第一定律', '力不是维持运动的原因'],
+        explanation: 'Zur Aufrechterhaltung einer gleichförmigen Bewegung ist keine Nettokraft nötig; eine vorhandene Antriebskraft hebt gerade nur den Widerstand auf, die resultierende Kraft bleibt null.',
+        review: ['Erstes Newtonsches Gesetz', 'Kraft ist nicht die Ursache der Aufrechterhaltung von Bewegung'],
       },
     },
   ],
@@ -440,26 +440,26 @@ const UNIFORM_LINEAR_MOTION: SelfCheckItem = {
 
 const SOUND_MEDIUM_SPEED: SelfCheckItem = {
   id: 'sound-speed-medium',
-  prompt: '声音在水中的传播速度与空气中相比，通常如何？',
-  takeaway: '声速由介质决定：一般固体 > 液体 > 气体，水中约 1500 m/s，空气（15 ℃）约 340 m/s。',
+  prompt: 'Wie verhält sich die Schallgeschwindigkeit in Wasser üblicherweise im Vergleich zu der in Luft?',
+  takeaway: 'Die Schallgeschwindigkeit wird vom Medium bestimmt: im Allgemeinen Festkörper > Flüssigkeit > Gas, in Wasser etwa 1500 m/s, in Luft (15 ℃) etwa 340 m/s.',
   options: [
-    { id: 'faster', label: '水中比空气中快', correct: true },
+    { id: 'faster', label: 'In Wasser schneller als in Luft', correct: true },
     {
       id: 'slower',
-      label: '水中比空气中慢',
+      label: 'In Wasser langsamer als in Luft',
       mistake: {
         type: 'concept',
-        explanation: '介质越致密弹性传声越快：海水中约 1500 m/s，远大于空气中的 340 m/s。',
-        review: ['声速与介质的关系'],
+        explanation: 'Je dichter und elastischer das Medium, desto schneller wird der Schall übertragen: in Meerwasser etwa 1500 m/s, deutlich mehr als die 340 m/s in Luft.',
+        review: ['Zusammenhang zwischen Schallgeschwindigkeit und Medium'],
       },
     },
     {
       id: 'same',
-      label: '一样快',
+      label: 'Gleich schnell',
       mistake: {
         type: 'concept',
-        explanation: '声速不是常数，它随介质种类和温度变化，不能跨介质直接套用空气中的数值。',
-        review: ['声速的决定因素'],
+        explanation: 'Die Schallgeschwindigkeit ist keine Konstante, sie ändert sich mit der Art des Mediums und der Temperatur; man darf den Wert für Luft nicht ohne Weiteres auf ein anderes Medium übertragen.',
+        review: ['Bestimmende Faktoren der Schallgeschwindigkeit'],
       },
     },
   ],
@@ -467,26 +467,26 @@ const SOUND_MEDIUM_SPEED: SelfCheckItem = {
 
 const ECHO_RANGING_HALF: SelfCheckItem = {
   id: 'echo-round-trip',
-  prompt: '回声测距中，v·t 算出的是深度本身吗？',
-  takeaway: 'v·t 是声音"去程 + 回程"的总路程，海底深度要再除以 2：d = v·t/2。',
+  prompt: 'Ist im Fall der Echo-Entfernungsmessung das Produkt v·t unmittelbar die Tiefe selbst?',
+  takeaway: 'v·t ist die Gesamtstrecke des Schalls für Hin- und Rückweg, für die Tiefe des Meeresbodens muss man noch durch 2 teilen: d = v·t/2.',
   options: [
-    { id: 'half', label: '不是，要除以 2', correct: true },
+    { id: 'half', label: 'Nein, es muss durch 2 geteilt werden', correct: true },
     {
       id: 'direct',
-      label: '是，v·t 就是深度',
+      label: 'Ja, v·t ist bereits die Tiefe',
       mistake: {
         type: 'modeling',
-        explanation: '回声是往返信号：v·t 包含去程与回程两段路程，直接用会算成两倍深度。',
-        review: ['回声测距模型 d = v·t/2'],
+        explanation: 'Das Echo ist ein Hin-und-Rück-Signal: v·t umfasst sowohl Hin- als auch Rückweg, direkt verwendet ergibt es die doppelte Tiefe.',
+        review: ['Modell der Echo-Entfernungsmessung d = v·t/2'],
       },
     },
     {
       id: 'quarter',
-      label: '不是，要除以 4',
+      label: 'Nein, es muss durch 4 geteilt werden',
       mistake: {
         type: 'modeling',
-        explanation: '往返只有两段路程，除以 2 即可；除以 4 是误把"来回"当成四段。',
-        review: ['回声测距模型 d = v·t/2'],
+        explanation: 'Der Hin- und Rückweg besteht aus nur zwei Teilstrecken, eine Division durch 2 genügt; eine Division durch 4 verwechselt den Hin- und Rückweg mit vier Teilstrecken.',
+        review: ['Modell der Echo-Entfernungsmessung d = v·t/2'],
       },
     },
   ],
@@ -494,28 +494,28 @@ const ECHO_RANGING_HALF: SelfCheckItem = {
 
 export const POINT_CHARGE_DIRECTION: SelfCheckItem = {
   id: 'point-charge-field-direction',
-  prompt: '正点电荷周围某点的电场方向是？',
+  prompt: 'Wie ist die Richtung des elektrischen Feldes an einem Punkt in der Umgebung einer positiven Punktladung?',
   takeaway:
-    '电场由源电荷决定：正电荷的场沿径向指向外，负电荷的场指向电荷本身，与放不放试探电荷无关。',
+    'Das elektrische Feld wird von der Quellladung bestimmt: Das Feld einer positiven Ladung zeigt radial nach außen, das Feld einer negativen Ladung zeigt auf die Ladung selbst, unabhängig davon, ob eine Probeladung vorhanden ist.',
   options: [
-    { id: 'radially-out', label: '沿径向背离电荷指向外', correct: true },
+    { id: 'radially-out', label: 'Radial vom Ladungspunkt nach außen', correct: true },
     {
       id: 'toward-charge',
-      label: '指向电荷本身',
+      label: 'Auf die Ladung selbst gerichtet',
       mistake: {
         type: 'direction',
-        explanation: '指向电荷的是负电荷的场；正电荷的电场线从它出发向外发散。',
-        review: ['电场线的方向约定', '正负电荷的场分布'],
+        explanation: 'Auf die Ladung zu zeigt das Feld einer negativen Ladung; die Feldlinien einer positiven Ladung gehen von ihr aus und laufen nach außen auseinander.',
+        review: ['Vorzeichenkonvention der Feldlinienrichtung', 'Feldverteilung positiver und negativer Ladungen'],
       },
     },
     {
       id: 'depends-on-probe',
-      label: '取决于放入的试探电荷正负',
+      label: 'Hängt vom Vorzeichen der eingebrachten Probeladung ab',
       mistake: {
         type: 'concept',
         explanation:
-          '电场是源电荷的属性，先于试探电荷存在；试探电荷只改变受力方向 F = qE，不改变场的方向。',
-        review: ['电场强度的定义 E = F/q'],
+          'Das elektrische Feld ist eine Eigenschaft der Quellladung und existiert vor der Probeladung; die Probeladung ändert nur die Richtung der wirkenden Kraft F = qE, nicht die Richtung des Feldes.',
+        review: ['Definition der Feldstärke E = F/q'],
       },
     },
   ],
@@ -523,28 +523,28 @@ export const POINT_CHARGE_DIRECTION: SelfCheckItem = {
 
 export const SUPERPOSITION: SelfCheckItem = {
   id: 'field-superposition',
-  prompt: '两个点电荷在空间某点产生的总场强应当怎样求？',
+  prompt: 'Wie bestimmt man die gesamte Feldstärke, die zwei Punktladungen an einem Raumpunkt erzeugen?',
   takeaway:
-    '场强叠加是矢量叠加：等量异种电荷连线中点两场同向相加，等量同种电荷连线中点两场反向抵消为零。',
+    'Die Überlagerung der Feldstärken ist eine Vektoraddition: Beim Mittelpunkt der Verbindungslinie zweier entgegengesetzt gleich großer Ladungen addieren sich die beiden gleich gerichteten Felder, beim Mittelpunkt zweier gleich großer gleichartiger Ladungen heben sich die beiden entgegengesetzt gerichteten Felder zu null auf.',
   options: [
-    { id: 'vector-add', label: '两个场强的矢量和', correct: true },
+    { id: 'vector-add', label: 'Die Vektorsumme der beiden Feldstärken', correct: true },
     {
       id: 'scalar-add',
-      label: '两个场强大小直接相加',
+      label: 'Die Beträge der beiden Feldstärken werden direkt addiert',
       mistake: {
         type: 'concept',
         explanation:
-          '场强是矢量：等量同种电荷连线中点的两个场大小相等方向相反，代数相加会把 0 算成 2E。',
-        review: ['电场叠加原理', '矢量合成'],
+          'Die Feldstärke ist ein Vektor: Beim Mittelpunkt zweier gleich großer gleichartiger Ladungen sind die beiden Felder betragsgleich und entgegengesetzt gerichtet; eine algebraische Addition ergäbe aus 0 fälschlich 2E.',
+        review: ['Superpositionsprinzip des elektrischen Feldes', 'Vektoraddition'],
       },
     },
     {
       id: 'always-zero',
-      label: '两个电荷的场总会互相抵消',
+      label: 'Die Felder zweier Ladungen heben sich immer gegenseitig auf',
       mistake: {
         type: 'concept',
-        explanation: '只有等量同种电荷连线中点才抵消为零；等量异种电荷中点的场反而加倍。',
-        review: ['典型场分布：等量同种/异种电荷'],
+        explanation: 'Nur beim Mittelpunkt zweier gleich großer gleichartiger Ladungen hebt sich das Feld zu null auf; beim Mittelpunkt zweier entgegengesetzt gleich großer Ladungen verdoppelt sich das Feld sogar.',
+        review: ['Typische Feldverteilungen: gleich große gleichartige/entgegengesetzte Ladungen'],
       },
     },
   ],
@@ -552,27 +552,27 @@ export const SUPERPOSITION: SelfCheckItem = {
 
 export const PLATE_MOTION: SelfCheckItem = {
   id: 'plate-motion-type',
-  prompt: '带电粒子垂直于场强方向进入匀强电场（平行板间），它做什么运动？',
-  takeaway: '沿初速度方向匀速、沿场强方向匀加速 —— 合成为类平抛运动，轨迹是抛物线。',
+  prompt: 'Ein geladenes Teilchen tritt senkrecht zur Feldstärkerichtung in ein homogenes elektrisches Feld ein (zwischen parallelen Platten). Welche Bewegung führt es aus?',
+  takeaway: 'In Richtung der Anfangsgeschwindigkeit gleichförmig, in Richtung der Feldstärke gleichmäßig beschleunigt — zusammen ergibt das eine dem waagerechten Wurf entsprechende Bewegung, die Bahn ist eine Parabel.',
   options: [
-    { id: 'parabola', label: '类平抛运动（抛物线轨迹）', correct: true },
+    { id: 'parabola', label: 'Dem waagerechten Wurf entsprechende Bewegung (parabelförmige Bahn)', correct: true },
     {
       id: 'circle',
-      label: '匀速圆周运动',
+      label: 'Gleichförmige Kreisbewegung',
       mistake: {
         type: 'concept',
         explanation:
-          '圆周运动需要始终指向圆心的力；匀强电场中电场力方向恒定，产生的是恒定加速度，轨迹为抛物线。',
-        review: ['匀强电场中的类平抛', '圆周运动的条件'],
+          'Eine Kreisbewegung erfordert eine stets zum Kreismittelpunkt gerichtete Kraft; im homogenen elektrischen Feld ist die Richtung der elektrischen Feldkraft konstant, es entsteht eine konstante Beschleunigung, die Bahn ist eine Parabel.',
+        review: ['Dem waagerechten Wurf entsprechende Bewegung im homogenen elektrischen Feld', 'Bedingungen für eine Kreisbewegung'],
       },
     },
     {
       id: 'straight',
-      label: '沿原方向匀速直线运动',
+      label: 'Gleichförmige geradlinige Bewegung in der ursprünglichen Richtung',
       mistake: {
         type: 'concept',
-        explanation: '粒子带电就会受电场力 F = qE，垂直方向持续加速，不可能保持直线。',
-        review: ['电场力 F = qE', '运动的合成'],
+        explanation: 'Ein geladenes Teilchen erfährt stets die elektrische Feldkraft F = qE und wird in der senkrechten Richtung fortlaufend beschleunigt, es kann keine Gerade beibehalten.',
+        review: ['Elektrische Feldkraft F = qE', 'Zusammensetzung von Bewegungen'],
       },
     },
   ],
@@ -580,26 +580,26 @@ export const PLATE_MOTION: SelfCheckItem = {
 
 export const PLATE_OUTSIDE: SelfCheckItem = {
   id: 'plate-outside-field',
-  prompt: '粒子飞出平行板区域之后，它的运动是？',
-  takeaway: '理想模型中场只存在于板间；出场后合力为零，粒子沿出场速度方向做匀速直线运动。',
+  prompt: 'Welche Bewegung führt das Teilchen aus, nachdem es den Bereich der parallelen Platten verlassen hat?',
+  takeaway: 'Im idealisierten Modell existiert das Feld nur zwischen den Platten; nach dem Austritt ist die resultierende Kraft null und das Teilchen führt entlang der Austrittsgeschwindigkeit eine gleichförmige geradlinige Bewegung aus.',
   options: [
-    { id: 'uniform-line', label: '沿出场速度做匀速直线运动', correct: true },
+    { id: 'uniform-line', label: 'Gleichförmige geradlinige Bewegung entlang der Austrittsgeschwindigkeit', correct: true },
     {
       id: 'keeps-bending',
-      label: '继续沿抛物线偏转',
+      label: 'Wird weiterhin parabelförmig abgelenkt',
       mistake: {
         type: 'modeling',
-        explanation: '偏转来自板间电场；板外场强为零，没有力就没有加速度，轨迹变回直线。',
-        review: ['有界场模型', '牛顿第一定律'],
+        explanation: 'Die Ablenkung stammt vom Feld zwischen den Platten; außerhalb der Platten ist die Feldstärke null, ohne Kraft gibt es keine Beschleunigung und die Bahn wird wieder zur Geraden.',
+        review: ['Modell des begrenzten Feldes', 'Erstes Newtonsches Gesetz'],
       },
     },
     {
       id: 'returns',
-      label: '被吸回极板之间',
+      label: 'Wird zwischen die Platten zurückgezogen',
       mistake: {
         type: 'modeling',
-        explanation: '理想平行板模型中板外无场，不存在"吸回"的力；边缘效应在高中模型中忽略。',
-        review: ['理想化模型的边界'],
+        explanation: 'Im idealisierten Modell paralleler Platten gibt es außerhalb der Platten kein Feld, es existiert keine Kraft, die zurückzieht; Randeffekte werden im Modell der Oberstufe vernachlässigt.',
+        review: ['Grenzen des idealisierten Modells'],
       },
     },
   ],
@@ -607,32 +607,32 @@ export const PLATE_OUTSIDE: SelfCheckItem = {
 
 const FIELD_WORK_ENERGY: SelfCheckItem = {
   id: 'field-work-energy',
-  prompt: '电场力对带电粒子做正功时，粒子的动能如何变化？',
-  takeaway: '动能定理 W = ΔEₖ：电场力做正功动能增大；做负功动能减小。',
+  prompt: 'Wie ändert sich die kinetische Energie eines geladenen Teilchens, wenn die elektrische Feldkraft positive Arbeit an ihm verrichtet?',
+  takeaway: 'Arbeit-Energie-Theorem W = ΔEₖ: Verrichtet die elektrische Feldkraft positive Arbeit, wächst die kinetische Energie; verrichtet sie negative Arbeit, nimmt sie ab.',
   options: [
-    { id: 'increases', label: '动能增大', correct: true },
+    { id: 'increases', label: 'Die kinetische Energie wächst', correct: true },
     {
       id: 'unchanged',
-      label: '动能不变',
+      label: 'Die kinetische Energie bleibt konstant',
       mistake: {
         type: 'concept',
-        explanation: '动能不变的是洛伦兹力（不做功）；电场力沿位移有分量时必然改变动能。',
-        review: ['动能定理 W = ΔEₖ', '电场力做功与磁场力不做功的对比'],
+        explanation: 'Die kinetische Energie unverändert lässt die Lorentzkraft (sie verrichtet keine Arbeit); hat die elektrische Feldkraft eine Komponente entlang der Verschiebung, ändert sie zwangsläufig die kinetische Energie.',
+        review: ['Arbeit-Energie-Theorem W = ΔEₖ', 'Vergleich: elektrische Feldkraft verrichtet Arbeit, Magnetfeldkraft nicht'],
       },
     },
     {
       id: 'decreases',
-      label: '动能减小',
+      label: 'Die kinetische Energie nimmt ab',
       mistake: {
         type: 'concept',
-        explanation: '做正功意味着力在位移方向上有正分量，把能量交给粒子，动能只会增大。',
-        review: ['正功与负功的判断'],
+        explanation: 'Positive Arbeit bedeutet, dass die Kraft eine positive Komponente in Richtung der Verschiebung hat und Energie an das Teilchen abgibt, die kinetische Energie kann nur wachsen.',
+        review: ['Beurteilung positiver und negativer Arbeit'],
       },
     },
   ],
 }
 
-/* ------------------------------------------------------------ question map -- */
+/* ------------------------------------------------------------ Fragenzuordnung -- */
 
 const MAGNETIC_BASIC = [MAGNETIC_WORK, LORENTZ_RULE]
 const MAGNETIC_RADIUS = [RADIUS_MASS, MAGNETIC_WORK]
@@ -644,12 +644,12 @@ const PLATES = [PLATE_MOTION, PLATE_OUTSIDE]
 const POINT = [POINT_CHARGE_DIRECTION]
 const POINT_MULTI = [POINT_CHARGE_DIRECTION, SUPERPOSITION]
 
-/* Circuit self-checks: the engine's verifier publishes kcl_current_conservation
-   and power_balance, so the wrong options cite them as live evidence. */
+/* Selbsttests für Stromkreise: Der Verifier der Engine veröffentlicht kcl_current_conservation
+   und power_balance, daher zitieren die falschen Optionen sie als Live-Belege. */
 const OHMS_LAW: SelfCheckItem = {
   id: 'circuit-ohms-law',
-  prompt: '在串联电路中，电源电动势为 E，总电阻为 R，电路中的电流是多少？',
-  takeaway: '欧姆定律 I = E/R：串联电路电流等于电源电动势除以总电阻。',
+  prompt: 'In einem Reihenstromkreis beträgt die Quellenspannung E und der Gesamtwiderstand R. Wie groß ist der Strom im Stromkreis?',
+  takeaway: 'Ohmsches Gesetz I = E/R: Der Strom in einem Reihenstromkreis ist gleich der Quellenspannung geteilt durch den Gesamtwiderstand.',
   options: [
     { id: 'i-e-r', label: 'I = E / R', correct: true },
     {
@@ -657,8 +657,8 @@ const OHMS_LAW: SelfCheckItem = {
       label: 'I = E × R',
       mistake: {
         type: 'concept',
-        explanation: '电流与电阻成反比，不是正比；电阻越大电流越小。',
-        review: ['欧姆定律 I = U/R'],
+        explanation: 'Der Strom ist umgekehrt proportional zum Widerstand, nicht proportional; je größer der Widerstand, desto kleiner der Strom.',
+        review: ['Ohmsches Gesetz I = U/R'],
         evidenceCheckId: 'kcl_current_conservation',
       },
     },
@@ -667,8 +667,8 @@ const OHMS_LAW: SelfCheckItem = {
       label: 'I = R / E',
       mistake: {
         type: 'modeling',
-        explanation: '把电阻与电动势的位置写反了，应分子为电动势、分母为电阻。',
-        review: ['欧姆定律 I = U/R'],
+        explanation: 'Hier sind Widerstand und Quellenspannung vertauscht; im Zähler muss die Quellenspannung stehen, im Nenner der Widerstand.',
+        review: ['Ohmsches Gesetz I = U/R'],
       },
     },
   ],
@@ -676,27 +676,27 @@ const OHMS_LAW: SelfCheckItem = {
 
 const SERIES_PARALLEL_RULE: SelfCheckItem = {
   id: 'circuit-series-parallel',
-  prompt: '串联电路中各处的电流关系是什么？',
-  takeaway: '串联电路电流处处相等，电压按电阻分配；并联电路各支路电压相等，电流按电导分配。',
+  prompt: 'Welche Beziehung gilt für den Strom an allen Stellen eines Reihenstromkreises?',
+  takeaway: 'In einem Reihenstromkreis ist der Strom überall gleich, die Spannung verteilt sich nach den Widerständen; in einem Parallelstromkreis ist die Spannung an allen Zweigen gleich, der Strom verteilt sich nach den Leitwerten.',
   options: [
-    { id: 'equal', label: '电流处处相等', correct: true },
+    { id: 'equal', label: 'Der Strom ist überall gleich', correct: true },
     {
       id: 'voltage-equal',
-      label: '电压处处相等',
+      label: 'Die Spannung ist überall gleich',
       mistake: {
         type: 'concept',
-        explanation: '电压处处相等是并联电路的特征，串联电路中电压按电阻分配。',
-        review: ['串联电路规律', '并联电路规律'],
+        explanation: 'Überall gleiche Spannung ist das Kennzeichen eines Parallelstromkreises; in einem Reihenstromkreis verteilt sich die Spannung nach den Widerständen.',
+        review: ['Gesetze des Reihenstromkreises', 'Gesetze des Parallelstromkreises'],
       },
     },
     {
       id: 'current-adds',
-      label: '电流相加',
+      label: 'Die Ströme werden addiert',
       mistake: {
         type: 'modeling',
         explanation:
-          '电流相加是并联支路的特征（干路电流等于各支路电流之和），串联电路电流处处相等。',
-        review: ['串并联电流与电压规律'],
+          'Die Addition der Ströme ist das Kennzeichen paralleler Zweige (der Gesamtstrom ist gleich der Summe der Zweigströme); in einem Reihenstromkreis ist der Strom überall gleich.',
+        review: ['Strom- und Spannungsgesetze in Reihen- und Parallelschaltung'],
       },
     },
   ],
@@ -704,8 +704,8 @@ const SERIES_PARALLEL_RULE: SelfCheckItem = {
 
 const TERMINAL_VOLTAGE_RULE: SelfCheckItem = {
   id: 'circuit-terminal-voltage',
-  prompt: '电源有内阻时，路端电压与电动势的关系是什么？',
-  takeaway: '路端电压 U = E − I·r：电源内阻上分去一部分电压，外电路电压小于电动势。',
+  prompt: 'Welche Beziehung gilt zwischen Klemmenspannung und Quellenspannung, wenn die Stromquelle einen Innenwiderstand hat?',
+  takeaway: 'Klemmenspannung U = E − I·r: Am Innenwiderstand der Stromquelle fällt ein Teil der Spannung ab, die Spannung im Außenstromkreis ist kleiner als die Quellenspannung.',
   options: [
     { id: 'u-e-ir', label: 'U = E − I·r', correct: true },
     {
@@ -713,18 +713,18 @@ const TERMINAL_VOLTAGE_RULE: SelfCheckItem = {
       label: 'U = E + I·r',
       mistake: {
         type: 'concept',
-        explanation: '内阻电压降与外电路电压方向相反，应相减而非相加。',
-        review: ['路端电压公式 U = E − I·r'],
+        explanation: 'Der Spannungsabfall am Innenwiderstand ist der Spannung des Außenstromkreises entgegengerichtet, er muss subtrahiert und nicht addiert werden.',
+        review: ['Formel für die Klemmenspannung U = E − I·r'],
         evidenceCheckId: 'terminal_voltage_law',
       },
     },
     {
       id: 'u-equals-e',
-      label: 'U = E（路端电压等于电动势）',
+      label: 'U = E (Klemmenspannung gleich Quellenspannung)',
       mistake: {
         type: 'modeling',
-        explanation: '只有理想电源（内阻为零）时路端电压才等于电动势；有内阻时内阻分去一部分电压。',
-        review: ['电源内阻与路端电压'],
+        explanation: 'Nur bei einer idealen Stromquelle (Innenwiderstand null) ist die Klemmenspannung gleich der Quellenspannung; bei vorhandenem Innenwiderstand fällt an ihm ein Teil der Spannung ab.',
+        review: ['Innenwiderstand der Stromquelle und Klemmenspannung'],
         evidenceCheckId: 'terminal_voltage_law',
       },
     },
@@ -733,27 +733,27 @@ const TERMINAL_VOLTAGE_RULE: SelfCheckItem = {
 
 const POWER_RULE: SelfCheckItem = {
   id: 'circuit-power',
-  prompt: '电源的总功率、外电路功率与内阻消耗功率之间满足什么关系？',
-  takeaway: '能量守恒：电源总功率 P = E·I 等于外电路功率 U·I 与内阻消耗功率 I²·r 之和。',
+  prompt: 'Welche Beziehung gilt zwischen der Gesamtleistung der Stromquelle, der Leistung des Außenstromkreises und der am Innenwiderstand verbrauchten Leistung?',
+  takeaway: 'Energieerhaltung: Die Gesamtleistung der Stromquelle P = E·I ist gleich der Summe aus der Leistung des Außenstromkreises U·I und der am Innenwiderstand verbrauchten Leistung I²·r.',
   options: [
-    { id: 'conservation', label: 'P总 = P外 + P内', correct: true },
+    { id: 'conservation', label: 'P_gesamt = P_außen + P_innen', correct: true },
     {
       id: 'p-equals-ui',
-      label: 'P总 = U·I（只算外电路）',
+      label: 'P_gesamt = U·I (nur Außenstromkreis)',
       mistake: {
         type: 'concept',
-        explanation: 'U·I 只是外电路功率，漏掉了内阻上消耗的 I²·r 部分。',
-        review: ['电源功率公式 P = E·I'],
+        explanation: 'U·I ist nur die Leistung des Außenstromkreises; der am Innenwiderstand verbrauchte Anteil I²·r fehlt.',
+        review: ['Formel für die Leistung der Stromquelle P = E·I'],
         evidenceCheckId: 'power_balance',
       },
     },
     {
       id: 'p-equals-i2r',
-      label: 'P总 = I²·r（只算内阻）',
+      label: 'P_gesamt = I²·r (nur Innenwiderstand)',
       mistake: {
         type: 'modeling',
-        explanation: 'I²·r 只是内阻消耗功率，电源总功率应为 E·I，含外电路与内阻两部分。',
-        review: ['电源功率与能量守恒'],
+        explanation: 'I²·r ist nur die am Innenwiderstand verbrauchte Leistung; die Gesamtleistung der Stromquelle ist E·I und umfasst sowohl den Außenstromkreis als auch den Innenwiderstand.',
+        review: ['Leistung der Stromquelle und Energieerhaltung'],
         evidenceCheckId: 'power_balance',
       },
     },
@@ -763,34 +763,34 @@ const POWER_RULE: SelfCheckItem = {
 const CIRCUIT_OHM = [OHMS_LAW, SERIES_PARALLEL_RULE]
 const CIRCUIT_EMF = [TERMINAL_VOLTAGE_RULE, OHMS_LAW]
 
-/* Optics self-checks. The optics engine has no published verifier checks (it
-   verifies imaging by geometry, not by named checks), so the wrong options
-   state the underlying law directly instead of citing an evidenceCheckId —
-   matching how the mechanics items handle concepts without a live check. */
+/* Selbsttests zur Optik. Die Optik-Engine veröffentlicht keine Verifier-Checks (sie
+   prüft die Abbildung geometrisch, nicht über benannte Checks), daher nennen die falschen Optionen
+   das zugrunde liegende Gesetz direkt, statt eine evidenceCheckId zu zitieren —
+   genauso wie die Mechanik-Aufgaben Konzepte ohne Live-Check behandeln. */
 const PLANE_MIRROR_IMAGE: SelfCheckItem = {
   id: 'optics-plane-mirror-virtual',
-  prompt: '物体在平面镜前 15 cm 处，像到镜面的距离和像的性质是？',
-  takeaway: '平面镜成正立、等大、虚像，像距等于物距（v = u），像与物关于镜面对称。',
+  prompt: 'Ein Gegenstand befindet sich 15 cm vor einem ebenen Spiegel. Wie groß ist der Abstand des Bildes vom Spiegel und welche Art von Bild entsteht?',
+  takeaway: 'Der ebene Spiegel erzeugt ein aufrechtes, gleich großes, virtuelles Bild, der Bildabstand ist gleich dem Gegenstandsabstand (v = u), Bild und Gegenstand sind spiegelsymmetrisch.',
   options: [
-    { id: 'v-equals-u', label: '像距 = 15 cm，正立等大虚像', correct: true },
+    { id: 'v-equals-u', label: 'Bildabstand = 15 cm, aufrechtes, gleich großes virtuelles Bild', correct: true },
     {
       id: 'v-doubles',
-      label: '像距 = 30 cm，像比物大',
+      label: 'Bildabstand = 30 cm, das Bild ist größer als der Gegenstand',
       mistake: {
         type: 'concept',
         explanation:
-          '平面镜成像的像距始终等于物距，不会放大；"放大"是凸透镜或凹面镜在一定物距下才出现的现象。',
-        review: ['平面镜成像规律：像距 = 物距', '虚像不放大'],
+          'Bei der Abbildung durch einen ebenen Spiegel ist der Bildabstand stets gleich dem Gegenstandsabstand, es gibt keine Vergrößerung; eine Vergrößerung tritt nur bei einer Konvexlinse oder einem Konkavspiegel bei bestimmten Gegenstandsabständen auf.',
+        review: ['Abbildungsgesetz des ebenen Spiegels: Bildabstand = Gegenstandsabstand', 'Ein virtuelles Bild wird nicht vergrößert'],
       },
     },
     {
       id: 'real-image',
-      label: '像距 = 15 cm，倒立实像',
+      label: 'Bildabstand = 15 cm, umgekehrtes reelles Bild',
       mistake: {
         type: 'concept',
         explanation:
-          '平面镜成的像是光的反射形成的虚像，不能呈现在光屏上；实像由实际光线会聚而成，平面镜不可能成实像。',
-        review: ['实像与虚像的区别', '平面镜成像性质'],
+          'Das Bild eines ebenen Spiegels ist ein durch Reflexion des Lichts entstandenes virtuelles Bild und kann nicht auf einem Schirm aufgefangen werden; ein reelles Bild entsteht durch die Vereinigung tatsächlicher Lichtstrahlen, ein ebener Spiegel kann kein reelles Bild erzeugen.',
+        review: ['Unterschied zwischen reellem und virtuellem Bild', 'Eigenschaften der Abbildung am ebenen Spiegel'],
       },
     },
   ],
@@ -798,28 +798,28 @@ const PLANE_MIRROR_IMAGE: SelfCheckItem = {
 
 const CONVEX_LENS_REAL_IMAGE: SelfCheckItem = {
   id: 'optics-convex-lens-real-image',
-  prompt: '凸透镜焦距 f = 10 cm，物体放在 u = 30 cm（u > 2f）处，像的性质是？',
-  takeaway: '凸透镜成实像的条件是 u > f；当 u > 2f 时成倒立、缩小、实像，像距 f < v < 2f。',
+  prompt: 'Eine Konvexlinse hat die Brennweite f = 10 cm, der Gegenstand steht bei u = 30 cm (u > 2f). Welche Art von Bild entsteht?',
+  takeaway: 'Die Bedingung für ein reelles Bild bei einer Konvexlinse ist u > f; für u > 2f entsteht ein umgekehrtes, verkleinertes, reelles Bild mit dem Bildabstand f < v < 2f.',
   options: [
-    { id: 'inverted-reduced', label: '倒立、缩小、实像，f < v < 2f', correct: true },
+    { id: 'inverted-reduced', label: 'Umgekehrtes, verkleinertes, reelles Bild, f < v < 2f', correct: true },
     {
       id: 'upright-reduced',
-      label: '正立、缩小、实像',
+      label: 'Aufrechtes, verkleinertes, reelles Bild',
       mistake: {
         type: 'concept',
         explanation:
-          '凸透镜成的实像一律倒立；正立的像只能是虚像（u < f 时），不可能既正立又成实像。',
-        review: ['凸透镜成像规律：实像倒立、虚像正立', 'u > 2f 与 f < u < 2f 的像性质'],
+          'Reelle Bilder einer Konvexlinse sind stets umgekehrt; ein aufrechtes Bild kann nur ein virtuelles Bild sein (für u < f), es kann nicht zugleich aufrecht und reell sein.',
+        review: ['Abbildungsgesetz der Konvexlinse: reelle Bilder umgekehrt, virtuelle Bilder aufrecht', 'Bildeigenschaften für u > 2f und f < u < 2f'],
       },
     },
     {
       id: 'enlarged-real',
-      label: '倒立、放大、实像',
+      label: 'Umgekehrtes, vergrößertes, reelles Bild',
       mistake: {
         type: 'modeling',
         explanation:
-          'u > 2f 时像距 f < v < 2f 且像缩小；放大实像出现在 f < u < 2f 时，物距区间不同像性质也不同。',
-        review: ['凸透镜成像规律表', '物距与像距、像性质对应关系'],
+          'Für u > 2f liegt der Bildabstand bei f < v < 2f und das Bild ist verkleinert; ein vergrößertes reelles Bild tritt bei f < u < 2f auf, je nach Gegenstandsabstand ist die Bildeigenschaft unterschiedlich.',
+        review: ['Tabelle der Abbildungsgesetze der Konvexlinse', 'Zuordnung von Gegenstandsabstand, Bildabstand und Bildeigenschaft'],
       },
     },
   ],
@@ -827,28 +827,28 @@ const CONVEX_LENS_REAL_IMAGE: SelfCheckItem = {
 
 const CONVEX_LENS_MAGNIFYING: SelfCheckItem = {
   id: 'optics-convex-lens-virtual-image',
-  prompt: '凸透镜焦距 f = 10 cm，物体放在 u = 6 cm（u < f）处，像的性质是？',
-  takeaway: '当 u < f 时凸透镜成正立、放大、虚像，像距 |v| > u，这是放大镜的原理。',
+  prompt: 'Eine Konvexlinse hat die Brennweite f = 10 cm, der Gegenstand steht bei u = 6 cm (u < f). Welche Art von Bild entsteht?',
+  takeaway: 'Für u < f erzeugt die Konvexlinse ein aufrechtes, vergrößertes, virtuelles Bild mit dem Bildabstand |v| > u; dies ist das Prinzip der Lupe.',
   options: [
-    { id: 'upright-enlarged-virtual', label: '正立、放大、虚像', correct: true },
+    { id: 'upright-enlarged-virtual', label: 'Aufrechtes, vergrößertes, virtuelles Bild', correct: true },
     {
       id: 'inverted-reduced-real',
-      label: '倒立、缩小、实像',
+      label: 'Umgekehrtes, verkleinertes, reelles Bild',
       mistake: {
         type: 'concept',
         explanation:
-          'u < f 时折射光线发散，不能会聚成实像；正立的像只能是虚像，与 u > 2f 的成像情况相反。',
-        review: ['凸透镜 u < f 成虚像', '放大镜原理'],
+          'Für u < f laufen die gebrochenen Lichtstrahlen auseinander und können sich nicht zu einem reellen Bild vereinigen; ein aufrechtes Bild kann nur ein virtuelles Bild sein, im Gegensatz zur Abbildung für u > 2f.',
+        review: ['Konvexlinse erzeugt für u < f ein virtuelles Bild', 'Prinzip der Lupe'],
       },
     },
     {
       id: 'real-image',
-      label: '倒立、放大、实像',
+      label: 'Umgekehrtes, vergrößertes, reelles Bild',
       mistake: {
         type: 'modeling',
         explanation:
-          '倒立放大实像出现在 f < u < 2f；u < f 时根本不成实像，判断成像性质要先看物距与焦距的关系。',
-        review: ['凸透镜成像规律：物距区间决定像性质'],
+          'Ein umgekehrtes vergrößertes reelles Bild tritt für f < u < 2f auf; für u < f entsteht überhaupt kein reelles Bild, zur Beurteilung der Bildeigenschaft ist zuerst das Verhältnis von Gegenstandsabstand und Brennweite zu prüfen.',
+        review: ['Abbildungsgesetz der Konvexlinse: der Bereich des Gegenstandsabstands bestimmt die Bildeigenschaft'],
       },
     },
   ],
@@ -856,28 +856,28 @@ const CONVEX_LENS_MAGNIFYING: SelfCheckItem = {
 
 const CONCAVE_MIRROR_REAL_IMAGE: SelfCheckItem = {
   id: 'optics-concave-mirror-real-image',
-  prompt: '凹面镜焦距 f = 10 cm，物体放在 u = 30 cm（u > 2f）处，像的性质是？',
-  takeaway: '凹面镜的成像规律与凸透镜相同：u > 2f 时成倒立、缩小、实像，像出现在镜面前方（同侧）。',
+  prompt: 'Ein Konkavspiegel hat die Brennweite f = 10 cm, der Gegenstand steht bei u = 30 cm (u > 2f). Welche Art von Bild entsteht?',
+  takeaway: 'Das Abbildungsgesetz des Konkavspiegels stimmt mit dem der Konvexlinse überein: Für u > 2f entsteht ein umgekehrtes, verkleinertes, reelles Bild, das vor der Spiegelfläche (auf derselben Seite) erscheint.',
   options: [
-    { id: 'inverted-reduced-real', label: '倒立、缩小、实像', correct: true },
+    { id: 'inverted-reduced-real', label: 'Umgekehrtes, verkleinertes, reelles Bild', correct: true },
     {
       id: 'upright-virtual',
-      label: '正立、缩小、虚像',
+      label: 'Aufrechtes, verkleinertes, virtuelles Bild',
       mistake: {
         type: 'concept',
         explanation:
-          '凹面镜 u > 2f 时反射光线会聚成实像，像倒立；正立虚像只出现在 u < f 时，与凸面镜不同。',
-        review: ['凹面镜成像规律', '球面镜与透镜成像规律类比'],
+          'Beim Konkavspiegel vereinigen sich für u > 2f die reflektierten Lichtstrahlen zu einem reellen Bild, das Bild ist umgekehrt; ein aufrechtes virtuelles Bild tritt nur für u < f auf, anders als beim Konvexspiegel.',
+        review: ['Abbildungsgesetz des Konkavspiegels', 'Analogie der Abbildungsgesetze von sphärischen Spiegeln und Linsen'],
       },
     },
     {
       id: 'enlarged-real',
-      label: '倒立、放大、实像',
+      label: 'Umgekehrtes, vergrößertes, reelles Bild',
       mistake: {
         type: 'modeling',
         explanation:
-          'u > 2f 时像缩小；放大实像要求 f < u < 2f。把"凹面镜能成实像"误当成"一定放大"。',
-        review: ['凹面镜成像规律表', '物距与像性质对应关系'],
+          'Für u > 2f ist das Bild verkleinert; ein vergrößertes reelles Bild erfordert f < u < 2f. Hier wird fälschlich die Aussage, ein Konkavspiegel erzeuge ein reelles Bild, mit einer stets vergrößerten Abbildung verwechselt.',
+        review: ['Tabelle der Abbildungsgesetze des Konkavspiegels', 'Zuordnung von Gegenstandsabstand und Bildeigenschaft'],
       },
     },
   ],
@@ -885,28 +885,28 @@ const CONCAVE_MIRROR_REAL_IMAGE: SelfCheckItem = {
 
 const CONVEX_MIRROR_IMAGE: SelfCheckItem = {
   id: 'optics-convex-mirror-virtual',
-  prompt: '凸面镜对光有发散作用，物体在凸面镜前成的像是？',
-  takeaway: '凸面镜（发散面镜）对任何物距都成正立、缩小、虚像，因此用作汽车后视镜以扩大视野。',
+  prompt: 'Ein Konvexspiegel streut das Licht. Welches Bild entsteht von einem Gegenstand vor dem Konvexspiegel?',
+  takeaway: 'Der Konvexspiegel (Streuspiegel) erzeugt für jeden Gegenstandsabstand ein aufrechtes, verkleinertes, virtuelles Bild; deshalb dient er als Rückspiegel eines Autos zur Vergrößerung des Sichtfelds.',
   options: [
-    { id: 'upright-reduced-virtual', label: '正立、缩小、虚像', correct: true },
+    { id: 'upright-reduced-virtual', label: 'Aufrechtes, verkleinertes, virtuelles Bild', correct: true },
     {
       id: 'inverted-real',
-      label: '倒立、实像',
+      label: 'Umgekehrtes, reelles Bild',
       mistake: {
         type: 'concept',
         explanation:
-          '凸面镜是发散面镜，反射光线不会会聚，永远不成实像；实像只有会聚面镜（凹面镜）在 u > f 时才能形成。',
-        review: ['凸面镜的发散性质', '会聚面镜与发散面镜的区别'],
+          'Der Konvexspiegel ist ein Streuspiegel, die reflektierten Lichtstrahlen vereinigen sich nicht und es entsteht nie ein reelles Bild; ein reelles Bild kann nur ein Sammelspiegel (Konkavspiegel) für u > f erzeugen.',
+        review: ['Streuende Eigenschaft des Konvexspiegels', 'Unterschied zwischen Sammel- und Streuspiegel'],
       },
     },
     {
       id: 'enlarged-virtual',
-      label: '正立、放大、虚像',
+      label: 'Aufrechtes, vergrößertes, virtuelles Bild',
       mistake: {
         type: 'concept',
         explanation:
-          '凸面镜的虚像始终缩小（放大率 |m| < 1），因为发散作用使像"被压缩"；放大虚像是凸透镜 u < f 时才出现的。',
-        review: ['凸面镜成像：始终缩小', '凸透镜放大镜的物距条件'],
+          'Das virtuelle Bild des Konvexspiegels ist stets verkleinert (Vergrößerung |m| < 1), weil die Streuung das Bild zusammendrückt; ein vergrößertes virtuelles Bild tritt nur bei einer Konvexlinse für u < f auf.',
+        review: ['Abbildung am Konvexspiegel: stets verkleinert', 'Gegenstandsabstandsbedingung der Lupe mit Konvexlinse'],
       },
     },
   ],
@@ -914,38 +914,38 @@ const CONVEX_MIRROR_IMAGE: SelfCheckItem = {
 
 const CONVEX_LENS_BETWEEN_F_2F: SelfCheckItem = {
   id: 'optics-convex-lens-magnified-real',
-  prompt: '凸透镜焦距 f = 10 cm，物体放在 u = 15 cm（f < u < 2f）处，像的性质是？',
-  takeaway: '当 f < u < 2f 时凸透镜成倒立、放大、实像，像距 v > 2f，这是投影仪的原理。',
+  prompt: 'Eine Konvexlinse hat die Brennweite f = 10 cm, der Gegenstand steht bei u = 15 cm (f < u < 2f). Welche Art von Bild entsteht?',
+  takeaway: 'Für f < u < 2f erzeugt die Konvexlinse ein umgekehrtes, vergrößertes, reelles Bild mit dem Bildabstand v > 2f; dies ist das Prinzip des Projektors.',
   options: [
-    { id: 'inverted-enlarged-real', label: '倒立、放大、实像，v > 2f', correct: true },
+    { id: 'inverted-enlarged-real', label: 'Umgekehrtes, vergrößertes, reelles Bild, v > 2f', correct: true },
     {
       id: 'upright-virtual',
-      label: '正立、放大、虚像',
+      label: 'Aufrechtes, vergrößertes, virtuelles Bild',
       mistake: {
         type: 'concept',
-        explanation: '正立虚像出现在 u < f 时；f < u < 2f 时折射光线会聚成实像，实像一律倒立。',
-        review: ['凸透镜成像规律：f < u < 2f 成倒立放大实像', '实像与虚像的物距分界'],
+        explanation: 'Ein aufrechtes virtuelles Bild tritt für u < f auf; für f < u < 2f vereinigen sich die gebrochenen Lichtstrahlen zu einem reellen Bild, und reelle Bilder sind stets umgekehrt.',
+        review: ['Abbildungsgesetz der Konvexlinse: für f < u < 2f entsteht ein umgekehrtes vergrößertes reelles Bild', 'Gegenstandsabstandsgrenze zwischen reellem und virtuellem Bild'],
       },
     },
     {
       id: 'reduced-real',
-      label: '倒立、缩小、实像',
+      label: 'Umgekehrtes, verkleinertes, reelles Bild',
       mistake: {
         type: 'modeling',
         explanation:
-          '缩小实像出现在 u > 2f；f < u < 2f 时像距 v > 2f 且像放大。混淆了两个物距区间的像性质。',
-        review: ['凸透镜成像规律表', '放大实像与缩小实像的物距条件'],
+          'Ein verkleinertes reelles Bild tritt für u > 2f auf; für f < u < 2f ist der Bildabstand v > 2f und das Bild vergrößert. Hier werden die Bildeigenschaften zweier Gegenstandsabstandsbereiche verwechselt.',
+        review: ['Tabelle der Abbildungsgesetze der Konvexlinse', 'Gegenstandsabstandsbedingungen für vergrößerte und verkleinerte reelle Bilder'],
       },
     },
   ],
 }
 
-/* --------------------------------------------------------------- induction -- */
+/* --------------------------------------------------------------- Induktion -- */
 
 export const INDUCTION_BAR_EMF: SelfCheckItem = {
   id: 'induction-bar-emf-formula',
-  prompt: '导体棒长 L，垂直切割磁感应强度为 B 的匀强磁场，速度为 v，感应电动势大小是？',
-  takeaway: '动生电动势 E = BLv：三个量互相垂直时电动势最大；方向由右手定则判断。',
+  prompt: 'Ein Leiterstab der Länge L bewegt sich mit der Geschwindigkeit v senkrecht durch ein homogenes Magnetfeld der Flussdichte B. Wie groß ist die induzierte Spannung?',
+  takeaway: 'Bewegungsinduzierte Spannung E = BLv: Die Spannung ist maximal, wenn die drei Größen senkrecht aufeinander stehen; die Richtung bestimmt man mit der Rechte-Hand-Regel.',
   options: [
     { id: 'blv', label: 'E = BLv', correct: true },
     {
@@ -954,8 +954,8 @@ export const INDUCTION_BAR_EMF: SelfCheckItem = {
       mistake: {
         type: 'modeling',
         explanation:
-          'BLv/R 是感应电流 I 的大小（欧姆定律 I = E/R），不是电动势。电动势只由 B、L、v 决定，与回路电阻无关。',
-        review: ['动生电动势 E = BLv', '感应电流 I = E/R'],
+          'BLv/R ist der Betrag des induzierten Stroms I (Ohmsches Gesetz I = E/R), nicht die Spannung. Die induzierte Spannung wird nur von B, L und v bestimmt und hängt nicht vom Widerstand des Stromkreises ab.',
+        review: ['Bewegungsinduzierte Spannung E = BLv', 'Induzierter Strom I = E/R'],
         evidenceCheckId: 'ohm_law_loop',
       },
     },
@@ -965,8 +965,8 @@ export const INDUCTION_BAR_EMF: SelfCheckItem = {
       mistake: {
         type: 'concept',
         explanation:
-          '速度 v 在分子上：单位时间扫过的面积是 Lv，磁通量变化率是 BLv。写成除法会导致单位都凑不齐（T·m ÷ (m/s) 不是伏特）。',
-        review: ['单位检验：T·m²/s = Wb/s = V', '动生电动势推导'],
+          'Die Geschwindigkeit v steht im Zähler: Die pro Zeiteinheit überstrichene Fläche ist Lv, die Änderungsrate des magnetischen Flusses ist BLv. Eine Division ergibt nicht einmal stimmige Einheiten (T·m ÷ (m/s) ist kein Volt).',
+        review: ['Einheitenprüfung: T·m²/s = Wb/s = V', 'Herleitung der bewegungsinduzierten Spannung'],
         evidenceCheckId: 'faraday_law',
       },
     },
@@ -975,30 +975,30 @@ export const INDUCTION_BAR_EMF: SelfCheckItem = {
 
 export const INDUCTION_LENZ: SelfCheckItem = {
   id: 'induction-lenz-opposition',
-  prompt: '穿过线圈的磁通量增加时，楞次定律给出的感应电流方向是？',
+  prompt: 'Welche Richtung des induzierten Stroms ergibt sich nach der Lenzschen Regel, wenn der magnetische Fluss durch eine Spule zunimmt?',
   takeaway:
-    '楞次定律：感应电流的磁场总要阻碍引起感应电流的磁通量的变化 —— 磁通量增加时，感应电流的磁场与原磁场反向。',
+    'Lenzsche Regel: Das Magnetfeld des induzierten Stroms wirkt stets der Änderung des magnetischen Flusses entgegen, die den induzierten Strom hervorruft — nimmt der magnetische Fluss zu, ist das Magnetfeld des induzierten Stroms dem ursprünglichen Magnetfeld entgegengerichtet.',
   options: [
-    { id: 'opposes-increase', label: '使感应磁场与原磁场反向，阻碍增加', correct: true },
+    { id: 'opposes-increase', label: 'Das induzierte Magnetfeld ist dem ursprünglichen entgegengerichtet und hemmt die Zunahme', correct: true },
     {
       id: 'same-direction',
-      label: '使感应磁场与原磁场同向，增强磁通量',
+      label: 'Das induzierte Magnetfeld ist dem ursprünglichen gleichgerichtet und verstärkt den magnetischen Fluss',
       mistake: {
         type: 'direction',
         explanation:
-          '若感应磁场与原磁场同向，磁通量会进一步增加，感应电动势进一步增大 —— 正反馈无限放大能量，违反能量守恒。楞次定律的"阻碍"正是能量守恒的体现。',
-        review: ['楞次定律的表述', '楞次定律与能量守恒'],
+          'Wäre das induzierte Magnetfeld dem ursprünglichen gleichgerichtet, würde der magnetische Fluss weiter zunehmen und die induzierte Spannung weiter wachsen — eine Rückkopplung würde die Energie unbegrenzt vergrößern und damit die Energieerhaltung verletzen. Das Hemmen der Lenzschen Regel ist gerade der Ausdruck der Energieerhaltung.',
+        review: ['Formulierung der Lenzschen Regel', 'Lenzsche Regel und Energieerhaltung'],
         evidenceCheckId: 'lenz_direction',
       },
     },
     {
       id: 'no-direction',
-      label: '方向无法确定，与线圈电阻有关',
+      label: 'Die Richtung ist unbestimmt und hängt vom Spulenwiderstand ab',
       mistake: {
         type: 'concept',
         explanation:
-          '感应电流的方向只由磁通量变化的方向和线圈绕向决定（楞次定律），电流的大小才与电阻有关（I = E/R）。',
-        review: ['楞次定律定方向', 'I = E/R 定大小'],
+          'Die Richtung des induzierten Stroms wird nur durch die Richtung der Flussänderung und den Wicklungssinn der Spule bestimmt (Lenzsche Regel); nur der Betrag des Stroms hängt vom Widerstand ab (I = E/R).',
+        review: ['Lenzsche Regel bestimmt die Richtung', 'I = E/R bestimmt den Betrag'],
         evidenceCheckId: 'lenz_direction',
       },
     },
@@ -1007,29 +1007,29 @@ export const INDUCTION_LENZ: SelfCheckItem = {
 
 export const INDUCTION_FARADAY: SelfCheckItem = {
   id: 'induction-faraday-rate',
-  prompt: '法拉第电磁感应定律中，感应电动势的大小等于什么？',
-  takeaway: 'E = -dΦ/dt：感应电动势的大小等于磁通量的变化率 —— 不是变化量，是单位时间的变化量。',
+  prompt: 'Was ist nach dem Faradayschen Induktionsgesetz der Betrag der induzierten Spannung?',
+  takeaway: 'E = -dΦ/dt: Der Betrag der induzierten Spannung ist gleich der Änderungsrate des magnetischen Flusses — nicht der Änderung selbst, sondern der Änderung pro Zeiteinheit.',
   options: [
-    { id: 'flux-rate', label: '磁通量的变化率 dΦ/dt', correct: true },
+    { id: 'flux-rate', label: 'Die Änderungsrate des magnetischen Flusses dΦ/dt', correct: true },
     {
       id: 'flux-change',
-      label: '磁通量的变化量 ΔΦ',
+      label: 'Die Änderung des magnetischen Flusses ΔΦ',
       mistake: {
         type: 'concept',
         explanation:
-          '同样的 ΔΦ 用 1 s 或 10 s 完成，电动势差 10 倍：缓慢变化几乎不产生电动势。决定电动势的是变化快慢（变化率），不是变化总量。',
-        review: ['E = -dΦ/dt 的含义', '变化量与变化率的区别'],
+          'Dieselbe Änderung ΔΦ, einmal in 1 s und einmal in 10 s ausgeführt, ergibt einen zehnfachen Unterschied der Spannung: Bei langsamer Änderung entsteht fast keine Spannung. Entscheidend für die Spannung ist die Schnelligkeit der Änderung (die Änderungsrate), nicht der Gesamtbetrag der Änderung.',
+        review: ['Bedeutung von E = -dΦ/dt', 'Unterschied zwischen Änderung und Änderungsrate'],
         evidenceCheckId: 'faraday_law',
       },
     },
     {
       id: 'flux-value',
-      label: '磁通量 Φ 本身的大小',
+      label: 'Der Betrag des magnetischen Flusses Φ selbst',
       mistake: {
         type: 'concept',
         explanation:
-          '一个很大的恒定磁通量（dΦ/dt = 0）不产生任何电动势；只有变化才感应。感应电动势与 Φ 的绝对值无关。',
-        review: ['法拉第定律：变化才感应', '恒定磁通无电动势'],
+          'Ein sehr großer konstanter magnetischer Fluss (dΦ/dt = 0) erzeugt überhaupt keine Spannung; nur eine Änderung induziert. Die induzierte Spannung hängt nicht vom Absolutwert von Φ ab.',
+        review: ['Faradaysches Gesetz: nur eine Änderung induziert', 'Konstanter magnetischer Fluss erzeugt keine Spannung'],
         evidenceCheckId: 'faraday_law',
       },
     },
@@ -1038,64 +1038,64 @@ export const INDUCTION_FARADAY: SelfCheckItem = {
 
 export const INDUCTION_NO_CUT: SelfCheckItem = {
   id: 'induction-zero-emf-conditions',
-  prompt: '导体棒在磁场中运动，哪种情况感应电动势为零？',
+  prompt: 'Ein Leiterstab bewegt sich in einem Magnetfeld. In welchem Fall ist die induzierte Spannung null?',
   takeaway:
-    'E = BLv 中任一量为零则电动势为零：v = 0（不运动）、棒平行于磁场运动（不切割）、或棒沿自身长度方向滑动（不扫过有效面积）。',
+    'Ist in E = BLv eine der Größen null, so ist auch die Spannung null: v = 0 (keine Bewegung), der Stab bewegt sich parallel zum Magnetfeld (schneidet keine Feldlinien) oder der Stab gleitet entlang seiner eigenen Länge (überstreicht keine wirksame Fläche).',
   options: [
-    { id: 'parallel-to-b', label: '棒沿磁场方向运动（速度与磁场平行）', correct: true },
+    { id: 'parallel-to-b', label: 'Der Stab bewegt sich in Richtung des Magnetfelds (Geschwindigkeit parallel zum Magnetfeld)', correct: true },
     {
       id: 'fast-motion',
-      label: '棒运动得非常快时',
+      label: 'Wenn sich der Stab sehr schnell bewegt',
       mistake: {
         type: 'modeling',
         explanation:
-          'E = BLv 与速度成正比：速度越快电动势越大，永远不会因为"太快"而变成零。为零的唯一方式是有效切割速度分量为零。',
-        review: ['E = BLv 的速度是垂直于磁场的分量', '正比关系'],
+          'E = BLv ist proportional zur Geschwindigkeit: Je schneller, desto größer die Spannung, sie wird nie wegen zu großer Geschwindigkeit null. Null wird sie nur dann, wenn die wirksame Komponente der Schneidegeschwindigkeit null ist.',
+        review: ['In E = BLv ist die Geschwindigkeit die Komponente senkrecht zum Magnetfeld', 'Proportionale Beziehung'],
         evidenceCheckId: 'faraday_law',
       },
     },
     {
       id: 'any-motion',
-      label: '只要棒在磁场中运动，电动势就不为零',
+      label: 'Solange sich der Stab im Magnetfeld bewegt, ist die Spannung nicht null',
       mistake: {
         type: 'concept',
         explanation:
-          '沿磁场方向运动不切割磁感线，E = BLv⊥ 中垂直分量 v⊥ = 0，电动势为零。"运动"不等于"切割"。',
-        review: ['切割磁感线的条件', '速度的垂直分量'],
+          'Bewegt man sich in Richtung des Magnetfelds, werden keine Feldlinien geschnitten; in E = BLv⊥ ist die senkrechte Komponente v⊥ = 0, die Spannung ist null. Bewegung bedeutet nicht automatisch Schneiden.',
+        review: ['Bedingung für das Schneiden von Feldlinien', 'Senkrechte Komponente der Geschwindigkeit'],
         evidenceCheckId: 'faraday_law',
       },
     },
   ],
 }
 
-/* ------------------------------------------------------------------- wave -- */
+/* ------------------------------------------------------------------- Welle -- */
 
 export const WAVE_SPEED_FREQUENCY: SelfCheckItem = {
   id: 'wave-speed-frequency',
-  prompt: '把绳子抖得更快（频率加倍）、绳子不换，波速和波长各怎样变？',
+  prompt: 'Ein Seil wird schneller geschüttelt (doppelte Frequenz), das Seil selbst wird nicht gewechselt. Wie ändern sich Wellengeschwindigkeit und Wellenlänge?',
   takeaway:
-    '波速由介质决定，与抖动频率无关。v = λf 里 v 固定，频率加倍波长就减半 —— 抖得快，波形变密，但波跑得一样快。',
+    'Die Wellengeschwindigkeit wird vom Medium bestimmt und hängt nicht von der Schüttelfrequenz ab. In v = λf ist v fest; verdoppelt sich die Frequenz, halbiert sich die Wellenlänge — bei schnellerem Schütteln wird die Wellenform dichter, aber die Welle läuft gleich schnell.',
   options: [
-    { id: 'speed-same-wavelength-half', label: '波速不变，波长减半', correct: true },
+    { id: 'speed-same-wavelength-half', label: 'Wellengeschwindigkeit unverändert, Wellenlänge halbiert', correct: true },
     {
       id: 'speed-doubles',
-      label: '波速加倍，波长不变',
+      label: 'Wellengeschwindigkeit verdoppelt, Wellenlänge unverändert',
       mistake: {
         type: 'concept',
         explanation:
-          '波速是介质的性质（绳子的张力和线密度决定），抖动的快慢改变不了它。v = λf 中 v 固定，f 加倍只能让 λ 减半。',
-        review: ['波速由介质决定', 'v = λf'],
+          'Die Wellengeschwindigkeit ist eine Eigenschaft des Mediums (bestimmt durch die Spannung und die lineare Dichte des Seils); die Schnelligkeit des Schüttelns ändert daran nichts. In v = λf ist v fest, eine Verdopplung von f kann λ nur halbieren.',
+        review: ['Wellengeschwindigkeit wird vom Medium bestimmt', 'v = λf'],
         evidenceCheckId: 'wave_speed_relation',
       },
     },
     {
       id: 'both-double',
-      label: '波速和波长都加倍',
+      label: 'Wellengeschwindigkeit und Wellenlänge verdoppeln sich beide',
       mistake: {
         type: 'modeling',
         explanation:
-          '若 v 与 λ 同时加倍，v = λf 会要求 f 减半，与"频率加倍"矛盾。同一根绳上 v 固定，只能是 λ 随 f 反比变化。',
-        review: ['v = λf：三个量只能独立选两个', '周期 T = 1/f'],
+          'Würden sich v und λ zugleich verdoppeln, verlangte v = λf eine Halbierung von f, im Widerspruch zur Verdopplung der Frequenz. Auf demselben Seil ist v fest, λ kann sich nur umgekehrt proportional zu f ändern.',
+        review: ['v = λf: von den drei Größen sind nur zwei unabhängig wählbar', 'Periodendauer T = 1/f'],
         evidenceCheckId: 'period_frequency_reciprocal',
       },
     },
@@ -1104,30 +1104,30 @@ export const WAVE_SPEED_FREQUENCY: SelfCheckItem = {
 
 export const WAVE_PARTICLE_TRANSPORT: SelfCheckItem = {
   id: 'wave-particle-transport',
-  prompt: '横波沿绳向右传播，绳上被标记的那个质点怎样运动？',
+  prompt: 'Eine Transversalwelle läuft auf einem Seil nach rechts. Wie bewegt sich das markierte Seilteilchen?',
   takeaway:
-    '质点只在自己的平衡位置附近上下振动，不随波向右迁移。向右传播的是振动形式和能量，不是绳子本身。',
+    'Das Teilchen schwingt nur um seine eigene Gleichgewichtslage auf und ab und wandert nicht mit der Welle nach rechts. Nach rechts breiten sich die Schwingungsform und die Energie aus, nicht das Seil selbst.',
   options: [
-    { id: 'oscillates-in-place', label: '在原位置附近上下振动，不向右移动', correct: true },
+    { id: 'oscillates-in-place', label: 'Schwingt um seinen ursprünglichen Ort auf und ab und bewegt sich nicht nach rechts', correct: true },
     {
       id: 'travels-with-wave',
-      label: '跟着波一起向右运动',
+      label: 'Bewegt sich zusammen mit der Welle nach rechts',
       mistake: {
         type: 'concept',
         explanation:
-          '波传播的是振动状态，不是介质。标记点的 x 坐标始终不变，只有 y 随时间做简谐振动 —— 画布上它的横坐标一格都没动。',
-        review: ['波传播的是振动形式与能量', '介质质点做简谐振动'],
+          'Die Welle überträgt den Schwingungszustand, nicht das Medium. Die x-Koordinate des markierten Punkts bleibt stets unverändert, nur y führt über die Zeit eine harmonische Schwingung aus — auf dem Canvas bewegt sich seine Abszisse um keinen einzigen Rasterabstand.',
+        review: ['Die Welle überträgt Schwingungsform und Energie', 'Die Medium-Teilchen führen eine harmonische Schwingung aus'],
         evidenceCheckId: 'particle_no_net_transport',
       },
     },
     {
       id: 'round-trip-wavelength',
-      label: '先向右走一个波长再回到原位',
+      label: 'Bewegt sich zuerst um eine Wellenlänge nach rechts und kehrt dann an den ursprünglichen Ort zurück',
       mistake: {
         type: 'modeling',
         explanation:
-          '质点从不离开自己的 x 位置。"一个周期后回到原位"说的是它完成一次上下的全振动，而不是在水平方向走了一个来回。',
-        review: ['一个周期 T = 1/f 内质点完成一次全振动', '波形在一个周期内平移一个波长'],
+          'Das Teilchen verlässt niemals seine x-Position. Die Aussage, es kehre nach einer Periode an den ursprünglichen Ort zurück, bedeutet, dass es eine vollständige Auf-und-Ab-Schwingung ausführt, und nicht, dass es in horizontaler Richtung einen Hin-und-Rückweg zurücklegt.',
+        review: ['In einer Periode T = 1/f führt das Teilchen eine vollständige Schwingung aus', 'Die Wellenform verschiebt sich in einer Periode um eine Wellenlänge'],
         evidenceCheckId: 'profile_translation',
       },
     },
@@ -1136,29 +1136,29 @@ export const WAVE_PARTICLE_TRANSPORT: SelfCheckItem = {
 
 export const WAVE_PATH_DIFFERENCE: SelfCheckItem = {
   id: 'wave-path-difference',
-  prompt: '两个同相的相干波源到 P 点的路程差 Δ = 2λ，P 点的振动情况是？',
-  takeaway: '路程差是波长的整数倍时，两列波同相到达：波峰遇波峰、波谷遇波谷，振动加强，振幅为 2A。',
+  prompt: 'Zwei gleichphasige kohärente Wellenquellen haben zum Punkt P den Gangunterschied Δ = 2λ. Wie schwingt der Punkt P?',
+  takeaway: 'Ist der Gangunterschied ein ganzzahliges Vielfaches der Wellenlänge, treffen die beiden Wellen gleichphasig ein: Wellenberg trifft auf Wellenberg, Wellental auf Wellental, die Schwingung wird verstärkt, die Amplitude ist 2A.',
   options: [
-    { id: 'constructive', label: '振动加强，振幅 2A', correct: true },
+    { id: 'constructive', label: 'Die Schwingung wird verstärkt, Amplitude 2A', correct: true },
     {
       id: 'destructive',
-      label: '振动减弱，振幅为零',
+      label: 'Die Schwingung wird abgeschwächt, Amplitude null',
       mistake: {
         type: 'concept',
         explanation:
-          '减弱的条件是 Δ = (n + ½)λ，两列波反相抵消。Δ = 2λ 正好相差两个整周期，两列波同相叠加，是加强点。',
-        review: ['Δ = nλ 加强', 'Δ = (n + ½)λ 减弱'],
+          'Die Bedingung für Abschwächung ist Δ = (n + ½)λ, hier heben sich die beiden Wellen gegenphasig auf. Δ = 2λ entspricht genau zwei ganzen Perioden, die beiden Wellen überlagern sich gleichphasig, es ist ein Verstärkungspunkt.',
+        review: ['Δ = nλ verstärkt', 'Δ = (n + ½)λ schwächt ab'],
         evidenceCheckId: 'path_difference_rule',
       },
     },
     {
       id: 'beats',
-      label: '振幅在 0 与 2A 之间来回变化',
+      label: 'Die Amplitude schwankt zwischen 0 und 2A hin und her',
       mistake: {
         type: 'modeling',
         explanation:
-          '加强点的振幅稳定为 2A：P 点位移随时间在 −2A 与 +2A 之间振动，但振幅本身不变。相干波的加强、减弱分布是稳定的。',
-        review: ['干涉图样稳定不变', '合振幅 A_P = |2A·cos(πΔ/λ)|'],
+          'Die Amplitude an einem Verstärkungspunkt ist stabil 2A: Die Verschiebung des Punktes P schwingt über die Zeit zwischen −2A und +2A, aber die Amplitude selbst bleibt unverändert. Die Verteilung der Verstärkungen und Abschwächungen kohärenter Wellen ist stabil.',
+        review: ['Das Interferenzmuster bleibt stabil', 'Resultierende Amplitude A_P = |2A·cos(πΔ/λ)|'],
         evidenceCheckId: 'superposition_bounds',
       },
     },
@@ -1167,30 +1167,30 @@ export const WAVE_PATH_DIFFERENCE: SelfCheckItem = {
 
 export const WAVE_DESTRUCTIVE_HALF: SelfCheckItem = {
   id: 'wave-destructive-half',
-  prompt: '把观察点移到路程差 Δ = λ/2 的位置，两列波在这里怎样叠加？',
+  prompt: 'Verschiebt man den Beobachtungspunkt an die Stelle mit dem Gangunterschied Δ = λ/2, wie überlagern sich die beiden Wellen dort?',
   takeaway:
-    '路程差半个波长时两列波反相到达，一列到波峰另一列正到波谷，位移始终相互抵消，振幅为零 —— 这就是减弱点。',
+    'Bei einem Gangunterschied von einer halben Wellenlänge treffen die beiden Wellen gegenphasig ein, erreicht die eine einen Wellenberg, so erreicht die andere gerade ein Wellental, die Verschiebungen heben sich stets gegenseitig auf, die Amplitude ist null — das ist ein Abschwächungspunkt.',
   options: [
-    { id: 'cancel', label: '始终相互抵消，振幅为零', correct: true },
+    { id: 'cancel', label: 'Heben sich stets gegenseitig auf, Amplitude null', correct: true },
     {
       id: 'crest-on-crest',
-      label: '波峰叠波峰，振幅 2A',
+      label: 'Wellenberg über Wellenberg, Amplitude 2A',
       mistake: {
         type: 'concept',
         explanation:
-          '半个波长的路程差意味着一列波到达波峰时另一列正好到达波谷，位移大小相等、方向相反，叠加后为零。',
-        review: ['Δ = (n + ½)λ 减弱', '相位差 = 2πΔ/λ'],
+          'Ein Gangunterschied von einer halben Wellenlänge bedeutet, dass die eine Welle gerade einen Wellenberg erreicht, während die andere einen Wellental erreicht; die Verschiebungen sind betragsgleich und entgegengesetzt gerichtet und ergeben nach der Überlagerung null.',
+        review: ['Δ = (n + ½)λ schwächt ab', 'Phasendifferenz = 2πΔ/λ'],
         evidenceCheckId: 'path_difference_rule',
       },
     },
     {
       id: 'waves-vanish',
-      label: '两列波相遇后就都消失了',
+      label: 'Nachdem sich die beiden Wellen getroffen haben, verschwinden sie beide',
       mistake: {
         type: 'modeling',
         explanation:
-          '两列波只是在这一点位移相消，各自仍按原方向继续传播；能量没有消失，而是重新分布到了加强点上。',
-        review: ['波的独立传播原理', '干涉是能量的重新分布'],
+          'Die beiden Wellen heben sich nur an diesem Punkt in ihrer Verschiebung auf, jede von ihnen breitet sich weiter in ihrer ursprünglichen Richtung aus; die Energie verschwindet nicht, sondern verteilt sich neu auf die Verstärkungspunkte.',
+        review: ['Prinzip der unabhängigen Ausbreitung von Wellen', 'Interferenz ist eine Neuverteilung der Energie'],
         evidenceCheckId: 'superposition_bounds',
       },
     },
@@ -1199,30 +1199,30 @@ export const WAVE_DESTRUCTIVE_HALF: SelfCheckItem = {
 
 export const WAVE_NODE_MOTION: SelfCheckItem = {
   id: 'wave-node-motion',
-  prompt: '两端固定的弦形成驻波，波节处的质点怎样运动？',
+  prompt: 'Auf einer an beiden Enden befestigten Saite bildet sich eine stehende Welle. Wie bewegen sich die Teilchen an einem Knoten?',
   takeaway:
-    '波节是两列反向传播的波始终反相叠加的位置，位移恒为零，质点静止不动；振幅最大的位置是波腹。',
+    'Ein Knoten ist die Stelle, an der zwei entgegengesetzt laufende Wellen stets gegenphasig überlagert werden, die Verschiebung ist immer null und das Teilchen bleibt in Ruhe; die Stelle mit der größten Amplitude ist der Bauch.',
   options: [
-    { id: 'still', label: '始终静止，位移为零', correct: true },
+    { id: 'still', label: 'Bleibt stets in Ruhe, Verschiebung null', correct: true },
     {
       id: 'max-amplitude',
-      label: '振幅最大，上下振动最猛',
+      label: 'Größte Amplitude, schwingt am stärksten auf und ab',
       mistake: {
         type: 'concept',
         explanation:
-          '振幅最大的位置叫波腹，不是波节。波节是两列波始终反相抵消的地方，位移恒为零 —— 画布上它一动不动。',
-        review: ['波节：位移恒为零', '波腹：振幅最大'],
+          'Die Stelle mit der größten Amplitude heißt Bauch, nicht Knoten. Ein Knoten ist die Stelle, an der sich die beiden Wellen stets gegenphasig aufheben, die Verschiebung ist immer null — auf dem Canvas bewegt er sich überhaupt nicht.',
+        review: ['Knoten: Verschiebung immer null', 'Bauch: größte Amplitude'],
         evidenceCheckId: 'node_positions_fixed',
       },
     },
     {
       id: 'slides-along',
-      label: '沿弦来回移动',
+      label: 'Bewegt sich entlang der Saite hin und her',
       mistake: {
         type: 'modeling',
         explanation:
-          '驻波的"驻"就是波形不传播：波节固定在 x = m·L/n，不随时间移动；两端固定的弦，两个端点本身就是波节。',
-        review: ['驻波波形不传播', '固定端是波节'],
+          'Das Stehende an einer stehenden Welle ist, dass sich die Wellenform nicht ausbreitet: Die Knoten liegen fest bei x = m·L/n und verschieben sich nicht mit der Zeit; bei einer an beiden Enden befestigten Saite sind die beiden Enden selbst Knoten.',
+        review: ['Die Wellenform einer stehenden Welle breitet sich nicht aus', 'Ein festes Ende ist ein Knoten'],
         evidenceCheckId: 'boundary_nodes',
       },
     },
@@ -1231,29 +1231,29 @@ export const WAVE_NODE_MOTION: SelfCheckItem = {
 
 export const WAVE_HARMONIC_FREQUENCY: SelfCheckItem = {
   id: 'wave-harmonic-frequency',
-  prompt: '弦长 L、波速 v 不变，从二次谐波切到三次谐波，频率怎样变？',
+  prompt: 'Die Saitenlänge L und die Wellengeschwindigkeit v bleiben unverändert. Wie ändert sich die Frequenz beim Übergang von der zweiten zur dritten Harmonischen?',
   takeaway:
-    'f_n = n·v/(2L)，谐波频率与 n 成正比：n 从 2 变 3，频率变为原来的 1.5 倍，弦上多出一个波节。',
+    'f_n = n·v/(2L), die Frequenz der Harmonischen ist proportional zu n: Beim Übergang von n = 2 zu n = 3 wird die Frequenz zum 1,5-Fachen, auf der Saite entsteht ein zusätzlicher Knoten.',
   options: [
-    { id: 'times-1-5', label: '变为原来的 1.5 倍（f_n ∝ n）', correct: true },
+    { id: 'times-1-5', label: 'Wird zum 1,5-Fachen (f_n ∝ n)', correct: true },
     {
       id: 'unchanged',
-      label: '不变，频率只由弦决定',
+      label: 'Unverändert, die Frequenz wird nur von der Saite bestimmt',
       mistake: {
         type: 'concept',
         explanation:
-          '弦决定的是波速 v 和基频 f₁ = v/(2L)；第 n 次谐波的频率 f_n = n·f₁ 随 n 增大。同一根弦可以在多个频率上共振。',
-        review: ['f_n = n·v/(2L) = n·f₁', '基频与谐波'],
+          'Die Saite bestimmt die Wellengeschwindigkeit v und die Grundfrequenz f₁ = v/(2L); die Frequenz der n-ten Harmonischen f_n = n·f₁ wächst mit n. Dieselbe Saite kann bei mehreren Frequenzen in Resonanz geraten.',
+        review: ['f_n = n·v/(2L) = n·f₁', 'Grundfrequenz und Harmonische'],
         evidenceCheckId: 'frequency_harmonic',
       },
     },
     {
       id: 'two-thirds',
-      label: '变为原来的 2/3（波长变长了）',
+      label: 'Wird zum 2/3-Fachen (die Wellenlänge wird länger)',
       mistake: {
         type: 'modeling',
         explanation:
-          'n 变大时 λ = 2L/n 变短而不是变长；v 不变，λ 变短则 f = v/λ 变大。三次谐波的波长是二次谐波的 2/3，频率是 1.5 倍。',
+          'Wächst n, so wird λ = 2L/n kürzer und nicht länger; v bleibt konstant, wird λ kürzer, so wächst f = v/λ. Die Wellenlänge der dritten Harmonischen beträgt 2/3 der zweiten, die Frequenz das 1,5-Fache.',
         review: ['L = n·λ/2', 'v = λf'],
         evidenceCheckId: 'harmonic_relation',
       },
@@ -1263,17 +1263,17 @@ export const WAVE_HARMONIC_FREQUENCY: SelfCheckItem = {
 
 export const WAVE_LONGITUDINAL_DIRECTION: SelfCheckItem = {
   id: 'wave-longitudinal-direction',
-  prompt: '纵波在介质中传播时，质点的振动方向与传播方向有什么关系？',
-  takeaway: '纵波中质点沿传播方向前后振动，形成压缩区和稀疏区；横波才是垂直于传播方向振动。',
+  prompt: 'Wie hängt bei einer Longitudinalwelle im Medium die Schwingungsrichtung der Teilchen mit der Ausbreitungsrichtung zusammen?',
+  takeaway: 'Bei einer Longitudinalwelle schwingen die Teilchen in Richtung der Ausbreitung vor und zurück und bilden Verdichtungs- und Verdünnungsbereiche; nur die Transversalwelle schwingt senkrecht zur Ausbreitungsrichtung.',
   options: [
-    { id: 'parallel', label: '振动方向平行于传播方向', correct: true },
+    { id: 'parallel', label: 'Die Schwingungsrichtung ist parallel zur Ausbreitungsrichtung', correct: true },
     {
       id: 'perpendicular',
-      label: '振动方向垂直于传播方向',
+      label: 'Die Schwingungsrichtung ist senkrecht zur Ausbreitungsrichtung',
       mistake: {
         type: 'concept',
-        explanation: '垂直于传播方向振动的是横波；纵波通过介质的压缩和稀疏传播。',
-        review: ['纵波与横波的区别', '压缩与稀疏'],
+        explanation: 'Senkrecht zur Ausbreitungsrichtung schwingt die Transversalwelle; die Longitudinalwelle breitet sich über Verdichtung und Verdünnung des Mediums aus.',
+        review: ['Unterschied zwischen Longitudinal- und Transversalwelle', 'Verdichtung und Verdünnung'],
         evidenceCheckId: 'longitudinal_particle_motion',
       },
     },
@@ -1282,17 +1282,17 @@ export const WAVE_LONGITUDINAL_DIRECTION: SelfCheckItem = {
 
 export const WAVE_BOUNDARY_RULE: SelfCheckItem = {
   id: 'wave-boundary-rule',
-  prompt: '机械波从一种介质进入另一种介质时，哪个量保持不变？',
-  takeaway: '频率由波源决定，跨界面保持不变；波速改变，因此波长随介质改变。',
+  prompt: 'Welche Größe bleibt unverändert, wenn eine mechanische Welle von einem Medium in ein anderes übergeht?',
+  takeaway: 'Die Frequenz wird von der Wellenquelle bestimmt und bleibt über die Grenzfläche hinweg unverändert; die Wellengeschwindigkeit ändert sich, daher ändert sich die Wellenlänge mit dem Medium.',
   options: [
-    { id: 'frequency', label: '频率', correct: true },
+    { id: 'frequency', label: 'Frequenz', correct: true },
     {
       id: 'speed',
-      label: '波速',
+      label: 'Wellengeschwindigkeit',
       mistake: {
         type: 'concept',
-        explanation: '介质改变会改变波速；为了保持 f 不变，波长按 λ = v/f 改变。',
-        review: ['v = λf', '跨界面频率不变'],
+        explanation: 'Ein Wechsel des Mediums ändert die Wellengeschwindigkeit; damit f unverändert bleibt, ändert sich die Wellenlänge nach λ = v/f.',
+        review: ['v = λf', 'Die Frequenz bleibt über die Grenzfläche hinweg unverändert'],
         evidenceCheckId: 'frequency_unchanged_at_boundary',
       },
     },
@@ -1301,8 +1301,8 @@ export const WAVE_BOUNDARY_RULE: SelfCheckItem = {
 
 export const WAVE_DIFFRACTION_MINIMUM: SelfCheckItem = {
   id: 'wave-diffraction-minimum',
-  prompt: '单缝衍射的暗纹条件是什么？',
-  takeaway: '暗纹满足 a·sinθ = mλ（m = ±1, ±2, …），缝越窄衍射展开越明显。',
+  prompt: 'Wie lautet die Bedingung für die dunklen Streifen bei der Beugung am Einzelspalt?',
+  takeaway: 'Für die dunklen Streifen gilt a·sinθ = mλ (m = ±1, ±2, …); je schmaler der Spalt, desto ausgeprägter die Beugung.',
   options: [
     { id: 'm-lambda', label: 'a·sinθ = mλ', correct: true },
     {
@@ -1310,8 +1310,8 @@ export const WAVE_DIFFRACTION_MINIMUM: SelfCheckItem = {
       label: 'a·sinθ = (m + ½)λ',
       mistake: {
         type: 'modeling',
-        explanation: '(m + ½)λ 是双缝干涉的暗纹条件；单缝衍射来自同一缝内各子波的叠加。',
-        review: ['单缝衍射暗纹条件', '双缝干涉与单缝衍射的区别'],
+        explanation: '(m + ½)λ ist die Bedingung für die dunklen Streifen bei der Doppelspaltinterferenz; die Beugung am Einzelspalt entsteht aus der Überlagerung der Elementarwellen innerhalb desselben Spalts.',
+        review: ['Bedingung für die dunklen Streifen bei der Einzelspaltbeugung', 'Unterschied zwischen Doppelspaltinterferenz und Einzelspaltbeugung'],
       },
     },
   ],
@@ -1319,17 +1319,17 @@ export const WAVE_DIFFRACTION_MINIMUM: SelfCheckItem = {
 
 export const WAVE_DOPPLER_SIGN: SelfCheckItem = {
   id: 'wave-doppler-sign',
-  prompt: '波源接近静止观察者时，观察者接收到的频率怎样变化？',
-  takeaway: '波源接近时波前被压密，接收频率高于源频率；远离时低于源频率。',
+  prompt: 'Wie ändert sich die vom Beobachter empfangene Frequenz, wenn sich die Wellenquelle einem ruhenden Beobachter nähert?',
+  takeaway: 'Nähert sich die Wellenquelle, werden die Wellenfronten gestaucht und die empfangene Frequenz ist höher als die Quellfrequenz; entfernt sie sich, ist sie niedriger als die Quellfrequenz.',
   options: [
-    { id: 'higher', label: '频率升高', correct: true },
+    { id: 'higher', label: 'Die Frequenz steigt', correct: true },
     {
       id: 'unchanged',
-      label: '频率不变',
+      label: 'Die Frequenz bleibt unverändert',
       mistake: {
         type: 'concept',
-        explanation: '相对运动改变相邻波前到达观察者的时间间隔，因此接收频率发生改变。',
-        review: ['多普勒效应', 'f′ = f(v ± v₀)/(v ∓ vₛ)'],
+        explanation: 'Die Relativbewegung ändert den zeitlichen Abstand, in dem aufeinanderfolgende Wellenfronten den Beobachter erreichen, daher ändert sich die Empfangsfrequenz.',
+        review: ['Dopplereffekt', 'f′ = f(v ± v₀)/(v ∓ vₛ)'],
         evidenceCheckId: 'doppler_frequency_relation',
       },
     },
@@ -1338,18 +1338,18 @@ export const WAVE_DOPPLER_SIGN: SelfCheckItem = {
 
 export const PHOTOELECTRIC_EQUATION: SelfCheckItem = {
   id: 'photoelectric-equation',
-  prompt: '光电效应中，增大入射光强度会怎样影响光电子的最大初动能？',
+  prompt: 'Wie wirkt sich eine Erhöhung der Intensität des einfallenden Lichts beim photoelektrischen Effekt auf die maximale kinetische Energie der Photoelektronen aus?',
   takeaway:
-    '光强增大只增加单位时间的入射光子数，从而增大光电流；每个光子能量 hf 不变，最大初动能不变。',
+    'Eine höhere Lichtintensität erhöht nur die Zahl der einfallenden Photonen pro Zeiteinheit und damit den Photostrom; die Energie hf jedes Photons bleibt unverändert, ebenso die maximale kinetische Energie.',
   options: [
-    { id: 'unchanged', label: '最大初动能不变，光电流增大', correct: true },
+    { id: 'unchanged', label: 'Die maximale kinetische Energie bleibt unverändert, der Photostrom wächst', correct: true },
     {
       id: 'increases',
-      label: '最大初动能随光强增大',
+      label: 'Die maximale kinetische Energie wächst mit der Lichtintensität',
       mistake: {
         type: 'concept',
-        explanation: '爱因斯坦方程为 hf = W + Kmax，Kmax 只由频率和逸出功决定，与光强无关。',
-        review: ['光子能量 E = hf', 'Kmax = hf − W'],
+        explanation: 'Die Einstein-Gleichung lautet hf = W + Kmax; Kmax wird nur von der Frequenz und der Austrittsarbeit bestimmt und ist unabhängig von der Lichtintensität.',
+        review: ['Photonenenergie E = hf', 'Kmax = hf − W'],
         evidenceCheckId: 'intensity_does_not_change_kmax',
       },
     },
@@ -1358,17 +1358,17 @@ export const PHOTOELECTRIC_EQUATION: SelfCheckItem = {
 
 export const PHOTOELECTRIC_THRESHOLD: SelfCheckItem = {
   id: 'photoelectric-threshold',
-  prompt: '入射光频率低于金属截止频率时，增大光强能否产生光电子？',
-  takeaway: '不能。单个光子能量 hf 小于逸出功时，再多的光子也不能让一个电子逸出。',
+  prompt: 'Können Photoelektronen entstehen, wenn die Frequenz des einfallenden Lichts unter der Grenzfrequenz des Metalls liegt und die Lichtintensität erhöht wird?',
+  takeaway: 'Nein. Ist die Energie hf eines einzelnen Photons kleiner als die Austrittsarbeit, so können noch so viele Photonen kein Elektron herauslösen.',
   options: [
-    { id: 'cannot', label: '不能，Kmax = 0', correct: true },
+    { id: 'cannot', label: 'Nein, Kmax = 0', correct: true },
     {
       id: 'can-with-intensity',
-      label: '可以，只要光强足够大',
+      label: 'Ja, sofern die Lichtintensität groß genug ist',
       mistake: {
         type: 'concept',
-        explanation: '光电效应是单光子过程；频率低于截止频率时每个光子都不足以克服逸出功。',
-        review: ['截止频率 f₀ = W/h', '单光子光电效应'],
+        explanation: 'Der photoelektrische Effekt ist ein Einzelphotonenprozess; liegt die Frequenz unter der Grenzfrequenz, reicht kein einzelnes Photon aus, um die Austrittsarbeit zu überwinden.',
+        review: ['Grenzfrequenz f₀ = W/h', 'Einzelphotonen-Photoeffekt'],
         evidenceCheckId: 'photocurrent_extinction_below_threshold',
       },
     },
@@ -1377,26 +1377,26 @@ export const PHOTOELECTRIC_THRESHOLD: SelfCheckItem = {
 
 export const MODERN_UNSUPPORTED: SelfCheckItem = {
   id: 'modern-unsupported-model',
-  prompt: '当前引擎没有原子能级跃迁模型时，应当怎样回答此类题？',
-  takeaway: '应返回 UNSUPPORTED_MODEL 并说明模型缺口，不能套用经典公式伪造答案。',
+  prompt: 'Wie ist eine solche Aufgabe zu beantworten, wenn die aktuelle Engine kein Modell für Energieniveau-Übergänge besitzt?',
+  takeaway: 'Es soll UNSUPPORTED_MODEL zurückgegeben und die Modellücke erklärt werden; klassische Formeln dürfen nicht angewendet werden, um eine Antwort vorzutäuschen.',
   options: [
-    { id: 'unsupported', label: '返回 UNSUPPORTED_MODEL', correct: true },
+    { id: 'unsupported', label: 'UNSUPPORTED_MODEL zurückgeben', correct: true },
     {
       id: 'classical-guess',
-      label: '用任意经典公式估算',
+      label: 'Mit einer beliebigen klassischen Formel abschätzen',
       mistake: {
         type: 'modeling',
-        explanation: '能级跃迁是量子模型；用其他物理模型计算会得到没有物理依据的数值。',
-        review: ['模型适用边界', '失败关闭原则'],
+        explanation: 'Energieniveau-Übergänge sind ein Quantenmodell; die Berechnung mit einem anderen physikalischen Modell liefert Werte ohne physikalische Grundlage.',
+        review: ['Gültigkeitsgrenzen des Modells', 'Prinzip des sicheren Fehlers (fail-closed)'],
       },
     },
   ],
 }
 
 /**
- * Golden question → self-check items. The test suite asserts every golden
- * question has at least one item and every option is either correct or a
- * classified mistake.
+ * Goldfrage → Selbsttest-Aufgaben. Die Testsuite stellt sicher, dass jede Goldfrage
+ * mindestens eine Aufgabe besitzt und jede Option entweder richtig oder ein
+ * klassifizierter Fehler ist.
  */
 export const QUESTION_SELF_CHECKS: Readonly<Record<string, readonly SelfCheckItem[]>> = {
   '01-proton-basic': MAGNETIC_BASIC,
@@ -1484,7 +1484,7 @@ export const QUESTION_SELF_CHECKS: Readonly<Record<string, readonly SelfCheckIte
   'ind-05-bar-zero-velocity': [INDUCTION_NO_CUT, INDUCTION_BAR_EMF],
   'ind-06-missing-resistance': [INDUCTION_BAR_EMF],
 
-  /* ------------------------------------------------------------------- wave -- */
+  /* ------------------------------------------------------------------- Welle -- */
   'wave-01-speed-from-wavelength-frequency': [WAVE_SPEED_FREQUENCY, WAVE_PARTICLE_TRANSPORT],
   'wave-02-wavelength-from-speed': [WAVE_SPEED_FREQUENCY],
   'wave-03-interference-constructive': [WAVE_PATH_DIFFERENCE, WAVE_DESTRUCTIVE_HALF],
@@ -1497,6 +1497,6 @@ export const QUESTION_SELF_CHECKS: Readonly<Record<string, readonly SelfCheckIte
   'wave-10-doppler': [WAVE_DOPPLER_SIGN],
 }
 
-/** Self-check items for a question, [] when none are defined. */
+/** Selbsttest-Aufgaben zu einer Frage, [] wenn keine definiert sind. */
 export const selfChecksOfQuestion = (questionId: string): readonly SelfCheckItem[] =>
   QUESTION_SELF_CHECKS[questionId] ?? []

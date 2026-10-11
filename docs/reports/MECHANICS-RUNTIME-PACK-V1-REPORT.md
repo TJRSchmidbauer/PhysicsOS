@@ -1,215 +1,215 @@
 # Mechanics Runtime Pack V1 — Report
 
-> 文件：`docs/reports/MECHANICS-RUNTIME-PACK-V1-REPORT.md`
-> 任务编号：`MECHANICS_RUNTIME_PACK_V1`
+> Datei: `docs/reports/MECHANICS-RUNTIME-PACK-V1-REPORT.md`
+> Aufgaben-ID: `MECHANICS_RUNTIME_PACK_V1`
 
 ---
 
 ## 1. Mechanics Contracts
 
-`packages/physics-scene` 扩展：
+`packages/physics-scene` Erweiterung:
 
-- `Body`（rigid_body）已有完整 Contract（mass, position, velocity, acceleration, shape, material）
-- `Force` 已有完整 Contract（type: gravity, normal, friction, tension, spring, electric, lorentz, ampere, drag, custom；vector, targetId, model, derived）
-- `GravityField` 已有完整 Contract（uniform_gravity, acceleration: QuantityVector）
-- Scene validation 扩展：Body 单位/维度/有限性/质量正数检查，Body ID 加入 observable target 校验
+- `Body` (rigid_body) hat bereits vollständigen Contract (mass, position, velocity, acceleration, shape, material)
+- `Force` hat bereits vollständigen Contract (type: gravity, normal, friction, tension, spring, electric, lorentz, ampere, drag, custom; vector, targetId, model, derived)
+- `GravityField` hat bereits vollständigen Contract (uniform_gravity, acceleration: QuantityVector)
+- Scene-Validierung Erweiterung: Body Einheiten/Dimensionen/Endlichkeit/positive Masse Prüfung, Body ID zu observable target Validierung hinzugefügt
 
-新增 `mechanics-scene-factory.ts`：
+Neu: `mechanics-scene-factory.ts`:
 
-- `createMechanicsScene(input)` — 根据 model 创建合法 PhysicsScene
-- `createMechanicsSimulationRequest(scene, simId, traceId)` — 创建 SimulationRequest
-- 支持 5 种 model + gravity, groundY, inclineAngle, frictionCoefficient, appliedForce
+- `createMechanicsScene(input)` — erstellt gültige PhysicsScene gemäß Model
+- `createMechanicsSimulationRequest(scene, simId, traceId)` — erstellt SimulationRequest
+- Unterstützt 5 Models + gravity, groundY, inclineAngle, frictionCoefficient, appliedForce
 
 ---
 
 ## 2. Engine Models
 
-`packages/engine-mechanics` 新建：
+`packages/engine-mechanics` neu erstellt:
 
 - `M1 uniform_linear_motion` — x(t) = x0 + vt, a = 0, F_net = 0
 - `M2 uniformly_accelerated_motion` — v(t) = v0 + at, x(t) = x0 + v0t + ½at²
-- `M3 projectile_motion` — 统一平抛 + 斜抛（launchAngle = 0 即平抛）
-  - flightTime, range, maxHeight, impactVelocity 计算
-  - GroundImpact 事件生成
-  - Timeline duration = impactTime
-- `M4 newton_second_law` — ΣF = ma，支持 applied force + gravity + normal
+- `M3 projectile_motion` — vereinheitlichter waagrechter + schräger Wurf (launchAngle = 0 für waagrechten Wurf)
+  - flightTime, range, maxHeight, impactVelocity Berechnung
+  - GroundImpact Ereignis-Generierung
+  - Timeline Dauer = impactTime
+- `M4 newton_second_law` — ΣF = ma, unterstützt applied force + gravity + normal
 - `M5 inclined_plane` — g sinθ, g cosθ, N = mg cosθ, f = μN, a = g(sinθ - μcosθ)
 
-`mechanics-model-selector.ts`：
+`mechanics-model-selector.ts`:
 
-- `detectMechanicsModel(scene)` — 通过 title/description/observable/force/body 自动检测 model
-- `resolveMechanicsModel(scene)` — 返回完整 MechanicsModel
+- `detectMechanicsModel(scene)` — automatische Model-Erkennung über title/description/observable/force/body
+- `resolveMechanicsModel(scene)` — gibt vollständiges MechanicsModel zurück
 
 ---
 
 ## 3. Solver
 
-- `analytical-kinematics.ts` — kinematicsAt(pos0, v0, a, t) 返回 position/velocity/acceleration
+- `analytical-kinematics.ts` — kinematicsAt(pos0, v0, a, t) gibt position/velocity/acceleration zurück
 - `force-dynamics.ts` — newtonSecondLaw(m, forces[]), inclineAcceleration(m, g, θ, μ), inclineForceDecomposition(g, θ)
 
-全部 analytical，无数值积分。
+Alles analytisch, keine numerische Integration.
 
 ---
 
 ## 4. Scene Integration
 
-- `MechanicsEngine` 实现 `PhysicsEngine<PhysicsScene>` 接口
-- canHandle 检查：2D, single body, mass > 0, validateScene
-- validate 调用 validateScene + canHandle
-- stateAt 返回 closed-form state
-- simulate 采样 65 点轨迹，计算 derivedQuantities，生成 verification
+- `MechanicsEngine` implementiert `PhysicsEngine<PhysicsScene>` Interface
+- canHandle Prüfung: 2D, single body, mass > 0, validateScene
+- validate ruft validateScene + canHandle auf
+- stateAt gibt closed-form state zurück
+- simulate sampelt 65-Punkte-Trajektorie, berechnet derivedQuantities, generiert verification
 
 ---
 
 ## 5. Verifier
 
-`packages/physics-verifier` 扩展：
+`packages/physics-verifier` Erweiterung:
 
-- `verifyNewtonSecondLaw(m, F, a)` — ΣF = ma 数值检查
-- `verifyKinematicConsistency(v0, a, t, v, x, x0)` — v(t) = v0 + at 检查
-- `verifyProjectileHorizontalVelocity(states, bodyId)` — vx constant 检查
-- `verifyProjectileVerticalAcceleration(a, g)` — ay = -g 检查
-- `verifyProjectileImpact(finalY, groundY)` — impact y ≈ groundY 检查
-- `verifyInclineForceDecomposition(g, θ, gPar, gNorm, N, m)` — mg sinθ, mg cosθ 检查
+- `verifyNewtonSecondLaw(m, F, a)` — ΣF = ma numerische Prüfung
+- `verifyKinematicConsistency(v0, a, t, v, x, x0)` — v(t) = v0 + at Prüfung
+- `verifyProjectileHorizontalVelocity(states, bodyId)` — vx constant Prüfung
+- `verifyProjectileVerticalAcceleration(a, g)` — ay = -g Prüfung
+- `verifyProjectileImpact(finalY, groundY)` — impact y ≈ groundY Prüfung
+- `verifyInclineForceDecomposition(g, θ, gPar, gNorm, N, m)` — mg sinθ, mg cosθ Prüfung
 
-Engine 内置 verification 在 simulate 中生成。
+Engine-interne verification wird in simulate generiert.
 
 ---
 
 ## 6. Observation
 
-`packages/physics-observation` 扩展：
+`packages/physics-observation` Erweiterung:
 
 - PositionObservation, MechanicsVelocityObservation, AccelerationObservation
 - ForceObservation, NetForceObservation
 - MechanicsTrajectoryObservation
 - DisplacementObservation
-- ProjectileKeyPointObservation（launch, apex, impact）
+- ProjectileKeyPointObservation (launch, apex, impact)
 - GroundObservation, InclineObservation
 
-`observeMechanicsScene(input)` — 从 scene + simulation 生成 renderer-neutral observations
+`observeMechanicsScene(input)` — erzeugt renderer-neutrale Observations aus scene + simulation
 
 ---
 
 ## 7. Lab
 
-Lab UI 更新中 — 当前 Lab Workspace 仍以 Magnetic Runtime 为主。
-Mechanics Lab Templates 和 Renderer 待 UI 阶段完成。
+Lab-UI in Aktualisierung — aktueller Lab Workspace basiert noch hauptsächlich auf Magnetic Runtime.
+Mechanics Lab Templates und Renderer warten auf UI-Phase.
 
 ---
 
 ## 8. Question Parser
 
-`packages/question-core` 扩展：
+`packages/question-core` Erweiterung:
 
-- `DeterministicMechanicsQuestionParser` — 识别中文力学题
-- 支持：初速度、末速度、加速度、时间、位移、高度、质量、力、角度、摩擦系数、重力加速度、水平速度、抛射角
-- 单位通过 `physics-units` 的 `parseQuantity` + `canonicalValue` 转换
-- 不手工换算
+- `DeterministicMechanicsQuestionParser` — erkennt chinesische Mechanik-Aufgaben
+- Unterstützt: Anfangsgeschwindigkeit, Endgeschwindigkeit, Beschleunigung, Zeit, Verschiebung, Höhe, Masse, Kraft, Winkel, Reibungskoeffizient, Erdbeschleunigung, horizontale Geschwindigkeit, Wurfwinkel
+- Einheiten über `physics-units` `parseQuantity` + `canonicalValue` Umwandlung
+- Keine manuelle Umrechnung
 
 ---
 
 ## 9. Semantic IR
 
-`PhysicsSemanticIR` 扩展：
+`PhysicsSemanticIR` Erweiterung:
 
 - domain: 'mechanics'
 - model: uniform_linear_motion | uniformly_accelerated_motion | projectile_motion | newton_second_law | inclined_plane
-- 新增 targets: final_velocity, displacement, time, acceleration, range, max_height, flight_time, normal_force, friction_force, net_force, velocity
-- 新增 relations: constant_velocity, constant_acceleration, free_flight, on_incline
-- 新增 assumptions: no_air_resistance, constant_force, kinetic_friction, static_friction_pending
-- 新增字段: inclineAngle, launchAngle, groundY, frictionCoefficient
+- Neue targets: final_velocity, displacement, time, acceleration, range, max_height, flight_time, normal_force, friction_force, net_force, velocity
+- Neue relations: constant_velocity, constant_acceleration, free_flight, on_incline
+- Neue assumptions: no_air_resistance, constant_force, kinetic_friction, static_friction_pending
+- Neue Felder: inclineAngle, launchAngle, groundY, frictionCoefficient
 
-`semantic-validator.ts` 扩展为 domain-aware：magnetic → validateMagneticIR, mechanics → validateMechanicsIR
+`semantic-validator.ts` erweitert zu domain-aware: magnetic → validateMagneticIR, mechanics → validateMechanicsIR
 
 ---
 
 ## 10. Question Runtime
 
-`question-runtime.ts` 重写：
+`question-runtime.ts` neu geschrieben:
 
-- 自动检测 magnetic vs mechanics 题目
-- 磁场 → DeterministicMagneticQuestionParser + MagneticEngine
-- 力学 → DeterministicMechanicsQuestionParser + MechanicsEngine
-- 统一 processQuestion 接口
-- buildSolution 支持 5 种 mechanics model 的 step + result 生成
+- Automatische Erkennung magnetic vs mechanics Aufgaben
+- Magnetfeld → DeterministicMagneticQuestionParser + MagneticEngine
+- Mechanik → DeterministicMechanicsQuestionParser + MechanicsEngine
+- Vereinheitlichtes processQuestion Interface
+- buildSolution unterstützt step + result Generierung für 5 mechanics Models
 
 ---
 
 ## 11. Renderer
 
-MechanicsRenderer 待 UI 阶段完成。当前 LabCanvas 仅支持 magnetic。
+MechanicsRenderer wartet auf UI-Phase. Aktueller LabCanvas unterstützt nur magnetic.
 
 ---
 
 ## 12. Timeline
 
-MechanicsEngine.stateAt 支持 Play/Pause/Seek/Step/Speed。
-全部来自 analytical stateAt(t)，无 CSS 动画。
+MechanicsEngine.stateAt unterstützt Play/Pause/Seek/Step/Speed.
+Alles stammt aus analytical stateAt(t), keine CSS-Animationen.
 
 ---
 
 ## 13. Golden Tests
 
-### 磁场 Golden Questions（原有 49 tests）
+### Magnetfeld Golden Questions (bestehende 49 Tests)
 
-- 10 个磁场题目全部通过
-- Q09 单位转换（km/s + mT）现在通过 physics-units 正确转换
+- 10 Magnetfeld-Aufgaben alle bestanden
+- Q09 Einheitenumrechnung (km/s + mT) jetzt durch physics-units korrekt umgewandelt
 
-### 力学 Golden Questions（新增 64 tests）
+### Mechanik Golden Questions (neu 64 Tests)
 
-Golden Questions（6 个）：
+Golden Questions (6 Stück):
 
-- mech-01: 匀加速 v0=10, a=2, t=5 → v=20, s=75 ✓
-- mech-02: 平抛 h=20m, vx=10m/s, g=10 → t=2s, R=20m ✓
-- mech-03: 斜抛 v0=20, θ=30°, g=10 → maxH, flightTime, range ✓
+- mech-01: gleichmäßig beschleunigt v0=10, a=2, t=5 → v=20, s=75 ✓
+- mech-02: waagrechter Wurf h=20m, vx=10m/s, g=10 → t=2s, R=20m ✓
+- mech-03: schräger Wurf v0=20, θ=30°, g=10 → maxH, flightTime, range ✓
 - mech-04: Newton m=2, F=10 → a=5 m/s² ✓
-- mech-05: 斜面 m=2, θ=30°, g=10, μ=0 → a=5 m/s², N≈17.32N ✓
-- mech-06: 单位转换 72 km/h → 20 m/s ✓
+- mech-05: schiefe Ebene m=2, θ=30°, g=10, μ=0 → a=5 m/s², N≈17,32N ✓
+- mech-06: Einheitenumrechnung 72 km/h → 20 m/s ✓
 
 Engine Direct Tests:
 
 - canHandle uniform linear / projectile / incline ✓
-- rejects mass ≤ 0 ✓
-- stateAt returns valid state ✓
-- simulate produces states and derived ✓
+- lehnt mass ≤ 0 ab ✓
+- stateAt gibt gültigen state zurück ✓
+- simulate erzeugt states und derived ✓
 
-Metamorphic Tests:
+Metamorphe Tests:
 
-- projectile vx×2 → range×2, same flight time ✓
+- projectile vx×2 → range×2, gleiche Flugzeit ✓
 - newton F×2 → a×2 ✓
-- incline mass×2 → acceleration unchanged ✓
+- incline mass×2 → Beschleunigung unverändert ✓
 
-Edge Cases:
+Randfälle:
 
-- mass = 0 → unsupported ✓
-- mass < 0 → unsupported ✓
-- g = 0 projectile → no crash, no NaN ✓
-- no NaN in simulation results ✓
+- mass = 0 → nicht unterstützt ✓
+- mass < 0 → nicht unterstützt ✓
+- g = 0 projectile → kein Absturz, kein NaN ✓
+- kein NaN in Simulationsergebnissen ✓
 
 ---
 
 ## 14. Browser E2E
 
-待 UI 阶段完成后执行。
+Wird nach UI-Phase ausgeführt.
 
 ---
 
 ## 15. Screenshots
 
-待 UI 阶段完成后输出。
+Werden nach UI-Phase ausgegeben.
 
 ---
 
-## 16. Known Limitations
+## 16. Bekannte Einschränkungen
 
-- **Lab UI**：当前 Lab Workspace 仍以 Magnetic Runtime 为主，Mechanics Lab Templates 和 Renderer 待 UI 阶段
-- **Scene Commands**：Mechanics Scene Commands（SetBodyMass, SetInitialPosition, SetLaunchAngle 等）待 V2
-- **Static Friction**：V1 仅支持 kinetic friction (μN)，静摩擦平衡判断标记为 PENDING
-- **Renderer**：MechanicsRenderer（平抛抛物线、斜面力分解图）待 UI 阶段
-- **Data Panel**：x-t, v-t, a-t 图表待 UI 阶段
-- **Agent "What If?"**：Tool Contract 预留，实现待 V2
-- **Home/Recent Spaces**：待 UI 阶段更新
+- **Lab UI**: Aktueller Lab Workspace basiert noch hauptsächlich auf Magnetic Runtime, Mechanics Lab Templates und Renderer warten auf UI-Phase
+- **Scene Commands**: Mechanics Scene Commands (SetBodyMass, SetInitialPosition, SetLaunchAngle usw.) warten auf V2
+- **Static Friction**: V1 unterstützt nur kinetic friction (μN), statische Reibungs-Gleichgewichtsprüfung als PENDING markiert
+- **Renderer**: MechanicsRenderer (waagrechter Wurf Parabel, schiefe Ebene Kraftzerlegung) wartet auf UI-Phase
+- **Data Panel**: x-t, v-t, a-t Diagramme warten auf UI-Phase
+- **Agent "What If?"**: Tool Contract reserviert, Implementierung wartet auf V2
+- **Home/Recent Spaces**: Warten auf UI-Phasen-Aktualisierung
 
 ---
 
@@ -233,190 +233,171 @@ HARNESS_WINDOWS_REPLAY_GATE_DEFERRED
 
 ---
 
-## 19. UI Architecture — 一个工作台，不是每个域一个页面
+## 19. UI Architecture — Ein Arbeitsbereich, nicht eine Seite pro Domäne
 
-本轮把三个近乎相同的工作台外壳收敛为一个。此前 `LabWorkspace`（磁场）、
-`MechanicsLabWorkspace`、`ElectricLabWorkspace` 共约 1170 行组件体，
-其中 ~80–85% 是同一套 toolbar / scene panel / canvas / timeline / data panel /
-inspector 结构；`TreeRow`、`Chart`、`formatNumber`、`stepTo` 等叶子组件被逐字复制
-2–3 份，`PLAYBACK_RATES` 出现三次。
+In dieser Runde werden drei fast identische Arbeitsbereich-Hüllen zu einer zusammengefasst. Zuvor hatten `LabWorkspace` (Magnetfeld), `MechanicsLabWorkspace`, `ElectricLabWorkspace` zusammen ca. 1170 Zeilen Komponenten-Code, wobei ~80–85 % dieselbe toolbar / scene panel / canvas / timeline / data panel / inspector Struktur waren; `TreeRow`, `Chart`, `formatNumber`, `stepTo` und andere Blattkomponenten wurden wörtlich 2–3-fach kopiert, `PLAYBACK_RATES` kam dreimal vor.
 
 ```text
-PhysicsSurface（唯一 dispatcher，LabWorkspace.tsx）
+PhysicsSurface (einziger Dispatcher, LabWorkspace.tsx)
         │  domainOfScene(scene) → magnetic | mechanics | electric | unsupported
         ↓
-WorkspaceRuntime（physics/workspace-runtime.ts）
+WorkspaceRuntime (physics/workspace-runtime.ts)
         │  getSnapshot / editParameter / setChoice / setObservable
         │  setRunning / setRate / seek / step / advance / setHighlight
-        ├── MagneticWorkspaceRuntime   → 包装既有已验收 MagneticRuntimeBridge
+        ├── MagneticWorkspaceRuntime   → wrappt bestehenden bereits abgenommenen MagneticRuntimeBridge
         ├── MechanicsWorkspaceRuntime  → MechanicsRuntimeBridge
         └── ElectricWorkspaceRuntime   → SceneRuntime + ElectricEngine
         ↓
-PhysicsWorkspace（唯一 shell，PhysicsWorkspace.tsx）
-        │  只消费 WorkspaceSnapshot；不含任何物理事实
+PhysicsWorkspace (einzige Shell, PhysicsWorkspace.tsx)
+        │  konsumiert nur WorkspaceSnapshot; enthält keine Physik-Fakten
         ↓
 PhysicsCanvas → RENDERERS[view.domain]
 ```
 
-`MechanicsLabWorkspace.tsx`（734 行）与 `ElectricLabWorkspace.tsx`（615 行）已删除。
-新增域 = 一个 runtime adapter + registry 里一个 renderer，不再新增页面。
+`MechanicsLabWorkspace.tsx` (734 Zeilen) und `ElectricLabWorkspace.tsx` (615 Zeilen) wurden gelöscht.
+Neue Domäne = ein Runtime-Adapter + ein Renderer in der Registry, keine neuen Seiten mehr.
 
-Snapshot 契约（`WorkspaceSnapshot`）统一了此前三种互不兼容的 snapshot 形状：
+Snapshot-Vertrag (`WorkspaceSnapshot`) vereinheitlicht die zuvor drei inkompatiblen Snapshot-Formen:
 `domain / title / subtitle / status / sceneRevision / view / ariaLabel / tree /
 inspector / charts / table / derivation / verification / events / clock /
-trajectoryTimes / sampleReadout? / error?`。
+trajectoryTimes / sampleReadout? / error?`.
 
-### 关键修复：整块画布不显示
+### Schlüssel-Fix: Ganzer Canvas nicht sichtbar
 
-`physics-tokens.css` 从未被 import。插件 bundle 只自动注入 `*.module.css`，
-因此所有 `--physics-*` 变量未定义。`stroke: var(--undefined)` 在计算值阶段无效并回退到
-继承值，而画布根节点是 `<svg fill="none">` —— 结果是网格、坐标轴、箭头、轨迹、
-磁场 ×/· 全部进入 DOM 但不着墨。**已验收的 Magnetic UI 也因此静默退化**。
+`physics-tokens.css` wurde nie importiert. Plugin-Bundle injiziert nur automatisch `*.module.css`, daher waren alle `--physics-*` Variablen undefiniert. `stroke: var(--undefined)` wird im berechneten Wert ungültig und fällt auf den Erbwert zurück, während der Canvas-Wurzelknoten `<svg fill="none">` ist — Ergebnis: Gitter, Koordinatenachsen, Pfeile, Trajektorien, Magnetfeld ×/· gelangen alle in den DOM, aber zeichnen nicht. **Bereits abgenommenes Magnetic UI daher ebenfalls stille Regression**.
 
-修复：token 随 `mountPhysicsOSChrome()` 在 document 级注入（该文件本就是这个用途），
-删除重复的 css 文件；`tests/chrome.client.spec.ts` 逐个断言 24 个 token 存在，
-使这种「全白画布」故障不能再静默发生。
+Fix: Tokens werden mit `mountPhysicsOSChrome()` auf Document-Ebene injiziert (Datei dient genau diesem Zweck), doppelte CSS-Dateien entfernt; `tests/chrome.client.spec.ts` prüft alle 24 Tokens einzeln, damit dieser "weißer Canvas"-Fehler nicht mehr still auftreten kann.
 
-### 关键修复：画布被放大 1.5×
+### Schlüssel-Fix: Canvas wird 1,5× vergrößert
 
-`PhysicsCanvas` 原先按内容尺寸生成 viewBox。竖幅场景（平抛 h=20/R=20 约 1:1）得到
-431×459 的 viewBox，在 770×699 的框里被 `preserveAspectRatio` 放大 1.523×，
-所有线宽与字号同步放大，画面显得粗糙且不占满宽度。现在 plot box 固定为 960×540，
-场景在框内居中，viewBox 尺寸恒定 —— 缩放只会 ≤1，永不放大。
-域绘制额外加了 clipPath，物体飞出取景框时不再压到坐标轴与刻度上。
+`PhysicsCanvas` erzeugte viewBox ursprünglich nach Inhaltsgröße. Hochformat-Szenarien (waagrechter Wurf h=20/R=20 ca. 1:1) ergaben 431×459 viewBox, in 770×699 Box durch `preserveAspectRatio` 1,523× vergrößert, alle Strichstärken und Schriftgrößen mitvergrößert, Bild wirkt grob und füllt Breite nicht aus. Jetzt plot box fest 960×540, Szene in Box zentriert, viewBox-Größe konstant — Skalierung nur ≤1, nie Vergrößerung. Domänen-Zeichnung zusätzlich mit clipPath, Objekte fliegen nicht mehr auf Achsen und Skalen hinaus.
 
 ---
 
 ## 20. Mechanics Visual Contract
 
-`physics/scene-visual-model.ts` 是 renderer 唯一输入：`BodyVisual` `GroundVisual`
-`InclineVisual` `PlatformVisual` `TrajectoryVisual` `VectorVisual` `AngleVisual`
-`DimensionVisual` `KeyPointVisual` `CoordinateVisual` `LabelVisual`
-`MeasurementVisual` `FieldVisual` `ParticleVisual` `GuideVisual`。
-坐标为场景单位、y 向上；每个 renderer 自己完成唯一一次 y 翻转。
+`physics/scene-visual-model.ts` ist einzige Renderer-Eingabe: `BodyVisual` `GroundVisual` `InclineVisual` `PlatformVisual` `TrajectoryVisual` `VectorVisual` `AngleVisual` `DimensionVisual` `KeyPointVisual` `CoordinateVisual` `LabelVisual` `MeasurementVisual` `FieldVisual` `ParticleVisual` `GuideVisual`. Koordinaten in Szeneneinheiten, y nach oben; jeder Renderer führt genau einmal y-Spiegelung durch.
 
-`physics/primitives.tsx` 提供共享图元（Ground / Incline / Platform / Body /
-Vectors / MathLabel / Angle / Dimension / KeyPoint / Coordinate / ArrowMarkers）。
-renderer 不 import 任何 engine，不计算任何物理量 —— 全包只有 layout 算术。
+`physics/primitives.tsx` stellt gemeinsame Primitiven bereit (Ground / Incline / Platform / Body / Vectors / MathLabel / Angle / Dimension / KeyPoint / Coordinate / ArrowMarkers). Renderer importiert keine Engine, berechnet keine Physik — nur Layout-Arithmetik.
 
-Lab 与 Question Space 现在共用**同一条** mechanics 视觉路径
-（`mechanics-visual-bridge.ts`，observation 驱动）。此前 Lab 走一份重复的
-view builder，两个界面会各自漂移；重复实现已删除。
+Lab und Question Space nutzen jetzt **denselben** mechanics visuellen Pfad
+(`mechanics-visual-bridge.ts`, observation-gesteuert). Zuvor nutzte Lab einen redundanten
+view builder, wodurch sich beide Oberflächen eigenständig drifteten; die redundante Implementierung wurde entfernt.
 
-### 向量标签布局
+### Vektor-Beschriftungs-Layout
 
-斜面上 mg / N / f / a / mg·sinθ / mg·cosθ 六个箭头共用同一基点，「标签放箭头末端」
-会全部叠在一起。`vector-label-layout.ts` 在**屏幕空间**求解标签盒：每个标签沿
-它自己箭头的方向被推开，因此永远和自己的箭头保持视觉配对；位移超过阈值才补一条
-引线。`tests/vector-label-layout.client.spec.ts` 用真实的六箭头自由体图断言两两不重叠。
+Auf der schiefen Ebene teilen sich die sechs Pfeile mg / N / f / a / mg·sinθ / mg·cosθ denselben Basispunkt; „Beschriftung am Pfeilende"
+würden sich alle übereinander stapeln. `vector-label-layout.ts` löst die Beschriftungsboxen im **Bildschirmraum**: jedes Label wird entlang
+seiner eigenen Pfeilrichtung weggeschoben, sodass es immer visuell mit seinem Pfeil gekoppelt bleibt; nur bei Überschreitung des Schwellenwerts wird eine
+Führungslinie hinzugefügt. `tests/vector-label-layout.client.spec.ts` prüft mit einem echten Sechs-Pfeil-Freikörperdiagramm, dass sich keine zwei überlappen.
 
-### 自由体图来自 Observation 层
+### Freikörperdiagramm stammt aus der Observation-Schicht
 
-个别力（mg / N / f）此前在任何 mechanics 场景都不存在：`createMechanicsScene`
-没有 `type: 'force'` observable，`visible(scene,'force')` 恒为空。现在：
+Einzelne Kräfte (mg / N / f) existierten zuvor in keinem mechanics-Szenario: `createMechanicsScene`
+hatte kein `type: 'force'` Observable, `visible(scene,'force')` war stets leer. Jetzt:
 
-- `createMechanicsScene` 增加 `obs-forces`（force）、`obs-keypoints`、
+- `createMechanicsScene` fügt `obs-forces` (force), `obs-keypoints`, hinzu
   `obs-components`（velocity_components）、`obs-decomposition`（force_decomposition）
-- `observeMechanicsScene` 发布个别力观测：mg 对所有模型；N、f 与
-  mg·sinθ / mg·cosθ 由引擎已算出的 `normal_force` / `friction_force` 幅值
-  投影到模型自有的斜面坐标系 —— **方向来自模型，不来自绘制代码**
-- μ 现在写入 `body.material.frictionCoefficient`，否则 resolver 读到 μ=0，
-  场景声称有摩擦而 solver 并不施加
-- ΣF 只在它与单一个别力不同时才画，避免同一物理事实叠两支箭头
+- `observeMechanicsScene` veröffentlicht einzelne Kraftbeobachtungen: mg für alle Modelle; N, f und
+  mg·sinθ / mg·cosθ aus den vom Engine bereits berechneten `normal_force` / `friction_force` Beträgen
+  auf das modell-eigene Schrägen-Koordinatensystem projiziert — **Richtung kommt vom Modell, nicht vom Zeichencode**
+- μ wird jetzt in `body.material.frictionCoefficient` geschrieben, andernfalls liest der Resolver μ=0,
+  die Szene behauptet Reibung, aber der Solver wendet sie nicht an
+- ΣF wird nur gezeichnet, wenn es von einer einzelnen Einzelkraft abweicht, um zu vermeiden, dass zwei Pfeile für dieselbe physikalische Tatsache übereinander liegen
 
 ---
 
-## 21. Observation Toggle 走 Scene Command
+## 21. Observation Toggle über Scene Command
 
-速度分量、力的分解、关键点此前是组件内的局部 `Record<string,boolean>`，
-点击不产生任何 scene 事件。现在四类图层都是 scene observable，
-toggle 经 `SetObservableEnabled` 命令 → revision +1 → `ObservableEnabled/Disabled`
-事件，画布显示的内容与 scene 声明的内容不可能不一致。
+Geschwindigkeitskomponenten, Kraftzerlegungen und Schlüsselpunkte waren zuvor lokale `Record<string,boolean>` innerhalb der Komponente,
+Klicks erzeugten keine Scene-Ereignisse. Jetzt sind alle vier Ebenen Scene-Observables,
+Toggle über `SetObservableEnabled`-Befehl → Revision +1 → `ObservableEnabled/Disabled`-Ereignisse,
+der Canvas-Inhalt kann nicht mit dem vom Scene Deklarierten inkonsistent sein.
 
-新增 mechanics scene commands（`scene-runtime.ts`）：
+Neue mechanics Scene Commands (`scene-runtime.ts`):
 `SetBodyMass` `SetBodyPosition` `SetBodyVelocity` `SetGravityAcceleration`
-`SetInclineAngle` `SetFrictionCoefficient` `SetAppliedForce` `SetGroundLevel`，
-各自的 PhysicsEvent 与校验（倾角必须严格在 0–90°，μ ≥ 0，质量 > 0）。
+`SetInclineAngle` `SetFrictionCoefficient` `SetAppliedForce` `SetGroundLevel`,
+jeweils mit PhysicsEvent und Validierung (Neigungswinkel muss strikt in 0–90° liegen, μ ≥ 0, Masse > 0).
 
 ---
 
 ## 22. Inspector / Scene Tree / Data Panel
 
-三者现在都由 snapshot 数据驱动，不再每个工作台手写一份。
+Alle drei werden jetzt von Snapshot-Daten getrieben, nicht mehr handgeschrieben pro Arbeitsbereich.
 
-- Inspector：`QuantityParameter`（可编辑）与 `DerivedQuantityView`（只读）分离；
-  编辑在 blur / Enter 提交，Escape 还原，非法值显示 invalid 态但**不下发命令**
-  （半个数字不该成为一次 scene revision）
-- 题目场景在 Lab 中现在**可编辑**（此前写死只读）：h / v₀ / θ / g 修改后
-  revision +1 且重新验证通过
-- Scene Tree：`SceneTreeNode` 递归渲染，observable 行带 checkbox，
-  hover 高亮对应图元。力学树标签修复（此前三个 geometry observable 都显示「辅助几何」）
-- Data Panel：数据 / 图像 / 推导 / 事件。图表有轴名、单位、零线、与场景时钟同步的
-  cursor，不是装饰性 sparkline
-- Verification：只显示有物理含义的检查（水平速度守恒 / 竖直加速度 = g / 落地点约束 /
-  重力分量 mg·sinθ 等）；schema、id 唯一性、单位维度等结构性检查折叠为一行
-  「场景结构有效 n/n」。学生看不到 raw id，也看不到 JSON
+- Inspector: `QuantityParameter` (bearbeitbar) und `DerivedQuantityView` (schreibgeschützt) getrennt;
+  Bearbeitung wird bei Blur / Enter abgeschickt, Escape stellt wieder her, ungültige Werte zeigen Invalid-Zustand an, aber **lösen keinen Befehl aus**
+  (ein halber Ziffernwert sollte keine Scene-Revision auslösen)
+- Aufgabenszenarien im Labor sind jetzt **bearbeitbar** (zuvor hardcoded schreibgeschützt): h / v₀ / θ / g nach Änderung
+  Revision +1 und erneute Validierung bestanden
+- Scene Tree: `SceneTreeNode` rekursives Rendering, Observable-Zeilen mit Checkbox,
+  Hover hebt entsprechendes Grafikelement hervor. Mechanik-Baum-Labels korrigiert (zuvor zeigten alle drei Geometry-Observables „Hilfsgeometrie“)
+- Data Panel: Daten / Grafiken / Herleitungen / Ereignisse. Diagramme haben Achsenbeschriftungen, Einheiten, Nulllinie, mit Szenen-Uhr synchronisierten
+  Cursor, kein dekoratives Sparkline
+- Verification: Zeigt nur physikalisch sinnvolle Prüfungen (horizontale Geschwindigkeitserhaltung / vertikale Beschleunigung = g / Landepunkt-Beschränkung /
+  Schwerekraftkomponente mg·sinθ usw.); Schema-, ID-Einzigartigkeit, Einheitsdimensionen etc. strukturelle Prüfungen zusammengeklappt in einer Zeile
+  „Szenenstruktur gültig n/n“. Schüler sehen keine rohen IDs, auch kein JSON
 
 ---
 
 ## 23. Timeline
 
-事件标记（发射 / 最高点 / 落地）绘制在 scrubber 上方，点击直接 seek 到该时刻；
-标记只在有物理意义的时刻出现。播放由 `useAnimationClock`（RAF + 隐藏标签页
-基线重置）驱动，磁场域保留 `magneticPhysicalDelta` 映射（一个回旋周期 ≈1e-7 s，
-不映射的话每帧要跳过上百万圈）；力学 / 电场按真实秒推进并在末态停住。
+Ereignismarker (Abwurf / Höchstpunkt / Landung) werden über dem Scrubber gezeichnet, Klick seekt direkt zu jenem Zeitpunkt;
+Marker erscheinen nur bei physikalisch bedeutsamen Zeitpunkten. Wiedergabe wird von `useAnimationClock` getrieben (RAF + Reset der Baseline bei versteckten Tabs
+), Magnetfeld-Domäne behält `magneticPhysicalDelta`-Mapping bei (eine Zyklotronperiode ≈1e-7 s,
+ohne Mapping müsste man pro Frame Millionen Umläufe überspringen); Mechanik / Elektrisches Feld schreiten in echten Sekunden fort und halten im Endzustand an.
 
 ---
 
 ## 24. Icon System V1
 
-`src/client/icons/physics-icons.tsx`：24×24 网格、1.75px 视觉线宽、圆角端点、
-`currentColor` 描边的 SVG React 组件（小尺寸下补偿线宽以保持视觉重量）。
-覆盖实验室 / 试题 / 运动学 / 速度 / 加速度 / 轨迹 / 重力 / 力 / 合力 /
-牛顿第二定律 / 平抛 / 斜抛 / 斜面 / 摩擦 / 支持力 / 时间 / 时间轴 / 图表 /
-测量 / 验证 / 场景 / 可观察量 / 变量 / 关键点 / 地面 / 播放 / 暂停 / 重置 / 单步。
+`src/client/icons/physics-icons.tsx`: 24×24 Raster, 1.75px visuelle Strichstärke, abgerundete Endpunkte,
+`currentColor` gestrichelte SVG React Komponenten (bei kleinen Größen Strichstärke-Kompensation zur Beibehaltung des visuellen Gewichts).
+Abdeckung: Labor / Aufgaben / Kinematik / Geschwindigkeit / Beschleunigung / Bahn / Schwerkraft / Kraft / Resultierende /
+Newton'sches Zweites Gesetz / Horizontalwurf / Schräger Wurf / Schräge Ebene / Reibung / Normalkraft / Zeit / Zeitachse / Diagramm /
+Messung / Verifikation / Szene / Observierbare Größe / Variable / Schlüsselpunkt / Boden / Abspielen / Pausieren / Zurücksetzen / Einzelschritt.
 
-**Toolbar 与导航不使用任何 raster**：生成的概念图仅作视觉参考，最终图标全部手绘 SVG。
+**Toolbar und Navigation verwenden kein Raster**: generierte Konzeptbilder dienen nur als visuelle Referenz, endgültige Icons sind alle handgezeichnete SVGs.
 
 ---
 
 ## 25. Generated Design Assets
 
-`scripts/design/generate-physics-assets.mjs`（Node only，浏览器永不触达）。
-凭据只从 gitignored `.env` 读取（`PHYSICSOS_IMAGE_PRIMARY_*` /
-`PHYSICSOS_IMAGE_SECONDARY_*`），metadata 记录 provider / model / prompt /
-实际像素 / 时间，**不记录 key**。上游偶发 502，脚本对 5xx/429 重试。
+`scripts/design/generate-physics-assets.mjs` (Node only, Browser erreicht es nie).
+Anmeldeinformationen werden nur aus gitignored `.env` gelesen (`PHYSICSOS_IMAGE_PRIMARY_*` /
+`PHYSICSOS_IMAGE_SECONDARY_*`), Metadaten protokollieren Provider / Model / Prompt /
+tatsächliche Pixel / Zeit, **keine Keys protokolliert**. Upstream gelegentliche 502, Skript wiederholt bei 5xx/429.
 
-| Asset                       | Provider    | 实际尺寸 | 用途                  |
+| Asset                       | Provider    | Tatsächliche Größe | Verwendungszweck                  |
 | --------------------------- | ----------- | -------- | --------------------- |
-| `icon-concept-sheet`        | gpt-image-2 | 2880²    | 图标系统视觉参考      |
-| `component-reference-sheet` | gpt-image-2 | 2880²    | 画布图元 1:1 复刻参考 |
-| `projectile-hero`           | gpt-image-2 | 1254²    | 平抛视觉参考          |
-| `inclined-plane-hero`       | gpt-image-2 | 2880²    | 斜面视觉参考          |
-| `newton-force-hero`         | gpt-image-2 | 2880²    | 牛顿第二定律视觉参考  |
-| `uniform-acceleration-hero` | gpt-image-2 | 2880²    | 匀变速视觉参考        |
-| `lab-empty-state`           | gpt-image-2 | 1254²    | 空状态背景参考        |
+| `icon-concept-sheet`        | gpt-image-2 | 2880²    | Iconsystem visuelle Referenz      |
+| `component-reference-sheet` | gpt-image-2 | 2880²    | Canvas-Grafikelemente 1:1 Nachbau-Referenz |
+| `projectile-hero`           | gpt-image-2 | 1254²    | Horizontalwurf visuelle Referenz  |
+| `inclined-plane-hero`       | gpt-image-2 | 2880²    | Schiefe Ebene visuelle Referenz   |
+| `newton-force-hero`         | gpt-image-2 | 2880²    | Newtons 2. Gesetz visuelle Referenz |
+| `uniform-acceleration-hero` | gpt-image-2 | 2880²    | Gleichmäßig beschleunigte Bewegung visuelle Referenz |
+| `lab-empty-state`           | gpt-image-2 | 1254²    | Labor-Leerzustand Hintergrund-Referenz |
 
-请求 4096² 时服务端上限约 2880²，metadata 记录的是解码得到的真实尺寸而非请求值。
-Lab 空状态最终使用内联 SVG（点阵 + 一条真实二次贝塞尔抛物线），不使用 raster。
+Bei Anfrage von 4096² liegt Server-Obergrenze bei ~2880², Metadaten protokollieren die decodierte tatsächliche Größe, nicht den Anfragewert.
+Labor-Leerzustand verwendet letztlich Inline-SVG (Punktmatrix + eine echte quadratische Bézier-Parabel), kein Raster.
 
 ---
 
 ## 26. Browser E2E
 
-`node apps/web/e2e/mechanics-acceptance.mjs`（需先起 `pnpm dsh web`）。
+`node apps/web/e2e/mechanics-acceptance.mjs` (zuerst `pnpm dsh web` starten).
 
-| Case | 内容                                                                                                 | 结果 |
+| Case | Inhalt                                                                                                 | Ergebnis |
 | ---- | ---------------------------------------------------------------------------------------------------- | ---- |
-| E    | 磁场回归：verified、canvas ≥55%、无棋盘格、无整页滚动、真实着墨 >20 stroke、v/F 标签                 | PASS |
-| A    | 平抛：模板创建 → 改 h=45 → revision 1 + 射程重算 + 仍 verified → 播放推进时钟 → 图像面板 ≥2 张带轴图 | PASS |
-| B    | 斜面：mg/N/f/a 四箭头齐备 → 开启力分解得到 3 个 mg* 标签 → 改 θ=45 → 支持力变化                      | PASS |
-| C    | 平抛题：READY → 点击已知量高亮画布 → 结构化步骤 → 在物理世界中打开 → mechanics + verified            | PASS |
-| D    | 斜面题：同上                                                                                         | PASS |
+| E    | Magnetfeld Regression: verified, Canvas ≥55%, kein Schachbrettmuster, keine ganzseitige Scrollbar, echte Striche >20, v/F Labels | PASS |
+| A    | Horizontalwurf: Template erstellen → h=45 ändern → Revision 1 + Reichweite neu berechnet + weiterhin verified → Wiedergabe treibt Uhr voran → Grafik-Panel ≥2 Diagramme mit Achsen | PASS |
+| B    | Schiefe Ebene: mg/N/f/a vier Pfeile komplett → Kraftzerlegung aktiviert ergibt 3 mg* Labels → θ=45 ändern → Normalkraft ändert sich | PASS |
+| C    | Horizontalwurf-Aufgabe: READY → Klick auf bekannte Größen hebt Canvas hervor → Strukturierte Schritte → In Physikwelt öffnen → mechanics + verified | PASS |
+| D    | Schiefe-Ebene-Aufgabe: gleiches Vorgehen                                                             | PASS |
 
-门禁：consoleErrors 0 / pageErrors 0 / unhandledRejections 0 /
-failedRequests 0 / errorResponses 0 —— 全部 0。
-响应式：1440 / 1600 / 1920 三档 canvas 占比 ≥55%，无整页滚动。
+Qualitätssicherung: consoleErrors 0 / pageErrors 0 / unhandledRejections 0 /
+failedRequests 0 / errorResponses 0 — alle 0.
+Responsive: 1440 / 1600 / 1920 drei Stufen Canvas-Anteil ≥55%, keine ganzseitige Scrollbar.
 
 ---
 
@@ -435,248 +416,248 @@ docs/reports/screenshots/physics-icon-system-concept-4k.png
 docs/reports/screenshots/mechanics-component-reference-4k.png
 ```
 
-### Visual QA（逐图人工检查）
+### Visuelle QA (bildweise manuelle Prüfung)
 
-- 平抛：抛物线完整、地面带剖面线、发射平台为短板（非贯穿地面的立柱）、
-  h 标注在左侧留白、R 标注在地面下方、起点 / 落地点为精确小 marker、
-  v 绿 / mg 蓝灰 / a 琥珀、时间轴上有发射与落地标记
-- 斜面：楔形完整含顶点、水平基准、θ 弧、物块贴合坡面并随坡旋转、
-  mg/N/f/a 四箭头基点均在物块、力分解开启后 mg·sinθ / mg·cosθ 为次级虚线箭头且标签不叠
-- 磁场：网格、×/· 场点阵、轨道圆、v/F 箭头、粒子高光、旋转方向字形、比例尺 —— 与验收态一致
-- 三档分辨率：Canvas 优先吃空间，Scene / Inspector 不随宽度无限增长
-- Inspector：可编辑量与派生量分区；验证列表全为中文物理检查名 + PASS
+- Horizontalwurf: Parabel vollständig, Boden mit Schnittlinien, Abschussplattform ist kurzes Brett (kein den Boden durchstoßender Pfeiler),
+  h Beschriftung im linken Rand, R Beschriftung unter dem Boden, Start- / Landepunkt als präzise kleine Marker,
+  v grün / mg blaugrau / a bernsteinfarben, Zeitachse hat Abwurf- und Lander-Marker
+- Schiefe Ebene: Keilform vollständig mit Scheitelpunkt, horizontale Basis, θ-Bogen, Klötzchen haftet an Schrägenfläche und rotiert mit,
+  mg/N/f/a vier Pfeile haben Basispunkte alle am Klötzchen, nach Aktivierung der Kraftzerlegung sind mg·sinθ / mg·cosθ sekundäre gestrichelte Pfeile und Labels überlappen nicht
+- Magnetfeld: Gitter, ×/· Feldpunktraster, Bahnenkreise, v/F Pfeile, Teilchen-Highlight, Drehrichtung-Glyphe, Maßstab — konsistent mit Abnahmezustand
+- Drei Auflösungsstufen: Canvas beansprucht Platz 우선, Scene / Inspector wachsen nicht unbegrenzt mit der Breite
+- Inspector: Bearbeitbare und abgeleitete Größen getrennt; Verifikationsliste ganz in chinesischen Physik-Prüfnamen + PASS
 
 ---
 
 ## 28. Regression
 
-- `pnpm test`（root）：10 包全绿
-- `npx vitest run packages/client/ui-physicsos`：8 文件 / 60 测试全绿
-- harness `pnpm test:gui`：3818 passed / 1 failed —— 唯一失败是
-  `ui-primitives/tests/code-block.client.spec.tsx` 的 5s 超时，
-  单独运行 15/15 通过，属并行负载下的既有 flake，与本轮改动无关
-- harness `pnpm build`：全部包构建通过
-- 磁场既有单测（B 0.50→1.00 闭环、电荷变号、×/· 映射、Observation 移除、
-  seek/playback、失败快照一致性）全部保持通过
+- `pnpm test` (root): 10 Pakete alles grün
+- `npx vitest run packages/client/ui-physicsos`: 8 Dateien / 60 Tests alles grün
+- Harness `pnpm test:gui`: 3818 passed / 1 failed — einzige Fehlschlag ist
+  `ui-primitives/tests/code-block.client.spec.tsx` 5s Timeout,
+  einzeln ausgeführt 15/15 durch, ist ein bekannter Flake unter Parallellast, in keinem Zusammenhang mit dieser Änderung stehend
+- Harness `pnpm build`: alle Pakete bauen erfolgreich
+- Magnetfeld bestehende Unit-Tests (B 0.50→1.00 Schleife, Ladungszeichenwechsel, ×/· Mapping, Observation Entfernung,
+  Seek/Playback, Fehlschlag-Snapshot-Konsistenz) bestehen alle weiterhin
 
-### 依赖解析修复
+### Abhängigkeitsauflösungs-Fix
 
-`ui-physicsos` 通过 `file:` 引用 `packages/*`，pnpm 会把这些包**复制**进
-`.pnpm` store 且不再随源码刷新 —— 浏览器 bundle 因此编译的是旧副本，
-而 vitest 经 tsconfig paths 读源码，两者出现分歧（现象：源码改了标题，
-测试看得到，浏览器看不到）。已把这 8 个依赖改为 `link:` 协议，
-node_modules 里是指向源码的软链，编辑即时生效。
-
----
-
-## 29. Known Limitations
-
-- 电场域时间轴无事件标记（引擎暂无离散事件）——
-  登记为 `ELECTRIC_TIMELINE_EVENT_MARKERS_BACKLOG`，见 `docs/reports/BACKLOG.md`
-- Agent 答案为确定性意图匹配，未接入模型；契约与工具已就位，
-  接入只需替换 `matchIntent`（`AGENT_MODEL_BACKED_ANSWERS_BACKLOG`）
-- 图片 / PDF / OCR 题目输入未接入，UI 明确标注未开放
-- `apps/web` 独立 SPA 仍是过渡产物，未随本轮 UI 演进
-- 生成的 hero raster 落在 `UI/assets/mechanics/*.png`，未做 WebP / 2x 派生
-  （当前 UI 不使用 raster，避免引入未被消费的资产）
-- **Canvas Camera V1（适应场景 / 100% / 复位视角）未实现为显式控件。**
-  它要解决的问题——极端场景与放大导致的线宽变粗——已由「viewBox 跟随容器像素尺寸
-  - 世界包围盒等比 fit」解决：gate C 对四个场景（含 400 m 落差、1200 m 射程）
-    断言恒定 fit，浏览器门禁在 1440 / 1600 / 1920 三档断言渲染缩放 ≤ 1。
-    在没有实测到取景不足的场景之前，加一组缩放控件只会增加无人使用的 UI；
-    一旦出现真正需要平移/缩放的场景（例如多物体远距离交互）再补
-- 斜面上 ΣF 与 a 同向时两个标签仍偏近（力分解开启时最明显）：
-  布局算法沿各自箭头方向推开，同向箭头因此只能靠长度差区分
-- 1920×1080 下画布下方留白偏多：世界包围盒按 16:9 归一，
-  而该视口的画布框接近 4:3。取景正确且等比，属可接受的空白而非缺陷
+`ui-physicsos` referenziert `packages/*` via `file:`, pnpm **kopiert** diese Pakete in
+`.pnpm` Store und aktualisiert nicht mehr mit dem Quellcode — Browser-Bundle kompiliert daher alte Kopie,
+während vitest über tsconfig paths Quellcode liest, wodurch Divergenz entsteht (Phänomen: Quellcode Titel geändert,
+Test sieht es, Browser nicht). Diese 8 Abhängigkeiten wurden auf `link:` Protokoll geändert,
+in node_modules sind Symlinks auf den Quellcode, Bearbeitungen wirken sofort.
 
 ---
 
-## 31. Experimental Branch — 题目事实不可被实验污染
+## 29. Bekannte Einschränkungen
 
-题干里的条件是**陈述的事实**。在实验室里问「如果把 h 改成 30 m 会怎样」是另一个
-物理世界，因此第一次修改物理事实时 fork，而不是推进题目自己的 revision ——
-否则学生刚读完的解答会静默描述一个与题干不再相符的场景。
+- Elektrisches-Feld-Domäne Zeitachse ohne Ereignismarker (Engine hat vorerst keine diskreten Ereignisse) —
+  erfasst als `ELECTRIC_TIMELINE_EVENT_MARKERS_BACKLOG`, siehe `docs/reports/BACKLOG.md`
+- Agent-Antworten basieren auf deterministischem Intent-Matching, nicht modellgestützt; Vertrag und Tools sind bereit,
+  Einbindung erfordert nur Austausch von `matchIntent` (`AGENT_MODEL_BACKED_ANSWERS_BACKLOG`)
+- Bild / PDF / OCR Aufgabeneingabe nicht angebunden, UI deutlich als nicht verfügbar markiert
+- `apps/web` Standalone-SPA ist noch Übergangsprodukt, nicht mit dieser UI-Weiterentwicklung mitgegangen
+- Generierte Hero-Raster liegen in `UI/assets/mechanics/*.png`, keine WebP / 2x Ableitungen gemacht
+  (aktuelles UI nutzt kein Raster, um ungenutzte Assets nicht einzuführen)
+- **Canvas Camera V1 (Anpassen an Szene / 100% / Ansicht zurücksetzen) nicht als explizites Steuerelement implementiert.**
+  Das Problem, das es lösen soll — Strichstärkenverdickung durch extreme Szenen und Vergrößerung — wurde durch „viewBox folgt Container-Pixelgröße
+  - Welt-Bounding-Box proportional fit" gelöst: Gate C prüft vier Szenen (inkl. 400 m Höhendifferenz, 1200 m Reichweite)
+    auf konstantes Fit, Browser-Gate an 1440 / 1600 / 1920 drei Stufen prüft Render-Skalierung ≤ 1.
+    Solange kein realer Fall von unzureichendem Bildausschnitt vorliegt, fügt ein Zoom-Steuerelement nur ungenutzte UI hinzu;
+    sobald echte Pan/Zoom-bedürftige Szenarien auftreten (z. B. Mehrkörper-Ferninteraktion), nachrüsten
+- Auf Schräger Ebene liegen ΣF und a Labels bei gleicher Richtung noch nah beieinander (bei aktiver Kraftzerlegung am deutlichsten):
+  Layout-Algorithmus schiebt entlang jeweiliger Pfeilrichtung auseinander, gleichgerichtete Pfeile lassen sich daher nur über Längenunterschied unterscheiden
+- Bei 1920×1080 zu viel Leerraum unter Canvas: Welt-Bounding-Box nach 16:9 normalisiert,
+  aber der Canvas-Rahmen dieses Viewports ist nahe 4:3. Bildausschnitt korrekt und proportional, akzeptabler Leerraum, kein Defekt
 
-契约（`packages/physics-scene/src/scene-branch.ts`，`SceneMetadata.lineage`
-是 docs/03 §25 的最小兼容扩展，没有第二套 Scene）：
+---
+
+## 31. Experimental Branch — Aufgabentatsachen dürfen nicht durch Experimente verunreinigt werden
+
+Die Bedingungen im Aufgabentext sind **festgestellte Tatsachen**. Im Labor zu fragen „Was passiert, wenn h auf 30 m geändert wird“ ist eine andere
+physikalische Welt, daher beim ersten Ändern physikalischer Tatsachen Fork, statt die Revision der Aufgabe voranzutreiben —
+sonst beschreibt die gerade gelesene Lösung stillschweigend ein Szenario, das nicht mehr zum Aufgabentext passt.
+
+Vertrag (`packages/physics-scene/src/scene-branch.ts`, `SceneMetadata.lineage`
+ist die minimal kompatible Erweiterung von docs/03 §25, keine zweite Scene):
 
 ```ts
 interface SceneLineage {
   origin: 'question' | 'template' | 'blank'
   branchType: 'experimental'
   originQuestionId?: QuestionId
-  originSceneId: SceneId // 原始场景，回到原题只需一跳
-  parentSceneId: SceneId // 直接父级
-  parentRevision: number // fork 瞬间的父级 revision
+  originSceneId: SceneId // Ursprungsszene, zurück zur Originalaufgabe nur ein Sprung
+  parentSceneId: SceneId // Direkter Elternteil
+  parentRevision: number // Eltern-Revision im Fork-Moment
   forkedAt: IsoDateTime
 }
 ```
 
-分支从 **revision 0** 开始：它是新世界，沿用父级 revision 会让两个不同场景
-声称同一个版本号；父级 revision 保存在 `lineage.parentRevision`，
-这正是「恢复原题条件」需要的信息。分支的分支仍指向最初的
-`originSceneId`，所以返回路径永远是一跳。
+Branch beginnt bei **Revision 0**: es ist eine neue Welt, die Fortführung der Eltern-Revision würde zwei verschiedene Szenarien
+dasselbe Versionsnummer beanspruchen lassen; Eltern-Revision wird in `lineage.parentRevision` gespeichert,
+genau das ist die Info für „Originalaufgabenbedingungen wiederherstellen“. Branch des Branches zeigt weiter auf das ursprüngliche
+`originSceneId`, daher ist Rückweg immer ein Sprung.
 
-### 什么算「修改物理事实」
+### Was gilt als „Ändern physikalischer Tatsachen“
 
-`physics/experimental-branch.ts` 里只有一处定义（`FACT_COMMANDS`）：
+`physics/experimental-branch.ts` hat nur eine Definitionsstelle (`FACT_COMMANDS`):
 
-- **会 fork**：`SetParticleCharge` `SetParticleMass` `SetParticleVelocity`
+- **Löst Fork aus**: `SetParticleCharge` `SetParticleMass` `SetParticleVelocity`
   `SetMagneticFieldStrength` `SetMagneticFieldDirection`
   `SetElectricFieldStrength` `SetElectricFieldDirection`
   `SetBodyMass` `SetBodyPosition` `SetBodyVelocity`
   `SetGravityAcceleration` `SetInclineAngle` `SetFrictionCoefficient`
   `SetAppliedForce` `SetGroundLevel`
-- **不会 fork**：播放 / 暂停 / 单步 / seek / 切换 Observation / 查看数据 /
-  Agent 高亮。`SetObservableEnabled` 刻意排除 —— 它改变的是「在看什么」，
-  不是「什么是真的」，但仍然推进场景自身 revision 作为可审计事件。
+- **Löst keinen Fork aus**: Abspielen / Pausieren / Einzelschritt / Seek / Observation umschalten / Daten ansehen /
+  Agent Highlight. `SetObservableEnabled` bewusst ausgeschlossen — es ändert „was man anschaut“,
+  nicht „was wahr ist“, treibt aber weiterhin die Scene-eigene Revision als auditierbares Event voran.
 
-### 修复的前置缺陷
+### Behobener Vorläuferfehler
 
-question → scene 这条链**从未记录来源**：`createMechanicsScene` 没有
-`sourceQuestionId` 入参，`buildMechanicsSceneFromIR` 只把题号写进 description。
-因此 fork 判据永远为假。已把 `sourceQuestionId` 贯通到 metadata；
-浏览器 CASE F 是发现这个缺陷的地方（单测因为直接构造带 metadata 的场景而通过）。
+Die Kette question → scene hat **nie die Quelle aufgezeichnet**: `createMechanicsScene` hat keinen
+`sourceQuestionId`-Parameter, `buildMechanicsSceneFromIR` schreibt nur die Aufgabennummer in die Description.
+Daher war Fork-Kriterium immer falsch. `sourceQuestionId` jetzt durchgängig in Metadaten;
+Browser CASE F hat diesen Fehler aufgedeckt (Unit-Test bestand, weil er Scene direkt mit Metadaten konstruierte).
 
 ### UI
 
-Toolbar 显示轻量徽标：`实验分支` + `来源：<题目标题>` + `恢复原题条件`。
-不做 git 分支 UI。`data-physicsos-branch="experimental"` 供 E2E 断言。
+Toolbar zeigt leichtes Badge: `Experimenteller Zweig` + `Quelle: <Aufgabentitel>` + `Originalbedingungen wiederherstellen`.
+Kein Git-Branch-UI. `data-physicsos-branch="experimental"` für E2E-Assertionen.
 
-### 测试
+### Tests
 
-- `packages/physics-scene/tests/scene-branch.test.ts`（5）：新世界从 revision 0
-  开始、编辑分支后原题保持 20 m 与 revision 4、分支的分支仍指向原始场景、
-  template 场景 origin 为 template、深拷贝隔离
-- `tests/experimental-branch.client.spec.tsx`（5）：只看不 fork、
-  首次改事实才 fork、恢复原题条件、template 永不 fork、Toolbar 徽标与回退
+- `packages/physics-scene/tests/scene-branch.test.ts` (5): Neue Welt beginnt bei Revision 0
+  , nach Bearbeitung des Branches behält Originalaufgabe 20 m und Revision 4, Branch des Branches zeigt weiter auf Ursprungsszene,
+  Template-Szene origin ist template, Deep-Copy-Isolierung
+- `tests/experimental-branch.client.spec.tsx` (5): Nur ansehen löst keinen Fork aus,
+  erst beim ersten Ändern von Tatsachen Fork, Originalbedingungen wiederherstellen, Template niemals Fork, Toolbar Badge und Zurückkehren
 
 ---
 
-## 32. Physics Agent — Runtime-aware，不自己算物理
+## 32. Physics Agent — Laufzeit-bewusst, rechnet Physik nicht selbst
 
-`physics/physics-agent.ts` + `physics/physics-agent-answers.ts` + `AgentDrawer.tsx`。
+`physics/physics-agent.ts` + `physics/physics-agent-answers.ts` + `AgentDrawer.tsx`.
 
-Agent 可读：domain / scene title / revision / status / 当前时间与总时长 /
-命名验证项 / 派生量 / **当前实际绘制的视觉 id** / observable 开关 / branch。
+Agent kann lesen: Domain / Scene-Titel / Revision / Status / aktuelle Zeit und Gesamtdauer /
+benannte Verifikationspunkte / abgeleitete Größen / **aktuell tatsächlich gezeichnete visuelle IDs** / Observable-Schalter / Branch.
 
 ```text
-用户：「水平速度在哪里？为什么不变？」
+Nutzer: „Wo ist die horizontale Geschwindigkeit? Warum ändert sie sich nicht?“
         ↓
-Agent 读 Verifier 的 horizontal_velocity_constant = PASS
+Agent liest Verifier's horizontal_velocity_constant = PASS
         ↓
-解释 + tool: physics.ui.highlight('horizontal-velocity')
+Erklärung + tool: physics.ui.highlight('horizontal-velocity')
 ```
 
-Agent **不**重新计算 vₓ。答案里出现的每个数值都来自 context 里的派生量；
-`matchIntent` 匹配不到时返回 `undefined`，Drawer 直说「这一轮我还无法回答」，
-而不是编一个听起来合理的物理解释。
+Agent **berechnet vₓ nicht neu**. Jeder Zahlenwert in der Antwort stammt aus den abgeleiteten Größen im Context;
+`matchIntent` findet keine Übereinstimmung, gibt `undefined` zurück, Drawer sagt direkt „In dieser Runde kann ich noch nicht antworten“,
+statt eine plausibel klingende physikalische Erklärung zu erfinden.
 
-### 工具与 PhysicsEvent 严格分离
+### Werkzeuge und PhysicsEvent strikt getrennt
 
-| 工具                         | 性质              | revision | PhysicsEvent |
+| Werkzeug                         | Art              | Revision | PhysicsEvent |
 | ---------------------------- | ----------------- | -------- | ------------ |
-| `physics.ui.highlight`       | 纯视图交互        | 不变     | 不产生       |
-| `physics.scene.setParameter` | 真实 SceneCommand | +1       | 产生         |
+| `physics.ui.highlight`       | Reine View-Interaktion | Unverändert | Wird nicht erzeugt |
+| `physics.scene.setParameter` | Echter SceneCommand | +1       | Wird erzeugt |
 
-`physics.scene.setParameter` 走的是 Inspector 用的同一个 `editParameter`
-→ `expectedRevision` → SceneRuntime → Engine → Verifier → Observation → UI。
-Agent 只是命令的调用者，没有旁路。
+`physics.scene.setParameter` nutzt denselben `editParameter` wie der Inspector
+→ `expectedRevision` → SceneRuntime → Engine → Verifier → Observation → UI.
+Agent ist nur Befehlsaufrufer, kein Bypass.
 
-高亮目标支持语义别名（`horizontal-velocity` → `velocity-x`），并且**先与当前
-帧实际绘制的 id 求交**：指向没画出来的东西时返回「画布当前没有显示速度分量，
-请先打开对应的可观察量」，而不是静默高亮空集。
+Highlight-Ziele unterstützen semantische Aliase (`horizontal-velocity` → `velocity-x`), und **zuerst Abgleich mit aktuell
+im Frame tatsächlich gezeichneten IDs schneiden**: zeigt auf etwas, das nicht gezeichnet ist, gibt zurück „Canvas zeigt derzeit keine Geschwindigkeitskomponenten,
+bitte entsprechende Observierbare Größe zuerst öffnen“, statt stillschweigend leere Menge zu highlighten.
 
-### 视觉
+### Visuell
 
-高亮是 `drop-shadow` 光晕 + `--physics-highlight`（琥珀），
-160ms 内完成，持续 1.8 s 后自动释放；不闪烁、无红框、无强动画，
-`prefers-reduced-motion` 下 transition 归零（token 层统一处理）。
+Highlight ist `drop-shadow` Glow + `--physics-highlight` (Bernstein),
+in 160ms abgeschlossen, nach 1.8 s automatisch freigegeben; kein Flackern, kein roter Rahmen, keine starke Animation,
+bei `prefers-reduced-motion` Transition auf Null (Token-Ebene zentral behandelt).
 
 ### Source Chips
 
-Drawer 显示`依据`：`场景 rev. N` / `仿真已验证` / 命名验证项。不展示 JSON。
+Drawer zeigt `Grundlage`: `Szenen Rev. N` / `Simulation verifiziert` / Benannte Verifikationspunkte. Kein JSON.
 
-### 测试
+### Tests
 
-`tests/physics-agent.client.spec.tsx`（12）：context 只报真实事实、
-别名解析与「未绘制则拒绝」、高亮不改 revision、
-打开图层后可高亮分量、参数命令 revision +1 且引擎重算、
-拒绝场景不存在的参数、建议只出现在能回答的场景、
-答案引用命名验证项、无法作答时返回 undefined、
-Drawer 端到端（高亮到画布 + 引用依据 + 命令落到 Inspector）
+`tests/physics-agent.client.spec.tsx` (12): Context meldet nur reale Fakten,
+Alias-Auflösung und „nicht gezeichnet → Ablehnen“, Highlight ändert Revision nicht,
+nach Öffnen der Ebene Komponente highlightbar, Parameter-Befehl Revision +1 und Engine rechnet neu,
+weist nicht existierende Szenenparameter ab, Vorschläge nur in beantwortbaren Szenen,
+Antwort referenziert benannte Verifikationspunkte, gibt undefined zurück wenn nicht beantwortbar,
+Drawer End-to-End (Highlight auf Canvas + Referenz Grundlagen + Befehl landet im Inspector)
 
 ---
 
 ## 33. Regression Gates
 
-`tests/regression-gates.client.spec.ts` + 浏览器门禁，针对**静默**故障：
+`tests/regression-gates.client.spec.ts` + Browser-Gates, gegen **stille** Ausfälle:
 
-| Gate | 断言                                                  | 位置                                                                     |
+| Gate | Assertion                                                  | Position                                                                     |
 | ---- | ----------------------------------------------------- | ------------------------------------------------------------------------ |
-| A    | 所有 `--physics-*` token 实际注入                     | `chrome.client.spec.ts` / `regression-gates`                             |
-| B    | 画布每个域都产出真实几何（轨迹 / 矢量 / 地面 / 场）   | `regression-gates` + 浏览器 `paintedStrokes > 20`                        |
-| C    | 场景恒定 fit 进固定 plot box 且保持等比；渲染缩放 ≤ 1 | `regression-gates` + 浏览器 `displayScale ≤ 1`                           |
-| D    | 题目原场景不被实验分支修改                            | `scene-branch.test.ts` + 浏览器 CASE F                                   |
-| E    | Agent 高亮不改变 scene revision                       | `physics-agent.client.spec.tsx` + 浏览器 CASE G                          |
-| F    | Agent 参数命令改变 revision 并触发重算                | `physics-agent.client.spec.tsx` + 浏览器 CASE H                          |
-| G    | Observable toggle 真正改变 Observation 输出           | `regression-gates`（力分解观测从无到有）                                 |
-| H    | runtime 读到的是当前源码而非 stale copy               | `regression-gates`（断言只存在于当前源码的 observable 与 metadata 字段） |
+| A    | Alle `--physics-*` Tokens werden tatsächlich injiziert     | `chrome.client.spec.ts` / `regression-gates`                             |
+| B    | Jede Domäne im Canvas produziert echte Geometrie (Bahn / Vektoren / Boden / Feld)   | `regression-gates` + Browser `paintedStrokes > 20`                        |
+| C    | Szene passt konstant in feste Plot-Box und behält Seitenverhältnis bei; Render-Skalierung ≤ 1 | `regression-gates` + Browser `displayScale ≤ 1`                           |
+| D    | Ursprüngliche Aufgabenszene wird nicht durch Experimentzweig geändert                            | `scene-branch.test.ts` + Browser CASE F                                   |
+| E    | Agent-Highlight ändert scene revision nicht                       | `physics-agent.client.spec.tsx` + Browser CASE G                          |
+| F    | Agent-Parameterbefehl ändert revision und löst Neuberechnung aus                | `physics-agent.client.spec.tsx` + Browser CASE H                          |
+| G    | Observable-Umschalter ändert Observation-Ausgabe tatsächlich           | `regression-gates` (Kraftzerlegungs-Beobachtung von null auf vorhanden)                                 |
+| H    | Runtime liest aktuellen Quellcode, nicht veraltete Kopie               | `regression-gates` (Assertions nur für im aktuellen Quellcode existierende observable- und metadata-Felder) |
 
-Gate C 的教训值得记录：早期断言写成「px-per-metre ≤ 1」是错的 ——
-那是单位换算不是放大。真正要守的是 **viewBox 尺寸与渲染像素尺寸之比 ≤ 1**。
-1920×1080 下这条门禁抓到 1.38× 放大，促成把 viewBox 改为跟随容器像素尺寸
-（ResizeObserver），从此 1 viewBox 单位 = 1 CSS px，画布同时填满可用空间。
+Die Lehre aus Gate C ist es wert, festgehalten zu werden: Die frühe Assertion „px-per-metre ≤ 1" war falsch —
+das ist Einheitenumrechnung, keine Vergrößerung. Was wirklich zu wahren ist, ist das **Verhältnis von viewBox-Größe zu Render-Pixel-Größe ≤ 1**.
+Bei 1920×1080 erfasste dieses Gate eine 1,38-fache Vergrößerung, was dazu führte, viewBox an die Container-Pixelgröße anzupassen
+(ResizeObserver), seitdem gilt 1 viewBox-Einheit = 1 CSS px, und der Canvas füllt gleichzeitig den verfügbaren Raum aus.
 
 ---
 
-## 34. Final Verification
+## 34. Endgültige Verifikation
 
-| 项目                                  | 结果                                                                                    |
-| ------------------------------------- | --------------------------------------------------------------------------------------- |
+| Projekt                                  | Ergebnis                                                                                    |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------- |
 | root `pnpm typecheck`                 | PASS                                                                                    |
-| root `pnpm test`                      | PASS（11 文件）                                                                         |
-| `ui-physicsos` vitest                 | PASS（11 文件 / 83 测试）                                                               |
+| root `pnpm test`                      | PASS (11 Dateien)                                                                         |
+| `ui-physicsos` vitest                 | PASS (11 Dateien / 83 Tests)                                                               |
 | harness `pnpm build`                  | PASS                                                                                    |
-| harness `pnpm test:gui`               | **PASS（283 文件 / 3842 测试 / 1 skipped / 0 失败）**                                   |
-| 浏览器验收 `mechanics-acceptance.mjs` | ALL CHECKS PASSED                                                                       |
-| 浏览器门禁                            | consoleErrors / pageErrors / unhandledRejections / failedRequests / errorResponses 全 0 |
+| harness `pnpm test:gui`               | **PASS (283 Dateien / 3842 Tests / 1 skipped / 0 fehlgeschlagen)**                                   |
+| Browser-Abnahme `mechanics-acceptance.mjs` | ALL CHECKS PASSED                                                                       |
+| Browser-Gates                            | consoleErrors / pageErrors / unhandledRejections / failedRequests / errorResponses alle 0 |
 
 ### UPSTREAM_PARALLEL_TEST_FLAKE
 
-`packages/client/ui-primitives/tests/code-block.client.spec.tsx` 曾在
-`test:gui` 并行负载下 5 s 超时。核查结论：
+`packages/client/ui-primitives/tests/code-block.client.spec.tsx` trat einst in
+`test:gui` unter paralleler Last 5 s Timeout auf. Untersuchungsresultat:
 
-- 单独重复运行 **10/10 通过**（每次 15/15）
-- 该 spec 与 `src/` 均**不 import** 任何 `@physicsos/*` 或 physicsos 模块
-- 本轮最终 `test:gui` 全量 283/283 通过，未复现
+- Einzeln wiederholt ausgeführt **10/10 bestanden** (jeweils 15/15)
+- Weder dieses Spec noch `src/` **importieren** irgendwelche `@physicsos/*`- oder physicsos-Module
+- In dieser Runde endgültiges `test:gui` voll 283/283 bestanden, nicht reproduzierbar
 
-判定为上游并行负载 flake，登记为 `UPSTREAM_PARALLEL_TEST_FLAKE`。
-未 `.skip`，未加无限 timeout，未为它改动任何业务代码。
+Als Upstream-Parallellast-Flake eingestuft, registriert als `UPSTREAM_PARALLEL_TEST_FLAKE`.
+Kein `.skip`, kein unendlicher Timeout, keine Geschäftslogik-Änderungen für ihn.
 
 ---
 
-## 35. Browser E2E — 八个 Case
+## 35. Browser E2E — Acht Cases
 
 `node apps/web/e2e/mechanics-acceptance.mjs`
 
-| Case | 内容                                                                               | 结果 |
-| ---- | ---------------------------------------------------------------------------------- | ---- |
-| E    | 磁场回归：verified / canvas ≥55% / 无棋盘格 / 无整页滚动 / 真实着墨 / v·F 标签     | PASS |
-| A    | 平抛：模板 → 改 h=45 → revision +1 + 射程重算 + 仍 verified → 播放推进 → 图像面板  | PASS |
-| B    | 斜面：mg·N·f·a 齐备 → 力分解得 3 个 mg* → 改 θ=45 → 支持力变化                     | PASS |
-| C    | 平抛题：READY → 点击已知量高亮画布 → 结构化步骤 → 在物理世界中打开 → verified      | PASS |
-| D    | 斜面题：同上                                                                       | PASS |
-| F    | 题目 → Lab：只看不 fork → 改 h → 生成实验分支（revision 归 1）→ 返回题目原值不变   | PASS |
-| G    | Agent「这个高度是什么？」→ 画布高亮 + 引用依据 + **revision 不变**                 | PASS |
-| H    | Agent「把斜面角度改成 45°」→ revision +1 + Inspector 同步 + 引擎重算 + 仍 verified | PASS |
+| Case | Inhalt                                                                               | Ergebnis |
+| ---- | ------------------------------------------------------------------------------------ | -------- |
+| E    | Magnetfeld-Regression: verified / Canvas ≥55% / kein Schachbrettmuster / kein ganzseitiges Scrollen / echtes Rendering / v·F-Labels     | PASS |
+| A    | Waagerechter Wurf: Template → h=45 ändern → revision +1 + Reichweite neu berechnen + weiterhin verified → Wiedergabe voran → Bildpanel  | PASS |
+| B    | Schiefe Ebene: mg·N·f·a komplett → Kraftzerlegung ergibt 3 mg* → θ=45 ändern → Stützkraft ändert sich                     | PASS |
+| C    | Waagerechter-Wurf-Aufgabe: READY → Bekannte Größen anklicken, Canvas highlightet → Strukturierte Schritte → In Physikwelt öffnen → verified      | PASS |
+| D    | Schiefe-Ebene-Aufgabe: dasselbe                                                                       | PASS |
+| F    | Aufgabe → Labor: Nur ansehen, nicht forken → h ändern → Experimentzweig erzeugen (revision zurück auf 1) → Zurück zur Aufgabe, Originalwerte unverändert   | PASS |
+| G    | Agent „Was ist diese Höhe?“ → Canvas-Highlight + Referenzgrundlage + **revision unverändert**                 | PASS |
+| H    | Agent „Ändere Schrägenwinkel auf 45°“ → revision +1 + Inspector Sync + Engine Neuberechnung + weiterhin verified | PASS |
 
-响应式：1440 / 1600 / 1920 三档 canvas ≥55%、无整页滚动、渲染缩放 ≤ 1。
+Responsive: 1440 / 1600 / 1920 drei Stufen Canvas ≥55%, kein ganzseitiges Scrollen, Render-Skalierung ≤ 1.
 
 ---
 
-## 36. Final Screenshot Set
+## 36. Endgültiger Screenshot-Satz
 
 ```text
 docs/reports/screenshots/home-final-1600x900.png
@@ -694,28 +675,28 @@ docs/reports/screenshots/physics-icon-system-concept-4k.png
 docs/reports/screenshots/mechanics-component-reference-4k.png
 ```
 
-复现：`node apps/web/e2e/final-screenshots.mjs`（0 console / 0 page error）。
+Reproduktion: `node apps/web/e2e/final-screenshots.mjs` (0 console / 0 page error).
 
-### 人工 Visual QA 结论
+### Manuelles Visual-QA-Ergebnis
 
-- **Canvas 是主视觉**：三档分辨率下占内部工作区 ≥55%；1920 下 viewBox 跟随容器，
-  线宽与字号保持 1:1，不再被放大
-- **箭头与标签**：斜面六箭头（mg / N / f / a / mg·sinθ / mg·cosθ）共基点但标签
-  沿各自箭头方向分离，无重叠；平抛的 v / mg / a 无遮挡
-- **标注**：h 在左侧留白、R 在地面下方、比例尺在右下，互不重叠；
-  域绘制被 clipPath 限制在 plot 内，飞出取景框不再压到坐标轴
-- **图表**：四条序列（x-t / y-t / vₓ-t / v_y-t）同排显示，轴名 + 单位 +
-  与场景时钟同步的琥珀 cursor；标题走 MathText，下标正确
-- **排版**：数值 tabular-nums，单位与数值之间有空格，变量斜体
-- **Inspector**：可编辑量与派生量分区；验证列表全为中文物理检查名 + PASS，
-  结构性检查折叠为一行
-- **修复的具体缺陷**：图表 y 轴标题与最大刻度重叠（已给标题独立标注带）、
-  第四张图被面板高度裁掉（`auto-fit` 列）、平抛发射平台曾是贯穿地面的立柱、
-  抛体最高点与起点重合时的重复 marker、斜面楔形顶点被裁
+- **Canvas ist Hauptvisual**: In drei Auflösungsstufen belegt es internen Arbeitsbereich ≥55%; bei 1920 folgt viewBox dem Container,
+  Linienstärke und Schriftgröße bleiben 1:1, werden nicht mehr vergrößert
+- **Pfeile und Labels**: Schiefe-Ebene-Sechs-Pfeile (mg / N / f / a / mg·sinθ / mg·cosθ) gemeinsamer Basispunkt, aber Labels
+  trennen sich entlang jeweiliger Pfeilrichtung, keine Überlappung; waagerechter Wurf v / mg / a keine Verdeckung
+- **Beschriftungen**: h in linker Freifläche, R unter dem Boden, Maßstab rechts unten, keine gegenseitige Überlappung;
+  Domänenzeichnung durch clipPath auf Plot begrenzt, herausragende Bereiche drücken nicht mehr auf Achsen
+- **Diagramme**: vier Sequenzen (x-t / y-t / vₓ-t / v_y-t) nebeneinander dargestellt, Achsenname + Einheit +
+  mit Szenenuhr synchroner amber Cursor; Titel via MathText, Indizes korrekt
+- **Satz**: Zahlen tabular-nums, Leerzeichen zwischen Einheit und Wert, Variablen kursiv
+- **Inspector**: Editierbare Größen und abgeleitete Größen in Bereiche getrennt; Prüfliste vollständig mit chinesischen Physik-Prüfnamen + PASS,
+  Strukturprüfungen zu einer Zeile zusammengeklappt
+- **Konkret behobene Mängel**: Diagramm y-Achsentitel überlappt mit maximalem Tick (Titel erhielt eigene Beschriftungsleiste),
+  viertes Diagramm durch Panelhöhe abgeschnitten (`auto-fit` Spalte), waagerechter-Wurf-Startplattform war einst durch Boden reichender Pfeiler,
+  doppelte Marker bei Zusammenfall von Wurfhöhe und Startpunkt, Schiefe-Ebene-Keilspitze abgeschnitten
 
 ---
 
-## 37. 完成状态
+## 37. Abschlussstatus
 
 ```text
 MECHANICS_RUNTIME_PACK_V1_COMPLETE
@@ -724,5 +705,5 @@ UPSTREAM_PARALLEL_TEST_FLAKE
 HARNESS_WINDOWS_REPLAY_GATE_DEFERRED
 ```
 
-下一阶段：`ELECTRIC_FIELD_RUNTIME_PACK_V1`（点电荷、多点电荷、匀强电场、
-电场矢量、电势、等势线、带电粒子在匀强电场中的运动）。
+Nächste Phase: `ELECTRIC_FIELD_RUNTIME_PACK_V1` (Punktladung, Mehrfachladungen, homogenes elektrisches Feld,
+elektrisches Feldvektor, elektrisches Potential, Gleichpotentiallinien, Bewegung geladener Teilchen im homogenen elektrischen Feld).

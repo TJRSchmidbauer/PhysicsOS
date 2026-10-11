@@ -1,17 +1,17 @@
 /**
- * Experiment self-check bank (实验自测) for lab topics.
+ * Experiment self-check bank for lab topics.
  *
  * The golden-question bank keys its self-checks by question id; lab-first
- * teaching content (the circuit domain, the 初中 measurement experiments) has
+ * teaching content (the circuit domain, the middle-school measurement experiments) has
  * no golden questions, so its conceptual probes are keyed by a LAB TOPIC
  * instead. A topic names what the current frame teaches: for circuits the web
- * layer resolves it from facts the runtime already published (纯串联 / 并联
- * 结点 / 滑动变阻器 / 电源含内阻) — never from a template id, so a student-
+ * layer resolves it from facts the runtime already published (pure series /
+ * parallel nodes / rheostat / battery with internal resistance) — never from a template id, so a student-
  * modified or question-forked circuit still gets the probes that match what is
  * actually on the canvas. The optics topics dispatch the same way, on the
- * imaging element the runtime reports (平面镜 / 凸透镜 / 凹面镜), and the
- * acoustics topic on the echo range being present. The 初中 measurement
- * rigs (测平均速度 / 伏安法 / 测灯泡功率) are physically identical to their
+ * imaging element the runtime reports (plane mirror / convex lens / concave mirror), and the
+ * acoustics topic on the echo range being present. The middle-school measurement
+ * rigs (measuring average speed / volt-ampere method / measuring bulb power) are physically identical to their
  * base apparatus — their topic is the measurement intent, which lives in the
  * scene title the template stamped, the same dispatch the tutor uses for
  * mechanics lessons.
@@ -24,7 +24,7 @@
  * bat`), and the UI resolves the citation by prefix.
  *
  * Each set also declares the knowledge nodes its attempts count toward, so the
- * learning record aggregates lab practice into the same 掌握度 view as
+ * learning record aggregates lab practice into the same mastery view as
  * question practice.
  */
 
@@ -71,29 +71,29 @@ export interface ExperimentSelfCheckSet {
 
 const SERIES_CURRENT: SelfCheckItem = {
   id: 'series-current-everywhere',
-  prompt: '串联电路中，流过各个元件的电流大小关系是？',
-  takeaway: '串联电路只有一条通路，电流处处相等 —— 这正是基尔霍夫电流定律在单回路中的表现。',
+  prompt: 'In einem Reihenstromkreis, wie ist die Beziehung zwischen den Strömen durch die einzelnen Bauteile?',
+  takeaway: 'In einem Reihenstromkreis gibt es nur einen Strompfad, der Strom ist überall gleich – das ist genau die Ausprägung des Kirchhoffschen Stromgesetzes in einem einfachen Stromkreis.',
   options: [
-    { id: 'equal', label: '处处相等', correct: true },
+    { id: 'equal', label: 'Überall gleich', correct: true },
     {
       id: 'consumed',
-      label: '离电源正极越远，电流越小',
+      label: 'Je weiter entfernt vom Pluspol der Spannungsquelle, desto kleiner wird der Strom',
       mistake: {
         type: 'concept',
         explanation:
-          '电流不会被元件"消耗"：串联回路只有一条通路，任一截面每秒通过的电荷量相同，电流处处相等。被消耗的是电能，不是电流。',
-        review: ['串联电流处处相等', '基尔霍夫电流定律'],
+          'Der Strom wird nicht von den Bauteilen „verbraucht": Im Reihenstromkreis gibt es nur einen Pfad, an jedem Querschnitt fließt pro Sekunde dieselbe Ladungsmenge, der Strom ist überall gleich. Verbraucht wird elektrische Energie, nicht elektrischer Strom.',
+        review: ['Strom in Reihe überall gleich', 'Kirchhoffsches Stromgesetz'],
         evidenceCheckId: 'kcl_current_conservation',
       },
     },
     {
       id: 'bigger-resistance-less',
-      label: '电阻越大的元件，流过的电流越小',
+      label: 'Je größer der Widerstand eines Bauteils, desto kleiner ist der Strom, der durch es fließt',
       mistake: {
         type: 'concept',
         explanation:
-          '"电阻大分到的电流小"是并联分流的规则；串联回路里各元件流过同一个电流，电阻大的元件分到的是更大的电压。',
-        review: ['串联与并联的区别', '串联分压 U = IR'],
+          '„Der größere Widerstand erhält einen kleineren Stromanteil" ist die Regel für die Stromverzweigung bei Parallelschaltung; in einem Reihenstromkreis fließt durch alle Bauteile derselbe Strom, an einem größeren Widerstand fällt jedoch eine größere Spannung ab.',
+        review: ['Unterschied zwischen Reihen- und Parallelschaltung', 'Spannungsteilung in Reihe U = IR'],
         evidenceCheckId: 'kcl_current_conservation',
       },
     },
@@ -102,28 +102,28 @@ const SERIES_CURRENT: SelfCheckItem = {
 
 const SERIES_VOLTAGE: SelfCheckItem = {
   id: 'series-voltage-division',
-  prompt: '串联电路中，各电阻两端的电压怎样分配？',
-  takeaway: '串联分压：电流相同，U = IR，电压与电阻成正比分配，总电压等于各部分电压之和。',
+  prompt: 'Wie wird die Spannung in einem Reihenstromkreis auf die Widerstände aufgeteilt?',
+  takeaway: 'Spannungsteilung in Reihe: Gleicher Strom, U = IR, die Spannung teilt sich proportional zum Widerstand auf, die Gesamtspannung ist gleich der Summe der Teilspannungen.',
   options: [
-    { id: 'proportional', label: '与电阻成正比分配（U = IR）', correct: true },
+    { id: 'proportional', label: 'Proportional zum Widerstand (U = IR)', correct: true },
     {
       id: 'all-source',
-      label: '每个电阻两端的电压都等于电源电压',
+      label: 'An jedem Widerstand liegt die volle Quellspannung an',
       mistake: {
         type: 'concept',
         explanation:
-          '"各处电压相等"是并联电路的规则；串联电路里总电压按电阻大小分配，各部分电压之和才等于电源电压。',
-        review: ['串联分压', '并联电压相等的适用范围'],
+          '„Überall gleiche Spannung" gilt für Parallelschaltungen; in einem Reihenstromkreis teilt sich die Gesamtspannung nach der Größe der Widerstände auf, nur die Summe der Teilspannungen ist gleich der Quellspannung.',
+        review: ['Spannungsteilung in Reihe', 'Gleiche Spannung bei Parallelschaltung'],
       },
     },
     {
       id: 'equal-split',
-      label: '不论阻值大小，各电阻平分电压',
+      label: 'Unabhängig vom Widerstandswert teilen sich die Widerstände die Spannung zu gleichen Teilen',
       mistake: {
         type: 'concept',
         explanation:
-          '串联电流相同，由 U = IR 可知电压与电阻成正比：R₂ = 2R₁ 时 U₂ = 2U₁，只有阻值相等时才平分。',
-        review: ['欧姆定律 U = IR', '串联分压'],
+          'Da der Strom in Reihe gleich ist, folgt aus U = IR, dass die Spannung proportional zum Widerstand ist: Bei R₂ = 2R₁ ist U₂ = 2U₁, nur bei gleichen Widerständen wird die Spannung gleichmäßig aufgeteilt.',
+        review: ['Ohmsches Gesetz U = IR', 'Spannungsteilung in Reihe'],
       },
     },
   ],
@@ -133,27 +133,27 @@ const SERIES_VOLTAGE: SelfCheckItem = {
 
 const PARALLEL_VOLTAGE: SelfCheckItem = {
   id: 'parallel-voltage-equal',
-  prompt: '并联的各支路两端的电压关系是？',
-  takeaway: '并联各支路接在同一对结点之间，电压必然相等；支路电流按 I = U/R 与电阻成反比分配。',
+  prompt: 'Wie verhält sich die Spannung an den einzelnen Zweigen einer Parallelschaltung?',
+  takeaway: 'Alle Zweige einer Parallelschaltung sind an dasselbe Knotenpaar angeschlossen, daher liegt an ihnen die gleiche Spannung an; die Zweigströme verteilen sich nach I = U/R umgekehrt proportional zum Widerstand.',
   options: [
-    { id: 'equal', label: '相等，都等于并联部分两端的电压', correct: true },
+    { id: 'equal', label: 'Sie ist gleich und entspricht der Spannung am Parallelteil', correct: true },
     {
       id: 'bigger-resistance-more',
-      label: '电阻大的支路分到更高的电压',
+      label: 'Der Zweig mit dem größeren Widerstand erhält eine höhere Spannung',
       mistake: {
         type: 'concept',
         explanation:
-          '"电阻大分到电压大"是串联分压的规则；并联支路两端接的是同一对结点，电压相同，电阻大的支路分到的电流更小。',
-        review: ['并联电压相等', '并联分流 I = U/R'],
+          '„Größerer Widerstand erhält größere Spannung" ist die Regel für die Spannungsteilung in Reihe; bei Parallelschaltung sind die Zweige an dasselbe Knotenpaar angeschlossen, die Spannung ist gleich, der Zweig mit dem größeren Widerstand führt jedoch einen kleineren Strom.',
+        review: ['Gleiche Spannung bei Parallelschaltung', 'Stromaufteilung in Parallelschaltung I = U/R'],
       },
     },
     {
       id: 'bigger-current-more',
-      label: '电流大的支路电压也大',
+      label: 'Je größer der Strom in einem Zweig ist, desto höher ist dessen Spannung',
       mistake: {
         type: 'concept',
-        explanation: '并联支路电压相同；电流大恰恰说明这条支路电阻小（I = U/R），不是电压高。',
-        review: ['欧姆定律 I = U/R', '并联电路的特点'],
+        explanation: 'Bei Parallelschaltung ist die Spannung an allen Zweigen gleich; ein größerer Strom bedeutet einfach, dass dieser Zweig einen kleineren Widerstand hat (I = U/R), nicht dass die Spannung höher ist.',
+        review: ['Ohmsches Gesetz I = U/R', 'Merkmale von Parallelschaltungen'],
       },
     },
   ],
@@ -161,29 +161,29 @@ const PARALLEL_VOLTAGE: SelfCheckItem = {
 
 const PARALLEL_MAIN_CURRENT: SelfCheckItem = {
   id: 'parallel-main-current',
-  prompt: '并联电路中，干路电流与各支路电流的关系是？',
-  takeaway: '结点处电流守恒：流入等于流出，干路电流等于各支路电流之和（基尔霍夫电流定律）。',
+  prompt: 'Wie verhält sich der Hauptstrom zum Strom in den einzelnen Zweigen einer Parallelschaltung?',
+  takeaway: 'Am Knoten gilt die Ladungserhaltung: Der zufließende Strom ist gleich der Summe der abfließenden Ströme, der Hauptstrom ist also die Summe aller Zweigströme (Kirchhoffsches Stromgesetz).',
   options: [
-    { id: 'sum', label: '干路电流等于各支路电流之和', correct: true },
+    { id: 'sum', label: 'Der Hauptstrom ist gleich der Summe der Ströme in allen Zweigen', correct: true },
     {
       id: 'max-branch',
-      label: '干路电流等于最大的那条支路电流',
+      label: 'Der Hauptstrom ist gleich dem Strom im stärkstbelasteten Zweig',
       mistake: {
         type: 'concept',
         explanation:
-          '结点不会丢失电荷：流入结点的干路电流必须等于流出的各支路电流之和，而不是其中最大的一条。',
-        review: ['基尔霍夫电流定律', '并联分流'],
+          'An einem Knoten geht keine Ladung verloren: Der in den Knoten fließende Hauptstrom muss gleich der Summe der aus dem Knoten abfließenden Zweigströme sein, nicht gleich dem größten einzelnen Zweigstrom.',
+        review: ['Kirchhoffsches Stromgesetz', 'Stromaufteilung in Parallelschaltung'],
         evidenceCheckId: 'kcl_current_conservation',
       },
     },
     {
       id: 'same-everywhere',
-      label: '各支路电流都等于干路电流',
+      label: 'Der Strom in jedem Zweig ist gleich dem Hauptstrom',
       mistake: {
         type: 'concept',
         explanation:
-          '"电流处处相等"只对串联成立；并联结点把干路电流按电导分成几路，每条支路只分到一部分。',
-        review: ['串联与并联的区别', '基尔霍夫电流定律'],
+          '„Der Strom ist überall gleich" gilt nur für Reihenstromkreise; am Knoten einer Parallelschaltung teilt sich der Hauptstrom entsprechend der Leitwerte auf, jeder Zweig führt nur einen Teil des Stroms.',
+        review: ['Unterschied zwischen Reihen- und Parallelschaltung', 'Kirchhoffsches Stromgesetz'],
         evidenceCheckId: 'kcl_current_conservation',
       },
     },
@@ -194,29 +194,29 @@ const PARALLEL_MAIN_CURRENT: SelfCheckItem = {
 
 const RHEOSTAT_CURRENT: SelfCheckItem = {
   id: 'rheostat-resistance-current',
-  prompt: '滑动变阻器的接入电阻增大时，回路中的电流怎样变化？',
+  prompt: 'Wie ändert sich der Strom im Stromkreis, wenn der eingestellte Widerstand des Schleifwiderstands größer wird?',
   takeaway:
-    '总电阻增大而电源不变，由 I = U/(R₀ + R滑) 可知电流减小 —— 滑动变阻器正是靠这一点调节电流。',
+    'Bei konstanter Spannungsquelle wird der Gesamtwiderstand größer, nach I = U/(R₀ + R_Schleifer) nimmt der Strom ab – genau auf diese Weise reguliert ein Potentiometer den Strom.',
   options: [
-    { id: 'decreases', label: '减小（总电阻变大）', correct: true },
+    { id: 'decreases', label: 'Er nimmt ab (Gesamtwiderstand wird größer)', correct: true },
     {
       id: 'increases',
-      label: '增大（滑片动了，电流跟着变大）',
+      label: 'Er nimmt zu (durch das Verschieben des Schleifers ändert sich der Strom automatisch)',
       mistake: {
         type: 'concept',
         explanation:
-          '电流由整个回路的总电阻决定：接入电阻增大 → 总电阻增大 → I = U/R 减小。滑片移动的方向要换算成接入电阻的增减再下结论。',
-        review: ['欧姆定律 I = U/R', '滑动变阻器的接入电阻'],
+          'Der Strom wird durch den Gesamtwiderstand des gesamten Stromkreises bestimmt: Größerer eingestellter Widerstand → größerer Gesamtwiderstand → I = U/R nimmt ab. Die Bewegungsrichtung des Schleifers muss in die Änderung des eingestellten Widerstands umgerechnet werden, bevor man die Schlussfolgerung zieht.',
+        review: ['Ohmsches Gesetz I = U/R', 'Eingestellter Widerstand eines Schleifwiderstands'],
       },
     },
     {
       id: 'unchanged',
-      label: '不变（变阻器不影响其它元件）',
+      label: 'Er bleibt unverändert (der Widerstand beeinflusst nur sich selbst)',
       mistake: {
         type: 'modeling',
         explanation:
-          '串联回路是一个整体：任何一段电阻的变化都会改变总电阻，从而同时改变整条回路的电流，不存在"只影响自己"的元件。',
-        review: ['动态电路分析：先总后分', '串联总电阻'],
+          'Ein Reihenstromkreis ist ein geschlossenes System: Jede Änderung eines Widerstandswerts ändert den Gesamtwiderstand und damit den Strom im gesamten Stromkreis, es gibt kein Bauteil, das „nur sich selbst beeinflusst".',
+        review: ['Analyse dynamischer Stromkreise: erst Gesamtwiderstand, dann Verteilung', 'Gesamtwiderstand in Reihe'],
       },
     },
   ],
@@ -224,60 +224,60 @@ const RHEOSTAT_CURRENT: SelfCheckItem = {
 
 const RHEOSTAT_METER: SelfCheckItem = {
   id: 'rheostat-meter-link',
-  prompt: '接入电阻增大后，定值电阻 R₀ 两端电压表的读数怎样变化？',
-  takeaway: '动态电路先看干路：I 减小，而 U₀ = I·R₀（R₀ 不变），所以电压表读数跟着减小。',
+  prompt: 'Wie ändert sich die Anzeige des Voltmeters über dem Festwiderstand R₀, wenn der eingestellte Widerstand größer wird?',
+  takeaway: 'Bei der Analyse dynamischer Stromkreise betrachtet man zuerst den Hauptstromkreis: I nimmt ab, und da U₀ = I·R₀ (R₀ konstant), nimmt auch die Spannungsanzeige entsprechend ab.',
   options: [
-    { id: 'decreases', label: '减小（U₀ = I·R₀ 随电流减小）', correct: true },
+    { id: 'decreases', label: 'Sie nimmt ab (U₀ = I·R₀ nimmt mit abnehmendem Strom ab)', correct: true },
     {
       id: 'increases',
-      label: '增大（电阻增大电压就增大）',
+      label: 'Sie nimmt zu (größerer Widerstand bedeutet größere Spannung)',
       mistake: {
         type: 'concept',
         explanation:
-          '"电阻大分压多"说的是变阻器自己：它分走更多电压，留给 R₀ 的反而变少。R₀ 阻值未变，它的电压只随电流 U₀ = I·R₀ 变化。',
-        review: ['串联分压', '动态电路分析：先总后分'],
+          '„Je größer der Widerstand, desto größer der Spannungsabfall" gilt für den Schleifwiderstand selbst: Er nimmt einen größeren Teil der Gesamtspannung auf, so dass an R₀ weniger Spannung abfällt. R₀ hat einen konstanten Wert, seine Spannung ändert sich nur über U₀ = I·R₀ mit dem Strom.',
+        review: ['Spannungsteilung in Reihe', 'Analyse dynamischer Stromkreise: erst Gesamtwiderstand, dann Verteilung'],
       },
     },
     {
       id: 'unchanged',
-      label: '不变（R₀ 没有变）',
+      label: 'Sie bleibt unverändert (R₀ hat sich nicht geändert)',
       mistake: {
         type: 'modeling',
         explanation:
-          'R₀ 不变不代表 U₀ 不变：流过它的电流变了，U₀ = I·R₀ 就跟着变。动态电路里"没动的元件"读数照样会变。',
-        review: ['U = IR 中两个量都可能变化', '动态电路分析'],
+          'Dass R₀ konstant bleibt, bedeutet nicht, dass U₀ konstant bleibt: Ändert sich der durch ihn fließende Strom, ändert sich auch U₀ = I·R₀. In dynamischen Stromkreisen können auch die Anzeigen von unbewegten Bauteilen variieren.',
+        review: ['In U = IR können sich beide Größen ändern', 'Analyse dynamischer Stromkreise'],
       },
     },
   ],
 }
 
-/* ----------------------------------------------------- 伏安法测电阻 (初中) -- */
+/* ----------------------------------------------------- Spannungs-Strom-Methode (Mittelschule) -- */
 
 const VA_PRINCIPLE: SelfCheckItem = {
   id: 'va-principle',
-  prompt: '伏安法测电阻的原理是？',
+  prompt: 'Was ist das Prinzip der Spannungs-Strom-Methode zur Widerstandsmessung?',
   takeaway:
-    '电压表读出 Rx 两端的电压 U，电流表读出流过它的电流 I，由欧姆定律的变形 R = U/I 算出阻值。',
+    'Das Voltmeter misst die Spannung U am Widerstand Rx, das Amperemeter misst den durch ihn fließenden Strom I, der Widerstandswert ergibt sich aus der Umformung des Ohmschen Gesetzes R = U/I.',
   options: [
-    { id: 'r-u-over-i', label: '测出 U 和 I，由 R = U/I 求出', correct: true },
+    { id: 'r-u-over-i', label: 'Messe U und I und berechne R = U/I', correct: true },
     {
       id: 'r-follows-u',
-      label: '电压越大电阻越大，取电压最大时的读数',
+      label: 'Je größer die Spannung, desto größer der Widerstand, nimm den Messwert bei maximaler Spannung',
       mistake: {
         type: 'concept',
         explanation:
-          '电阻是导体自身的属性，由材料、长度、横截面积决定；改变电压时 U 与 I 按同一比例变化，U/I 不变。测多组数据是为了取平均减小误差，不是因为电阻在变。',
-        review: ['电阻是导体的属性', '欧姆定律 R = U/I'],
+          'Der Widerstand ist eine Eigenschaft des Leiters, die von Material, Länge und Querschnittsfläche bestimmt wird; ändert man die Spannung, verändern sich U und I im gleichen Verhältnis, U/I bleibt konstant. Mehrere Messreihen werden durchgeführt, um den Mittelwert zu bilden und zufällige Fehler zu reduzieren, nicht weil sich der Widerstand ändert.',
+        review: ['Widerstand ist eine Eigenschaft des Leiters', 'Ohmsches Gesetz R = U/I'],
       },
     },
     {
       id: 'swap-meters',
-      label: '电压表串联、电流表并联接入也能测',
+      label: 'Man kann auch Voltmeter in Reihe und Amperemeter parallel schalten',
       mistake: {
         type: 'modeling',
         explanation:
-          '接法反了：电压表内阻很大，串进干路会几乎切断电流；电流表内阻很小，并到 Rx 两端会把它短路。必须电流表串联、电压表并联，理想表才不干扰电路。',
-        review: ['电压表并联、电流表串联', '理想电表假设'],
+          'Das ist falsch geschaltet: Das Voltmeter hat einen sehr hohen Innenwiderstand, wird es in den Hauptkreis geschaltet, wird der Strom nahezu unterbrochen; das Amperemeter hat einen sehr kleinen Innenwiderstand, wird es parallel zu Rx geschaltet, wird Rx kurzgeschlossen. Korrekt ist: Amperemeter in Reihe, Voltmeter parallel – so stören ideale Messgeräte den Stromkreis kaum.',
+        review: ['Voltmeter parallel, Amperemeter in Reihe', 'Annahme idealer Messgeräte'],
         evidenceCheckId: 'ideal_meters_non_intrusive',
       },
     },
@@ -286,62 +286,62 @@ const VA_PRINCIPLE: SelfCheckItem = {
 
 const VA_RHEOSTAT_ROLE: SelfCheckItem = {
   id: 'va-rheostat-role',
-  prompt: '实验中串联一个滑动变阻器，主要是为了？',
+  prompt: 'Wozu wird im Experiment ein Schleifwiderstand in Reihe geschaltet?',
   takeaway:
-    '移动滑片改变回路总电阻，就改变了 Rx 的工作点：多组 (U, I) 求 R 取平均能减小偶然误差，同时变阻器还能限流保护电路。',
+    'Durch Verschieben des Schleifers wird der Gesamtwiderstand des Stromkreises verändert, wodurch sich der Arbeitspunkt von Rx ändert: Durch Messen mehrerer (U, I)-Wertepaare und Bildung des Mittelwerts von R lassen sich zufällige Fehler reduzieren, außerdem dient der Widerstand dem Strombegrenzungsschutz.',
   options: [
-    { id: 'multi-readings', label: '改变 Rx 的电压和电流，测多组数据取平均', correct: true },
+    { id: 'multi-readings', label: 'Um Spannung und Strom an Rx zu verändern und mehrere Messwerte für die Mittelwertbildung zu erhalten', correct: true },
     {
       id: 'change-rx',
-      label: '直接改变待测电阻 Rx 的阻值',
+      label: 'Um den zu messenden Widerstand Rx direkt zu verändern',
       mistake: {
         type: 'concept',
         explanation:
-          '滑动变阻器改变的是它自己接入电路的那段电阻；Rx 是待测对象，阻值不变，变的只是它分到的电压和流过的电流。',
-        review: ['滑动变阻器的接入电阻', '串联分压'],
+          'Der Schleifwiderstand ändert nur den Anteil seines eigenen Widerstands, der in den Stromkreis eingeschaltet ist; Rx ist der zu messende Widerstand, dessen Wert konstant bleibt, verändert werden nur die an ihm abfallende Spannung und der durch ihn fließende Strom.',
+        review: ['Eingestellter Widerstand eines Schleifwiderstands', 'Spannungsteilung in Reihe'],
       },
     },
     {
       id: 'as-switch',
-      label: '代替开关控制电路的通断',
+      label: 'Um den Stromkreis anstelle eines Schalters ein- und auszuschalten',
       mistake: {
         type: 'modeling',
         explanation:
-          '开关只有通、断两个状态；变阻器的价值是连续调节接入电阻，让工作点在一段范围内滑动，从而读出多组不同的 (U, I)。',
-        review: ['滑动变阻器的作用', '伏安法多次测量取平均'],
+          'Ein Schalter hat nur die Zustände „ein" und „aus"; der Vorteil des Schleifwiderstands besteht darin, den eingeschalteten Widerstand kontinuierlich zu regulieren und den Arbeitspunkt über einen Bereich zu verschieben, um mehrere verschiedene (U, I)-Wertepaare abzulesen.',
+        review: ['Funktion des Schleifwiderstands', 'Mehrfachmessung bei der Spannungs-Strom-Methode'],
       },
     },
   ],
 }
 
-/* ------------------------------------------------- 测小灯泡电功率 (初中) -- */
+/* ------------------------------------------------- Leistung einer Glühlampe (Mittelschule) -- */
 
 const BULB_POWER_READING: SelfCheckItem = {
   id: 'bulb-power-reading',
-  prompt: '怎样得到小灯泡此刻的实际电功率？',
+  prompt: 'Wie ermittelt man die momentane tatsächliche Leistung einer Glühlampe?',
   takeaway:
-    'P = UI：电压表读 U、电流表读 I，两个读数相乘就是灯泡此刻消耗的实际功率 —— 功率随工作点变化，靠测量而不是铭牌。',
+    'P = U·I: Das Voltmeter misst U, das Amperemeter misst I, das Produkt der beiden Werte ist die momentane elektrische Leistung der Lampe – die Leistung ändert sich mit dem Arbeitspunkt und muss gemessen werden, nicht nur vom Typenschild abgelesen.',
   options: [
-    { id: 'p-ui', label: '电压表读数乘以电流表读数：P = UI', correct: true },
+    { id: 'p-ui', label: 'Spannungsanzeige × Stromanzeige: P = U·I', correct: true },
     {
       id: 'rated-always',
-      label: '灯泡亮着就是额定功率，看铭牌即可',
+      label: 'Solange die Lampe leuchtet, ist sie auf Nennleistung, einfach Typenschild lesen',
       mistake: {
         type: 'concept',
         explanation:
-          '铭牌给的是额定电压下的功率。实际功率 P = UI 随灯泡两端电压变化：低于额定电压时灯更暗、功率更小，只有电压恰为额定值时实际功率才等于额定功率。',
-        review: ['额定功率与实际功率', '电功率 P = UI'],
+          'Das Typenschild gibt nur die Leistung bei Nennspannung an. Die tatsächliche Leistung P = U·I ändert sich mit der Spannung an der Lampe: Unterhalb der Nennspannung leuchtet die Lampe schwächer und hat eine geringere Leistung, nur wenn die Spannung genau dem Nennwert entspricht, ist die tatsächliche Leistung gleich der Nennleistung.',
+        review: ['Nennleistung und tatsächliche Leistung', 'Elektrische Leistung P = U·I'],
         evidenceCheckId: 'power_balance',
       },
     },
     {
       id: 'brightness',
-      label: '看亮度估计：越亮越接近额定功率',
+      label: 'Nach Helligkeit abschätzen: Je heller, desto näher an der Nennleistung',
       mistake: {
         type: 'modeling',
         explanation:
-          '亮度确实随实际功率增大，但那只是定性判断，而且超过额定电压时灯更亮却已过载。测量要靠 P = UI 的读数，亮度只能做辅助观察。',
-        review: ['电功率的测量方法', 'P = UI'],
+          'Die Helligkeit nimmt zwar mit der tatsächlichen Leistung zu, das ist jedoch nur eine qualitative Abschätzung, außerdem kann die Lampe bei Überschreitung der Nennspannung heller, aber bereits überlastet sein. Zur Messung muss man P = U·I verwenden, die Helligkeit ist nur eine ergänzende Beobachtung.',
+        review: ['Messverfahren für elektrische Leistung', 'P = U·I'],
       },
     },
   ],
@@ -349,63 +349,63 @@ const BULB_POWER_READING: SelfCheckItem = {
 
 const BULB_RATED_POINT: SelfCheckItem = {
   id: 'bulb-rated-point',
-  prompt: '要测出额定功率，滑动变阻器应调到什么状态？',
+  prompt: 'Wie muss der Schleifwiderstand eingestellt werden, um die Nennleistung zu messen?',
   takeaway:
-    '调节滑片直到电压表读数等于灯泡的额定电压，此刻 P = UI 才是额定功率；偏离额定电压测到的都只是那一点的实际功率。',
+    'Reguliere den Schleifer so lange, bis die Spannungsanzeige dem Nennspannungswert der Lampe entspricht; in diesem Moment ist P = U·I genau die Nennleistung. Bei jeder Abweichung von der Nennspannung misst man nur die momentane tatsächliche Leistung an diesem Arbeitspunkt.',
   options: [
-    { id: 'until-rated', label: '调到电压表读数恰等于额定电压', correct: true },
+    { id: 'until-rated', label: 'Bis die Spannungsanzeige genau den Nennspannungswert erreicht', correct: true },
     {
       id: 'max-current',
-      label: '调到电流最大、灯最亮时读数',
+      label: 'Wenn der Strom maximal und die Lampe am hellsten ist',
       mistake: {
         type: 'modeling',
         explanation:
-          '接入电阻最小时灯泡分到的电压可能超过额定值：灯是更亮了，但已过载有烧毁风险，读出的也不是额定功率。判断标准是电压表读数，不是亮度。',
-        review: ['额定电压是判断标准', '滑动变阻器的调节方向'],
+          'Wenn der eingestellte Widerstand minimal ist, kann die Spannung an der Lampe die Nennspannung überschreiten: Die Lampe leuchtet zwar heller, ist aber bereits überlastet und kann durchbrennen, außerdem ist die abgelesene Leistung dann nicht die Nennleistung. Maßgeblich ist der Spannungswert, nicht die Helligkeit.',
+        review: ['Nennspannung als Kriterium', 'Einstellrichtung des Schleifwiderstands'],
       },
     },
     {
       id: 'any-point',
-      label: '任意位置都行，功率是灯泡固定的属性',
+      label: 'An beliebiger Stelle, denn die Leistung ist eine feste Eigenschaft der Lampe',
       mistake: {
         type: 'concept',
         explanation:
-          '功率不是灯泡的固有属性：P = UI 随工作点连续变化，滑片每动一格实际功率就变一次。只有额定电压下的那一个功率才叫额定功率。',
-        review: ['实际功率随电压变化', '额定功率的含义'],
+          'Die Leistung ist keine feste Eigenschaft der Lampe: P = U·I ändert sich kontinuierlich mit dem Arbeitspunkt, schon eine kleine Verschiebung des Schleifers ändert die tatsächliche Leistung. Nur die Leistung bei Nennspannung wird als Nennleistung bezeichnet.',
+        review: ['Tatsächliche Leistung ändert sich mit der Spannung', 'Bedeutung der Nennleistung'],
         evidenceCheckId: 'power_balance',
       },
     },
   ],
 }
 
-/* ------------------------------------------------- 测平均速度 (初中力学) -- */
+/* ------------------------------------------------- Durchschnittsgeschwindigkeit (Mittelschule, Mechanik) -- */
 
 const AVERAGE_SPEED_DEFINITION: SelfCheckItem = {
   id: 'avg-speed-definition',
-  prompt: '测量小车沿斜面下滑的平均速度，正确的算法是？',
+  prompt: 'Wie berechnet man richtig die Durchschnittsgeschwindigkeit eines Wagens, der eine schiefe Ebene hinunterrollt?',
   takeaway:
-    '平均速度是总路程除以总时间：v̄ = s/t。刻度尺量出 s、停表计下 t，相除即得 —— 它描述整段运动的平均快慢。',
+    'Durchschnittsgeschwindigkeit ist die Gesamtstrecke geteilt durch die Gesamtzeit: v̄ = s/t. Mit einem Maßband misst man s, mit einer Stoppuhr t und bildet den Quotienten – so erhält man die mittlere Geschwindigkeit für den gesamten Bewegungsabschnitt.',
   options: [
-    { id: 'total-over-total', label: '用总路程除以总时间：v̄ = s/t', correct: true },
+    { id: 'total-over-total', label: 'Gesamtstrecke durch Gesamtzeit: v̄ = s/t', correct: true },
     {
       id: 'average-of-speeds',
-      label: '把开头和结尾的速度加起来除以 2',
+      label: 'Anfangs- und Endgeschwindigkeit addieren und durch 2 teilen',
       mistake: {
         type: 'concept',
         explanation:
-          '平均速度的定义永远是 v̄ = s/t；"首末速度的平均值"只在匀变速时才恰好等于它，一般运动中两者并不相等。先量路程、再计时间，相除才可靠。',
-        review: ['平均速度的定义 v̄ = s/t', '匀变速的特例 v̄ = (v₀+v)/2'],
+          'Die Definition der Durchschnittsgeschwindigkeit ist immer v̄ = s/t; der Mittelwert aus Anfangs- und Endgeschwindigkeit ist nur bei gleichmäßig beschleunigter Bewegung gleich der Durchschnittsgeschwindigkeit, bei allgemeinen Bewegungen sind beide Werte unterschiedlich. Nur durch Messen von Strecke und Zeit erhält man das korrekte Ergebnis.',
+        review: ['Definition der Durchschnittsgeschwindigkeit v̄ = s/t', 'Sonderfall bei gleichmäßig beschleunigter Bewegung v̄ = (v₀+v)/2'],
         evidenceCheckId: 'velocity_change',
       },
     },
     {
       id: 'instant-at-end',
-      label: '读小车到达底端那一刻的速度',
+      label: 'Die Geschwindigkeit in dem Moment ablesen, in dem der Wagen unten ankommt',
       mistake: {
         type: 'concept',
         explanation:
-          '到达底端那一刻的速度是瞬时速度，它只描述那一个时刻；小车一路加速，末速度比整段的平均速度大。平均速度必须用整段的 s 和 t 求。',
-        review: ['平均速度与瞬时速度的区别'],
+          'Die Geschwindigkeit beim Erreichen des unteren Endes ist eine Momentangeschwindigkeit und beschreibt nur diesen einen Zeitpunkt; da der Wagen beschleunigt, ist die Endgeschwindigkeit größer als die Durchschnittsgeschwindigkeit für den gesamten Abschnitt. Für die Durchschnittsgeschwindigkeit muss man stets die gesamte Strecke s und die gesamte Zeit t verwenden.',
+        review: ['Unterschied zwischen Durchschnitts- und Momentangeschwindigkeit'],
         evidenceCheckId: 'velocity_change',
       },
     },
@@ -414,64 +414,64 @@ const AVERAGE_SPEED_DEFINITION: SelfCheckItem = {
 
 const AVERAGE_SPEED_SEGMENTS: SelfCheckItem = {
   id: 'avg-speed-segments',
-  prompt: '小车从静止沿斜面加速下滑，前半程与后半程的平均速度相比？',
+  prompt: 'Wie verhalten sich die Durchschnittsgeschwindigkeiten der ersten und zweiten Hälfte, wenn ein Wagen aus dem Stand eine schiefe Ebene beschleunigt hinunterrollt?',
   takeaway:
-    '小车越滑越快，走完相同路程后半程用时更短：由 v̄ = s/t，后半程的平均速度更大 —— 分段测量正是为了量出这一点。',
+    'Der Wagen wird immer schneller, für die gleiche Strecke benötigt er in der zweiten Hälfte weniger Zeit: Aus v̄ = s/t folgt, dass die Durchschnittsgeschwindigkeit in der zweiten Hälfte größer ist – genau das soll durch die Teilstreckenmessung nachgewiesen werden.',
   options: [
-    { id: 'second-half-faster', label: '后半程更大（相同路程用时更短）', correct: true },
+    { id: 'second-half-faster', label: 'Die zweite Hälfte ist größer (gleiche Strecke, kürzere Zeit)', correct: true },
     {
       id: 'equal',
-      label: '相等（同一辆小车速度当然一样）',
+      label: 'Sie sind gleich (derselbe Wagen hat natürlich die gleiche Geschwindigkeit)',
       mistake: {
         type: 'concept',
         explanation:
-          '加速下滑时速度一直在增大，不存在"一辆车一个速度"：前半程慢、后半程快，两段的平均速度必然不同。分段计时就能直接量出差别。',
-        review: ['加速运动中速度随时间变化', '分段测平均速度'],
+          'Bei beschleunigter Bewegung nimmt die Geschwindigkeit ständig zu, es gibt nicht „eine Geschwindigkeit für den Wagen": Die erste Hälfte ist langsamer, die zweite Hälfte schneller, daher müssen die Durchschnittsgeschwindigkeiten unterschiedlich sein. Durch Zeitmessung für Teilstrecken lässt sich dieser Unterschied direkt feststellen.',
+        review: ['Geschwindigkeit ändert sich bei beschleunigter Bewegung', 'Messung der Durchschnittsgeschwindigkeit auf Teilstrecken'],
         evidenceCheckId: 'velocity_change',
       },
     },
     {
       id: 'first-half-faster',
-      label: '前半程更大（先走的路程占便宜）',
+      label: 'Die erste Hälfte ist größer (hat einen Vorsprung durch die gewählte Aufteilung)',
       mistake: {
         type: 'concept',
         explanation:
-          '两段路程相同，比较的是用时：小车从静止加速，前半程速度小、用时长，平均速度反而小。v̄ = s/t 里 s 相同，t 短者胜。',
-        review: ['平均速度 v̄ = s/t', '从静止加速的运动特征'],
+          'Beide Teilstrecken sind gleich lang, entscheidend ist die benötigte Zeit: Da der Wagen aus dem Stand beschleunigt, ist seine Geschwindigkeit in der ersten Hälfte geringer, die benötigte Zeit also länger, und somit ist die Durchschnittsgeschwindigkeit kleiner. Bei v̄ = s/t gilt: gleicher s, kleiner t → größere Geschwindigkeit.',
+        review: ['Durchschnittsgeschwindigkeit v̄ = s/t', 'Merkmale der Bewegung aus dem Stand mit konstanter Beschleunigung'],
         evidenceCheckId: 'velocity_change',
       },
     },
   ],
 }
 
-/* ------------------------------------------------- 平面镜成像 (初中光学) -- */
+/* ------------------------------------------------- Ebenenspiegel (Mittelschule, Optik) -- */
 
 const MIRROR_DISTANCE_SIZE: SelfCheckItem = {
   id: 'mirror-distance-size',
-  prompt: '把蜡烛慢慢远离玻璃板，镜中像的大小和像到镜面的距离怎样变化？',
+  prompt: 'Wie verändern sich Größe und Abstand des Spiegelbilds, wenn man die Kerze langsam von der Glasplatte wegbewegt?',
   takeaway:
-    '平面镜的像与物关于镜面对称：像与物始终等大，像距始终等于物距 —— 蜡烛远离时像也等距离退远，但大小不变。',
+    'Das Bild in einem ebenen Spiegel ist spiegelsymmetrisch zum Gegenstand: Bild und Gegenstand sind stets gleich groß, der Bildabstand ist stets gleich dem Gegenstandsabstand – entfernt sich die Kerze, entfernt sich das Bild um denselben Betrag, seine Größe bleibt jedoch unverändert.',
   options: [
-    { id: 'same-size-farther', label: '像大小不变，像到镜面的距离变大（v = u）', correct: true },
+    { id: 'same-size-farther', label: 'Bildgröße bleibt unverändert, Bildabstand vergrößert sich (v = u)', correct: true },
     {
       id: 'image-shrinks',
-      label: '像越来越小（看上去确实变小了）',
+      label: 'Das Bild wird immer kleiner (es sieht zwar kleiner aus)',
       mistake: {
         type: 'concept',
         explanation:
-          '"看上去变小"是因为像离眼睛远了、视角变小，属于观察效果；几何上平面镜的像与物关于镜面对称，永远等大。用大小相同的备用蜡烛去替换像的位置就能验证。',
-        review: ['平面镜成像特点：等大、对称', '视角与像的真实大小'],
+          'Der Eindruck „es wird kleiner" entsteht durch den größeren Abstand zum Auge und den damit kleineren Sehwinkel, also durch einen Beobachtungseffekt; geometrisch ist das Bild im ebenen Spiegel zum Gegenstand spiegelsymmetrisch und daher stets gleich groß. Dies lässt sich durch Einsetzen einer gleich großen Ersatzkerze an die Bildposition überprüfen.',
+        review: ['Merkmale der Bildentstehung am ebenen Spiegel: gleich groß, symmetrisch', 'Sehwinkel und wahre Bildgröße'],
         evidenceCheckId: 'mirror_image_symmetry',
       },
     },
     {
       id: 'image-stays',
-      label: '像留在原处，只有蜡烛在动',
+      label: 'Das Bild bleibt an seinem Platz, nur die Kerze bewegt sich',
       mistake: {
         type: 'concept',
         explanation:
-          '像的位置由物的位置决定：像与物关于镜面对称，物距变大像距同步变大。物动像必动，两者始终隔镜相对、距离相等。',
-        review: ['像物对称：像距 = 物距', '平面镜成像作图'],
+          'Die Bildposition wird durch die Gegenstandsposition bestimmt: Bild und Gegenstand sind spiegelsymmetrisch, vergrößert sich der Gegenstandsabstand, vergrößert sich auch der Bildabstand synchron. Bewegt sich der Gegenstand, bewegt sich auch das Bild, beide bleiben spiegelbildlich zum Spiegel mit gleichem Abstand angeordnet.',
+        review: ['Bild-Gegenstand-Symmetrie: Bildabstand = Gegenstandsabstand', 'Strahlengang am ebenen Spiegel'],
         evidenceCheckId: 'mirror_image_symmetry',
       },
     },
@@ -480,64 +480,64 @@ const MIRROR_DISTANCE_SIZE: SelfCheckItem = {
 
 const MIRROR_VIRTUAL_SCREEN: SelfCheckItem = {
   id: 'mirror-virtual-screen',
-  prompt: '把光屏放到玻璃板后面"像"的位置上，光屏上能承接到像吗？',
+  prompt: 'Kann man das Bild auf einem Schirm auffangen, wenn man diesen hinter die Glasplatte an die Stelle des „Bilds" hält?',
   takeaway:
-    '平面镜的像是反射光线反向延长线的交点，镜后并没有实际光线到达 —— 是虚像，光屏承接不到，只能透过玻璃板看到。',
+    'Das Bild im ebenen Spiegel ist der Schnittpunkt der rückwärts verlängerten reflektierten Lichtstrahlen, hinter dem Spiegel treffen keine tatsächlichen Lichtstrahlen ein – es handelt sich um ein virtuelles Bild, das nicht auf einem Schirm aufgefangen werden kann, sondern nur durch die Glasplatte hindurch sichtbar ist.',
   options: [
-    { id: 'cannot-virtual', label: '不能：那是反射光线反向延长线形成的虚像', correct: true },
+    { id: 'cannot-virtual', label: 'Nein: Es ist ein virtuelles Bild, das durch die rückwärts verlängerten reflektierten Lichtstrahlen entsteht', correct: true },
     {
       id: 'can-catch',
-      label: '能：像就在那个位置，光屏放准了就能接住',
+      label: 'Ja: Das Bild befindet sich genau dort, wenn der Schirm genau positioniert ist, kann man es auffangen',
       mistake: {
         type: 'concept',
         explanation:
-          '位置"对"不等于有光到达：反射光线全部折回蜡烛一侧，镜后那个位置没有任何实际光线会聚，光屏上自然一片空白。能被光屏承接的只有实像。',
-        review: ['实像与虚像的区别', '平面镜成虚像'],
+          '„Genau an der richtigen Stelle" bedeutet noch nicht, dass dort Licht eintrifft: Alle reflektierten Lichtstrahlen kehren zur Kerzenseite zurück, an der Position hinter dem Spiegel gibt es keinen tatsächlichen Strahlenschnittpunkt. Nur reelle Bilder können auf einem Schirm aufgefangen werden.',
+        review: ['Unterschied zwischen reellem und virtuellem Bild', 'Bildentstehung am ebenen Spiegel'],
         evidenceCheckId: 'virtual_image_uncatchable',
       },
     },
     {
       id: 'brighter-helps',
-      label: '换更亮的蜡烛、把屏贴得更近就能承接到',
+      label: 'Ja, wenn man eine hellere Kerze nimmt oder den Schirm näher heranrückt',
       mistake: {
         type: 'modeling',
         explanation:
-          '亮度和距离改变的只是观察条件，改变不了"镜后没有实际光线"这一事实：虚像的本质由光路决定，再亮的蜡烛也不会让反射光跑到镜子后面去。',
-        review: ['虚像不能被光屏承接', '光的反射定律'],
+          'Helligkeit und Abstand beeinflussen nur die Beobachtungsbedingungen, ändern aber nichts daran, dass hinter dem Spiegel keine tatsächlichen Lichtstrahlen ankommen: Das Wesen des virtuellen Bilds wird durch den Strahlengang bestimmt, auch die hellste Kerze lässt kein reflektiertes Licht hinter den Spiegel gelangen.',
+        review: ['Virtuelles Bild kann nicht auf einem Schirm aufgefangen werden', 'Reflexionsgesetz'],
         evidenceCheckId: 'virtual_image_uncatchable',
       },
     },
   ],
 }
 
-/* ------------------------------------------------- 凸透镜成像 (初中光学) -- */
+/* ------------------------------------------------- Sammellinse (Mittelschule, Optik) -- */
 
 const LENS_BEYOND_2F: SelfCheckItem = {
   id: 'lens-beyond-2f',
-  prompt: '蜡烛放在凸透镜二倍焦距之外（u > 2f）时，光屏上得到的像是？',
+  prompt: 'Welches Bild entsteht auf dem Schirm, wenn die Kerze außerhalb der doppelten Brennweite (u > 2f) einer Sammellinse steht?',
   takeaway:
-    'u > 2f 时成倒立、缩小的实像，像距落在 f 与 2f 之间 —— 照相机正是工作在这一区间：景物远在 2f 外，底片上是缩小的实像。',
+    'Bei u > 2f entsteht ein umgekehrtes, verkleinertes, reelles Bild mit einem Bildabstand zwischen f und 2f – genau dieser Bereich wird in Fotoapparaten genutzt: Gegenstände weit außerhalb von 2f erzeugen auf dem Film ein verkleinertes, reelles Bild.',
   options: [
-    { id: 'inverted-reduced', label: '倒立、缩小的实像（f < v < 2f，照相机）', correct: true },
+    { id: 'inverted-reduced', label: 'Umgekehrt, verkleinert, reell (f < v < 2f, Fotoapparat)', correct: true },
     {
       id: 'upright-virtual',
-      label: '正立、缩小的虚像',
+      label: 'Aufrecht, verkleinert, virtuell',
       mistake: {
         type: 'concept',
         explanation:
-          '凸透镜只在 u < f 时成虚像，而且那个虚像是放大的。u > 2f 时折射光线实际会聚在光屏上，是能承接的实像，且必然倒立。"正立缩小的虚像"是凹透镜的成像特点。',
-        review: ['凸透镜成像规律表', '凸透镜与凹透镜的区别'],
+          'Eine Sammellinse erzeugt nur bei u < f ein virtuelles Bild, und dieses ist vergrößert. Bei u > 2f konvergieren die gebrochenen Lichtstrahlen tatsächlich auf dem Schirm und bilden ein auffangbares, reelles Bild, das notwendigerweise umgekehrt ist. „Aufrecht, verkleinert, virtuell" ist ein Merkmal einer Zerstreuungslinse.',
+        review: ['Bildentstehungsgesetz der Sammellinse', 'Unterschied zwischen Sammel- und Zerstreuungslinse'],
         evidenceCheckId: 'thin_lens_equation',
       },
     },
     {
       id: 'inverted-magnified',
-      label: '倒立、放大的实像',
+      label: 'Umgekehrt, vergrößert, reell',
       mistake: {
         type: 'concept',
         explanation:
-          '倒立放大的实像出现在 f < u < 2f（投影仪区间）。u > 2f 时由 1/u + 1/v = 1/f 可得 v < u，放大率 m = v/u < 1，像必然缩小。判断像的大小先比较 u 与 2f。',
-        review: ['成像规律：u 与 2f 的比较', '放大率 m = v/u'],
+          'Ein umgekehrtes, vergrößertes, reelles Bild entsteht bei f < u < 2f (Projektorbereich). Bei u > 2f ergibt die Linsengleichung 1/u + 1/v = 1/f v < u und die Abbildungsmassstab m = v/u < 1, das Bild ist also verkleinert. Zum Bestimmen der Bildgröße vergleicht man u mit 2f.',
+        review: ['Bildentstehungsgesetz: Vergleich von u mit 2f', 'Abbildungsmassstab m = v/u'],
         evidenceCheckId: 'thin_lens_equation',
       },
     },
@@ -546,72 +546,72 @@ const LENS_BEYOND_2F: SelfCheckItem = {
 
 const LENS_WITHIN_F: SelfCheckItem = {
   id: 'lens-within-f',
-  prompt: '把蜡烛移到焦点以内（u < f），光屏上还能承接到像吗？',
+  prompt: 'Kann man das Bild auf einem Schirm auffangen, wenn man die Kerze innerhalb der Brennweite (u < f) einer Sammellinse platziert?',
   takeaway:
-    'u < f 时折射光线发散，其反向延长线交成正立、放大的虚像 —— 这就是放大镜：光屏上承接不到，必须透过透镜观察。',
+    'Bei u < f divergieren die gebrochenen Lichtstrahlen, ihre rückwärts verlängerten Linien schneiden sich zu einem aufrechten, vergrößerten, virtuellen Bild – genau das Prinzip der Lupe: Das Bild kann nicht auf einem Schirm aufgefangen werden, man muss durch die Linse hindurchschauen.',
   options: [
     {
       id: 'cannot-magnifier',
-      label: '不能：成正立、放大的虚像，要透过透镜看（放大镜）',
+      label: 'Nein: Es entsteht ein aufrechtes, vergrößertes, virtuelles Bild, das nur durch die Linse betrachtet werden kann (Lupe)',
       correct: true,
     },
     {
       id: 'move-screen-far',
-      label: '能，只要把光屏移得足够远',
+      label: 'Ja, man braucht den Schirm nur weit genug entfernt aufzustellen',
       mistake: {
         type: 'modeling',
         explanation:
-          'u < f 时折射光线是发散的，越往远处光线彼此离得越开，永远不会会聚成实像 —— 移屏解决不了"没有会聚点"的问题。像在反向延长线一侧，只能用眼睛透过透镜看。',
-        review: ['u < f 成虚像', '实像与虚像'],
+          'Bei u < f sind die gebrochenen Lichtstrahlen divergent, je weiter sie sich fortpflanzen, desto weiter entfernen sie sich voneinander, sie werden niemals konvergieren. Das Verschieben des Schirms löst also nicht das Problem „kein Konvergenzpunkt". Das Bild liegt auf der Seite der rückwärts verlängerten Strahlen und ist nur durch die Linse sichtbar.',
+        review: ['Bei u < f entsteht ein virtuelles Bild', 'Unterschied zwischen reellem und virtuellem Bild'],
         evidenceCheckId: 'virtual_image_uncatchable',
       },
     },
     {
       id: 'screen-at-focus',
-      label: '能，把光屏放在焦点上就行',
+      label: 'Ja, man stellt den Schirm einfach im Brennpunkt auf',
       mistake: {
         type: 'concept',
         explanation:
-          '焦点是平行于主光轴的光会聚的位置，不是任何物体的像的位置。u < f 时根本没有实际光线会聚，焦点处的光屏同样一片空白。承接实像要把屏放到 v 处，而此时 v 不存在。',
-        review: ['焦点与焦距的含义', '虚像不能被光屏承接'],
+          'Der Brennpunkt ist der Konvergenzpunkt für parallel zur optischen Achse einfallende Lichtstrahlen, nicht der Bildort für einen beliebigen Gegenstand. Bei u < f gibt es überhaupt keinen tatsächlichen Konvergenzpunkt der gebrochenen Strahlen, daher bleibt der Schirm im Brennpunkt leer. Ein reelles Bild würde nur an einem Ort v existieren, der hier nicht definiert ist.',
+        review: ['Bedeutung von Brennpunkt und Brennweite', 'Virtuelles Bild kann nicht auf einem Schirm aufgefangen werden'],
         evidenceCheckId: 'virtual_image_uncatchable',
       },
     },
   ],
 }
 
-/* ------------------------------------------------- 凹面镜成像 (初中光学) -- */
+/* ------------------------------------------------- Hohlspiegel (Mittelschule, Optik) -- */
 
 const CURVED_MIRROR_BEYOND_2F: SelfCheckItem = {
   id: 'curved-mirror-beyond-2f',
-  prompt: '蜡烛放在凹面镜二倍焦距之外（u > 2f）时，所成的像是？',
+  prompt: 'Welches Bild entsteht, wenn eine Kerze außerhalb der doppelten Brennweite (u > 2f) eines Hohlspiegels steht?',
   takeaway:
-    '凹面镜与凸透镜共用 1/u + 1/v = 1/f：u > 2f 时成倒立、缩小的实像。但反射把光折回，实像落在镜前（蜡烛一侧），光屏也要放在这一侧承接。',
+    'Hohlspiegel folgen der gleichen Grundgleichung 1/u + 1/v = 1/f wie Sammellinsen: Bei u > 2f entsteht ein umgekehrtes, verkleinertes, reelles Bild. Da es sich jedoch um Reflexion handelt, kehren die Lichtstrahlen zurück und das reelle Bild liegt vor dem Spiegel (auf der gleichen Seite wie die Kerze), wo es auf einem Schirm aufgefangen werden kann.',
   options: [
     {
       id: 'inverted-reduced-front',
-      label: '倒立、缩小的实像，成在镜前（蜡烛一侧）',
+      label: 'Umgekehrt, verkleinert, reell, vor dem Spiegel (auf der Kerzenseite)',
       correct: true,
     },
     {
       id: 'plane-mirror-like',
-      label: '正立、等大的虚像，成在镜后（像平面镜那样）',
+      label: 'Aufrecht, gleich groß, virtuell, hinter dem Spiegel (wie beim ebenen Spiegel)',
       mistake: {
         type: 'concept',
         explanation:
-          '等大对称的虚像是平面镜的规律。凹面镜会把平行于主光轴的光会聚到焦点，u > 2f 时反射光线实际会聚成倒立缩小的实像 —— 判断先比较 u 与 f、2f，别把球面镜当平面镜。',
-        review: ['球面镜与平面镜的区别', '凹面镜成像规律'],
+          'Ein aufrechtes, gleich großes, virtuelles Bild ist charakteristisch für einen ebenen Spiegel. Ein Hohlspiegel fokussiert parallel zur optischen Achse einfallendes Licht im Brennpunkt; bei u > 2f konvergieren die reflektierten Lichtstrahlen tatsächlich und bilden ein umgekehrtes, verkleinertes, reelles Bild. Vergleiche daher immer u mit f und 2f und verwechsle nicht Kugelspiegel mit ebenen Spiegeln.',
+        review: ['Unterschied zwischen Kugelspiegel und ebenem Spiegel', 'Bildentstehungsgesetz des Hohlspiegels'],
         evidenceCheckId: 'curved_mirror_equation',
       },
     },
     {
       id: 'real-behind-mirror',
-      label: '倒立、缩小的实像，成在镜子后面',
+      label: 'Umgekehrt, verkleinert, reell, hinter dem Spiegel',
       mistake: {
         type: 'concept',
         explanation:
-          '镜面不透光：反射光线全部折回蜡烛一侧，镜后没有任何实际光线，实像只能出现在镜前。"实像在元件另一侧"是透镜（光穿过）的规律，不适用于反射成像。',
-        review: ['反射成像与折射成像的区别', '实像出现在实际光线会聚处'],
+          'Die Spiegelfläche ist undurchsichtig: Alle reflektierten Lichtstrahlen kehren zur Vorderseite zurück, hinter dem Spiegel treffen keine tatsächlichen Lichtstrahlen ein. Reelle Bilder können daher nur dort entstehen, wo tatsächliche Lichtstrahlen konvergieren, d. h. vor dem Spiegel. Die Regel „reelles Bild auf der anderen Seite des optischen Elements" gilt für Linsen (durchlässig), nicht für Spiegel (reflektierend).',
+        review: ['Unterschied zwischen Reflexion und Brechung bei der Bildentstehung', 'Reelles Bild entsteht am Ort der tatsächlichen Strahlenkonvergenz'],
         evidenceCheckId: 'principal_rays_converge',
       },
     },
@@ -620,68 +620,68 @@ const CURVED_MIRROR_BEYOND_2F: SelfCheckItem = {
 
 const CURVED_MIRROR_WITHIN_F: SelfCheckItem = {
   id: 'curved-mirror-within-f',
-  prompt: '把蜡烛移到凹面镜焦点以内（u < f），光屏上还能承接到像吗？',
+  prompt: 'Kann man das Bild auf einem Schirm auffangen, wenn man die Kerze innerhalb der Brennweite (u < f) eines Hohlspiegels platziert?',
   takeaway:
-    'u < f 时反射光线发散，其反向延长线在镜后交成正立、放大的虚像 —— 化妆镜、牙医镜正是这样用的：光屏承接不到，要对着镜面观察。',
+    'Bei u < f divergieren die reflektierten Lichtstrahlen, ihre rückwärts verlängerten Linien schneiden sich hinter dem Spiegel zu einem aufrechten, vergrößerten, virtuellen Bild – genau wie bei einem Kosmetik- oder Zahnspiegel: Das Bild kann nicht auf einem Schirm aufgefangen werden, man muss direkt in den Spiegel schauen.',
   options: [
     {
       id: 'cannot-makeup-mirror',
-      label: '不能：成正立、放大的虚像，要对着镜面看（化妆镜）',
+      label: 'Nein: Es entsteht ein aufrechtes, vergrößertes, virtuelles Bild, das nur im Spiegel betrachtet werden kann (Kosmetikspiegel)',
       correct: true,
     },
     {
       id: 'screen-behind',
-      label: '能，把光屏放到镜后"像"的位置就能接住',
+      label: 'Ja, stellt man den Schirm hinter den Spiegel an die Bildposition, kann man es auffangen',
       mistake: {
         type: 'modeling',
         explanation:
-          '位置"对"不等于有光到达：镜后那个像是反射光线反向延长线的交点，没有实际光线经过，光屏放在那里一片空白。能被光屏承接的只有实际光线会聚成的实像。',
-        review: ['实像与虚像的区别', '虚像不能被光屏承接'],
+          'Die korrekte Position reicht nicht aus: Das Bild hinter dem Spiegel ist der Schnittpunkt der rückwärts verlängerten reflektierten Lichtstrahlen, dort treffen keine tatsächlichen Lichtstrahlen ein. Ein Schirm an dieser Stelle bleibt daher leer. Nur reelle Bilder, die durch tatsächliche Strahlenkonvergenz entstehen, können aufgefangen werden.',
+        review: ['Unterschied zwischen reellem und virtuellem Bild', 'Virtuelles Bild kann nicht auf einem Schirm aufgefangen werden'],
         evidenceCheckId: 'virtual_image_uncatchable',
       },
     },
     {
       id: 'always-converges',
-      label: '能，凹面镜总能把光会聚成实像',
+      label: 'Ja, ein Hohlspiegel kann Licht immer zu einem reellen Bild konvergieren lassen',
       mistake: {
         type: 'concept',
         explanation:
-          '凹面镜的会聚本领是有限的：物在焦点以内时，发自物点的光束太"散"，反射后仍然发散，不存在会聚点。只有 u > f 时才成实像，u < f 成放大的虚像。',
-        review: ['凹面镜成像规律：u 与 f 的比较', '焦点的物理意义'],
+          'Die Konvergenzfähigkeit eines Hohlspiegels ist begrenzt: Befindet sich der Gegenstand innerhalb der Brennweite, ist der einfallende Lichtkegel zu divergent, die reflektierten Strahlen bleiben divergent und es gibt keinen Konvergenzpunkt. Nur bei u > f entsteht ein reelles Bild, bei u < f entsteht ein vergrößertes, virtuelles Bild.',
+        review: ['Bildentstehungsgesetz des Hohlspiegels: Vergleich von u mit f', 'Bedeutung des Brennpunkts'],
         evidenceCheckId: 'curved_mirror_equation',
       },
     },
   ],
 }
 
-/* ------------------------------------------------- 回声测距 (初中声学) -- */
+/* ------------------------------------------------- Echolotung (Mittelschule, Akustik) -- */
 
 const ECHO_DISTANCE_FORMULA: SelfCheckItem = {
   id: 'echo-distance-formula',
-  prompt: '对着峭壁喊一声，2 s 后听到回声。声速取 340 m/s，人到峭壁的距离是？',
+  prompt: 'Man ruft gegen eine Felswand und hört das Echo nach 2 s. Mit Schallgeschwindigkeit v = 340 m/s beträgt der Abstand zwischen Rufer und Felswand?',
   takeaway:
-    '2 s 是声音"去 + 回"走完的时间：总路程 v·t = 680 m 是双程，单程距离要减半，d = v·t/2 = 340 m —— 除以 2 正是回声测距最容易漏掉的一步。',
+    'Die 2 s sind die Gesamtzeit für Hin- und Rückweg des Schalls: Die Gesamtstrecke ist v·t = 680 m (doppelter Weg), der einfache Abstand ist also die Hälfte davon, d = v·t/2 = 340 m – das Halbieren ist der leichteste Fehler bei der Echolotung.',
   options: [
-    { id: 'half-trip', label: '340 m（d = v·t/2，声音走的是往返双程）', correct: true },
+    { id: 'half-trip', label: '340 m (d = v·t/2, der Schall legt Hin- und Rückweg zurück)', correct: true },
     {
       id: 'full-trip',
-      label: '680 m（距离 = 速度 × 时间）',
+      label: '680 m (Abstand = Geschwindigkeit × Zeit)',
       mistake: {
         type: 'concept',
         explanation:
-          's = vt 没有错，错在 680 m 是声音的总路程：声音先到峭壁再折回来，2 s 里把"去程 + 回程"都走完了。人到峭壁的距离只是其中一半，务必再除以 2。',
-        review: ['回声测距 d = v·t/2', '往返路程与单程距离的区别'],
+          's = v·t ist prinzipiell richtig, aber 680 m ist die vom Schall in 2 s zurückgelegte Gesamtstrecke: Der Schall erreicht zunächst die Felswand und kehrt dann zurück, in 2 s hat er also Hin- und Rückweg vollständig zurückgelegt. Der Abstand zum Felsen ist nur die Hälfte davon, daher muss noch durch 2 geteilt werden.',
+        review: ['Echolotung d = v·t/2', 'Unterschied zwischen Hin- und Rückweg und einfachem Abstand'],
         evidenceCheckId: 'echo_distance_formula',
       },
     },
     {
       id: 'quarter-trip',
-      label: '170 m（去和回各占 1 s，再对半分）',
+      label: '170 m (Hin- und Rückweg je 1 s, dann nochmal halbieren)',
       mistake: {
         type: 'concept',
         explanation:
-          '"去和回各占 1 s"是对的，但那 1 s 里声音恰好走完整个单程：d = v·t₁ = 340 × 1 = 340 m。除以 2 只做一次 —— 要么把总时间减半，要么把总路程减半，不能两个都减。',
-        review: ['回声测距 d = v·t/2', '单程时间 t₁ = t/2'],
+          '„Hin- und Rückweg beanspruchen je 1 s" ist korrekt, dann legt der Schall in 1 s genau den einfachen Abstand zurück: d = v·t₁ = 340 × 1 = 340 m. Man halbiert also nur einmal – entweder teilt man die Gesamtzeit durch 2, oder teilt man die Gesamtstrecke durch 2, aber nicht beides.',
+        review: ['Echolotung d = v·t/2', 'Einzelwegzeit t₁ = t/2'],
         evidenceCheckId: 'reflection_symmetry',
       },
     },
@@ -690,30 +690,30 @@ const ECHO_DISTANCE_FORMULA: SelfCheckItem = {
 
 const ECHO_MEDIUM_SPEED: SelfCheckItem = {
   id: 'echo-medium-speed',
-  prompt: '用同样的方法在水下测距（声呐），测得的回声时间比空气中短得多，主要原因是？',
+  prompt: 'Wenn man mit derselben Methode Unterwasserentfernung misst (Sonar), ist die gemessene Echozeit viel kürzer als in Luft. Was ist der Hauptgrund?',
   takeaway:
-    '声速由传播介质决定：水中约 1500 m/s，比 15 ℃ 空气中的 340 m/s 快得多，同样的距离往返时间自然更短 —— 计算时必须用介质对应的声速。',
+    'Die Schallgeschwindigkeit hängt vom Ausbreitungsmedium ab: In Wasser beträgt sie etwa 1500 m/s und ist damit viel größer als in Luft (ca. 340 m/s bei 15 °C), bei gleicher Entfernung ist die Hin- und Rücklaufzeit daher deutlich kürzer – bei der Berechnung muss stets die zum Medium gehörende Schallgeschwindigkeit verwendet werden.',
   options: [
-    { id: 'medium-speed', label: '水中声速（约 1500 m/s）远大于空气中的声速', correct: true },
+    { id: 'medium-speed', label: 'Die Schallgeschwindigkeit in Wasser (ca. 1500 m/s) ist viel größer als in Luft', correct: true },
     {
       id: 'louder-faster',
-      label: '声呐发出的声音更响，传得更快',
+      label: 'Das Sonar sendet lautere Schallwellen aus, die sich schneller ausbreiten',
       mistake: {
         type: 'concept',
         explanation:
-          '响度描述声音的强弱，由振幅决定；传播快慢由介质本身决定，与响度无关。再响的声音在同一介质里也是同一个速度匀速传播。',
-        review: ['声速由介质决定', '响度与振幅'],
+          'Die Lautstärke beschreibt die Stärke des Schalls und wird durch die Amplitude bestimmt; die Ausbreitungsgeschwindigkeit wird hingegen durch das Medium bestimmt und ist unabhängig von der Lautstärke. Selbst der lauteste Schall breitet sich im gleichen Medium mit derselben konstanten Geschwindigkeit aus.',
+        review: ['Schallgeschwindigkeit wird vom Medium bestimmt', 'Unterschied zwischen Lautstärke und Amplitude'],
         evidenceCheckId: 'pulse_speed_constant',
       },
     },
     {
       id: 'water-shorter-path',
-      label: '声音在水里走的是更短的路线',
+      label: 'Der Schall legt im Wasser einen kürzeren Weg zurück',
       mistake: {
         type: 'modeling',
         explanation:
-          '声音沿直线传播，去程和回程走的都是源到反射面的同一段距离，介质不会改变路径长度。时间变短只能是速度变快：t = 2d/v，v 越大 t 越小。',
-        review: ['声音沿直线传播', '回声时间 t = 2d/v'],
+          'Schall breitet sich geradlinig aus, Hin- und Rückweg sind jeweils genau dieselbe Strecke vom Sender zum Reflektor. Das Medium ändert nicht die Weglänge. Die kürzere Zeit lässt sich nur durch eine höhere Geschwindigkeit erklären: t = 2d/v, je größer v, desto kleiner t.',
+        review: ['Schall breitet sich geradlinig aus', 'Echozeit t = 2d/v'],
         evidenceCheckId: 'echo_distance_formula',
       },
     },
@@ -724,30 +724,30 @@ const ECHO_MEDIUM_SPEED: SelfCheckItem = {
 
 const BUOYANCY_DEPTH: SelfCheckItem = {
   id: 'buoyancy-depth',
-  prompt: '铝块已经完全浸没在水中，再把它往下放到更深的位置，弹簧测力计的读数怎样变化？',
+  prompt: 'Ein Aluminiumblock ist bereits vollständig unter Wasser getaucht. Wird er noch tiefer in das Wasser gedrückt, wie ändert sich die Anzeige der Federwaage?',
   takeaway:
-    'F_浮 = ρ_液·g·V_排 里没有深度这一项：完全浸没后 V_排 就等于物块体积，再往下放它也不会变，所以浮力不变、读数也不变。',
+    'F_A = ρ_Fl·g·V_verdr enthält keine Tiefenabhängigkeit: Ist der Körper vollständig eingetaucht, ist das verdrängte Volumen V_verdr gleich dem Körpervolumen und ändert sich auch bei weiterem Absenken nicht, daher bleibt der Auftrieb und damit auch die Waagenanzeige unverändert.',
   options: [
-    { id: 'unchanged', label: '不变（V_排 已经等于物块体积，不再随深度变化）', correct: true },
+    { id: 'unchanged', label: 'Unverändert (V_verdr ist bereits gleich dem Körpervolumen und ändert sich nicht mit der Tiefe)', correct: true },
     {
       id: 'deeper-more-buoyant',
-      label: '变小（浸得越深浮力越大，把物块托得越轻）',
+      label: 'Sie wird kleiner (je tiefer eingetaucht, desto größer der Auftrieb, der Block wird leichter)',
       mistake: {
         type: 'concept',
         explanation:
-          '"越深浮力越大"只在物块还没完全浸没时成立 —— 那时是排开的体积在变大。一旦完全浸没，V_排 就锁死在物块体积上，再深也不增加，浮力随之不变。',
-        review: ['浮力只与 ρ_液 和 V_排 有关', '浸没前后 V_排 的区别'],
+          '„Je tiefer, desto größer der Auftrieb" gilt nur solange der Körper noch nicht vollständig eingetaucht ist – in diesem Fall nimmt das verdrängte Volumen noch zu. Sobald der Körper vollständig eingetaucht ist, ist V_verdr festgelegt und ändert sich nicht mehr, der Auftrieb bleibt daher konstant.',
+        review: ['Auftrieb hängt nur von ρ_Fl und V_verdr ab', 'Unterschied zwischen teilweisem und vollständigem Eintauchen'],
         evidenceCheckId: 'buoyancy_depth_independent',
       },
     },
     {
       id: 'deeper-more-pressure',
-      label: '变大（水越深压强越大，把物块往下压得更重）',
+      label: 'Sie wird größer (mit zunehmender Wassertiefe steigt der Druck und drückt den Block stärker nach unten)',
       mistake: {
         type: 'concept',
         explanation:
-          '深处压强确实更大，但上下表面的压强同时都变大，差值 ρ_液·g·h 只由物块自身的高度决定 —— 浮力来自这个差值，不是来自压强的绝对大小。',
-        review: ['浮力来自上下表面压力差', 'p = ρgh 与压力差的区别'],
+          'Der Druck steigt zwar mit der Tiefe, jedoch steigen sowohl der Druck auf die Oberseite als auch auf die Unterseite gleichzeitig an. Der Unterschied ergibt sich als ρ_Fl·g·h und hängt nur von der Höhe des Körpers ab – der Auftrieb entsteht aus diesem Druckunterschied, nicht aus dem Absolutdruck.',
+        review: ['Auftrieb entsteht aus dem Druckunterschied zwischen Ober- und Unterseite', 'Unterschied zwischen p = ρgh und Druckdifferenz'],
         evidenceCheckId: 'archimedes_principle',
       },
     },
@@ -757,30 +757,30 @@ const BUOYANCY_DEPTH: SelfCheckItem = {
 const BUOYANCY_LIQUID: SelfCheckItem = {
   id: 'buoyancy-liquid',
   prompt:
-    '把同一个铝块从水（1.0×10³ kg/m³）改成完全浸没在盐水（1.1×10³ kg/m³）里，浮力和读数怎样变？',
+    'Wird derselbe Aluminiumblock aus Wasser (1,0×10³ kg/m³) in vollständig eingetauchtes Salzwasser (1,1×10³ kg/m³) überführt, wie verändern sich Auftrieb und Waagenanzeige?',
   takeaway:
-    '完全浸没时 V_排 不变，浮力只随液体密度走：ρ_液 变大 10%，F_浮 就变大 10%；G 没变，所以读数 F_示 = G − F_浮 相应变小。',
+    'Bei vollständigem Eintauchen bleibt V_verdr konstant, der Auftrieb hängt nur von der Flüssigkeitsdichte ab: ρ_Fl steigt um 10 %, daher steigt F_A um 10 %. Da G konstant bleibt, nimmt die Anzeige F_Anzeige = G − F_A entsprechend ab.',
   options: [
-    { id: 'more-buoyant', label: '浮力变大、读数变小', correct: true },
+    { id: 'more-buoyant', label: 'Auftrieb steigt, Waagenanzeige sinkt', correct: true },
     {
       id: 'nothing-changes',
-      label: '都不变（物块的质量和体积都没有改变）',
+      label: 'Beide bleiben unverändert (Masse und Volumen des Blocks ändern sich nicht)',
       mistake: {
         type: 'concept',
         explanation:
-          '浮力等于被排开液体的重力，取决于排开的是什么液体。物块没变，但同样 100 cm³ 的盐水比水更重，托起的力自然更大。',
-        review: ['F_浮 = ρ_液·g·V_排', '浮力由液体密度决定'],
+          'Der Auftrieb ist gleich dem Gewicht der verdrängten Flüssigkeit und hängt davon ab, welche Flüssigkeit verdrängt wird. Der Block hat sich nicht verändert, aber dieselben 100 cm³ Salzwasser wiegen mehr als 100 cm³ Wasser, daher ist die Auftriebskraft größer.',
+        review: ['F_A = ρ_Fl·g·V_verdr', 'Auftrieb hängt von der Flüssigkeitsdichte ab'],
         evidenceCheckId: 'archimedes_principle',
       },
     },
     {
       id: 'both-up',
-      label: '浮力变大、读数也变大',
+      label: 'Auftrieb steigt, Waagenanzeige steigt ebenfalls',
       mistake: {
         type: 'modeling',
         explanation:
-          '读数和浮力是此消彼长的：物块受重力 G、拉力 F_示、浮力 F_浮 三个力平衡，G 没变，浮力多分担一点，测力计就少拉一点。两个一起变大会破坏 F_示 + F_浮 = G。',
-        review: ['称重法 F_浮 = G − F_示', '悬吊物块的三力平衡'],
+          'Anzeige und Auftrieb sind gegenläufig: Auf den Block wirken Gewicht G, Zugkraft F_Anzeige und Auftrieb F_A im Gleichgewicht. G bleibt konstant, nimmt F_A zu, trägt der Auftrieb mehr Gewicht, so zieht die Waage weniger – die Kräfte bilanzieren sich nach F_Anzeige + F_A = G. Wenn beide zunähmen, wäre dieses Gleichgewicht verletzt.',
+        review: ['Tauchwägung F_A = G − F_Anzeige', 'Kräftegleichgewicht bei aufgehängtem Körper'],
         evidenceCheckId: 'scale_reading_balance',
       },
     },
@@ -791,30 +791,30 @@ const BUOYANCY_LIQUID: SelfCheckItem = {
 
 const MELTING_PLATEAU: SelfCheckItem = {
   id: 'melting-plateau',
-  prompt: '给冰持续加热，温度计停在 0 ℃ 不动了好几分钟。这段时间里冰还在吸热吗？',
+  prompt: 'Wird Eis kontinuierlich erwärmt, bleibt das Thermometer mehrere Minuten lang bei 0 °C stehen. Wird in dieser Zeit weiterhin Wärme aufgenommen?',
   takeaway:
-    '晶体熔化时吸的热全部用来破坏晶体结构，不用来升温 —— 温度不变不等于不吸热。加热器一秒都没停，图像上那段水平线正是熔化热 Q = mL 被吸收的过程。',
+    'Beim Schmelzen eines Kristalls wird die zugeführte Wärme vollständig zur Aufhebung der Kristallstruktur verbraucht, nicht zur Temperaturerhöhung – konstante Temperatur bedeutet also nicht, dass keine Wärme zugeführt wird. Der Heizkörper läuft ununterbrochen, und der waagerechte Abschnitt im Diagramm zeigt genau die Aufnahme der Schmelzwärme Q = m·L.',
   options: [
-    { id: 'absorbs', label: '在吸热（吸的热用来熔化，不用来升温）', correct: true },
+    { id: 'absorbs', label: 'Ja, es nimmt Wärme auf (die Wärme wird zum Schmelzen verbraucht, nicht zur Temperaturerhöhung)', correct: true },
     {
       id: 'no-heat',
-      label: '不吸热了（温度不变说明没有热量进来）',
+      label: 'Nein, es nimmt keine Wärme mehr auf (konstante Temperatur bedeutet kein Wärmestrom)',
       mistake: {
         type: 'concept',
         explanation:
-          '温度不变只说明内能里"分子运动剧烈程度"这一项没变，不代表没有能量进来。加热器功率恒定，这段时间照样每秒送进 P 焦耳，只是全部拿去拆晶体结构了。',
-        review: ['熔化过程吸热但温度不变', '晶体熔化热 Q = mL'],
+          'Konstante Temperatur bedeutet nur, dass der Anteil der inneren Energie, der die mittlere kinetische Energie der Moleküle widerspiegelt, unverändert bleibt – das schließt jedoch nicht aus, dass Energie zugeführt wird. Bei konstanter Heizleistung wird weiterhin pro Sekunde Energie zugeführt, diese wird jedoch vollständig zum Aufbrechen der Kristallstruktur verwendet.',
+        review: ['Beim Schmelzen wird Wärme aufgenommen, die Temperatur bleibt jedoch konstant', 'Schmelzwärme Q = m·L'],
         evidenceCheckId: 'melting_plateau',
       },
     },
     {
       id: 'broken-thermometer',
-      label: '温度计坏了（一直加热不可能不升温）',
+      label: 'Das Thermometer ist defekt (bei kontinuierlicher Erwärmung muss die Temperatur steigen)',
       mistake: {
         type: 'modeling',
         explanation:
-          '这正是晶体的定义特征：有固定熔点，熔化期间温度锁在熔点上。把冰换成松香（非晶体）再做一次，温度就会一路上升不停 —— 对比一下就知道温度计没坏。',
-        review: ['晶体有固定熔点', '晶体与非晶体的熔化图像差别'],
+          'Genau das ist ein charakteristisches Merkmal von Kristallen: Sie haben einen festen Schmelzpunkt, und während des Schmelzens bleibt die Temperatur bei diesem Punkt konstant. Führt man denselben Versuch mit einem amorphen Stoff wie Harz durch, steigt die Temperatur kontinuierlich an – ein direkter Vergleich zeigt, dass das Thermometer intakt ist.',
+        review: ['Kristalle haben einen festen Schmelzpunkt', 'Unterschied zwischen kristallinen und amorphen Stoffen im Schmelzdiagramm'],
         evidenceCheckId: 'plateau_duration',
       },
     },
@@ -823,30 +823,30 @@ const MELTING_PLATEAU: SelfCheckItem = {
 
 const MELTING_HEATING_RATE: SelfCheckItem = {
   id: 'melting-heating-rate',
-  prompt: '同一套装置、同样的加热功率，为什么熔化完之后水升温比之前冰升温慢得多？',
+  prompt: 'Im gleichen Versuchsaufbau mit gleicher Heizleistung: Warum steigt die Temperatur des Wassers nach dem vollständigen Schmelzen viel langsamer als zuvor die Temperatur des Eises?',
   takeaway:
-    '升温快慢由比热容决定：升温速率是 P/(cm)。水的比热容 4200 J/(kg·℃) 是冰 2100 的两倍，同样的功率和质量下升温速率正好减半。',
+    'Die Erwärmungsgeschwindigkeit wird durch die spezifische Wärmekapazität bestimmt: Die Aufheizrate beträgt P/(c·m). Die spezifische Wärmekapazität von Wasser (4200 J/(kg·°C)) ist doppelt so groß wie die von Eis (2100 J/(kg·°C)), daher halbiert sich bei gleicher Leistung und Masse die Aufheizgeschwindigkeit.',
   options: [
-    { id: 'specific-heat', label: '水的比热容比冰大，同样功率下升温更慢', correct: true },
+    { id: 'specific-heat', label: 'Wasser hat eine größere spezifische Wärmekapazität als Eis, daher steigt seine Temperatur bei gleicher Leistung langsamer', correct: true },
     {
       id: 'losing-heat',
-      label: '水散热更快，热量都跑掉了',
+      label: 'Wasser gibt Wärme schneller ab, ein Großteil der Wärme geht verloren',
       mistake: {
         type: 'modeling',
         explanation:
-          '散热确实存在，但它解释不了这个稳定的两倍关系。把冰段和水段的斜率量出来相比，正好等于两个比热容的反比 —— 这是比热容的定义在起作用，不是漏热。',
-        review: ['升温速率 = P/(cm)', '比热容的物理意义'],
+          'Wärmeverlust tritt zwar auf, kann jedoch nicht das exakte Verhältnis 1:2 erklären. Misst man die Steigungen der Geradenabschnitte für Eis und für Wasser, verhalten sie sich umgekehrt wie die spezifischen Wärmekapazitäten – das ist eine direkte Folge der Definition der spezifischen Wärmekapazität, nicht von Verlusten.',
+        review: ['Aufheizrate = P/(c·m)', 'Bedeutung der spezifischen Wärmekapazität'],
         evidenceCheckId: 'heating_rate_ratio',
       },
     },
     {
       id: 'mass-changed',
-      label: '冰化成水以后质量变小了',
+      label: 'Die Masse wird kleiner, wenn Eis zu Wasser schmilzt',
       mistake: {
         type: 'concept',
         explanation:
-          '熔化只是状态改变，质量守恒 —— 100 g 冰化成的就是 100 g 水。变的是比热容，不是质量；何况质量变小反而会升温更快。',
-        review: ['熔化前后质量不变', 'Q = cmΔt 中各量的含义'],
+          'Beim Schmelzen handelt es sich nur um einen Phasenübergang, die Masse bleibt erhalten – 100 g Eis ergeben 100 g Wasser. Was sich ändert, ist die spezifische Wärmekapazität, nicht die Masse; zudem würde eine kleinere Masse zu einer schnelleren Temperaturerhöhung führen.',
+        review: ['Masse bleibt beim Schmelzen erhalten', 'Bedeutung der Größen in Q = c·m·ΔT'],
         evidenceCheckId: 'energy_conservation',
       },
     },
@@ -855,30 +855,30 @@ const MELTING_HEATING_RATE: SelfCheckItem = {
 
 const HEAT_CAPACITY_RATIO: SelfCheckItem = {
   id: 'heat-capacity-ratio',
-  prompt: '等质量的水和煤油用相同的加热器加热相同时间，水升温 50 ℃、煤油升温 100 ℃。这说明什么？',
+  prompt: 'Gleiche Massen Wasser und Petroleum werden mit demselben Heizgerät für dieselbe Zeit erwärmt: Wasser erwärmt sich um 50 °C, Petroleum um 100 °C. Was folgt daraus?',
   takeaway:
-    '吸收的热量相同，升温却差一倍：水的比热容是煤油的两倍。比热容正是「吸热能力」的量度 —— c 越大，同样的热让温度升得越少。',
+    'Die aufgenommene Wärme ist gleich, die Temperaturerhöhung unterscheidet sich jedoch um den Faktor 2: Die spezifische Wärmekapazität von Wasser ist doppelt so groß wie die von Petroleum. Die spezifische Wärmekapazität ist ein Maß für die „Wärmespeicherfähigkeit" – je größer c, desto weniger steigt die Temperatur bei gleicher zugeführter Wärme.',
   options: [
-    { id: 'water-higher-c', label: '水的比热容更大，同样热量下升温更少', correct: true },
+    { id: 'water-higher-c', label: 'Wasser hat eine größere spezifische Wärmekapazität, bei gleicher Wärme steigt seine Temperatur weniger stark', correct: true },
     {
       id: 'water-less-heat',
-      label: '水实际吸收的热量比较少',
+      label: 'Wasser nimmt tatsächlich weniger Wärme auf',
       mistake: {
         type: 'concept',
         explanation:
-          '控制变量就是为了排除这件事：两边功率相同、时间相同，Q = P·t 完全一样。差的不是进来的热，是同样的热能把温度抬高多少。',
-        review: ['Q = P·t 两边相同', '控制变量：等质量、等功率、等时间'],
+          'Genau das sollen die Kontrollvariablen ausschließen: Gleiche Leistung und gleiche Zeit bedeuten Q = P·t ist für beide identisch. Der Unterschied liegt also nicht in der zugeführten Wärme, sondern darin, wie stark diese Wärme die Temperatur erhöht.',
+        review: ['Q = P·t ist für beide gleich', 'Kontrollvariablen: gleiche Masse, gleiche Leistung, gleiche Zeit'],
         evidenceCheckId: 'equal_heat_absorbed',
       },
     },
     {
       id: 'kerosene-thinner',
-      label: '煤油更稀所以热得快',
+      label: 'Petroleum ist „dünner", deshalb erwärmt es sich schneller',
       mistake: {
         type: 'modeling',
         explanation:
-          '密度不是这个实验的变量。把两边的升温比出来，正好等于两个比热容的反比 4200:2100 = 2:1 —— 这是 c 的定义在起作用，不是「稀」。',
-        review: ['ΔT / ΔT′ = c′ / c', '比热容的物理意义'],
+          'Die Dichte ist in diesem Experiment keine Variable. Das Verhältnis der Temperaturerhöhungen entspricht genau dem umgekehrten Verhältnis der spezifischen Wärmekapazitäten (4200:2100 = 2:1) – dies ergibt sich direkt aus der Definition von c, nicht aus der „Dünnflüssigkeit".',
+        review: ['ΔT / ΔT′ = c′ / c', 'Bedeutung der spezifischen Wärmekapazität'],
         evidenceCheckId: 'specific_heat_ratio',
       },
     },
@@ -887,30 +887,30 @@ const HEAT_CAPACITY_RATIO: SelfCheckItem = {
 
 const HEAT_CAPACITY_EQUAL_Q: SelfCheckItem = {
   id: 'heat-capacity-equal-q',
-  prompt: '这个实验为什么一定要用两个相同的加热器、加热相同的时间？',
+  prompt: 'Warum müssen in diesem Versuch zwei identische Heizgeräte verwendet und beide Flüssigkeiten für die gleiche Zeit erwärmt werden?',
   takeaway:
-    '要比吸热能力，必须让两边吸收的热量相同。Q = cmΔt，Q 相同、m 相同，ΔT 的差别就只剩 c。少了任何一个控制，比热容就比不出来。',
+    'Um die Wärmespeicherfähigkeit zu vergleichen, muss die aufgenommene Wärme auf beiden Seiten gleich sein. Aus Q = c·m·ΔT folgt: Sind Q und m gleich, spiegelt die Differenz von ΔT direkt den Unterschied der spezifischen Wärmekapazität c wider. Ohne diese Kontrollbedingung lässt sich c nicht korrekt vergleichen.',
   options: [
-    { id: 'same-heat', label: '让两边吸收的热量相同，升温差别才只反映比热容', correct: true },
+    { id: 'same-heat', label: 'Damit beide Flüssigkeiten die gleiche Wärmemenge aufnehmen, sodass die Temperaturdifferenz nur die spezifische Wärmekapazität widerspiegelt', correct: true },
     {
       id: 'faster-finish',
-      label: '这样两边能同时做完，省时间',
+      label: 'Damit beide Versuche gleichzeitig beendet werden und Zeit gespart wird',
       mistake: {
         type: 'concept',
         explanation:
-          '同时结束只是方便读数，不是原因。如果一边功率更大，它吸收的热量就更多，升温高并不能说明比热容小。',
-        review: ['控制变量：Q 必须相同', 'Q = P·t'],
+          'Das gleichzeitige Beenden ist nur eine Erleichterung bei der Ablesung, nicht der eigentliche Grund. Hätte ein Heizgerät eine höhere Leistung, würde die entsprechende Flüssigkeit mehr Wärme aufnehmen, und eine größere Temperaturerhöhung ließe sich nicht mehr eindeutig auf eine kleinere spezifische Wärmekapazität zurückführen.',
+        review: ['Kontrollvariable: Q muss gleich sein', 'Q = P·t'],
         evidenceCheckId: 'equal_heat_absorbed',
       },
     },
     {
       id: 'same-temperature',
-      label: '好让两边升到同一个温度再比较',
+      label: 'Damit beide auf dieselbe Endtemperatur erwärmt werden, um sie besser vergleichen zu können',
       mistake: {
         type: 'modeling',
         explanation:
-          '这个实验比较的就是升温的差别，不是终点温度相同。如果硬把两边加热到同一温度，用的时间（也就吸收的热量）就不同了，变量又搅在一起。',
-        review: ['比较的是 ΔT 而不是终温', 'Q = cmΔt 中先固定 Q 和 m'],
+          'In diesem Versuch wird gerade der Unterschied der Temperaturerhöhung ΔT verglichen, nicht angestrebt, dass die Endtemperaturen gleich sind. Würde man bis zur gleichen Endtemperatur erwärmen, wären die Erwärmungszeiten (und damit die aufgenommenen Wärmemengen Q = P·t) unterschiedlich, sodass wieder zwei Variablen vermischt würden.',
+        review: ['Verglichen wird ΔT, nicht die Endtemperatur', 'In Q = c·m·ΔT müssen zunächst Q und m konstant gehalten werden'],
         evidenceCheckId: 'specific_heat_ratio',
       },
     },
@@ -921,30 +921,30 @@ const HEAT_CAPACITY_EQUAL_Q: SelfCheckItem = {
 
 const LEVER_DOUBLE_MASS: SelfCheckItem = {
   id: 'lever-double-mass',
-  prompt: '杠杆已经平衡。把左侧钩码的质量加倍、右侧不动，要重新平衡，左侧力臂应该怎样改？',
+  prompt: 'Ein Hebel ist im Gleichgewicht. Verdoppelt man die Masse der Gewichtsstücke auf der linken Seite, lässt die rechte Seite unverändert, wie muss der linke Hebelarm verändert werden, um das Gleichgewicht wiederherzustellen?',
   takeaway:
-    '平衡条件是 F₁l₁ = F₂l₂。左边力加倍，力臂就要减半，乘积才变回原来的力矩。力变了力臂也必须跟着变，不是「往外移一点就行」。',
+    'Die Gleichgewichtsbedingung lautet F₁·l₁ = F₂·l₂. Verdoppelt sich die Kraft auf der linken Seite, muss der Hebelarm halbiert werden, damit das Produkt wieder dem ursprünglichen Drehmoment entspricht. Ändert sich die Kraft, muss sich auch der Hebelarm entsprechend ändern.',
   options: [
-    { id: 'halve-arm', label: '减半（加倍的力配一半的力臂）', correct: true },
+    { id: 'halve-arm', label: 'Halbieren (verdoppelte Kraft erfordert halben Hebelarm)', correct: true },
     {
       id: 'double-arm',
-      label: '加倍（质量大了就要挂得更远）',
+      label: 'Verdoppeln (größere Masse muss weiter außen aufgehängt werden)',
       mistake: {
         type: 'concept',
         explanation:
-          '往外移会让左边力矩变得更大，杠杆更不平衡。F 变大时要保持 F·l 不变，l 必须变小，不是变大。',
-        review: ['F₁l₁ = F₂l₂', '力矩 M = F·l'],
+          'Würde man den Hebelarm vergrößern, würde das linke Drehmoment noch größer werden und der Hebel noch weiter aus dem Gleichgewicht geraten. Um F·l konstant zu halten, wenn F größer wird, muss l kleiner werden.',
+        review: ['F₁·l₁ = F₂·l₂', 'Drehmoment M = F·l'],
         evidenceCheckId: 'moment_from_force',
       },
     },
     {
       id: 'unchanged',
-      label: '不用改，支点会自己找到新的平衡位置',
+      label: 'Nicht verändern, der Drehpunkt findet von selbst eine neue Gleichgewichtslage',
       mistake: {
         type: 'modeling',
         explanation:
-          '这个实验的支点是钉死的。第一类杠杆的平衡不是支点自己滑过去，而是两边力矩相等。力变了就必须改力臂（或改另一边的力）。',
-        review: ['第一类杠杆：支点固定在中间', '平衡条件 F₁l₁ = F₂l₂'],
+          'In diesem Versuch ist der Drehpunkt fest fixiert. Das Gleichgewicht eines Hebels erster Art wird nicht durch Verschieben des Drehpunkts hergestellt, sondern dadurch, dass die Drehmomente auf beiden Seiten gleich groß sind. Ändert sich eine Kraft, muss entweder der Hebelarm oder die Kraft auf der anderen Seite angepasst werden.',
+        review: ['Hebel erster Art: Drehpunkt ist fest', 'Gleichgewichtsbedingung F₁·l₁ = F₂·l₂'],
         evidenceCheckId: 'moment_balance',
       },
     },
@@ -953,30 +953,30 @@ const LEVER_DOUBLE_MASS: SelfCheckItem = {
 
 const LEVER_SLIDE_OUT: SelfCheckItem = {
   id: 'lever-slide-out',
-  prompt: '把右侧钩码沿杠杆向外滑远一点，右边对杠杆的作用怎样变？',
+  prompt: 'Wird ein Gewichtsstück auf der rechten Seite des Hebels weiter nach außen verschoben, wie ändert sich die Wirkung auf den Hebel?',
   takeaway:
-    '钩码的重力 G = mg 没变，变的是力臂。力臂变长，力矩 M = F·l 变大，所以右边把杠杆压下去。滑动改变的是力矩，不是力本身。',
+    'Die Gewichtskraft G = m·g des Gewichtsstücks bleibt unverändert, jedoch wird der Hebelarm größer. Das Drehmoment M = F·l nimmt zu, daher drückt die rechte Seite den Hebel stärker nach unten. Durch das Verschieben ändert sich also das Drehmoment, nicht die Kraft selbst.',
   options: [
-    { id: 'moment-up', label: '重力不变，力臂变长，力矩变大', correct: true },
+    { id: 'moment-up', label: 'Die Gewichtskraft bleibt unverändert, der Hebelarm wird größer, das Drehmoment nimmt zu', correct: true },
     {
       id: 'force-up',
-      label: '钩码变重了，所以把杠杆压下去',
+      label: 'Das Gewichtsstück wird schwerer, daher drückt es den Hebel stärker nach unten',
       mistake: {
         type: 'concept',
         explanation:
-          '钩码还是原来那一块，质量没变，重力 G = mg 也就没变。向外滑只拉长了力臂，力矩变大，不是力变大。',
-        review: ['G = mg 只由质量和 g 决定', 'M = F·l，l 变则 M 变'],
+          'Es handelt sich noch um dasselbe Gewichtsstück, die Masse ist unverändert, daher ist auch die Gewichtskraft G = m·g unverändert. Durch das Verschieben nach außen wird nur der Hebelarm verlängert, das Drehmoment vergrößert sich, nicht die Kraft.',
+        review: ['G = m·g hängt nur von Masse und g ab', 'M = F·l ändert sich mit l'],
         evidenceCheckId: 'weight_from_mass',
       },
     },
     {
       id: 'cancels',
-      label: '力和力臂互相抵消，杠杆仍然平衡',
+      label: 'Kraft und Hebelarm heben sich gegenseitig auf, der Hebel bleibt im Gleichgewicht',
       mistake: {
         type: 'modeling',
         explanation:
-          '力和力臂是相乘不是相消。一边力臂变长，这边力矩就单独变大，原来的 F₁l₁ = F₂l₂ 被破坏，杠杆向这一侧倾斜。',
-        review: ['M = F·l 是乘积', '平衡要两边力矩重新相等'],
+          'Kraft und Hebelarm werden multipliziert, nicht subtrahiert oder aufgehoben. Wird der Hebelarm auf einer Seite größer, vergrößert sich das Drehmoment dieser Seite allein, wodurch die ursprüngliche Gleichgewichtsbedingung F₁·l₁ = F₂·l₂ gestört wird und der Hebel zu dieser Seite kippt.',
+        review: ['M = F·l ist ein Produkt', 'Für Gleichgewicht müssen beide Drehmomente wieder gleich sein'],
         evidenceCheckId: 'moment_balance',
       },
     },
@@ -987,30 +987,30 @@ const LEVER_SLIDE_OUT: SelfCheckItem = {
 
 const FRICTION_STATIC_FOLLOWS: SelfCheckItem = {
   id: 'friction-static-follows',
-  prompt: '用弹簧测力计水平拉物块，拉力从 0 慢慢增大但物块还没动。此时静摩擦力多大？',
+  prompt: 'Mit einer Federwaage wird ein Block horizontal gezogen, die Zugkraft wird langsam von 0 aufwärts erhöht, doch der Block bewegt sich noch nicht. Wie groß ist in diesem Moment die Haftreibung?',
   takeaway:
-    '静摩擦是「被动力」：物块静止说明合力为零，静摩擦力始终等于当前拉力 f = F，随拉力同步增大，直到触及上限 μsN。',
+    'Haftreibung ist eine „ausgleichende Kraft": Da der Block noch in Ruhe ist, ist die resultierende Kraft null, die Haftreibung ist stets gleich der momentanen Zugkraft f = F und wächst mit dieser, bis sie ihren Maximalwert f_{max} = μ_H·N erreicht.',
   options: [
-    { id: 'equals-pull', label: '等于此时的拉力（f = F，随拉力增大）', correct: true },
+    { id: 'equals-pull', label: 'Gleich der momentanen Zugkraft (f = F, wächst mit der Zugkraft)', correct: true },
     {
       id: 'fixed-muk',
-      label: '恒等于 μkN，与拉力无关',
+      label: 'Konstant gleich μ_G·N, unabhängig von der Zugkraft',
       mistake: {
         type: 'concept',
         explanation:
-          'μkN 是滑动摩擦的大小，物块还没滑动。静止时静摩擦取「刚好平衡拉力」的值：拉力 3 N 时 f 就是 3 N，不是 μkN 的固定值。',
-        review: ['静摩擦是被动力：f = F（未滑动时）', '滑动摩擦才是 f = μkN'],
+          'μ_G·N ist der Betrag der Gleitreibung, der Block bewegt sich jedoch noch nicht. Im Ruhezustand nimmt die Haftreibung genau den Wert an, der erforderlich ist, um die Zugkraft auszugleichen: Beträgt die Zugkraft 3 N, so ist f = 3 N, nicht ein fester Wert μ_G·N.',
+        review: ['Haftreibung ist ausgleichend: f = F (solange keine Bewegung)', 'Gleitreibung ist f = μ_G·N'],
         evidenceCheckId: 'static_friction_balance',
       },
     },
     {
       id: 'always-max',
-      label: '始终等于最大静摩擦 μsN',
+      label: 'Stets gleich der maximalen Haftreibung μ_H·N',
       mistake: {
         type: 'concept',
         explanation:
-          'μsN 是静摩擦的上限，不是它的当前值。只有拉力增大到即将滑动的瞬间，静摩擦才达到 μsN；此前 f 只等于拉力本身。',
-        review: ['f_静 ≤ μsN 是不等式上限', '滑动临界：F = μsN'],
+          'μ_H·N ist nur der Grenzwert (Obergrenze) der Haftreibung, nicht deren aktueller Wert. Erst im Augenblick unmittelbar vor dem Beginn der Bewegung erreicht die Haftreibung ihren Maximalwert μ_H·N; zuvor ist f immer gleich der jeweiligen Zugkraft.',
+        review: ['f_H ≤ μ_H·N ist eine Ungleichung mit Obergrenze', 'Bewegungsbeginn bei F = μ_H·N'],
         evidenceCheckId: 'static_limit',
       },
     },
@@ -1019,30 +1019,30 @@ const FRICTION_STATIC_FOLLOWS: SelfCheckItem = {
 
 const FRICTION_KINETIC_CONSTANT: SelfCheckItem = {
   id: 'friction-kinetic-constant',
-  prompt: '物块已经滑起来了。把拉力再调大一些，滑动摩擦力怎样变？',
+  prompt: 'Der Block gleitet bereits. Wird die Zugkraft nun weiter erhöht, wie ändert sich die Gleitreibung?',
   takeaway:
-    '滑动摩擦 f = μkN 只由 μk 与支持力 N 决定，与拉力无关。拉力增大改变的是合力与加速度 a = (F − f)/m，不是 f 本身。',
+    'Die Gleitreibung beträgt f = μ_G·N und hängt nur von μ_G und der Normalkraft N ab, nicht von der Zugkraft. Eine Erhöhung der Zugkraft ändert daher nur die resultierende Kraft und die Beschleunigung a = (F − f)/m, nicht jedoch f selbst.',
   options: [
-    { id: 'unchanged', label: '不变，仍是 μkN（变大的只有加速度）', correct: true },
+    { id: 'unchanged', label: 'Sie bleibt unverändert, weiterhin μ_G·N (nur die Beschleunigung nimmt zu)', correct: true },
     {
       id: 'grows-with-pull',
-      label: '随拉力一起增大',
+      label: 'Sie nimmt mit der Zugkraft zu',
       mistake: {
         type: 'concept',
         explanation:
-          '把「静摩擦随外力增大」误套到了滑动段。一旦滑动，f = μkN 就固定了；数据页能看到拉力再涨、f 读数不再变。',
-        review: ['滑动摩擦 f = μkN 与外力无关', 'a = (F − f)/m 才是随拉力变的量'],
+          'Der für die Haftreibung gültige Zusammenhang „wächst mit der äußeren Kraft" darf nicht auf die Gleitreibung übertragen werden. Sobald der Körper gleitet, ist f = μ_G·N konstant; auch wenn die Zugkraft weiter zunimmt, bleibt der Betrag der Gleitreibung gleich.',
+        review: ['Gleitreibung f = μ_G·N ist unabhängig von der äußeren Kraft', 'Nur a = (F − f)/m ändert sich mit der Zugkraft'],
         evidenceCheckId: 'kinetic_friction',
       },
     },
     {
       id: 'equals-pull',
-      label: '等于拉力（保持平衡）',
+      label: 'Sie wird gleich der Zugkraft (Gleichgewicht)',
       mistake: {
         type: 'modeling',
         explanation:
-          'f = F 是静止段的平衡条件。物块已经在加速，合力不为零：F > f，差值产生加速度。',
-        review: ['滑动段合力 F − μkN ≠ 0', 'f = F 只对静止成立'],
+          'f = F gilt nur im Ruhezustand bei Gleichgewicht. Der Block beschleunigt bereits, die resultierende Kraft ist also ungleich null: F > f, und die Differenz erzeugt die Beschleunigung.',
+        review: ['Im Gleitfall ist F − μ_G·N ≠ 0', 'f = F gilt nur für ruhende Körper im Gleichgewicht'],
         evidenceCheckId: 'kinetic_friction',
       },
     },
@@ -1053,29 +1053,29 @@ const FRICTION_KINETIC_CONSTANT: SelfCheckItem = {
 
 const SPRING_PERIOD_MASS: SelfCheckItem = {
   id: 'spring-period-mass',
-  prompt: '弹簧振子实验中把振子质量换成 4 倍，振动周期怎样变？',
+  prompt: 'Im Federpendelversuch wird die Masse des schwingenden Körpers vervierfacht. Wie ändert sich die Schwingungsdauer?',
   takeaway:
-    'T = 2π√(m/k)：周期与 √m 成正比。m 变 4 倍，T 恰好变 2 倍——这是「周期与振幅无关」之外的第二个可测结论。',
+    'T = 2π√(m/k): Die Schwingungsdauer ist proportional zu √m. Wird m vervierfacht, wird T genau verdoppelt – dies ist neben der Amplitudenunabhängigkeit der zweite nachweisbare Zusammenhang.',
   options: [
-    { id: 'doubles', label: '变为 2 倍（T ∝ √m）', correct: true },
+    { id: 'doubles', label: 'Sie verdoppelt sich (T ∝ √m)', correct: true },
     {
       id: 'quadruples',
-      label: '变为 4 倍（质量几倍周期就几倍）',
+      label: 'Sie vervierfacht sich (vielfache Masse → vielfache Schwingungsdauer)',
       mistake: {
         type: 'concept',
-        explanation: 'T = 2π√(m/k) 里 m 在根号内：正比的是 √m 不是 m。4 倍质量只把 √m 变 2 倍。',
-        review: ['T = 2π√(m/k)', '根号关系：量 4 倍 → 根号 2 倍'],
+        explanation: 'In T = 2π√(m/k) steht m unter der Wurzel: Proportional ist √m, nicht m. Eine Vervierfachung von m führt also nur zu einer Verdopplung von √m.',
+        review: ['T = 2π√(m/k)', 'Wurzelbeziehung: Faktor 4 → Faktor 2'],
         evidenceCheckId: 'period_consistency',
       },
     },
     {
       id: 'unchanged',
-      label: '不变，周期只由弹簧决定',
+      label: 'Sie bleibt unverändert, die Schwingungsdauer hängt nur von der Feder ab',
       mistake: {
         type: 'concept',
         explanation:
-          'T 由 m 和 k 共同决定。「与振幅无关」不等于「与质量无关」——把 A 加倍 T 才不变。',
-        review: ['T = 2π√(m/k) 含 m', 'T 与振幅 A 无关'],
+          'T wird sowohl von m als auch von k bestimmt. „Unabhängig von der Amplitude" bedeutet nicht „unabhängig von der Masse" – nur eine Verdopplung von A lässt T unverändert.',
+        review: ['T = 2π√(m/k) enthält m', 'T ist unabhängig von der Amplitude A'],
         evidenceCheckId: 'period_consistency',
       },
     },
@@ -1084,29 +1084,29 @@ const SPRING_PERIOD_MASS: SelfCheckItem = {
 
 const SPRING_HOOKE_EXTENSION: SelfCheckItem = {
   id: 'spring-hooke-extension',
-  prompt: '竖直悬挂的弹簧下，钩码质量加倍后重新静止，伸长量 Δx 怎样变？',
+  prompt: 'An einer vertikal aufgehängten Feder wird das Gewichtsstück verdoppelt und das System kommt wieder zur Ruhe. Wie ändert sich die Verlängerung Δx?',
   takeaway:
-    '平衡条件 kΔx = mg：Δx = mg/k 与 m 成正比。质量加倍，伸长量正好加倍——这就是用弹簧测力计标刻度的原理。',
+    'Im Gleichgewicht gilt k·Δx = m·g, also Δx = (m·g)/k, d. h. proportional zu m. Wird die Masse verdoppelt, verdoppelt sich auch die Verlängerung – genau nach diesem Prinzip werden Federwaagen geeicht.',
   options: [
-    { id: 'doubles', label: '也加倍（Δx = mg/k ∝ m）', correct: true },
+    { id: 'doubles', label: 'Sie verdoppelt sich (Δx = m·g/k ∝ m)', correct: true },
     {
       id: 'unchanged',
-      label: '不变，伸长量由弹簧自身决定',
+      label: 'Sie bleibt unverändert, die Verlängerung hängt nur von der Feder ab',
       mistake: {
         type: 'concept',
         explanation:
-          '弹簧只决定 k；伸长量还由悬挂的重量决定。mg 加倍而 k 不变，平衡位置必须下移同样的倍数。',
-        review: ['kΔx = mg', 'Δx = mg/k'],
+          'Die Feder bestimmt zwar die Federkonstante k, die Verlängerung hängt aber auch vom angehängten Gewicht ab. Verdoppelt sich m·g bei unverändertem k, muss sich Δx entsprechend verdoppeln.',
+        review: ['k·Δx = m·g', 'Δx = m·g/k'],
         evidenceCheckId: 'hooke_equilibrium',
       },
     },
     {
       id: 'squares',
-      label: '变为 4 倍（力和形变是平方关系）',
+      label: 'Sie vervierfacht sich (Kraft und Dehnung stehen in quadratischem Verhältnis)',
       mistake: {
         type: 'concept',
-        explanation: 'F = kx 是一次线性关系，不是平方。力加倍 → 形变加倍，F–x 图是过原点的直线。',
-        review: ['F = kx 是线性关系', '弹性限度内 F–x 成正比'],
+        explanation: 'F = k·x ist eine lineare Beziehung, kein quadratischer Zusammenhang. Verdoppelt sich die Kraft, verdoppelt sich auch die Dehnung; der F–x-Graph ist im elastischen Bereich eine Gerade durch den Ursprung.',
+        review: ['F = k·x ist linear', 'Im elastischen Bereich sind F und x proportional'],
         evidenceCheckId: 'hooke_equilibrium',
       },
     },
@@ -1117,29 +1117,29 @@ const SPRING_HOOKE_EXTENSION: SelfCheckItem = {
 
 const PENDULUM_PERIOD_MASS: SelfCheckItem = {
   id: 'pendulum-period-mass',
-  prompt: '把单摆的摆球换成更重的（摆长不变），周期怎样变？',
-  takeaway: 'T = 2π√(L/g) 里没有 m：周期与摆球质量无关。伽利略在教堂里看吊灯发现的就是这条。',
+  prompt: 'Am Fadenpendel wird die Pendelkugel durch eine schwerere ersetzt, die Pendellänge bleibt unverändert. Wie ändert sich die Schwingungsdauer?',
+  takeaway: 'In T = 2π√(L/g) kommt m nicht vor: Die Schwingungsdauer ist unabhängig von der Masse der Pendelkugel. Genau diesen Zusammenhang beobachtete Galilei an den Kronleuchtern in der Kirche.',
   options: [
-    { id: 'unchanged', label: '不变（T 与摆球质量无关）', correct: true },
+    { id: 'unchanged', label: 'Sie bleibt unverändert (T ist unabhängig von der Masse der Pendelkugel)', correct: true },
     {
       id: 'heavier-slower',
-      label: '变长，重的摆球摆得慢',
+      label: 'Sie wird länger, eine schwerere Kugel schwingt langsamer',
       mistake: {
         type: 'concept',
         explanation:
-          '重球确实受更大重力，但质量也大同样倍数——F = ma 两边 m 约掉了。这就是「惯性质量 = 引力质量」的直接体现。',
-        review: ['T = 2π√(L/g)', '重力 ∝ m，加速度里 m 约掉'],
+          'Zwar wirkt auf eine schwerere Kugel eine größere Gewichtskraft, aber ihre träge Masse ist ebenfalls größer – in F = m·a kürzt sich m heraus. Dies ist ein direkter Ausdruck der Äquivalenz von träger und schwerer Masse.',
+        review: ['T = 2π√(L/g)', 'Gewichtskraft ∝ m, in der Beschleunigung kürzt sich m'],
         evidenceCheckId: 'period_consistency',
       },
     },
     {
       id: 'heavier-faster',
-      label: '变短，重球下落更快',
+      label: 'Sie wird kürzer, eine schwerere Kugel fällt schneller',
       mistake: {
         type: 'concept',
         explanation:
-          '「重的落得快」是亚里士多德直觉，自由落体和单摆都证伪了它：加速度与质量无关，周期也就与质量无关。',
-        review: ['T = 2π√(L/g)', '下落快慢与质量无关'],
+          'Die Vorstellung „Schwereres fällt schneller" stammt aus der aristotelischen Physik und wird sowohl durch den freien Fall als auch durch das Fadenpendel widerlegt: Die Beschleunigung ist unabhängig von der Masse, daher ist auch die Schwingungsdauer unabhängig von der Masse.',
+        review: ['T = 2π√(L/g)', 'Fallgeschwindigkeit ist unabhängig von der Masse'],
         evidenceCheckId: 'period_consistency',
       },
     },
@@ -1148,28 +1148,28 @@ const PENDULUM_PERIOD_MASS: SelfCheckItem = {
 
 const PENDULUM_LENGTH_PERIOD: SelfCheckItem = {
   id: 'pendulum-length-period',
-  prompt: '摆长 L 调为 4 倍，单摆周期变为几倍？用它可以怎么测 g？',
+  prompt: 'Wird die Pendellänge L vervierfacht, um welchen Faktor ändert sich die Schwingungsdauer eines Fadenpendels? Wie lässt sich damit g bestimmen?',
   takeaway:
-    'T = 2π√(L/g) → L 变 4 倍，T 变 2 倍；反过来测出 T 与 L 就能算 g = 4π²L/T²——这是「用单摆测重力加速度」实验的原理。',
+    'Aus T = 2π√(L/g) folgt: Bei Vervierfachung von L wird T verdoppelt. Umgekehrt lässt sich durch Messen von T und L die Erdbeschleunigung zu g = 4π²L/T² berechnen – genau nach diesem Prinzip funktioniert der Versuch „Bestimmung der Erdbeschleunigung mit dem Fadenpendel".',
   options: [
-    { id: 'doubles', label: 'T 变 2 倍；由 g = 4π²L/T² 反算 g', correct: true },
+    { id: 'doubles', label: 'T verdoppelt sich; g berechnet sich aus g = 4π²L/T²', correct: true },
     {
       id: 'quadruples',
-      label: 'T 变 4 倍（摆长几倍周期就几倍）',
+      label: 'T vervierfacht sich (vielfache Länge → vielfache Schwingungsdauer)',
       mistake: {
         type: 'concept',
-        explanation: 'L 在根号里：T ∝ √L。摆长 4 倍只让 √L 翻倍，T 是 2 倍不是 4 倍。',
-        review: ['T = 2π√(L/g)', 'T ∝ √L 非线性'],
+        explanation: 'L steht unter der Wurzel: T ∝ √L. Eine Vervierfachung von L führt nur zu einer Verdopplung von √L, also verdoppelt sich T, nicht vervierfacht sich.',
+        review: ['T = 2π√(L/g)', 'T ∝ √L ist nicht linear'],
         evidenceCheckId: 'period_consistency',
       },
     },
     {
       id: 'halves',
-      label: 'T 减半（摆长越长摆得越快）',
+      label: 'T halbiert sich (längeres Pendel schwingt schneller)',
       mistake: {
         type: 'modeling',
-        explanation: '方向反了：摆长更长，摆球走的路程更长而回复加速度同量级，摆动更慢，T 变大。',
-        review: ['T = 2π√(L/g)', '长摆周期长'],
+        explanation: 'Das Gegenteil ist richtig: Je länger das Pendel, desto größer ist der zurückgelegte Weg pro Schwingung und die Rückstellbeschleunigung relativ zur Länge ist kleiner, daher schwingt ein längeres Pendel langsamer und T wird größer.',
+        review: ['T = 2π√(L/g)', 'Längeres Pendel → größere Schwingungsdauer'],
         evidenceCheckId: 'rope_length',
       },
     },
@@ -1180,30 +1180,30 @@ const PENDULUM_LENGTH_PERIOD: SelfCheckItem = {
 
 const EMF_TERMINAL_VOLTAGE: SelfCheckItem = {
   id: 'emf-terminal-voltage',
-  prompt: '减小外电路电阻使干路电流增大时，路端电压怎样变化？',
+  prompt: 'Verringert man den Widerstand des Außenkreises, sodass der Hauptstrom größer wird, wie ändert sich die Klemmenspannung?',
   takeaway:
-    'U = E − I·r：电动势不变，电流越大内阻分掉的电压越多，路端电压越低 —— 这正是测电动势与内阻实验的原理。',
+    'U_K = E − I·r: Bei konstanter elektromotorischer Kraft fällt an einem realen Innenwiderstand eine größere Spannung I·r ab, wenn der Strom I größer wird, daher sinkt die Klemmenspannung – genau dies ist der Grundgedanke beim Experiment zur Bestimmung von E und r.',
   options: [
-    { id: 'decreases', label: '减小（U = E − I·r）', correct: true },
+    { id: 'decreases', label: 'Sie nimmt ab (U_K = E − I·r)', correct: true },
     {
       id: 'constant-emf',
-      label: '不变，路端电压始终等于电动势',
+      label: 'Sie bleibt unverändert, die Klemmenspannung ist stets gleich der elektromotorischen Kraft',
       mistake: {
         type: 'concept',
         explanation:
-          '只有内阻为零的理想电源才有 U ≡ E。真实电源的内阻要分走 I·r，电流越大路端电压越低：U = E − I·r。',
-        review: ['路端电压 U = E − I·r', '电源内阻'],
+          'Nur bei einer idealen Spannungsquelle mit Innenwiderstand r = 0 gilt U_K ≡ E. Bei einer realen Quelle wird ein Teil der Spannung am Innenwiderstand abfallen: U_K = E − I·r. Mit zunehmendem Strom wird dieser Anteil größer und die Klemmenspannung sinkt.',
+        review: ['Klemmenspannung U_K = E − I·r', 'Innenwiderstand einer Spannungsquelle'],
         evidenceCheckId: 'terminal_voltage_law',
       },
     },
     {
       id: 'increases',
-      label: '增大（电流大了电压也大）',
+      label: 'Sie nimmt zu (größerer Strom bedeutet größere Spannung)',
       mistake: {
         type: 'concept',
         explanation:
-          '对外电路确有 U = IR 的关系，但这里是 R 减小引起 I 增大；从电源一侧看 U = E − I·r，电流增大只会让路端电压下降。',
-        review: ['闭合电路欧姆定律 I = E/(R+r)', '路端电压 U = E − I·r'],
+          'Für den Außenkreis gilt zwar U_K = I·R, doch in diesem Fall wird R kleiner und verursacht ein größeres I. Betrachtet man die Quelle, folgt aus U_K = E − I·r, dass mit größerem I die Klemmenspannung kleiner wird, nicht größer.',
+        review: ['Gesetz für geschlossenen Stromkreis I = E/(R+r)', 'Klemmenspannung U_K = E − I·r'],
         evidenceCheckId: 'terminal_voltage_law',
       },
     },
@@ -1212,30 +1212,30 @@ const EMF_TERMINAL_VOLTAGE: SelfCheckItem = {
 
 const EMF_OPEN_CIRCUIT: SelfCheckItem = {
   id: 'emf-open-circuit',
-  prompt: '断开开关（I = 0）后，接在电源两端的电压表读数是？',
+  prompt: 'Wird der Schalter geöffnet (I = 0), welchen Wert zeigt das Voltmeter an den Klemmen der Spannungsquelle an?',
   takeaway:
-    '断路时 I = 0，内阻不分压，U = E − 0·r = E：电压表直读电动势，这是测 E 的常用方法（视电压表为理想表）。',
+    'Im Leerlauf ist I = 0, am Innenwiderstand fällt keine Spannung ab: U_K = E − 0·r = E. Das Voltmeter zeigt also direkt die elektromotorische Kraft E – dies ist eine gängige Methode zur Messung von E (unter der Annahme eines idealen Voltmeters).',
   options: [
-    { id: 'equals-emf', label: '等于电动势 E', correct: true },
+    { id: 'equals-emf', label: 'Gleich der elektromotorischen Kraft E', correct: true },
     {
       id: 'zero',
-      label: '为零（电路断了就没有电压）',
+      label: 'Null (wenn der Stromkreis unterbrochen ist, gibt es keine Spannung)',
       mistake: {
         type: 'concept',
         explanation:
-          '断路断掉的是电流，不是电源的本领：电动势由电源自身决定，断路时内阻不分压，电压表恰好读出 E。',
-        review: ['电动势的物理意义', '路端电压 U = E − I·r'],
+          'Durch das Öffnen des Schalters wird der Strom unterbrochen, nicht jedoch die Fähigkeit der Quelle, eine Spannung zu erzeugen. Die elektromotorische Kraft ist eine Eigenschaft der Quelle selbst; im Leerlauf fällt keine Spannung am Innenwiderstand ab, das Voltmeter misst daher genau E.',
+        review: ['Physikalische Bedeutung der elektromotorischen Kraft', 'Klemmenspannung U_K = E − I·r'],
         evidenceCheckId: 'terminal_voltage_law',
       },
     },
     {
       id: 'slightly-less',
-      label: '略小于电动势（内阻仍会分掉一点）',
+      label: 'Etwas kleiner als E (am Innenwiderstand fällt trotzdem ein kleiner Anteil ab)',
       mistake: {
         type: 'modeling',
         explanation:
-          '内阻分压是 I·r，与电流成正比：I = 0 时内阻一点电压也不分。理想电压表下读数就是 E；只有考虑电压表自身漏电流时才略小。',
-        review: ['U = E − I·r 在 I = 0 时的取值', '理想电表假设'],
+          'Der Spannungsabfall am Innenwiderstand beträgt I·r und ist proportional zum Strom: Bei I = 0 fällt gar keine Spannung ab. Unter idealen Bedingungen zeigt das Voltmeter also genau E; nur wenn man einen sehr kleinen Leckstrom durch das Voltmeter berücksichtigt, wäre der Wert geringfügig kleiner.',
+        review: ['Für I = 0 wird U_K = E − I·r zu E', 'Annahme idealer Messgeräte'],
         evidenceCheckId: 'terminal_voltage_law',
       },
     },
@@ -1252,124 +1252,124 @@ const EMF_OPEN_CIRCUIT: SelfCheckItem = {
 export const EXPERIMENT_SELF_CHECKS: Readonly<Record<string, ExperimentSelfCheckSet>> = {
   'circuit-series': {
     id: 'circuit-series',
-    topic: '串联电路',
+    topic: 'Reihenschaltung',
     knowledge: ['circ-series', 'circ-ohm-law'],
     items: [SERIES_CURRENT, SERIES_VOLTAGE],
   },
   'circuit-parallel': {
     id: 'circuit-parallel',
-    topic: '并联与混联电路',
+    topic: 'Parallel- und gemischte Schaltungen',
     knowledge: ['circ-parallel', 'circ-ohm-law'],
     items: [PARALLEL_VOLTAGE, PARALLEL_MAIN_CURRENT],
   },
   'circuit-rheostat': {
     id: 'circuit-rheostat',
-    topic: '滑动变阻器动态电路',
+    topic: 'Dynamischer Stromkreis mit Schleifwiderstand',
     knowledge: ['circ-dynamic', 'circ-ohm-law'],
     items: [RHEOSTAT_CURRENT, RHEOSTAT_METER],
   },
   'circuit-va': {
     id: 'circuit-va',
-    topic: '伏安法测电阻',
+    topic: 'Widerstandsmessung nach der Spannungs-Strom-Methode',
     knowledge: ['circ-ohm-law', 'circ-dynamic'],
     items: [VA_PRINCIPLE, VA_RHEOSTAT_ROLE],
   },
   'circuit-bulb': {
     id: 'circuit-bulb',
-    topic: '测量小灯泡的电功率',
+    topic: 'Messung der elektrischen Leistung einer Glühlampe',
     knowledge: ['circ-power', 'circ-ohm-law'],
     items: [BULB_POWER_READING, BULB_RATED_POINT],
   },
   'mechanics-average-speed': {
     id: 'mechanics-average-speed',
-    topic: '测量平均速度',
+    topic: 'Messung der Durchschnittsgeschwindigkeit',
     knowledge: ['kin-average-speed'],
     items: [AVERAGE_SPEED_DEFINITION, AVERAGE_SPEED_SEGMENTS],
   },
   'circuit-emf': {
     id: 'circuit-emf',
-    topic: '电动势与内阻',
+    topic: 'Elektromotorische Kraft und Innenwiderstand',
     knowledge: ['circ-emf-internal'],
     items: [EMF_TERMINAL_VOLTAGE, EMF_OPEN_CIRCUIT],
   },
   'optics-plane-mirror': {
     id: 'optics-plane-mirror',
-    topic: '平面镜成像',
+    topic: 'Bildentstehung am ebenen Spiegel',
     knowledge: ['opt-plane-mirror', 'opt-light-reflection', 'opt-real-virtual-image'],
     items: [MIRROR_DISTANCE_SIZE, MIRROR_VIRTUAL_SCREEN],
   },
   'optics-convex-lens': {
     id: 'optics-convex-lens',
-    topic: '凸透镜成像规律',
+    topic: 'Bildentstehungsgesetz der Sammellinse',
     knowledge: ['opt-lens-imaging', 'opt-real-virtual-image'],
     items: [LENS_BEYOND_2F, LENS_WITHIN_F],
   },
   'optics-curved-mirror': {
     id: 'optics-curved-mirror',
-    topic: '凹面镜成像',
+    topic: 'Bildentstehung am Hohlspiegel',
     knowledge: ['opt-curved-mirror', 'opt-light-reflection', 'opt-real-virtual-image'],
     items: [CURVED_MIRROR_BEYOND_2F, CURVED_MIRROR_WITHIN_F],
   },
   'acoustics-echo': {
     id: 'acoustics-echo',
-    topic: '回声测距',
+    topic: 'Entfernungsmessung mit Echolotung',
     knowledge: ['ac-echo-ranging', 'ac-sound-propagation', 'ac-echo'],
     items: [ECHO_DISTANCE_FORMULA, ECHO_MEDIUM_SPEED],
   },
   'fluid-buoyancy': {
     id: 'fluid-buoyancy',
-    topic: '探究浮力的大小',
+    topic: 'Untersuchung der Größe des Auftriebs',
     knowledge: ['fl-buoyancy-measure', 'fl-archimedes', 'fl-float-sink'],
     items: [BUOYANCY_DEPTH, BUOYANCY_LIQUID],
   },
   'thermal-melting': {
     id: 'thermal-melting',
-    topic: '探究晶体的熔化过程',
+    topic: 'Untersuchung des Schmelzvorgangs eines Kristalls',
     knowledge: ['th-melting-point', 'th-latent-heat', 'th-specific-heat'],
     items: [MELTING_PLATEAU, MELTING_HEATING_RATE],
   },
   'thermal-heat-capacity': {
     id: 'thermal-heat-capacity',
-    topic: '比较不同物质的吸热能力',
+    topic: 'Vergleich der Wärmespeicherfähigkeit verschiedener Stoffe',
     knowledge: ['th-specific-heat'],
     items: [HEAT_CAPACITY_RATIO, HEAT_CAPACITY_EQUAL_Q],
   },
   'mechanics-lever': {
     id: 'mechanics-lever',
-    topic: '探究杠杆的平衡条件',
+    topic: 'Untersuchung der Gleichgewichtsbedingung eines Hebels',
     knowledge: ['dyn-lever-balance', 'dyn-moment'],
     items: [LEVER_DOUBLE_MASS, LEVER_SLIDE_OUT],
   },
-  /* 弹簧/单摆/摩擦 topics are resolved from runtime verification facts (the
+  /* Spring/pendulum/friction topics are resolved from runtime verification facts (the
      hooke_equilibrium / rope_length / static_friction_balance checks), not the
      template id — a student-forked rig still gets the matching probes. The two
-     spring rigs share the probe pool but keep separate topics so 重新练习
-     deep-links back to the same apparatus the attempt was recorded on. */
+     spring rigs share the probe pool but keep separate topics so practice-deep
+     links back to the same apparatus the attempt was recorded on. */
   'mechanics-spring-statics': {
     id: 'mechanics-spring-statics',
-    topic: '弹簧弹力与形变量（胡克定律）',
+    topic: 'Federkraft und Dehnung (Hookesches Gesetz)',
     knowledge: ['dyn-hooke'],
     items: [SPRING_HOOKE_EXTENSION],
   },
   'mechanics-spring-oscillator': {
     id: 'mechanics-spring-oscillator',
-    topic: '弹簧振子与简谐振动',
+    topic: 'Federpendel und harmonische Schwingung',
     knowledge: ['osc-spring', 'dyn-hooke'],
     items: [SPRING_PERIOD_MASS, SPRING_HOOKE_EXTENSION],
   },
   'mechanics-pendulum': {
     id: 'mechanics-pendulum',
-    topic: '单摆与周期测量',
+    topic: 'Fadenpendel und Messung der Schwingungsdauer',
     knowledge: ['osc-pendulum'],
     items: [PENDULUM_PERIOD_MASS, PENDULUM_LENGTH_PERIOD],
   },
   'mechanics-friction': {
     id: 'mechanics-friction',
-    topic: '静摩擦与滑动摩擦',
+    topic: 'Haft- und Gleitreibung',
     knowledge: ['dyn-friction'],
     items: [FRICTION_STATIC_FOLLOWS, FRICTION_KINETIC_CONSTANT],
   },
-  /* The three 电磁场 domains (electric / magnetic / composite) were lab-first
+  /* The three electromagnetic domains (electric / magnetic / composite) were lab-first
      here: the golden-question bank keys its probes by question id, while these
      lab benches carry NO golden question, so their conceptual probes are keyed
      by a lab topic the web layer resolves from runtime facts instead. Each set
@@ -1377,87 +1377,87 @@ export const EXPERIMENT_SELF_CHECKS: Readonly<Record<string, ExperimentSelfCheck
      self-checks.ts) — one source of truth per probe, never a hand copy. */
   'magnetic-circular': {
     id: 'magnetic-circular',
-    topic: '磁场中的圆周运动',
+    topic: 'Kreisbewegung im Magnetfeld',
     knowledge: ['em-lorentz', 'em-circular'],
     items: [MAGNETIC_WORK, RADIUS_MASS],
   },
   'electric-point-charge': {
     id: 'electric-point-charge',
-    topic: '点电荷的电场',
+    topic: 'Elektrisches Feld einer Punktladung',
     knowledge: ['em-field-strength', 'em-superposition', 'em-electric-force'],
     items: [POINT_CHARGE_DIRECTION, SUPERPOSITION],
   },
   'electric-parallel-plate': {
     id: 'electric-parallel-plate',
-    topic: '平行板电场中的带电粒子',
+    topic: 'Geladene Teilchen im homogenen Feld eines Plattenkondensators',
     knowledge: ['em-uniform-deflection', 'em-bounded-field'],
     items: [PLATE_MOTION, PLATE_OUTSIDE],
   },
   'composite-velocity-selector': {
     id: 'composite-velocity-selector',
-    topic: '速度选择器',
+    topic: 'Geschwindigkeitsfilter',
     knowledge: ['em-velocity-selector', 'em-crossed-fields'],
     items: [SELECTOR_CONDITION, SELECTOR_TOO_FAST],
   },
   'composite-mass-spectrometer': {
     id: 'composite-mass-spectrometer',
-    topic: '质谱仪',
+    topic: 'Massenspektrometer',
     knowledge: ['em-mass-spectrometer', 'em-circular'],
     items: [RADIUS_MASS, SPECTROMETER_SPEED],
   },
   'composite-crossed-field': {
     id: 'composite-crossed-field',
-    topic: '正交电磁场中的带电粒子',
+    topic: 'Geladene Teilchen in gekreuzten elektrischen und magnetischen Feldern',
     knowledge: ['em-crossed-fields', 'em-lorentz'],
     items: [CROSSED_NET_FORCE, MAGNETIC_WORK],
   },
   'composite-three-field': {
     id: 'composite-three-field',
-    topic: '电、磁、重力三场平衡',
+    topic: 'Gleichgewicht in elektrischen, magnetischen und Gravitationsfeldern',
     knowledge: ['em-three-field'],
     items: [THREE_FIELD_GRAVITY, CROSSED_NET_FORCE],
   },
-  /* The induction lab benches (导体棒切割磁感线 / 磁通量变化) carry golden
+  /* The induction lab benches (conductor bar cutting field lines / flux change) carry golden
      questions too, but the Lab's topic dispatch is fact-based, not
      question-id-based: the web layer reads the bench type the runtime drew.
      Both sets reuse the exact probe items the question bank audited (see
      self-checks.ts) — one source of truth per probe, never a hand copy. */
   'induction-bar-motion': {
     id: 'induction-bar-motion',
-    topic: '导体棒切割磁感线',
+    topic: 'Leiterstab schneidet Magnetfeldlinien',
     knowledge: ['em-motional-emf', 'em-induction'],
     items: [INDUCTION_BAR_EMF, INDUCTION_NO_CUT],
   },
   'induction-flux-change': {
     id: 'induction-flux-change',
-    topic: '磁通量变化产生感应电动势',
+    topic: 'Induzierte elektromotorische Kraft durch Flussänderung',
     knowledge: ['em-faraday-law', 'em-lenz-law'],
     items: [INDUCTION_FARADAY, INDUCTION_LENZ],
   },
   /* The wave benches resolve their topic from the rig the runtime drew (a marked
-     particle → 绳波, two sources → 干涉, nodes → 驻波). The probes are shared with
+     particle → rope wave, two sources → interference, nodes → standing wave). The probes are shared with
      the wave golden questions (see self-checks.ts) — one source of truth. */
   'wave-travelling': {
     id: 'wave-travelling',
-    topic: '绳上的简谐横波',
+    topic: 'Harmonische Transversalwelle auf einem Seil',
     knowledge: ['wv-wave-speed', 'wv-particle-motion'],
     items: [WAVE_SPEED_FREQUENCY, WAVE_PARTICLE_TRANSPORT],
   },
   'wave-interference': {
     id: 'wave-interference',
-    topic: '双源干涉与波的叠加',
+    topic: 'Zweiquelleninterferenz und Wellenüberlagerung',
     knowledge: ['wv-interference', 'wv-wave-speed'],
     items: [WAVE_PATH_DIFFERENCE, WAVE_DESTRUCTIVE_HALF],
   },
   'wave-standing': {
     id: 'wave-standing',
-    topic: '两端固定的弦驻波',
+    topic: 'Stehende Welle auf einer beidseitig eingespannten Saite',
     knowledge: ['wv-standing-wave', 'wv-wave-speed'],
     items: [WAVE_NODE_MOTION, WAVE_HARMONIC_FREQUENCY],
   },
   'wave-expanded': {
     id: 'wave-expanded',
-    topic: '纵波、界面、衍射与多普勒',
+    topic: 'Longitudinalwellen, Grenzflächen, Beugung und Doppler-Effekt',
     knowledge: ['wv-longitudinal', 'wv-reflection-refraction', 'wv-diffraction', 'wv-doppler'],
     items: [
       WAVE_LONGITUDINAL_DIRECTION,

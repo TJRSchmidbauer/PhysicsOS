@@ -2,7 +2,7 @@
  * Tutor Mode scripts — a physics teacher, not a chat box.
  *
  * A tutor lesson is a structured ladder over the CURRENT frame:
- *   观察 (facts the runtime already published) → 引导问题 → 提示 1..n → 答案.
+ *   Beobachtung (facts the runtime already published) → Leitfrage → Hinweis 1..n → Antwort.
  * The student reveals one rung at a time; each rung may highlight the canvas
  * primitive it talks about, and the answer cites the Verifier checks by name.
  *
@@ -17,7 +17,7 @@ import { circuitTopicOf, mechanicsTopicOf } from './experiment-self-checks.ts'
 /** One revealable rung of the ladder. */
 export interface TutorStage {
   readonly id: string
-  /** Rung heading, e.g. 提示 1. */
+  /** Rung heading, e.g. Hinweis 1. */
   readonly title: string
   readonly paragraphs: readonly string[]
   /** Highlight targets (agent alias ids) applied when this rung is revealed. */
@@ -37,7 +37,7 @@ export interface TutorScript {
   readonly id: string
   /** Lesson topic shown as the card heading. */
   readonly topic: string
-  /** 观察: current-frame facts, one line each. */
+  /** Beobachtung: current-frame facts, one line each. */
   readonly observation: readonly string[]
   /** The guiding question the ladder answers. */
   readonly question: string
@@ -66,7 +66,7 @@ const checkOf = (
 }
 
 const observeLine = (name: string, value: string | undefined): string[] =>
-  value === undefined ? [] : [`${name}：${value}`]
+  value === undefined ? [] : [`${name}: ${value}`]
 
 const evidenceOf = (
   context: PhysicsAgentContext,
@@ -95,60 +95,60 @@ const evidenceOfPrefix = (
 const velocitySelectorLesson = (context: PhysicsAgentContext): TutorScript => {
   const selection = checkOf(context, 'velocity_selection_condition')
   const balanced = selection?.status === 'passed'
-  const electric = derivedText(context, '电场力大小')
-  const magnetic = derivedText(context, '洛伦兹力大小')
-  const net = derivedText(context, '合力大小')
-  const selected = derivedText(context, '选择速度')
-  const speed = derivedText(context, '速率')
+  const electric = derivedText(context, 'Betrag der elektrischen Feldkraft')
+  const magnetic = derivedText(context, 'Betrag der Lorentzkraft')
+  const net = derivedText(context, 'Betrag der resultierenden Kraft')
+  const selected = derivedText(context, 'Auswahlgeschwindigkeit')
+  const speed = derivedText(context, 'Geschwindigkeitsbetrag')
   return {
     id: balanced ? 'selector-balanced' : 'selector-deflecting',
-    topic: '速度选择器',
+    topic: 'Geschwindigkeitswähler',
     observation: [
-      ...observeLine('当前速率', speed),
-      ...observeLine('装置的选择速度 E/B', selected),
-      ...observeLine('电场力 |F_E|', electric),
-      ...observeLine('洛伦兹力 |F_B|', magnetic),
-      ...observeLine('合力 |ΣF|', net),
+      ...observeLine('Aktueller Geschwindigkeitsbetrag', speed),
+      ...observeLine('Auswahlgeschwindigkeit des Aufbaus E/B', selected),
+      ...observeLine('Elektrische Feldkraft |F_E|', electric),
+      ...observeLine('Lorentzkraft |F_B|', magnetic),
+      ...observeLine('Resultierende Kraft |ΣF|', net),
     ],
-    question: balanced ? '为什么这个粒子没有偏转？' : '为什么这个粒子发生了偏转？',
+    question: balanced ? 'Warum wird dieses Teilchen nicht abgelenkt?' : 'Warum wird dieses Teilchen abgelenkt?',
     hints: [
       {
         id: 'hint-electric',
-        title: '提示 1',
-        paragraphs: ['先看电场力：E 的方向确定后，F_E = qE 的方向就定了，它与速度无关。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Betrachte zuerst die elektrische Feldkraft: Ist die Richtung von E festgelegt, so ist auch die Richtung von F_E = qE bestimmt; sie hängt nicht von der Geschwindigkeit ab.'],
         highlights: ['electric-force'],
       },
       {
         id: 'hint-magnetic',
-        title: '提示 2',
-        paragraphs: ['再看洛伦兹力：用左手定则判断 qv×B 的方向。它与电场力方向相反吗？'],
+        title: 'Hinweis 2',
+        paragraphs: ['Betrachte nun die Lorentzkraft: Bestimme die Richtung von qv×B mit der Linke-Hand-Regel. Ist sie der elektrischen Feldkraft entgegengesetzt?'],
         highlights: ['magnetic-force'],
       },
       {
         id: 'hint-compare',
-        title: '提示 3',
+        title: 'Hinweis 3',
         paragraphs: [
-          '比较两个力的大小：|F_E| = qE 固定，|F_B| = qvB 随速度变化。想想 v 等于、大于、小于 E/B 时各会发生什么。',
+          'Vergleiche die Beträge der beiden Kräfte: |F_E| = qE ist fest, |F_B| = qvB ändert sich mit der Geschwindigkeit. Überlege, was geschieht, wenn v gleich, größer oder kleiner als E/B ist.',
         ],
         highlights: ['electric-force', 'magnetic-force'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: balanced
         ? [
-          '两个力等大反向，合力为零，粒子沿直线匀速通过 —— 速度恰好满足 v = E/B。',
+          'Die beiden Kräfte sind gleich groß und entgegengesetzt, die resultierende Kraft ist null, und das Teilchen durchläuft den Bereich geradlinig und gleichförmig — die Geschwindigkeit erfüllt gerade v = E/B.',
           [electric === undefined ? '' : `|F_E| = ${electric}`, magnetic === undefined ? '' : `|F_B| = ${magnetic}`, net === undefined ? '' : `|ΣF| = ${net}`]
             .filter(entry => entry.length > 0)
-            .join('；'),
+            .join('; '),
         ].filter(entry => entry.length > 0)
         : [
-          '当前速度不等于 E/B：|F_B| = qvB 与 |F_E| = qE 不相等，合力不为零，粒子向占优的那个力一侧偏转。',
+          'Die aktuelle Geschwindigkeit ist nicht gleich E/B: |F_B| = qvB und |F_E| = qE sind nicht gleich groß, die resultierende Kraft ist nicht null, und das Teilchen wird zur Seite der überwiegenden Kraft abgelenkt.',
           [electric === undefined ? '' : `|F_E| = ${electric}`, magnetic === undefined ? '' : `|F_B| = ${magnetic}`, net === undefined ? '' : `|ΣF| = ${net}`]
             .filter(entry => entry.length > 0)
-            .join('；'),
-          selected === undefined ? '' : `只有速度恰为 ${selected} 的粒子才能直线通过。`,
+            .join('; '),
+          selected === undefined ? '' : `Nur Teilchen mit einer Geschwindigkeit von genau ${selected} können geradlinig passieren.`,
         ].filter(entry => entry.length > 0),
       highlights: ['electric-force', 'magnetic-force', 'net-force'],
     },
@@ -161,44 +161,44 @@ const velocitySelectorLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const spectrometerLesson = (context: PhysicsAgentContext): TutorScript => {
-  const radius = derivedText(context, '回旋半径')
-  const period = derivedText(context, '回旋周期')
-  const selected = derivedText(context, '选择速度')
+  const radius = derivedText(context, 'Kreisbahnradius')
+  const period = derivedText(context, 'Umlaufperiode')
+  const selected = derivedText(context, 'Auswahlgeschwindigkeit')
   return {
     id: 'spectrometer-arc',
-    topic: '质谱仪',
+    topic: 'Massenspektrometer',
     observation: [
-      ...observeLine('选择速度 E/B', selected),
-      ...observeLine('磁偏转半径 r', radius),
-      ...observeLine('回旋周期 T', period),
+      ...observeLine('Auswahlgeschwindigkeit E/B', selected),
+      ...observeLine('Magnetischer Ablenkradius r', radius),
+      ...observeLine('Umlaufperiode T', period),
     ],
-    question: '离子进入磁偏转区后，为什么做匀速圆周运动？',
+    question: 'Warum bewegt sich das Ion nach dem Eintritt in den magnetischen Ablenkbereich auf einer gleichförmigen Kreisbahn?',
     hints: [
       {
         id: 'hint-region',
-        title: '提示 1',
-        paragraphs: ['偏转区里只有磁场。先确认粒子在这个区域受到哪些力。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Im Ablenkbereich gibt es nur ein Magnetfeld. Stelle zuerst fest, welche Kräfte auf das Teilchen in diesem Bereich wirken.'],
         highlights: ['magnetic-region'],
       },
       {
         id: 'hint-perpendicular',
-        title: '提示 2',
-        paragraphs: ['洛伦兹力始终垂直于速度。垂直于速度的力能改变速度的大小吗？'],
+        title: 'Hinweis 2',
+        paragraphs: ['Die Lorentzkraft steht stets senkrecht zur Geschwindigkeit. Kann eine senkrecht zur Geschwindigkeit stehende Kraft den Betrag der Geschwindigkeit ändern?'],
         highlights: ['magnetic-force'],
       },
       {
         id: 'hint-centripetal',
-        title: '提示 3',
-        paragraphs: ['大小不变、方向始终指向一侧的力正是向心力：qvB = mv²/r，解出 r = mv/(qB)。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Eine Kraft mit konstantem Betrag, deren Richtung stets zu einer Seite zeigt, ist genau die Zentripetalkraft: qvB = mv²/r, aufgelöst nach r = mv/(qB).'],
         highlights: ['trajectory'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '偏转区内洛伦兹力提供向心力且不做功：速率不变、方向匀速旋转，轨迹是圆弧。',
-        radius === undefined ? '' : `当前装置的偏转半径 r = ${radius}，由 r = mv/(qB) 给出（数值来自引擎派生量）。`,
+        'Im Ablenkbereich liefert die Lorentzkraft die Zentripetalkraft und verrichtet keine Arbeit: Der Geschwindigkeitsbetrag bleibt konstant, die Richtung dreht sich gleichförmig, die Bahn ist ein Kreisbogen.',
+        radius === undefined ? '' : `Der Ablenkradius des aktuellen Aufbaus beträgt r = ${radius} und ergibt sich aus r = mv/(qB) (Wert aus der abgeleiteten Größe der Engine).`,
       ].filter(entry => entry.length > 0),
       highlights: ['magnetic-force', 'trajectory'],
     },
@@ -211,47 +211,47 @@ const spectrometerLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const threeFieldLesson = (context: PhysicsAgentContext): TutorScript => {
-  const gravity = derivedText(context, '重力大小')
-  const electric = derivedText(context, '电场力大小')
-  const magnetic = derivedText(context, '洛伦兹力大小')
-  const net = derivedText(context, '合力大小')
+  const gravity = derivedText(context, 'Betrag der Schwerkraft')
+  const electric = derivedText(context, 'Betrag der elektrischen Feldkraft')
+  const magnetic = derivedText(context, 'Betrag der Lorentzkraft')
+  const net = derivedText(context, 'Betrag der resultierenden Kraft')
   return {
     id: 'three-field-net',
-    topic: '电场 + 磁场 + 重力',
+    topic: 'Elektrisches Feld + Magnetfeld + Schwerkraft',
     observation: [
-      ...observeLine('电场力 |F_E|', electric),
-      ...observeLine('洛伦兹力 |F_B|', magnetic),
-      ...observeLine('重力 |mg|', gravity),
-      ...observeLine('合力 |ΣF|', net),
+      ...observeLine('Elektrische Feldkraft |F_E|', electric),
+      ...observeLine('Lorentzkraft |F_B|', magnetic),
+      ...observeLine('Schwerkraft |mg|', gravity),
+      ...observeLine('Resultierende Kraft |ΣF|', net),
     ],
-    question: '三个场同时存在时，怎样确定粒子的运动？',
+    question: 'Wie wird die Bewegung des Teilchens bestimmt, wenn drei Felder gleichzeitig vorhanden sind?',
     hints: [
       {
         id: 'hint-list',
-        title: '提示 1',
-        paragraphs: ['先把三个力全部列出来：qE、qv×B、mg。漏掉任何一个都会得到错误的轨迹。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Liste zuerst alle drei Kräfte auf: qE, qv×B, mg. Lässt man eine davon weg, erhält man eine falsche Bahn.'],
         highlights: ['electric-force', 'magnetic-force', 'gravity-force'],
       },
       {
         id: 'hint-scale',
-        title: '提示 2',
-        paragraphs: ['比较数量级：观察上面三个力的大小，哪一个远小于其它两个？微观粒子的重力通常可以忽略，但要先比较再决定。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Vergleiche die Größenordnungen: Betrachte die Beträge der drei Kräfte oben — welche ist viel kleiner als die anderen beiden? Bei mikroskopischen Teilchen darf die Schwerkraft meist vernachlässigt werden, aber erst vergleichen, dann entscheiden.'],
       },
       {
         id: 'hint-sum',
-        title: '提示 3',
-        paragraphs: ['合力是矢量和 ΣF = qE + qv×B + mg，再用 ΣF = ma 决定加速度。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Die resultierende Kraft ist die Vektorsumme ΣF = qE + qv×B + mg; mit ΣF = ma wird dann die Beschleunigung bestimmt.'],
         highlights: ['net-force'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '引擎按 ΣF = qE + qv×B + mg 逐帧合成三个力；本场景中重力比电磁力小若干数量级，合力几乎等于电磁力之差。',
+        'Die Engine setzt die drei Kräfte Bild für Bild gemäß ΣF = qE + qv×B + mg zusammen; in dieser Szene ist die Schwerkraft um einige Größenordnungen kleiner als die elektromagnetischen Kräfte, sodass die resultierende Kraft nahezu der Differenz der elektromagnetischen Kräfte entspricht.',
         [electric === undefined ? '' : `|F_E| = ${electric}`, magnetic === undefined ? '' : `|F_B| = ${magnetic}`, gravity === undefined ? '' : `|mg| = ${gravity}`, net === undefined ? '' : `|ΣF| = ${net}`]
           .filter(entry => entry.length > 0)
-          .join('；'),
+          .join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['net-force'],
     },
@@ -260,45 +260,45 @@ const threeFieldLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const crossedFieldLesson = (context: PhysicsAgentContext): TutorScript => {
-  const electric = derivedText(context, '电场力大小')
-  const magnetic = derivedText(context, '洛伦兹力大小')
-  const net = derivedText(context, '合力大小')
+  const electric = derivedText(context, 'Betrag der elektrischen Feldkraft')
+  const magnetic = derivedText(context, 'Betrag der Lorentzkraft')
+  const net = derivedText(context, 'Betrag der resultierenden Kraft')
   return {
     id: 'crossed-field-net',
-    topic: '复合场 E + B',
+    topic: 'Kombiniertes Feld E + B',
     observation: [
-      ...observeLine('电场力 |F_E|', electric),
-      ...observeLine('洛伦兹力 |F_B|', magnetic),
-      ...observeLine('合力 |ΣF|', net),
+      ...observeLine('Elektrische Feldkraft |F_E|', electric),
+      ...observeLine('Lorentzkraft |F_B|', magnetic),
+      ...observeLine('Resultierende Kraft |ΣF|', net),
     ],
-    question: '正交的电场和磁场同时作用时，粒子会怎么运动？',
+    question: 'Wie bewegt sich das Teilchen, wenn ein elektrisches und ein magnetisches Feld senkrecht zueinander gleichzeitig wirken?',
     hints: [
       {
         id: 'hint-electric',
-        title: '提示 1',
-        paragraphs: ['电场力 qE 的方向由 E 和电荷符号决定，大小与速度无关。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Die Richtung der elektrischen Feldkraft qE wird von E und dem Vorzeichen der Ladung bestimmt; ihr Betrag hängt nicht von der Geschwindigkeit ab.'],
         highlights: ['electric-force'],
       },
       {
         id: 'hint-magnetic',
-        title: '提示 2',
-        paragraphs: ['洛伦兹力 qv×B 随速度不断改变方向和大小 —— 这是轨迹弯曲的原因。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Die Lorentzkraft qv×B ändert mit der Geschwindigkeit ständig Richtung und Betrag — das ist der Grund für die Krümmung der Bahn.'],
         highlights: ['magnetic-force'],
       },
       {
         id: 'hint-balance',
-        title: '提示 3',
-        paragraphs: ['问问自己：什么条件下两个力恰好抵消？那就是速度选择器的工作点 v = E/B。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Frage dich: Unter welcher Bedingung heben sich die beiden Kräfte gerade auf? Das ist der Arbeitspunkt des Geschwindigkeitswählers v = E/B.'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '合力 ΣF = qE + qv×B 逐帧变化：v = E/B 时两力抵消走直线，偏离该速度时轨迹弯曲。',
+        'Die resultierende Kraft ΣF = qE + qv×B ändert sich Bild für Bild: Bei v = E/B heben sich beide Kräfte auf und die Bahn ist gerade; weicht die Geschwindigkeit davon ab, krümmt sich die Bahn.',
         [electric === undefined ? '' : `|F_E| = ${electric}`, magnetic === undefined ? '' : `|F_B| = ${magnetic}`, net === undefined ? '' : `|ΣF| = ${net}`]
           .filter(entry => entry.length > 0)
-          .join('；'),
+          .join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['electric-force', 'magnetic-force', 'net-force'],
     },
@@ -307,140 +307,140 @@ const crossedFieldLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const magneticLesson = (context: PhysicsAgentContext): TutorScript => {
-  const radius = derivedText(context, '轨道半径 R')
-  const period = derivedText(context, '周期 T')
-  const force = derivedText(context, '洛伦兹力 F')
+  const radius = derivedText(context, 'Bahnradius R')
+  const period = derivedText(context, 'Periodendauer T')
+  const force = derivedText(context, 'Lorentzkraft F')
   return {
     id: 'magnetic-circular',
-    topic: '磁场中的圆周运动',
+    topic: 'Kreisbewegung im Magnetfeld',
     observation: [
-      ...observeLine('洛伦兹力 F', force),
-      ...observeLine('轨道半径 R', radius),
-      ...observeLine('周期 T', period),
+      ...observeLine('Lorentzkraft F', force),
+      ...observeLine('Bahnradius R', radius),
+      ...observeLine('Periodendauer T', period),
     ],
-    question: '为什么带电粒子在匀强磁场中做匀速圆周运动？',
+    question: 'Warum bewegt sich ein geladenes Teilchen in einem homogenen Magnetfeld auf einer gleichförmigen Kreisbahn?',
     hints: [
       {
         id: 'hint-direction',
-        title: '提示 1',
-        paragraphs: ['用左手定则判断洛伦兹力方向：它始终垂直于速度。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Bestimme die Richtung der Lorentzkraft mit der Linke-Hand-Regel: Sie steht stets senkrecht zur Geschwindigkeit.'],
         highlights: ['force'],
       },
       {
         id: 'hint-no-work',
-        title: '提示 2',
-        paragraphs: ['垂直于速度的力不做功。粒子的速率会变吗？'],
+        title: 'Hinweis 2',
+        paragraphs: ['Eine senkrecht zur Geschwindigkeit stehende Kraft verrichtet keine Arbeit. Ändert sich der Geschwindigkeitsbetrag des Teilchens?'],
       },
       {
         id: 'hint-radius',
-        title: '提示 3',
-        paragraphs: ['大小恒定、方向始终指向圆心的力就是向心力：qvB = mv²/r。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Eine Kraft mit konstantem Betrag, deren Richtung stets zum Kreismittelpunkt zeigt, ist die Zentripetalkraft: qvB = mv²/r.'],
         highlights: ['radius'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '洛伦兹力充当向心力且不做功，速率不变、方向匀速旋转 —— 匀速圆周运动。半径 r = mv/(qB)，周期 T = 2πm/(qB) 与速度无关。',
+        'Die Lorentzkraft wirkt als Zentripetalkraft und verrichtet keine Arbeit; der Geschwindigkeitsbetrag bleibt konstant, die Richtung dreht sich gleichförmig — eine gleichförmige Kreisbewegung. Der Radius r = mv/(qB) und die Periodendauer T = 2πm/(qB) hängen nicht von der Geschwindigkeit ab.',
         [radius === undefined ? '' : `R = ${radius}`, period === undefined ? '' : `T = ${period}`]
           .filter(entry => entry.length > 0)
-          .join('；'),
+          .join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['trajectory', 'radius'],
     },
     evidence: context.verification
-      .filter(check => /不做功|周期|半径|圆/.test(check.label))
+      .filter(check => /keine Arbeit|Periodendauer|Radius|Kreis/.test(check.label))
       .map(check => ({ label: check.label, status: check.status })),
   }
 }
 
 const projectileLesson = (context: PhysicsAgentContext): TutorScript => {
-  const range = derivedText(context, '水平射程 R')
-  const flight = derivedText(context, '飞行时间 t')
+  const range = derivedText(context, 'Waagerechte Wurfweite R')
+  const flight = derivedText(context, 'Flugzeit t')
   return {
     id: 'projectile-decomposition',
-    topic: '平抛运动',
+    topic: 'Waagerechter Wurf',
     observation: [
-      ...observeLine('水平射程 R', range),
-      ...observeLine('飞行时间 t', flight),
+      ...observeLine('Waagerechte Wurfweite R', range),
+      ...observeLine('Flugzeit t', flight),
     ],
-    question: '平抛运动为什么可以拆成两个互不相关的直线运动？',
+    question: 'Warum lässt sich der waagerechte Wurf in zwei unabhängige geradlinige Bewegungen zerlegen?',
     hints: [
       {
         id: 'hint-horizontal',
-        title: '提示 1',
-        paragraphs: ['水平方向受力吗？没有力，速度分量就保持不变。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Wirkt in horizontaler Richtung eine Kraft? Ohne Kraft bleibt die Geschwindigkeitskomponente konstant.'],
         highlights: ['horizontal-velocity'],
       },
       {
         id: 'hint-vertical',
-        title: '提示 2',
-        paragraphs: ['竖直方向只有重力：从零开始的匀加速运动，正是自由落体。'],
+        title: 'Hinweis 2',
+        paragraphs: ['In vertikaler Richtung wirkt nur die Schwerkraft: eine gleichmäßig beschleunigte Bewegung aus der Ruhe heraus, also ein freier Fall.'],
         highlights: ['gravity'],
       },
       {
         id: 'hint-time',
-        title: '提示 3',
-        paragraphs: ['两个分运动共用同一个时间 t。落地时间由哪一个分运动决定？'],
+        title: 'Hinweis 3',
+        paragraphs: ['Beide Teilbewegungen verwenden dieselbe Zeit t. Von welcher Teilbewegung hängt die Fallzeit ab?'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '水平匀速 x = v₀t，竖直自由落体 h = ½gt²；t = √(2h/g) 由高度决定，射程 R = v₀·t。',
+        'Horizontal gleichförmig x = v₀t, vertikal freier Fall h = ½gt²; t = √(2h/g) wird von der Höhe bestimmt, die Wurfweite ist R = v₀·t.',
         [range === undefined ? '' : `R = ${range}`, flight === undefined ? '' : `t = ${flight}`]
           .filter(entry => entry.length > 0)
-          .join('；'),
+          .join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['trajectory'],
     },
     evidence: context.verification
-      .filter(check => /轨迹|位移|运动|能量/.test(check.label))
+      .filter(check => /Bahn|Verschiebung|Bewegung|Energie/.test(check.label))
       .slice(0, 3)
       .map(check => ({ label: check.label, status: check.status })),
   }
 }
 
 const inclineLesson = (context: PhysicsAgentContext): TutorScript => {
-  const normal = derivedText(context, '支持力 N')
-  const acceleration = derivedText(context, '沿面加速度 a')
+  const normal = derivedText(context, 'Normalkraft N')
+  const acceleration = derivedText(context, 'Beschleunigung entlang der schiefen Ebene a')
   return {
     id: 'incline-decomposition',
-    topic: '斜面上的受力分析',
+    topic: 'Kraftanalyse auf der schiefen Ebene',
     observation: [
-      ...observeLine('支持力 N', normal),
-      ...observeLine('沿面加速度 a', acceleration),
+      ...observeLine('Normalkraft N', normal),
+      ...observeLine('Beschleunigung entlang der schiefen Ebene a', acceleration),
     ],
-    question: '为什么要把重力沿斜面和垂直斜面分解？',
+    question: 'Warum zerlegt man die Schwerkraft in eine Komponente entlang der schiefen Ebene und eine senkrecht dazu?',
     hints: [
       {
         id: 'hint-forces',
-        title: '提示 1',
-        paragraphs: ['先画出全部的力：重力 mg 竖直向下，支持力 N 垂直斜面。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Zeichne zuerst alle Kräfte: die Schwerkraft mg senkrecht nach unten und die Normalkraft N senkrecht zur schiefen Ebene.'],
         highlights: ['gravity', 'normal-force'],
       },
       {
         id: 'hint-axes',
-        title: '提示 2',
-        paragraphs: ['物体只能沿斜面运动，把坐标轴取在沿面/垂直面方向，运动方程最简单。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Der Körper kann sich nur entlang der schiefen Ebene bewegen; legt man die Koordinatenachsen entlang und senkrecht zur Ebene, werden die Bewegungsgleichungen am einfachsten.'],
       },
       {
         id: 'hint-components',
-        title: '提示 3',
-        paragraphs: ['分解重力：沿面分量 mg·sinθ 驱动滑动，垂直分量 mg·cosθ 与支持力平衡。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Zerlege die Schwerkraft: Die Komponente entlang der Ebene mg·sinθ treibt das Gleiten an, die senkrechte Komponente mg·cosθ hält der Normalkraft das Gleichgewicht.'],
         highlights: ['gravity-parallel', 'gravity-normal'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '垂直方向 N = mg·cosθ 平衡，沿面方向 mg·sinθ（减摩擦力）产生加速度 —— 这就是分解的意义。',
+        'In senkrechter Richtung herrscht Gleichgewicht N = mg·cosθ, in Richtung der Ebene erzeugt mg·sinθ (abzüglich der Reibungskraft) die Beschleunigung — das ist der Sinn der Zerlegung.',
         [normal === undefined ? '' : `N = ${normal}`, acceleration === undefined ? '' : `a = ${acceleration}`]
           .filter(entry => entry.length > 0)
-          .join('；'),
+          .join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['net-force'],
     },
@@ -451,43 +451,43 @@ const inclineLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const electricLesson = (context: PhysicsAgentContext): TutorScript => {
-  const field = derivedText(context, '电场强度 E') ?? derivedText(context, '场强 E')
-  const force = derivedText(context, '电场力 F')
+  const field = derivedText(context, 'Elektrische Feldstärke E') ?? derivedText(context, 'Feldstärke E')
+  const force = derivedText(context, 'Elektrische Feldkraft F')
   return {
     id: 'electric-force-direction',
-    topic: '电场与电场力',
+    topic: 'Elektrisches Feld und elektrische Feldkraft',
     observation: [
-      ...observeLine('电场强度 E', field),
-      ...observeLine('电场力 F', force),
+      ...observeLine('Elektrische Feldstärke E', field),
+      ...observeLine('Elektrische Feldkraft F', force),
     ],
-    question: '怎样从电场方向得到粒子受力方向？',
+    question: 'Wie erhält man aus der Richtung des elektrischen Feldes die Kraftrichtung auf das Teilchen?',
     hints: [
       {
         id: 'hint-field',
-        title: '提示 1',
-        paragraphs: ['电场方向是场自己的属性：正电荷的场沿径向向外，匀强场方向处处相同。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Die Feldrichtung ist eine Eigenschaft des Feldes selbst: Das Feld einer positiven Ladung zeigt radial nach außen, und in einem homogenen Feld ist die Richtung überall gleich.'],
         highlights: ['electric-field'],
       },
       {
         id: 'hint-sign',
-        title: '提示 2',
-        paragraphs: ['F = qE：正电荷受力与 E 同向，负电荷受力与 E 反向。电荷符号决定一切。'],
+        title: 'Hinweis 2',
+        paragraphs: ['F = qE: Bei positiver Ladung zeigt die Kraft in Richtung von E, bei negativer entgegen E. Das Vorzeichen der Ladung entscheidet.'],
         highlights: ['electric-force'],
       },
       {
         id: 'hint-motion',
-        title: '提示 3',
-        paragraphs: ['力的方向恒定时，垂直入射的粒子做类平抛运动 —— 与重力场里的平抛完全同构。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Bei konstanter Kraftrichtung führt ein senkrecht eintretendes Teilchen eine wurfähnliche Bewegung aus — strukturgleich zum waagerechten Wurf im Schwerefeld.'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '受力方向 = 电荷符号 × 场方向；恒定的电场力产生恒定加速度 a = qE/m，轨迹由初速度与场方向共同决定。',
+        'Kraftrichtung = Ladungsvorzeichen × Feldrichtung; die konstante elektrische Feldkraft erzeugt eine konstante Beschleunigung a = qE/m, und die Bahn wird von der Anfangsgeschwindigkeit und der Feldrichtung gemeinsam bestimmt.',
         [field === undefined ? '' : `E = ${field}`, force === undefined ? '' : `F = ${force}`]
           .filter(entry => entry.length > 0)
-          .join('；'),
+          .join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['electric-force'],
     },
@@ -498,47 +498,47 @@ const electricLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const averageSpeedLesson = (context: PhysicsAgentContext): TutorScript => {
-  const displacement = derivedText(context, '位移')
-  const finalSpeed = derivedText(context, '末速度')
-  const acceleration = derivedText(context, '加速度')
+  const displacement = derivedText(context, 'Verschiebung')
+  const finalSpeed = derivedText(context, 'Endgeschwindigkeit')
+  const acceleration = derivedText(context, 'Beschleunigung')
   return {
     id: 'mechanics-average-speed',
-    topic: '测量平均速度',
+    topic: 'Durchschnittsgeschwindigkeit messen',
     observation: [
-      ...observeLine('位移 s', displacement),
-      ...observeLine('末速度 v', finalSpeed),
-      ...observeLine('加速度 a', acceleration),
+      ...observeLine('Verschiebung s', displacement),
+      ...observeLine('Endgeschwindigkeit v', finalSpeed),
+      ...observeLine('Beschleunigung a', acceleration),
     ],
-    question: '怎样测出小车这段运动的平均速度？',
+    question: 'Wie misst man die Durchschnittsgeschwindigkeit des Wagens auf diesem Abschnitt?',
     hints: [
       {
         id: 'hint-define',
-        title: '提示 1',
-        paragraphs: ['平均速度描述整段运动的平均快慢：v̄ = s/t，只需要总路程和总时间两个量，不需要任何时刻的瞬时速度。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Die Durchschnittsgeschwindigkeit beschreibt die mittlere Schnelligkeit über den gesamten Abschnitt: v̄ = s/t; dazu braucht man nur die Gesamtstrecke und die Gesamtzeit, keine Momentangeschwindigkeit zu einem bestimmten Zeitpunkt.'],
         highlights: ['trajectory'],
       },
       {
         id: 'hint-measure',
-        title: '提示 2',
-        paragraphs: ['刻度尺量出斜面上的路程 s，停表记下滑行时间 t —— 播放一遍运动，时间轴就是你的停表。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Miss mit dem Lineal die Strecke s auf der schiefen Ebene und stoppe mit der Stoppuhr die Fahrzeit t — spiele die Bewegung einmal ab, dann ist die Zeitachse deine Stoppuhr.'],
       },
       {
         id: 'hint-segments',
-        title: '提示 3',
-        paragraphs: ['再分段测一次：前半程、后半程分别计时。小车加速下滑，相同路程哪一段用时更短？'],
+        title: 'Hinweis 3',
+        paragraphs: ['Miss anschließend abschnittsweise: Stoppe die erste und die zweite Hälfte getrennt. Der Wagen beschleunigt bergab — bei gleicher Strecke, welcher Abschnitt braucht weniger Zeit?'],
         highlights: ['velocity'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '把测得的路程除以对应的时间：v̄ = s/t。小车加速下滑，后半程用时更短，其平均速度大于前半程；全程的平均速度介于两段之间，而末速度是瞬时值，比全程平均速度更大。',
+        'Teile die gemessene Strecke durch die zugehörige Zeit: v̄ = s/t. Der Wagen beschleunigt bergab, die zweite Hälfte braucht weniger Zeit, ihre Durchschnittsgeschwindigkeit ist größer als die der ersten Hälfte; die Durchschnittsgeschwindigkeit über die gesamte Strecke liegt zwischen beiden, während die Endgeschwindigkeit ein Momentanwert und damit größer als die Durchschnittsgeschwindigkeit über die Gesamtstrecke ist.',
         [
           displacement === undefined ? '' : `s = ${displacement}`,
-          finalSpeed === undefined ? '' : `末速度 v = ${finalSpeed}`,
+          finalSpeed === undefined ? '' : `Endgeschwindigkeit v = ${finalSpeed}`,
           acceleration === undefined ? '' : `a = ${acceleration}`,
-        ].filter(entry => entry.length > 0).join('；'),
+        ].filter(entry => entry.length > 0).join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['trajectory'],
     },
@@ -548,57 +548,57 @@ const averageSpeedLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const leverBalanceLesson = (context: PhysicsAgentContext): TutorScript => {
-  const leftMoment = derivedText(context, '左端力矩 M₁')
-  const rightMoment = derivedText(context, '右端力矩 M₂')
-  const leftWeight = derivedText(context, '左端重力 G₁')
-  const rightWeight = derivedText(context, '右端重力 G₂')
-  const ratio = derivedText(context, '力矩比 M₁/M₂')
-  const judgement = derivedText(context, '平衡判断') ?? ''
-  const balanced = judgement.includes('杠杆平衡')
+  const leftMoment = derivedText(context, 'Linkes Drehmoment M₁')
+  const rightMoment = derivedText(context, 'Rechtes Drehmoment M₂')
+  const leftWeight = derivedText(context, 'Linke Gewichtskraft G₁')
+  const rightWeight = derivedText(context, 'Rechte Gewichtskraft G₂')
+  const ratio = derivedText(context, 'Drehmomentverhältnis M₁/M₂')
+  const judgement = derivedText(context, 'Gleichgewichtsbeurteilung') ?? ''
+  const balanced = judgement.includes('Hebel im Gleichgewicht')
   return {
     id: 'mechanics-lever',
-    topic: '探究杠杆的平衡条件',
+    topic: 'Gleichgewichtsbedingungen des Hebels untersuchen',
     observation: [
-      ...observeLine('左端力矩 M₁', leftMoment),
-      ...observeLine('右端力矩 M₂', rightMoment),
-      ...observeLine('力矩比 M₁/M₂', ratio),
+      ...observeLine('Linkes Drehmoment M₁', leftMoment),
+      ...observeLine('Rechtes Drehmoment M₂', rightMoment),
+      ...observeLine('Drehmomentverhältnis M₁/M₂', ratio),
     ],
     question: balanced
-      ? '为什么 200 g 挂在 15 cm 处，能和 300 g 挂在 10 cm 处平衡？'
-      : '杠杆向一边倾斜。怎样改力臂或质量，才能重新平衡？',
+      ? 'Warum können 200 g bei 15 cm mit 300 g bei 10 cm im Gleichgewicht sein?'
+      : 'Der Hebel neigt sich zu einer Seite. Wie müssen Hebelarm oder Masse geändert werden, damit wieder Gleichgewicht herrscht?',
     hints: [
       {
         id: 'hint-weight',
-        title: '提示 1',
-        paragraphs: ['每个钩码的力是它的重力 G = mg，不是「质量越大力臂就越长」。质量变了，变的是力。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Die Kraft jedes Gewichtsstücks ist seine Gewichtskraft G = mg, nicht etwa so, dass eine größere Masse automatisch einen längeren Hebelarm ergibt. Ändert sich die Masse, ändert sich die Kraft.'],
         highlights: ['hanger-left', 'hanger-right'],
       },
       {
         id: 'hint-moment',
-        title: '提示 2',
-        paragraphs: ['力矩才是让杠杆转的量：M = F·l。力臂是支点到力的作用线的垂直距离，把钩码向外滑，力不变，力矩变大。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Das Drehmoment ist die Größe, die den Hebel dreht: M = F·l. Der Hebelarm ist der senkrechte Abstand vom Drehpunkt zur Wirkungslinie der Kraft; schiebt man das Gewichtsstück nach außen, bleibt die Kraft gleich, das Drehmoment wird größer.'],
         highlights: ['arm-left', 'arm-right'],
       },
       {
         id: 'hint-balance',
-        title: '提示 3',
-        paragraphs: ['第一类杠杆的平衡条件是两边力矩相等：F₁l₁ = F₂l₂。一边的力加倍，这一边的力臂就要减半，乘积才能对上。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Die Gleichgewichtsbedingung des Hebels erster Art ist die Gleichheit der Drehmomente auf beiden Seiten: F₁l₁ = F₂l₂. Verdoppelt sich die Kraft auf einer Seite, muss der Hebelarm dieser Seite halbiert werden, damit die Produkte übereinstimmen.'],
         highlights: ['lever-1'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
         balanced
-          ? 'G₁ = 1.96 N、l₁ = 15 cm，M₁ = 29.4 N·cm；G₂ = 2.94 N、l₂ = 10 cm，M₂ = 29.4 N·cm。力和力臂不同，力矩相同，所以杠杆水平。'
-          : '看哪一边的 M = F·l 更大，杠杆就向哪一边沉。把较大的一边力臂缩短（或把较小的一边质量加大），直到 F₁l₁ = F₂l₂，杠杆重新水平。',
+          ? 'G₁ = 1.96 N, l₁ = 15 cm, M₁ = 29.4 N·cm; G₂ = 2.94 N, l₂ = 10 cm, M₂ = 29.4 N·cm. Kräfte und Hebelarme sind verschieden, die Drehmomente aber gleich, deshalb steht der Hebel waagerecht.'
+          : 'Die Seite mit dem größeren M = F·l sinkt nach unten. Verkürze den Hebelarm der größeren Seite (oder erhöhe die Masse der kleineren Seite), bis F₁l₁ = F₂l₂ gilt und der Hebel wieder waagerecht steht.',
         [
           leftWeight === undefined ? '' : `G₁ = ${leftWeight}`,
           rightWeight === undefined ? '' : `G₂ = ${rightWeight}`,
           leftMoment === undefined ? '' : `M₁ = ${leftMoment}`,
           rightMoment === undefined ? '' : `M₂ = ${rightMoment}`,
-        ].filter(entry => entry.length > 0).join('；'),
+        ].filter(entry => entry.length > 0).join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['hanger-left', 'hanger-right'],
     },
@@ -608,33 +608,33 @@ const leverBalanceLesson = (context: PhysicsAgentContext): TutorScript => {
 
 const forceMotionLesson = (context: PhysicsAgentContext): TutorScript => ({
   id: 'force-and-motion',
-  topic: '力与运动',
+  topic: 'Kraft und Bewegung',
   observation: context.derived
     .slice(0, 3)
-    .map(row => `${row.label}：${row.value} ${row.unit}`.trim()),
-  question: '怎样从受力情况得到物体的运动？',
+    .map(row => `${row.label}: ${row.value} ${row.unit}`.trim()),
+  question: 'Wie erhält man aus den wirkenden Kräften die Bewegung des Körpers?',
   hints: [
     {
       id: 'hint-forces',
-      title: '提示 1',
-      paragraphs: ['先做完整的受力分析，把每一个力都画出来。'],
+      title: 'Hinweis 1',
+      paragraphs: ['Führe zuerst eine vollständige Kraftanalyse durch und zeichne jede einzelne Kraft ein.'],
     },
     {
       id: 'hint-net',
-      title: '提示 2',
-      paragraphs: ['求合力：合力为零则速度保持不变（静止或匀速直线）；合力恒定则匀变速。'],
+      title: 'Hinweis 2',
+      paragraphs: ['Bilde die resultierende Kraft: Ist sie null, bleibt die Geschwindigkeit konstant (Ruhe oder gleichförmige geradlinige Bewegung); ist sie konstant, ist die Bewegung gleichmäßig beschleunigt.'],
     },
     {
       id: 'hint-newton',
-      title: '提示 3',
-      paragraphs: ['用 F = ma 把合力翻译成加速度，再用运动学公式描述位置随时间的变化。'],
+      title: 'Hinweis 3',
+      paragraphs: ['Übersetze die resultierende Kraft mit F = ma in eine Beschleunigung und beschreibe dann mit den kinematischen Formeln, wie sich der Ort mit der Zeit ändert.'],
     },
   ],
   answer: {
     id: 'answer',
-    title: '答案',
+    title: 'Antwort',
     paragraphs: [
-      '受力 → 合力 → 加速度 → 运动：这是力学问题的通用路径。本场景的数值都来自引擎的派生量。',
+      'Kräfte → resultierende Kraft → Beschleunigung → Bewegung: Das ist der allgemeine Weg bei Mechanikaufgaben. Die Zahlenwerte dieser Szene stammen alle aus den abgeleiteten Größen der Engine.',
     ],
     highlights: ['trajectory'],
   },
@@ -646,50 +646,50 @@ const forceMotionLesson = (context: PhysicsAgentContext): TutorScript => ({
 /* ----------------------------------------------------------------- circuit -- */
 
 const circuitSeriesLesson = (context: PhysicsAgentContext): TutorScript => {
-  const emf = derivedText(context, '电动势 E')
-  const current = derivedText(context, '干路电流 I')
-  const terminal = derivedText(context, '路端电压 U')
-  const external = derivedText(context, '外电路等效电阻')
+  const emf = derivedText(context, 'EMK E')
+  const current = derivedText(context, 'Hauptstrom I')
+  const terminal = derivedText(context, 'Klemmenspannung U')
+  const external = derivedText(context, 'Ersatzwiderstand des Außenkreises')
   return {
     id: 'circuit-series-loop',
-    topic: '串联电路',
+    topic: 'Reihenschaltung',
     observation: [
-      ...observeLine('电动势 E', emf),
-      ...observeLine('干路电流 I', current),
-      ...observeLine('路端电压 U', terminal),
-      ...observeLine('外电路等效电阻', external),
+      ...observeLine('EMK E', emf),
+      ...observeLine('Hauptstrom I', current),
+      ...observeLine('Klemmenspannung U', terminal),
+      ...observeLine('Ersatzwiderstand des Außenkreises', external),
     ],
-    question: '串联回路中的电流由什么决定？',
+    question: 'Wovon wird der Strom im Reihenstromkreis bestimmt?',
     hints: [
       {
         id: 'hint-loop',
-        title: '提示 1',
-        paragraphs: ['先看电流表：串联回路只有一条通路，电流处处相等，电流表读到的就是干路电流。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Betrachte zuerst das Amperemeter: Ein Reihenstromkreis hat nur einen Pfad, der Strom ist überall gleich, und was das Amperemeter anzeigt, ist der Hauptstrom.'],
         highlights: ['ammeter'],
       },
       {
         id: 'hint-resistance',
-        title: '提示 2',
-        paragraphs: ['再看电阻：串联总电阻等于各电阻之和，接入的电阻越多，总电阻越大。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Betrachte nun die Widerstände: Der Gesamtwiderstand in Reihe ist die Summe der Einzelwiderstände; je mehr Widerstände zugeschaltet sind, desto größer ist der Gesamtwiderstand.'],
         highlights: ['resistors'],
       },
       {
         id: 'hint-ohm',
-        title: '提示 3',
-        paragraphs: ['用欧姆定律把两者连起来：I = U / R串。总电压一定时，总电阻决定电流。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Verbinde beides mit dem Ohmschen Gesetz: I = U / R_Reihe. Bei fester Gesamtspannung bestimmt der Gesamtwiderstand den Strom.'],
         highlights: ['battery'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '干路电流由 I = U/R串 决定：串联电流处处相等，各电阻按 U = IR 分得电压，之和等于总电压。',
+        'Der Hauptstrom wird durch I = U/R_Reihe bestimmt: In Reihe ist der Strom überall gleich, jeder Widerstand erhält nach U = IR seine Spannung, und deren Summe ist gleich der Gesamtspannung.',
         [
           emf === undefined ? '' : `E = ${emf}`,
           current === undefined ? '' : `I = ${current}`,
-          external === undefined ? '' : `R串 = ${external}`,
-        ].filter(entry => entry.length > 0).join('；'),
+          external === undefined ? '' : `R_Reihe = ${external}`,
+        ].filter(entry => entry.length > 0).join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['ammeter', 'resistors'],
     },
@@ -698,47 +698,47 @@ const circuitSeriesLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const circuitParallelLesson = (context: PhysicsAgentContext): TutorScript => {
-  const current = derivedText(context, '干路电流 I')
-  const terminal = derivedText(context, '路端电压 U')
-  const external = derivedText(context, '外电路等效电阻')
+  const current = derivedText(context, 'Hauptstrom I')
+  const terminal = derivedText(context, 'Klemmenspannung U')
+  const external = derivedText(context, 'Ersatzwiderstand des Außenkreises')
   return {
     id: 'circuit-parallel-junction',
-    topic: '并联与混联电路',
+    topic: 'Parallel- und gemischte Schaltung',
     observation: [
-      ...observeLine('干路电流 I', current),
-      ...observeLine('路端电压 U', terminal),
-      ...observeLine('外电路等效电阻', external),
+      ...observeLine('Hauptstrom I', current),
+      ...observeLine('Klemmenspannung U', terminal),
+      ...observeLine('Ersatzwiderstand des Außenkreises', external),
     ],
-    question: '结点处的电流是怎样分配的？',
+    question: 'Wie verteilt sich der Strom am Knotenpunkt?',
     hints: [
       {
         id: 'hint-junction',
-        title: '提示 1',
-        paragraphs: ['先看结点（原理图上的圆点）：干路电流在这里分成几条支路，流入结点的电流必须等于流出的电流之和。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Betrachte zuerst den Knotenpunkt (den Punkt im Schaltplan): Hier teilt sich der Hauptstrom in mehrere Zweige, und der zufließende Strom muss gleich der Summe der abfließenden Ströme sein.'],
         highlights: ['ammeter'],
       },
       {
         id: 'hint-voltage',
-        title: '提示 2',
-        paragraphs: ['并联支路两端接的是同一对结点，电压相等；每条支路的电流 I = U/R，电阻小的支路分得多。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Die Zweige einer Parallelschaltung liegen an demselben Knotenpaar, ihre Spannung ist gleich; der Strom jedes Zweigs ist I = U/R, und der Zweig mit dem kleineren Widerstand erhält mehr.'],
         highlights: ['voltmeter'],
       },
       {
         id: 'hint-equivalent',
-        title: '提示 3',
-        paragraphs: ['并联部分的等效电阻比任何一条支路都小 —— 多一条支路就多一条通路，总电导相加。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Der Ersatzwiderstand des parallelen Teils ist kleiner als jeder einzelne Zweig — ein zusätzlicher Zweig bedeutet einen zusätzlichen Pfad, und die Leitwerte addieren sich.'],
         highlights: ['resistors'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '结点电流守恒（基尔霍夫电流定律）：干路电流等于各支路电流之和；并联支路电压相等，电流按电导分配。',
+        'Die Ladungserhaltung am Knoten (Kirchhoffsches Stromgesetz): Der Hauptstrom ist gleich der Summe der Zweigströme; parallel geschaltete Zweige haben dieselbe Spannung, und der Strom verteilt sich nach den Leitwerten.',
         [
-          current === undefined ? '' : `干路 I = ${current}`,
-          external === undefined ? '' : `等效外阻 = ${external}`,
-        ].filter(entry => entry.length > 0).join('；'),
+          current === undefined ? '' : `Hauptstrom I = ${current}`,
+          external === undefined ? '' : `Ersatzaußenwiderstand = ${external}`,
+        ].filter(entry => entry.length > 0).join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['ammeter', 'resistors'],
     },
@@ -747,47 +747,47 @@ const circuitParallelLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const circuitRheostatLesson = (context: PhysicsAgentContext): TutorScript => {
-  const slider = derivedText(context, '接入电阻 R滑')
-  const current = derivedText(context, '干路电流 I')
-  const terminal = derivedText(context, '路端电压 U')
+  const slider = derivedText(context, 'Zugeschalteter Widerstand R_Schieber')
+  const current = derivedText(context, 'Hauptstrom I')
+  const terminal = derivedText(context, 'Klemmenspannung U')
   return {
     id: 'circuit-rheostat-dynamic',
-    topic: '滑动变阻器动态电路',
+    topic: 'Dynamischer Stromkreis mit Schiebewiderstand',
     observation: [
-      ...observeLine('接入电阻 R滑', slider),
-      ...observeLine('干路电流 I', current),
-      ...observeLine('路端电压 U', terminal),
+      ...observeLine('Zugeschalteter Widerstand R_Schieber', slider),
+      ...observeLine('Hauptstrom I', current),
+      ...observeLine('Klemmenspannung U', terminal),
     ],
-    question: '滑片移动时，各电表读数为什么会联动变化？',
+    question: 'Warum ändern sich die Messwerte der Messgeräte gemeinsam, wenn der Schieber bewegt wird?',
     hints: [
       {
         id: 'hint-slider',
-        title: '提示 1',
-        paragraphs: ['先看滑动变阻器：接入电阻 R滑 = p·R全，滑片位置 p 决定接入了多少电阻。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Betrachte zuerst den Schiebewiderstand: Der zugeschaltete Widerstand ist R_Schieber = p·R_gesamt, die Schieberposition p bestimmt, wie viel Widerstand zugeschaltet ist.'],
         highlights: ['rheostat'],
       },
       {
         id: 'hint-current',
-        title: '提示 2',
-        paragraphs: ['总电阻变了，干路电流跟着变：I = U/(R₀ + R滑)。接入电阻增大，电流减小。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Ändert sich der Gesamtwiderstand, ändert sich auch der Hauptstrom: I = U/(R₀ + R_Schieber). Wächst der zugeschaltete Widerstand, sinkt der Strom.'],
         highlights: ['ammeter'],
       },
       {
         id: 'hint-meter',
-        title: '提示 3',
-        paragraphs: ['定值电阻上的电压 U₀ = I·R₀ 与电流同增同减 —— 电压表读数随电流联动，而不是随"谁被调节"。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Die Spannung am Festwiderstand U₀ = I·R₀ wächst und fällt mit dem Strom — der Messwert des Voltmeters ändert sich also zusammen mit dem Strom, nicht mit dem gerade verstellten Bauteil.'],
         highlights: ['voltmeter'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '一处电阻变化 → 总电阻变化 → 干路电流变化 → 各表读数联动。按播放可把滑片从当前位置扫到最大接入，I-t 与 U-t 曲线就是这条联动链。',
+        'Eine Widerstandsänderung → Änderung des Gesamtwiderstands → Änderung des Hauptstroms → die Messwerte folgen gemeinsam. Mit Abspielen wird der Schieber von der aktuellen Position bis zur maximalen Zuschaltung gefahren; die I-t- und U-t-Kurven zeigen genau diese Kette.',
         [
-          slider === undefined ? '' : `R滑 = ${slider}`,
+          slider === undefined ? '' : `R_Schieber = ${slider}`,
           current === undefined ? '' : `I = ${current}`,
-        ].filter(entry => entry.length > 0).join('；'),
+        ].filter(entry => entry.length > 0).join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['rheostat', 'ammeter'],
     },
@@ -796,48 +796,48 @@ const circuitRheostatLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const circuitVaLesson = (context: PhysicsAgentContext): TutorScript => {
-  const emf = derivedText(context, '电动势 E')
-  const current = derivedText(context, '干路电流 I')
-  const slider = derivedText(context, '接入电阻 R滑')
+  const emf = derivedText(context, 'EMK E')
+  const current = derivedText(context, 'Hauptstrom I')
+  const slider = derivedText(context, 'Zugeschalteter Widerstand R_Schieber')
   return {
     id: 'circuit-va-resistance',
-    topic: '伏安法测电阻',
+    topic: 'Widerstandsmessung nach der Strom-Spannungs-Methode',
     observation: [
-      ...observeLine('电源电压 E', emf),
-      ...observeLine('干路电流 I', current),
-      ...observeLine('接入电阻 R滑', slider),
+      ...observeLine('Quellenspannung E', emf),
+      ...observeLine('Hauptstrom I', current),
+      ...observeLine('Zugeschalteter Widerstand R_Schieber', slider),
     ],
-    question: '只用电压表和电流表，怎样测出待测电阻 Rx？',
+    question: 'Wie bestimmt man mit nur einem Voltmeter und einem Amperemeter den zu messenden Widerstand Rx?',
     hints: [
       {
         id: 'hint-ammeter',
-        title: '提示 1',
-        paragraphs: ['电流表串联在回路里：串联电流处处相等，它读出的就是流过 Rx 的电流 I。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Das Amperemeter liegt in Reihe im Stromkreis: In Reihe ist der Strom überall gleich, es zeigt also den Strom I an, der durch Rx fließt.'],
         highlights: ['ammeter'],
       },
       {
         id: 'hint-voltmeter',
-        title: '提示 2',
-        paragraphs: ['电压表并联在 Rx 两端，读出它分到的电压 U。理想表不干扰电路：电压表不分流、电流表不分压。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Das Voltmeter liegt parallel zu Rx und zeigt die an ihm anliegende Spannung U an. Ideale Messgeräte beeinflussen den Stromkreis nicht: Das Voltmeter entzieht keinen Strom, das Amperemeter verursacht keinen Spannungsabfall.'],
         highlights: ['voltmeter'],
       },
       {
         id: 'hint-slider',
-        title: '提示 3',
-        paragraphs: ['一组读数就能算 R = U/I，但只测一次偶然误差大。移动滑片改变工作点，再读几组 (U, I) —— 求出的 R 取平均。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Aus einem Wertepaar lässt sich R = U/I berechnen, doch eine einzelne Messung hat einen großen zufälligen Fehler. Bewege den Schieber, um den Arbeitspunkt zu ändern, lies weitere Wertepaare (U, I) ab — und mittlere die erhaltenen R.'],
         highlights: ['rheostat'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '由欧姆定律变形 Rx = U/I：电压表读 U、电流表读 I，一除即得。滑动变阻器负责改变工作点，多组读数取平均减小偶然误差 —— U 与 I 同增同减，比值不变，因为电阻是导体自身的属性。',
+        'Aus dem Ohmschen Gesetz umgestellt: Rx = U/I. Das Voltmeter zeigt U, das Amperemeter zeigt I, eine Division genügt. Der Schiebewiderstand ändert den Arbeitspunkt, und der Mittelwert mehrerer Messungen verkleinert den zufälligen Fehler — U und I wachsen und fallen gemeinsam, das Verhältnis bleibt konstant, weil der Widerstand eine Eigenschaft des Leiters selbst ist.',
         [
           emf === undefined ? '' : `E = ${emf}`,
           current === undefined ? '' : `I = ${current}`,
-          slider === undefined ? '' : `R滑 = ${slider}`,
-        ].filter(entry => entry.length > 0).join('；'),
+          slider === undefined ? '' : `R_Schieber = ${slider}`,
+        ].filter(entry => entry.length > 0).join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['voltmeter', 'ammeter'],
     },
@@ -850,47 +850,47 @@ const circuitVaLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const circuitBulbLesson = (context: PhysicsAgentContext): TutorScript => {
-  const current = derivedText(context, '干路电流 I')
-  const slider = derivedText(context, '接入电阻 R滑')
-  const external = derivedText(context, '输出功率')
+  const current = derivedText(context, 'Hauptstrom I')
+  const slider = derivedText(context, 'Zugeschalteter Widerstand R_Schieber')
+  const external = derivedText(context, 'Ausgangsleistung')
   return {
     id: 'circuit-bulb-power',
-    topic: '测量小灯泡的电功率',
+    topic: 'Elektrische Leistung einer kleinen Glühlampe messen',
     observation: [
-      ...observeLine('干路电流 I', current),
-      ...observeLine('接入电阻 R滑', slider),
-      ...observeLine('输出功率', external),
+      ...observeLine('Hauptstrom I', current),
+      ...observeLine('Zugeschalteter Widerstand R_Schieber', slider),
+      ...observeLine('Ausgangsleistung', external),
     ],
-    question: '怎样测出小灯泡的实际电功率和额定功率？',
+    question: 'Wie bestimmt man die tatsächliche und die Nennleistung einer kleinen Glühlampe?',
     hints: [
       {
         id: 'hint-meters',
-        title: '提示 1',
-        paragraphs: ['不需要新仪器：电压表读灯泡两端的电压 U，电流表读流过它的电流 I，两块表就够。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Es sind keine neuen Geräte nötig: Das Voltmeter misst die Spannung U an der Lampe, das Amperemeter den Strom I durch sie — zwei Messgeräte genügen.'],
         highlights: ['voltmeter', 'ammeter'],
       },
       {
         id: 'hint-formula',
-        title: '提示 2',
-        paragraphs: ['电功率的计算式：P = UI。把两个读数相乘，就是灯泡此刻消耗的实际功率 —— 它随工作点变化，不是固定值。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Die Berechnungsformel der elektrischen Leistung lautet P = UI. Multipliziert man die beiden Messwerte, erhält man die momentan von der Lampe aufgenommene tatsächliche Leistung — sie ändert sich mit dem Arbeitspunkt und ist kein fester Wert.'],
       },
       {
         id: 'hint-rated',
-        title: '提示 3',
-        paragraphs: ['移动滑片改变灯泡的工作点：电压表读数恰好等于额定电压时，算出的才是额定功率；判断标准是电压表读数，不是亮度。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Bewege den Schieber, um den Arbeitspunkt der Lampe zu ändern: Nur wenn der Messwert des Voltmeters genau der Nennspannung entspricht, ergibt die Rechnung die Nennleistung; maßgeblich ist der Messwert des Voltmeters, nicht die Helligkeit.'],
         highlights: ['rheostat'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        'P = UI 逐个工作点成立：任意滑片位置的读数相乘是那一点的实际功率，只有把电压调到额定值，读出的才是额定功率。低于额定电压灯更暗、功率更小；高于额定电压则过载有烧毁风险。',
+        'P = UI gilt für jeden Arbeitspunkt: Das Produkt der Messwerte an einer beliebigen Schieberposition ist die tatsächliche Leistung an diesem Punkt; nur wenn die Spannung auf den Nennwert eingestellt wird, erhält man die Nennleistung. Unterhalb der Nennspannung leuchtet die Lampe schwächer und die Leistung ist kleiner; oberhalb der Nennspannung drohen Überlast und Zerstörung.',
         [
           current === undefined ? '' : `I = ${current}`,
-          slider === undefined ? '' : `R滑 = ${slider}`,
-          external === undefined ? '' : `输出功率 = ${external}`,
-        ].filter(entry => entry.length > 0).join('；'),
+          slider === undefined ? '' : `R_Schieber = ${slider}`,
+          external === undefined ? '' : `Ausgangsleistung = ${external}`,
+        ].filter(entry => entry.length > 0).join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['voltmeter', 'rheostat'],
     },
@@ -899,62 +899,62 @@ const circuitBulbLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const circuitEmfLesson = (context: PhysicsAgentContext): TutorScript => {
-  const emf = derivedText(context, '电动势 E')
-  const current = derivedText(context, '干路电流 I')
-  const terminal = derivedText(context, '路端电压 U')
-  const internalPower = derivedText(context, '内阻耗散功率')
+  const emf = derivedText(context, 'EMK E')
+  const current = derivedText(context, 'Hauptstrom I')
+  const terminal = derivedText(context, 'Klemmenspannung U')
+  const internalPower = derivedText(context, 'Verlustleistung im Innenwiderstand')
   /* fmtQuantityValue renders sub-nanoamp solves as exactly '0' — an open
      switch, not a small current. The lesson flips between the open-circuit
      reading (U = E) and the loaded drop (U = E − I·r) on that fact. */
-  const open = context.derived.find(row => row.label === '干路电流 I')?.value === '0'
+  const open = context.derived.find(row => row.label === 'Hauptstrom I')?.value === '0'
   return {
     id: open ? 'circuit-emf-open' : 'circuit-emf-internal',
-    topic: '电动势与内阻',
+    topic: 'EMK und Innenwiderstand',
     observation: [
-      ...observeLine('电动势 E', emf),
-      ...observeLine('干路电流 I', current),
-      ...observeLine('路端电压 U', terminal),
-      ...observeLine('内阻耗散功率', internalPower),
+      ...observeLine('EMK E', emf),
+      ...observeLine('Hauptstrom I', current),
+      ...observeLine('Klemmenspannung U', terminal),
+      ...observeLine('Verlustleistung im Innenwiderstand', internalPower),
     ],
-    question: open ? '断路时电压表为什么直读电动势？' : '为什么路端电压比电动势小？',
+    question: open ? 'Warum zeigt das Voltmeter bei geöffnetem Stromkreis direkt die EMK an?' : 'Warum ist die Klemmenspannung kleiner als die EMK?',
     hints: [
       {
         id: 'hint-source',
-        title: '提示 1',
-        paragraphs: ['电源不是恒压器：它有内阻 r，对外输出的电压不一定等于电动势。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Eine Quelle ist kein Konstantspannungsgerät: Sie hat einen Innenwiderstand r, und die nach außen abgegebene Spannung ist nicht unbedingt gleich der EMK.'],
         highlights: ['battery'],
       },
       {
         id: 'hint-loop-law',
-        title: '提示 2',
-        paragraphs: ['闭合电路欧姆定律：I = E/(R + r)，内、外电阻共同决定电流。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Ohmsches Gesetz des geschlossenen Stromkreises: I = E/(R + r); Innen- und Außenwiderstand bestimmen gemeinsam den Strom.'],
         highlights: ['ammeter'],
       },
       {
         id: 'hint-terminal',
-        title: '提示 3',
-        paragraphs: ['路端电压 U = E − I·r：电流越大，内阻分走的电压越多。电流为零时内阻一点也不分。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Klemmenspannung U = E − I·r: Je größer der Strom, desto mehr Spannung fällt am Innenwiderstand ab. Bei Strom null fällt dort überhaupt nichts ab.'],
         highlights: ['voltmeter'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: open
         ? [
-          '断路时 I = 0，内阻不分压：U = E − 0·r = E，电压表直读电动势 —— 这正是测 E 的常用方法。',
+          'Bei geöffnetem Stromkreis ist I = 0, am Innenwiderstand fällt keine Spannung ab: U = E − 0·r = E, das Voltmeter zeigt direkt die EMK an — das ist die übliche Methode zur Messung von E.',
           [emf === undefined ? '' : `E = ${emf}`, terminal === undefined ? '' : `U = ${terminal}`]
             .filter(entry => entry.length > 0)
-            .join('；'),
+            .join('; '),
         ].filter(entry => entry.length > 0)
         : [
-          '内阻分走了 I·r：U = E − I·r，差额以 I²·r 的功率耗散在电源内部（见"内阻耗散功率"）。移动滑片改变 I，U 随之线性变化，这条 U-I 直线的截距是 E、斜率是 −r。',
+          'Am Innenwiderstand fällt I·r ab: U = E − I·r, und die Differenz wird als Leistung I²·r im Inneren der Quelle verbraucht (siehe Verlustleistung im Innenwiderstand). Bewegt man den Schieber und ändert I, so ändert sich U linear; der Achsenabschnitt dieser U-I-Geraden ist E, ihre Steigung ist −r.',
           [
             emf === undefined ? '' : `E = ${emf}`,
             terminal === undefined ? '' : `U = ${terminal}`,
             current === undefined ? '' : `I = ${current}`,
-            internalPower === undefined ? '' : `P内 = ${internalPower}`,
-          ].filter(entry => entry.length > 0).join('；'),
+            internalPower === undefined ? '' : `P_innen = ${internalPower}`,
+          ].filter(entry => entry.length > 0).join('; '),
         ].filter(entry => entry.length > 0),
       highlights: ['battery', 'voltmeter'],
     },
@@ -968,50 +968,50 @@ const circuitEmfLesson = (context: PhysicsAgentContext): TutorScript => {
 /* ------------------------------------------------------------------- optics -- */
 
 const planeMirrorLesson = (context: PhysicsAgentContext): TutorScript => {
-  const objectDistance = derivedText(context, '物距 u')
-  const imageDistance = derivedText(context, '像距 v')
-  const nature = derivedText(context, '像的性质')
-  const screenNote = derivedText(context, '光屏承接')
+  const objectDistance = derivedText(context, 'Gegenstandsabstand u')
+  const imageDistance = derivedText(context, 'Bildabstand v')
+  const nature = derivedText(context, 'Bildart')
+  const screenNote = derivedText(context, 'Schirmnachweis')
   return {
     id: 'optics-plane-mirror',
-    topic: '平面镜成像',
+    topic: 'Abbildung am ebenen Spiegel',
     observation: [
-      ...observeLine('物到镜面距离 u', objectDistance),
-      ...observeLine('像到镜面距离 v', imageDistance),
-      ...observeLine('像的性质', nature),
-      ...observeLine('光屏承接', screenNote),
+      ...observeLine('Abstand Gegenstand zur Spiegelfläche u', objectDistance),
+      ...observeLine('Abstand Bild zur Spiegelfläche v', imageDistance),
+      ...observeLine('Bildart', nature),
+      ...observeLine('Schirmnachweis', screenNote),
     ],
-    question: '光屏已经摆在像的位置上，为什么屏上还是接不到像？',
+    question: 'Der Schirm steht bereits an der Stelle des Bildes — warum lässt sich das Bild dennoch nicht auf dem Schirm auffangen?',
     hints: [
       {
         id: 'hint-reflection',
-        title: '提示 1',
-        paragraphs: ['光射到镜面发生反射，反射角等于入射角。进入眼睛的是反射光线 —— 打开「主光线光路」看看反射后的光走向哪里。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Trifft Licht auf die Spiegelfläche, wird es reflektiert, wobei der Reflexionswinkel gleich dem Einfallswinkel ist. Ins Auge gelangt der reflektierte Strahl — öffne den Strahlengang der Hauptstrahlen, um zu sehen, wohin das reflektierte Licht läuft.'],
         highlights: ['mirror'],
       },
       {
         id: 'hint-extension',
-        title: '提示 2',
-        paragraphs: ['沿每条反射光线向镜后反向延长（图中虚线）：这些延长线交于镜后一点，交点到镜面的距离恰好等于物距。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Verlängere jeden reflektierten Strahl hinter den Spiegel zurück (gestrichelte Linien in der Abbildung): Diese Verlängerungen schneiden sich in einem Punkt hinter dem Spiegel, und dessen Abstand zur Spiegelfläche ist genau gleich dem Gegenstandsabstand.'],
         highlights: ['image'],
       },
       {
         id: 'hint-virtual',
-        title: '提示 3',
-        paragraphs: ['问问自己：镜后那个交点处，有没有真实的光线通过？光屏只能承接真实会聚的光。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Frage dich: Verläuft an jenem Schnittpunkt hinter dem Spiegel tatsächlich Licht? Ein Schirm kann nur wirklich gebündeltes Licht auffangen.'],
         highlights: ['screen'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '平面镜成的是虚像：反射光线本身不会聚，只有它们的反向延长线在镜后相交。那里没有真实光线通过，所以光屏承接不到；而像与物到镜面的距离相等、大小相等、正立。',
+        'Der ebene Spiegel erzeugt ein virtuelles Bild: Die reflektierten Strahlen selbst laufen nicht zusammen, nur ihre rückwärtigen Verlängerungen schneiden sich hinter dem Spiegel. Dort verläuft kein wirkliches Licht, deshalb lässt sich das Bild nicht auf einem Schirm auffangen; Bild und Gegenstand haben denselben Abstand zur Spiegelfläche, dieselbe Größe und stehen aufrecht.',
         [
           objectDistance === undefined ? '' : `u = ${objectDistance}`,
           imageDistance === undefined ? '' : `v = ${imageDistance}`,
           nature === undefined ? '' : nature,
-        ].filter(entry => entry.length > 0).join('；'),
+        ].filter(entry => entry.length > 0).join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['image', 'screen'],
     },
@@ -1024,87 +1024,87 @@ const planeMirrorLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 /**
- * The five imaging zones of a convex lens, keyed by the 物距区间 derived value
- * the optics runtime publishes. The answer sentences are the 成像规律表 rows.
+ * The five imaging zones of a convex lens, keyed by the Gegenstandsabstand-Bereich derived value
+ * the optics runtime publishes. The answer sentences are the Abbildungsgesetz-Tabelle rows.
  */
 const LENS_ZONES: Readonly<Record<string, { slug: string; answer: string }>> = {
   'u > 2f': {
     slug: 'beyond-2f',
-    answer: '物距大于 2f：成倒立、缩小的实像，像距落在 f 与 2f 之间 —— 照相机的工作区间。',
+    answer: 'Gegenstandsabstand größer als 2f: Es entsteht ein umgekehrtes, verkleinertes reelles Bild, der Bildabstand liegt zwischen f und 2f — der Arbeitsbereich einer Kamera.',
   },
   'u = 2f': {
     slug: 'at-2f',
-    answer: '物距等于 2f：成倒立、等大的实像，v = 2f —— 实验室用这一点快速测焦距。',
+    answer: 'Gegenstandsabstand gleich 2f: Es entsteht ein umgekehrtes, gleich großes reelles Bild, v = 2f — im Labor nutzt man diesen Punkt zur schnellen Brennweitenmessung.',
   },
   'f < u < 2f': {
     slug: 'between-f-2f',
-    answer: '物距在 f 与 2f 之间：成倒立、放大的实像，像距 v > 2f —— 投影仪的工作区间。',
+    answer: 'Gegenstandsabstand zwischen f und 2f: Es entsteht ein umgekehrtes, vergrößertes reelles Bild, der Bildabstand v > 2f — der Arbeitsbereich eines Projektors.',
   },
   'u = f': {
     slug: 'at-f',
-    answer: '物距等于 f：折射后的光线互相平行，永不相交 —— 不成像，这是实像与虚像的分界点。',
+    answer: 'Gegenstandsabstand gleich f: Die gebrochenen Strahlen verlaufen parallel zueinander und schneiden sich nie — es entsteht kein Bild; das ist die Grenze zwischen reellem und virtuellem Bild.',
   },
   'u < f': {
     slug: 'within-f',
-    answer: '物距小于 f：折射光发散，反向延长线在物同侧相交 —— 成正立、放大的虚像，这就是放大镜。',
+    answer: 'Gegenstandsabstand kleiner als f: Das gebrochene Licht divergiert, die rückwärtigen Verlängerungen schneiden sich auf derselben Seite wie der Gegenstand — es entsteht ein aufrechtes, vergrößertes virtuelles Bild, wie bei einer Lupe.',
   },
 }
 
 const convexLensLesson = (context: PhysicsAgentContext): TutorScript => {
-  const objectDistance = derivedText(context, '物距 u')
-  const focalLength = derivedText(context, '焦距 f')
-  const imageDistance = derivedText(context, '像距 v')
-  const magnification = derivedText(context, '放大率 m')
-  const nature = derivedText(context, '像的性质')
-  const zoneText = context.derived.find(row => row.label === '物距区间')?.value
+  const objectDistance = derivedText(context, 'Gegenstandsabstand u')
+  const focalLength = derivedText(context, 'Brennweite f')
+  const imageDistance = derivedText(context, 'Bildabstand v')
+  const magnification = derivedText(context, 'Vergrößerung m')
+  const nature = derivedText(context, 'Bildart')
+  const zoneText = context.derived.find(row => row.label === 'Gegenstandsabstand-Bereich')?.value
   const zone = zoneText === undefined ? undefined : LENS_ZONES[zoneText]
-  const screenNote = derivedText(context, '光屏承接')
+  const screenNote = derivedText(context, 'Schirmnachweis')
   return {
     id: zone === undefined ? 'optics-lens' : `optics-lens-${zone.slug}`,
-    topic: '凸透镜成像规律',
+    topic: 'Abbildungsgesetze der Konvexlinse',
     observation: [
-      ...observeLine('物距 u', objectDistance),
-      ...observeLine('焦距 f', focalLength),
-      ...observeLine('像距 v', imageDistance),
-      ...observeLine('放大率 m', magnification),
-      ...observeLine('像的性质', nature),
-      ...observeLine('光屏承接', screenNote),
+      ...observeLine('Gegenstandsabstand u', objectDistance),
+      ...observeLine('Brennweite f', focalLength),
+      ...observeLine('Bildabstand v', imageDistance),
+      ...observeLine('Vergrößerung m', magnification),
+      ...observeLine('Bildart', nature),
+      ...observeLine('Schirmnachweis', screenNote),
     ],
     question:
       zoneText === 'u = f'
-        ? '物距恰好等于焦距，为什么此时不成像？'
-        : `当前物距落在 ${zoneText ?? '哪个'} 区间，为什么会成这样的像？`,
+        ? 'Der Gegenstandsabstand ist gerade gleich der Brennweite — warum entsteht dabei kein Bild?'
+        : `Der aktuelle Gegenstandsabstand fällt in den Bereich ${zoneText ?? 'welchem'} — warum entsteht ein solches Bild?`,
     hints: [
       {
         id: 'hint-compare',
-        title: '提示 1',
-        paragraphs: ['先把物距与两个基准点比较：轴上的 F（焦点）和 2F 是成像规律的全部分界点。物在哪个区间？'],
+        title: 'Hinweis 1',
+        paragraphs: ['Vergleiche den Gegenstandsabstand zuerst mit den beiden Bezugspunkten: F (Brennpunkt) und 2F auf der Achse sind sämtliche Grenzpunkte der Abbildungsgesetze. In welchem Bereich liegt der Gegenstand?'],
         highlights: ['lens'],
       },
       {
         id: 'hint-rays',
-        title: '提示 2',
-        paragraphs: ['打开「主光线光路」作图：平行主轴的光折射后过焦点，过光心的光沿直线传播 —— 两条折射光（或其反向延长线）的交点就是像。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Öffne den Strahlengang der Hauptstrahlen und konstruiere: Ein achsenparallel einfallender Strahl geht nach der Brechung durch den Brennpunkt, ein durch den Mittelpunkt gehender Strahl läuft geradlinig weiter — der Schnittpunkt zweier gebrochener Strahlen (oder ihrer rückwärtigen Verlängerungen) ist das Bild.'],
         highlights: ['image'],
       },
       {
         id: 'hint-equation',
-        title: '提示 3',
-        paragraphs: ['用薄透镜公式检验作图：1/u + 1/v = 1/f。u、f 已知即可解出 v；v 为正是屏可承接的实像，为负则像在物同侧，是虚像。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Prüfe die Konstruktion mit der Dünnlinse-Formel: 1/u + 1/v = 1/f. Sind u und f bekannt, lässt sich v berechnen; ein positives v bedeutet ein auf dem Schirm auffangbares reelles Bild, ein negatives v bedeutet ein Bild auf derselben Seite wie der Gegenstand, also ein virtuelles Bild.'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        zone?.answer ?? '把物距与 f、2f 比较即可读出像的倒正、大小与虚实；作图与薄透镜公式给出同一个像。',
+        zone?.answer ?? 'Durch Vergleich des Gegenstandsabstands mit f und 2f lassen sich Ausrichtung, Größe und Art (reell oder virtuell) des Bildes ablesen; Konstruktion und Dünnlinse-Formel ergeben dasselbe Bild.',
         [
           objectDistance === undefined ? '' : `u = ${objectDistance}`,
           focalLength === undefined ? '' : `f = ${focalLength}`,
           imageDistance === undefined ? '' : `v = ${imageDistance}`,
           magnification === undefined ? '' : `m = ${magnification}`,
-        ].filter(entry => entry.length > 0).join('；'),
-        screenNote === undefined ? '' : `光屏验证：${screenNote}。`,
+        ].filter(entry => entry.length > 0).join('; '),
+        screenNote === undefined ? '' : `Schirmnachweis: ${screenNote}.`,
       ].filter(entry => entry.length > 0),
       highlights: ['image', 'lens'],
     },
@@ -1118,45 +1118,45 @@ const convexLensLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 /**
- * The imaging zones of a concave mirror, keyed by the 物距区间 derived value
+ * The imaging zones of a concave mirror, keyed by the Gegenstandsabstand-Bereich derived value
  * the optics runtime publishes (the mirror shares the u-vs-f/2f classification
  * with the convex lens; 2f is the centre of curvature C). The answer sentences
- * are the 成像规律表 rows, folded back to the mirror's front side.
+ * are the Abbildungsgesetz-Tabelle rows, folded back to the mirror's front side.
  */
 const MIRROR_ZONES: Readonly<Record<string, { slug: string; answer: string }>> = {
   'u > 2f': {
     slug: 'beyond-c',
-    answer: '物距大于 2f（物在曲率中心 C 之外）：成倒立、缩小的实像，像落在镜前 F 与 C 之间 —— 反射望远镜的主镜正工作在这一区间。',
+    answer: 'Gegenstandsabstand größer als 2f (Gegenstand außerhalb des Krümmungsmittelpunkts C): Es entsteht ein umgekehrtes, verkleinertes reelles Bild, das zwischen F und C vor dem Spiegel liegt — genau in diesem Bereich arbeitet der Hauptspiegel eines Spiegelteleskops.',
   },
   'u = 2f': {
     slug: 'at-c',
-    answer: '物距等于 2f（物在曲率中心 C 上）：成倒立、等大的实像，像也落在 C 处 —— 过 C 的光线沿原路返回，实验室用这一点快速定曲率中心。',
+    answer: 'Gegenstandsabstand gleich 2f (Gegenstand im Krümmungsmittelpunkt C): Es entsteht ein umgekehrtes, gleich großes reelles Bild, das ebenfalls bei C liegt — ein durch C laufender Strahl kehrt auf demselben Weg zurück; im Labor nutzt man diesen Punkt zur schnellen Bestimmung des Krümmungsmittelpunkts.',
   },
   'f < u < 2f': {
     slug: 'between-f-c',
-    answer: '物距在 f 与 2f 之间：成倒立、放大的实像，像距 v > 2f，像落在 C 之外。',
+    answer: 'Gegenstandsabstand zwischen f und 2f: Es entsteht ein umgekehrtes, vergrößertes reelles Bild, der Bildabstand v > 2f, das Bild liegt außerhalb von C.',
   },
   'u = f': {
     slug: 'at-f',
-    answer: '物距等于 f：反射后的光线互相平行，永不相交 —— 不成像。探照灯正是反过来用它：把光源放在焦点，射出平行光束。',
+    answer: 'Gegenstandsabstand gleich f: Die reflektierten Strahlen verlaufen parallel zueinander und schneiden sich nie — es entsteht kein Bild. Ein Scheinwerfer nutzt genau das umgekehrt: Er setzt die Lichtquelle in den Brennpunkt und strahlt ein paralleles Bündel aus.',
   },
   'u < f': {
     slug: 'within-f',
-    answer: '物距小于 f：反射光发散，反向延长线在镜后相交 —— 成正立、放大的虚像，这就是化妆镜、牙医镜。',
+    answer: 'Gegenstandsabstand kleiner als f: Das reflektierte Licht divergiert, die rückwärtigen Verlängerungen schneiden sich hinter dem Spiegel — es entsteht ein aufrechtes, vergrößertes virtuelles Bild, wie bei einem Kosmetik- oder Zahnarztspiegel.',
   },
 }
 
 const curvedMirrorLesson = (context: PhysicsAgentContext): TutorScript => {
-  const objectDistance = derivedText(context, '物距 u')
-  const focalLength = derivedText(context, '焦距 f')
-  const imageDistance = derivedText(context, '像距 v')
-  const magnification = derivedText(context, '放大率 m')
-  const nature = derivedText(context, '像的性质')
-  const zoneText = context.derived.find(row => row.label === '物距区间')?.value
+  const objectDistance = derivedText(context, 'Gegenstandsabstand u')
+  const focalLength = derivedText(context, 'Brennweite f')
+  const imageDistance = derivedText(context, 'Bildabstand v')
+  const magnification = derivedText(context, 'Vergrößerung m')
+  const nature = derivedText(context, 'Bildart')
+  const zoneText = context.derived.find(row => row.label === 'Gegenstandsabstand-Bereich')?.value
   const zone = zoneText === undefined ? undefined : MIRROR_ZONES[zoneText]
-  const screenNote = derivedText(context, '光屏承接')
+  const screenNote = derivedText(context, 'Schirmnachweis')
   /* A convex mirror (f < 0) has no zone table — it always forms the same
-     upright reduced virtual image, so the runtime publishes no 物距区间. */
+     upright reduced virtual image, so the runtime publishes no Gegenstandsabstand-Bereich. */
   const convex = zoneText === undefined && focalLength !== undefined && focalLength.startsWith('-')
   return {
     id: convex
@@ -1164,54 +1164,54 @@ const curvedMirrorLesson = (context: PhysicsAgentContext): TutorScript => {
       : zone === undefined
         ? 'optics-mirror'
         : `optics-mirror-${zone.slug}`,
-    topic: '凹面镜成像',
+    topic: 'Abbildung am Konkavspiegel',
     observation: [
-      ...observeLine('物距 u', objectDistance),
-      ...observeLine('焦距 f', focalLength),
-      ...observeLine('像距 v', imageDistance),
-      ...observeLine('放大率 m', magnification),
-      ...observeLine('像的性质', nature),
-      ...observeLine('光屏承接', screenNote),
+      ...observeLine('Gegenstandsabstand u', objectDistance),
+      ...observeLine('Brennweite f', focalLength),
+      ...observeLine('Bildabstand v', imageDistance),
+      ...observeLine('Vergrößerung m', magnification),
+      ...observeLine('Bildart', nature),
+      ...observeLine('Schirmnachweis', screenNote),
     ],
     question: convex
-      ? '焦距为负（凸面镜）时，为什么无论物距多大，像都是正立、缩小的虚像？'
+      ? 'Warum ist bei negativer Brennweite (Konvexspiegel) das Bild stets aufrecht, verkleinert und virtuell, egal wie groß der Gegenstandsabstand ist?'
       : zoneText === 'u = f'
-        ? '物距恰好等于焦距，为什么此时不成像？'
-        : `当前物距落在 ${zoneText ?? '哪个'} 区间，为什么会成这样的像？与凸透镜有什么不同？`,
+        ? 'Der Gegenstandsabstand ist gerade gleich der Brennweite — warum entsteht dabei kein Bild?'
+        : `Der aktuelle Gegenstandsabstand fällt in den Bereich ${zoneText ?? 'welchem'} — warum entsteht ein solches Bild? Worin unterscheidet es sich von dem der Konvexlinse?`,
     hints: [
       {
         id: 'hint-compare',
-        title: '提示 1',
-        paragraphs: ['先把物距与轴上的两个基准点比较：F（焦点）和 C（曲率中心，在 2f 处）是凹面镜成像规律的全部分界点。物在哪个区间？'],
+        title: 'Hinweis 1',
+        paragraphs: ['Vergleiche den Gegenstandsabstand zuerst mit den beiden Bezugspunkten auf der Achse: F (Brennpunkt) und C (Krümmungsmittelpunkt, bei 2f) sind sämtliche Grenzpunkte der Abbildungsgesetze des Konkavspiegels. In welchem Bereich liegt der Gegenstand?'],
         highlights: ['mirror'],
       },
       {
         id: 'hint-rays',
-        title: '提示 2',
-        paragraphs: ['打开「主光线光路」作图：平行主轴的光反射后过焦点 F，射向镜面顶点的光按反射定律对称折回 —— 两条反射光（或其反向延长线）的交点就是像。注意反射把光折回蜡烛一侧。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Öffne den Strahlengang der Hauptstrahlen und konstruiere: Ein achsenparallel einfallender Strahl geht nach der Reflexion durch den Brennpunkt F, ein auf den Scheitel des Spiegels treffender Strahl wird nach dem Reflexionsgesetz symmetrisch zurückgeworfen — der Schnittpunkt zweier reflektierter Strahlen (oder ihrer rückwärtigen Verlängerungen) ist das Bild. Beachte, dass die Reflexion das Licht auf die Kerzenseite zurückwirft.'],
         highlights: ['image'],
       },
       {
         id: 'hint-equation',
-        title: '提示 3',
-        paragraphs: ['用球面镜公式检验作图：1/u + 1/v = 1/f（f = R/2）。v 为正时实像成在镜前，光屏要放到蜡烛这一侧承接；v 为负则像在镜后，是虚像。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Prüfe die Konstruktion mit der Kugelspiegel-Formel: 1/u + 1/v = 1/f (f = R/2). Ist v positiv, entsteht das reelle Bild vor dem Spiegel, und der Schirm muss auf der Kerzenseite aufgestellt werden; ist v negativ, liegt das Bild hinter dem Spiegel und ist virtuell.'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
         convex
-          ? '凸面镜对光发散：反射光的反向延长线永远在镜后相交，无论物距多大都成正立、缩小的虚像 —— 视野因此变大，汽车后视镜、路口反光镜都用它。'
+          ? 'Ein Konvexspiegel streut das Licht: Die rückwärtigen Verlängerungen der reflektierten Strahlen schneiden sich stets hinter dem Spiegel, und unabhängig vom Gegenstandsabstand entsteht ein aufrechtes, verkleinertes virtuelles Bild — dadurch wird das Sichtfeld größer, weshalb er als Rückspiegel und als Spiegel an Kreuzungen verwendet wird.'
           : zone?.answer ??
-            '把物距与 f、C（2f 处）比较即可读出像的倒正、大小与虚实；与凸透镜共用同一张规律表，只是反射把实像折回到镜前。',
+            'Durch Vergleich des Gegenstandsabstands mit f und C (bei 2f) lassen sich Ausrichtung, Größe und Art des Bildes ablesen; es gilt dieselbe Tabelle wie für die Konvexlinse, nur wirft die Reflexion das reelle Bild vor den Spiegel zurück.',
         [
           objectDistance === undefined ? '' : `u = ${objectDistance}`,
           focalLength === undefined ? '' : `f = ${focalLength}`,
           imageDistance === undefined ? '' : `v = ${imageDistance}`,
           magnification === undefined ? '' : `m = ${magnification}`,
-        ].filter(entry => entry.length > 0).join('；'),
-        screenNote === undefined ? '' : `光屏验证：${screenNote}。`,
+        ].filter(entry => entry.length > 0).join('; '),
+        screenNote === undefined ? '' : `Schirmnachweis: ${screenNote}.`,
       ].filter(entry => entry.length > 0),
       highlights: ['image', 'mirror'],
     },
@@ -1227,52 +1227,52 @@ const curvedMirrorLesson = (context: PhysicsAgentContext): TutorScript => {
 /* ---------------------------------------------------------------- acoustics -- */
 
 const echoRangingLesson = (context: PhysicsAgentContext): TutorScript => {
-  const soundSpeed = derivedText(context, '声速 v')
-  const echoTime = derivedText(context, '回声时间 t')
-  const oneWayTime = derivedText(context, '单程时间 t₁')
-  const measured = derivedText(context, '测得距离 d = v·t/2')
-  const wallDistance = derivedText(context, '峭壁距离 d')
-  const phase = context.derived.find(row => row.label === '脉冲状态')?.value
+  const soundSpeed = derivedText(context, 'Schallgeschwindigkeit v')
+  const echoTime = derivedText(context, 'Echolaufzeit t')
+  const oneWayTime = derivedText(context, 'Einwegzeit t₁')
+  const measured = derivedText(context, 'Gemessene Entfernung d = v·t/2')
+  const wallDistance = derivedText(context, 'Abstand zur Felswand d')
+  const phase = context.derived.find(row => row.label === 'Impulszustand')?.value
   return {
     id: 'acoustics-echo-ranging',
-    topic: '回声测距',
+    topic: 'Entfernungsmessung per Echo',
     observation: [
-      ...observeLine('声速 v', soundSpeed),
-      ...observeLine('回声时间 t', echoTime),
-      ...observeLine('脉冲状态', phase),
+      ...observeLine('Schallgeschwindigkeit v', soundSpeed),
+      ...observeLine('Echolaufzeit t', echoTime),
+      ...observeLine('Impulszustand', phase),
     ],
-    question: '只用停表记下回声时间，怎样算出到峭壁的距离？',
+    question: 'Wie berechnet man aus der mit der Stoppuhr gemessenen Echolaufzeit die Entfernung zur Felswand?',
     hints: [
       {
         id: 'hint-round-trip',
-        title: '提示 1',
-        paragraphs: ['先想清楚停表记下的 t 是什么：声音从声源出发，到峭壁反射后再回来才被听见 —— t 是"去 + 回"的总时间，不是单程时间。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Überlege zuerst, was die gestoppte Zeit t ist: Der Schall geht von der Quelle aus, wird an der Felswand reflektiert und erst danach gehört — t ist die Gesamtzeit für Hin- und Rückweg, nicht die Zeit für einen Weg.'],
         highlights: ['wall'],
       },
       {
         id: 'hint-total-path',
-        title: '提示 2',
-        paragraphs: ['声音在介质中以声速 v 匀速直线传播：t 秒内走过的总路程是 s = v·t。按播放看脉冲走完往返 —— 这段路程是声源到峭壁距离的两倍。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Der Schall breitet sich im Medium mit der Schallgeschwindigkeit v geradlinig und gleichförmig aus: Die in t Sekunden zurückgelegte Gesamtstrecke ist s = v·t. Spiele die Szene ab und beobachte den Impuls auf Hin- und Rückweg — diese Strecke ist doppelt so groß wie der Abstand von der Quelle zur Felswand.'],
         highlights: ['sound-pulse'],
       },
       {
         id: 'hint-halve',
-        title: '提示 3',
-        paragraphs: ['往返对称：去程和回程各走 d，各用 t/2。所以 d = v·(t/2) = v·t/2 —— 除以 2 这一步正是回声测距最容易漏掉的。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Hin- und Rückweg sind symmetrisch: Jeder Weg beträgt d und dauert t/2. Daher gilt d = v·(t/2) = v·t/2 — die Division durch 2 ist genau der Schritt, der bei der Echolaufzeitmessung am leichtesten vergessen wird.'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '把总路程减半：d = v·t/2。声音匀速走完 2d 用时 t，单程恰好各占一半；换介质声速变了，同样的距离回声时间随之改变，公式里的 v 必须用介质对应的声速。',
+        'Halbiere die Gesamtstrecke: d = v·t/2. Der Schall legt die Strecke 2d gleichförmig in der Zeit t zurück, auf jeden Weg entfällt genau die Hälfte; wechselt das Medium, ändert sich die Schallgeschwindigkeit, und bei gleicher Entfernung ändert sich die Echolaufzeit entsprechend — in der Formel muss v die Schallgeschwindigkeit des jeweiligen Mediums sein.',
         [
           soundSpeed === undefined ? '' : `v = ${soundSpeed}`,
           echoTime === undefined ? '' : `t = ${echoTime}`,
           oneWayTime === undefined ? '' : `t₁ = ${oneWayTime}`,
           measured === undefined ? '' : `d = v·t/2 = ${measured}`,
-        ].filter(entry => entry.length > 0).join('；'),
-        wallDistance === undefined ? '' : `与场景中摆放的峭壁距离 ${wallDistance} 一致 —— 测距公式经引擎验证。`,
+        ].filter(entry => entry.length > 0).join('; '),
+        wallDistance === undefined ? '' : `Das stimmt mit dem in der Szene platzierten Abstand zur Felswand ${wallDistance} überein — die Entfernungsformel ist von der Engine verifiziert.`,
       ].filter(entry => entry.length > 0),
       highlights: ['wall', 'sound-pulse'],
     },
@@ -1287,61 +1287,61 @@ const echoRangingLesson = (context: PhysicsAgentContext): TutorScript => {
 /* -------------------------------------------------------------------- fluid -- */
 
 const buoyancyLesson = (context: PhysicsAgentContext): TutorScript => {
-  const weight = derivedText(context, '物重 G')
-  const reading = derivedText(context, '测力计读数 F_示')
-  const buoyant = derivedText(context, '浮力 F_浮')
-  const displacedVolume = derivedText(context, '排开液体体积 V_排')
-  const displacedWeight = derivedText(context, '排开液体所受重力 G_排')
-  const liquidDensity = derivedText(context, '液体密度 ρ_液')
-  const phase = context.derived.find(row => row.label === '浸入状态')?.value
+  const weight = derivedText(context, 'Gewichtskraft G')
+  const reading = derivedText(context, 'Kraftmesseranzeige F_Anzeige')
+  const buoyant = derivedText(context, 'Auftriebskraft F_Auftrieb')
+  const displacedVolume = derivedText(context, 'Verdrängtes Flüssigkeitsvolumen V_verdrängt')
+  const displacedWeight = derivedText(context, 'Gewichtskraft der verdrängten Flüssigkeit G_verdrängt')
+  const liquidDensity = derivedText(context, 'Flüssigkeitsdichte ρ_Fl')
+  const phase = context.derived.find(row => row.label === 'Eintauchzustand')?.value
   const floats = context.verification.some(check => check.id === 'float_equilibrium')
   return {
     id: 'fluid-buoyancy',
-    topic: '探究浮力的大小',
+    topic: 'Größe des Auftriebs untersuchen',
     observation: [
-      ...observeLine('物重 G', weight),
-      ...observeLine('测力计读数 F_示', reading),
-      ...observeLine('浸入状态', phase),
+      ...observeLine('Gewichtskraft G', weight),
+      ...observeLine('Kraftmesseranzeige F_Anzeige', reading),
+      ...observeLine('Eintauchzustand', phase),
     ],
     question: floats
-      ? '物块浮在水面不再下沉，测力计读数为零 —— 此时浮力是多大？'
-      : '物块浸入水中后测力计读数变小了，少掉的那部分力去哪了？',
+      ? 'Der Klotz schwimmt auf dem Wasser und sinkt nicht weiter, die Kraftmesseranzeige ist null — wie groß ist der Auftrieb jetzt?'
+      : 'Nach dem Eintauchen des Klotzes ins Wasser wird die Kraftmesseranzeige kleiner — wohin ist der fehlende Teil der Kraft verschwunden?',
     hints: [
       {
         id: 'hint-missing-force',
-        title: '提示 1',
-        paragraphs: ['物块本身没有变轻：它受到的重力 G 从头到尾没变。变的是拉住它的力 —— 液体从下面托了它一把，测力计只需要拉剩下的部分。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Der Klotz selbst ist nicht leichter geworden: Seine Gewichtskraft G bleibt von Anfang bis Ende gleich. Geändert hat sich die Kraft, die ihn hält — die Flüssigkeit drückt von unten dagegen, und der Kraftmesser muss nur noch den Rest tragen.'],
         highlights: ['block-1'],
       },
       {
         id: 'hint-weighing-method',
-        title: '提示 2',
-        paragraphs: ['把这三个力写成平衡式：G 向下，F_浮 和 F_示 向上，三者平衡给出 F_示 + F_浮 = G。移项就是称重法：F_浮 = G − F_示，两次读数相减即可。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Schreibe die drei Kräfte als Gleichgewichtsbedingung: G nach unten, F_Auftrieb und F_Anzeige nach oben; das Gleichgewicht ergibt F_Anzeige + F_Auftrieb = G. Umgestellt erhält man das Wägeverfahren: F_Auftrieb = G − F_Anzeige; es genügt, die beiden Messwerte zu subtrahieren.'],
       },
       {
         id: 'hint-displaced',
-        title: '提示 3',
-        paragraphs: ['再看这一份力从哪来：物块占掉的那块空间原本装着液体。把那部分液体的重力算出来 G_排 = ρ_液·g·V_排，和刚才相减得到的 F_浮 比一比。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Betrachte nun, woher diese Kraft kommt: In dem Raum, den der Klotz einnimmt, befand sich zuvor Flüssigkeit. Berechne die Gewichtskraft dieser Flüssigkeit G_verdrängt = ρ_Fl·g·V_verdrängt und vergleiche sie mit dem zuvor durch Subtraktion erhaltenen F_Auftrieb.'],
         highlights: ['liquid-1'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
         floats
-          ? '漂浮时物块静止，竖直方向只剩重力和浮力，所以 F_浮 = G —— 测力计读数为零不是"没有浮力"，恰恰是浮力独自扛住了整个重力。'
-          : '少掉的力就是浮力：F_浮 = G − F_示。它等于物块排开的那部分液体所受的重力 G_排 = ρ_液·g·V_排 —— 这就是阿基米德原理。完全浸没后 V_排 锁定在物块体积上，再往深处放读数也不会变。',
+          ? 'Beim Schwimmen ruht der Klotz, in vertikaler Richtung bleiben nur Gewichtskraft und Auftrieb, also gilt F_Auftrieb = G — eine Kraftmesseranzeige von null bedeutet nicht, dass kein Auftrieb wirkt, sondern gerade, dass der Auftrieb allein die ganze Gewichtskraft trägt.'
+          : 'Die fehlende Kraft ist der Auftrieb: F_Auftrieb = G − F_Anzeige. Er ist gleich der Gewichtskraft der vom Klotz verdrängten Flüssigkeit G_verdrängt = ρ_Fl·g·V_verdrängt — das ist das Archimedische Prinzip. Nach dem vollständigen Eintauchen bleibt V_verdrängt auf das Volumen des Klotzes festgelegt, und auch ein weiteres Absenken ändert den Messwert nicht mehr.',
         [
           weight === undefined ? '' : `G = ${weight}`,
-          reading === undefined ? '' : `F_示 = ${reading}`,
-          buoyant === undefined ? '' : `F_浮 = G − F_示 = ${buoyant}`,
-          displacedVolume === undefined ? '' : `V_排 = ${displacedVolume}`,
-        ].filter(entry => entry.length > 0).join('；'),
+          reading === undefined ? '' : `F_Anzeige = ${reading}`,
+          buoyant === undefined ? '' : `F_Auftrieb = G − F_Anzeige = ${buoyant}`,
+          displacedVolume === undefined ? '' : `V_verdrängt = ${displacedVolume}`,
+        ].filter(entry => entry.length > 0).join('; '),
         displacedWeight === undefined
           ? ''
-          : `排开液体所受重力 G_排 = ${displacedWeight}，与浮力一致 —— 阿基米德原理经引擎验证。`,
-        liquidDensity === undefined ? '' : `当前液体密度 ρ_液 = ${liquidDensity}；换密度更大的液体，同样的 V_排 会给出更大的浮力。`,
+          : `Gewichtskraft der verdrängten Flüssigkeit G_verdrängt = ${displacedWeight}, gleich dem Auftrieb — das Archimedische Prinzip ist von der Engine verifiziert.`,
+        liquidDensity === undefined ? '' : `Aktuelle Flüssigkeitsdichte ρ_Fl = ${liquidDensity}; bei einer dichteren Flüssigkeit liefert dasselbe V_verdrängt einen größeren Auftrieb.`,
       ].filter(entry => entry.length > 0),
       highlights: ['block-1', 'liquid-1'],
     },
@@ -1357,57 +1357,57 @@ const buoyancyLesson = (context: PhysicsAgentContext): TutorScript => {
 /* ------------------------------------------------------------------ thermal -- */
 
 const crystalMeltingLesson = (context: PhysicsAgentContext): TutorScript => {
-  const power = derivedText(context, '加热功率 P')
-  const meltingPoint = derivedText(context, '熔点 T_熔')
-  const meltingDuration = derivedText(context, '熔化耗时 t_熔')
-  const meltingHeat = derivedText(context, '熔化吸热 Q_熔')
-  const temperature = derivedText(context, '当前温度 T')
-  const phase = context.derived.find(row => row.label === '所处阶段')?.value
+  const power = derivedText(context, 'Heizleistung P')
+  const meltingPoint = derivedText(context, 'Schmelzpunkt T_Schmelz')
+  const meltingDuration = derivedText(context, 'Schmelzdauer t_Schmelz')
+  const meltingHeat = derivedText(context, 'Schmelzwärme Q_Schmelz')
+  const temperature = derivedText(context, 'Aktuelle Temperatur T')
+  const phase = context.derived.find(row => row.label === 'Aktuelle Phase')?.value
   const crystalline = context.verification.some(check => check.id === 'melting_plateau')
   return {
     id: crystalline ? 'thermal-crystal-melting' : 'thermal-amorphous',
-    topic: '探究晶体的熔化过程',
+    topic: 'Schmelzvorgang eines Kristalls untersuchen',
     observation: [
-      ...observeLine('加热功率 P', power),
-      ...observeLine('当前温度 T', temperature),
-      ...observeLine('所处阶段', phase),
+      ...observeLine('Heizleistung P', power),
+      ...observeLine('Aktuelle Temperatur T', temperature),
+      ...observeLine('Aktuelle Phase', phase),
     ],
     question: crystalline
-      ? '加热器一秒都没停，温度计却停在熔点不动了。这段时间的热跑到哪去了？'
-      : '同样恒功率加热，为什么这个样品的温度一路上升，没有那段水平线？',
+      ? 'Die Heizung hat keine Sekunde ausgesetzt, doch das Thermometer bleibt beim Schmelzpunkt stehen. Wohin ist die Wärme in dieser Zeit gegangen?'
+      : 'Warum steigt die Temperatur dieser Probe bei gleicher konstanter Heizleistung durchgehend an, ohne jenen waagerechten Abschnitt?',
     hints: [
       {
         id: 'hint-still-heating',
-        title: '提示 1',
-        paragraphs: ['先确认一件事：加热器功率恒定，每一秒都在往里送 P 焦耳。温度不变不代表能量没进来 —— 这两件事要分开看。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Kläre zuerst eines: Die Heizleistung ist konstant, jede Sekunde werden P Joule zugeführt. Eine gleichbleibende Temperatur bedeutet nicht, dass keine Energie ankommt — diese beiden Dinge sind getrennt zu betrachten.'],
         highlights: ['thermal-bench-1'],
       },
       {
         id: 'hint-where-it-goes',
-        title: '提示 2',
-        paragraphs: ['热量进来只有两个去处：让分子运动更剧烈（温度升高），或者把固体的晶体结构拆开（状态改变）。熔化时它全部走了第二条路。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Die zugeführte Wärme kann nur zwei Wege nehmen: Sie verstärkt die Molekularbewegung (Temperatur steigt) oder sie löst die Kristallstruktur des Festkörpers auf (Zustandsänderung). Beim Schmelzen nimmt sie vollständig den zweiten Weg.'],
         highlights: ['sample-1'],
       },
       {
         id: 'hint-latent',
-        title: '提示 3',
-        paragraphs: ['把这段吸的热算出来：Q = P·t_熔，也等于 mL。反过来，知道熔化耗时和功率就能测出这种物质的熔化热 —— 这正是这个实验的用处。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Berechne die in diesem Abschnitt aufgenommene Wärme: Q = P·t_Schmelz, sie ist auch gleich mL. Umgekehrt lassen sich aus Schmelzdauer und Leistung die Schmelzwärme dieses Stoffes bestimmen — genau darin liegt der Nutzen dieses Versuchs.'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
         crystalline
-          ? '热全部用来熔化了：晶体有固定熔点，熔化期间吸收的能量拿去破坏晶体结构，不用来提高温度，所以图像上出现一段水平线。熔化完毕后剩下的液体继续吸热，温度才重新上升。'
-          : '这是非晶体：没有固定熔点，受热时逐渐变软，整个过程温度持续上升，图像上没有水平段。有没有那段水平线，正是区分晶体与非晶体的判据。',
+          ? 'Die Wärme wird vollständig zum Schmelzen verwendet: Ein Kristall hat einen festen Schmelzpunkt, die während des Schmelzens aufgenommene Energie dient dem Aufbrechen der Kristallstruktur und nicht der Temperaturerhöhung, daher zeigt das Diagramm einen waagerechten Abschnitt. Erst nach dem vollständigen Schmelzen nimmt die restliche Flüssigkeit weiter Wärme auf, und die Temperatur steigt wieder.'
+          : 'Dies ist ein amorpher Stoff: Er hat keinen festen Schmelzpunkt, wird beim Erhitzen allmählich weich, und die Temperatur steigt während des gesamten Vorgangs an, sodass das Diagramm keinen waagerechten Abschnitt hat. Ob jener waagerechte Abschnitt vorhanden ist, ist genau das Kriterium zur Unterscheidung von Kristallen und amorphen Stoffen.',
         [
           power === undefined ? '' : `P = ${power}`,
-          meltingPoint === undefined ? '' : `T_熔 = ${meltingPoint} ℃`,
-          meltingDuration === undefined ? '' : `t_熔 = ${meltingDuration}`,
-          meltingHeat === undefined ? '' : `Q_熔 = mL = ${meltingHeat}`,
-        ].filter(entry => entry.length > 0).join('；'),
-        '熔化前后两段斜率不同也不是偶然：升温速率是 P/(cm)，比热容越大升得越慢。',
+          meltingPoint === undefined ? '' : `T_Schmelz = ${meltingPoint} ℃`,
+          meltingDuration === undefined ? '' : `t_Schmelz = ${meltingDuration}`,
+          meltingHeat === undefined ? '' : `Q_Schmelz = mL = ${meltingHeat}`,
+        ].filter(entry => entry.length > 0).join('; '),
+        'Dass die Steigungen vor und nach dem Schmelzen verschieden sind, ist kein Zufall: Die Erwärmungsrate ist P/(cm); je größer die spezifische Wärmekapazität, desto langsamer steigt die Temperatur.',
       ].filter(entry => entry.length > 0),
       highlights: ['sample-1', 'thermometer'],
     },
@@ -1422,56 +1422,56 @@ const crystalMeltingLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const heatCapacityLesson = (context: PhysicsAgentContext): TutorScript => {
-  const power = derivedText(context, '加热功率 P')
-  const heat = derivedText(context, '吸收热量 Q')
-  const waterRise = derivedText(context, '升温 ΔT')
-  const oilRise = derivedText(context, '对比升温 ΔT′')
-  const waterC = derivedText(context, '比热容 c')
-  const oilC = derivedText(context, '对比比热容 c′')
-  const waterT = derivedText(context, '水温度 T')
-  const oilT = derivedText(context, '煤油温度 T′')
+  const power = derivedText(context, 'Heizleistung P')
+  const heat = derivedText(context, 'Aufgenommene Wärme Q')
+  const waterRise = derivedText(context, 'Temperaturanstieg ΔT')
+  const oilRise = derivedText(context, 'Vergleichs-Temperaturanstieg ΔT′')
+  const waterC = derivedText(context, 'Spezifische Wärmekapazität c')
+  const oilC = derivedText(context, 'Vergleichs-Wärmekapazität c′')
+  const waterT = derivedText(context, 'Wassertemperatur T')
+  const oilT = derivedText(context, 'Kerosintemperatur T′')
   return {
     id: 'thermal-heat-capacity',
-    topic: '比较不同物质的吸热能力',
+    topic: 'Wärmeaufnahmefähigkeit verschiedener Stoffe vergleichen',
     observation: [
-      ...observeLine('加热功率 P', power),
-      ...observeLine('水温度 T', waterT),
-      ...observeLine('煤油温度 T′', oilT),
+      ...observeLine('Heizleistung P', power),
+      ...observeLine('Wassertemperatur T', waterT),
+      ...observeLine('Kerosintemperatur T′', oilT),
     ],
-    question: '同样的加热器、同样加热这么久，为什么水升得慢、煤油升得快？',
+    question: 'Warum erwärmt sich Wasser langsamer und Kerosin schneller, obwohl dieselbe Heizung gleich lange heizt?',
     hints: [
       {
         id: 'hint-same-heat',
-        title: '提示 1',
-        paragraphs: ['先确认控制变量：两边质量相同、功率相同、时间相同，所以吸收的热量 Q = P·t 完全一样。差的不是进来的热。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Prüfe zuerst die Kontrollgrößen: Beide Seiten haben dieselbe Masse, dieselbe Leistung und dieselbe Zeit, die aufgenommene Wärme Q = P·t ist also völlig gleich. Nicht die zugeführte Wärme ist verschieden.'],
         highlights: ['thermal-bench-1', 'thermal-bench-1-comparison'],
       },
       {
         id: 'hint-q-cm-dt',
-        title: '提示 2',
-        paragraphs: ['Q = cmΔt。Q 和 m 都相同，Δt 大的那边 c 就小。煤油升了水的两倍，它的比热容就是水的一半。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Q = cmΔt. Sind Q und m gleich, so ist c auf der Seite mit dem größeren Δt kleiner. Kerosin erwärmt sich doppelt so stark wie Wasser, seine spezifische Wärmekapazität ist also halb so groß wie die von Wasser.'],
         highlights: ['sample-1', 'sample-2'],
       },
       {
         id: 'hint-read-thermometers',
-        title: '提示 3',
-        paragraphs: ['两支温度计用的是同一把尺子：水的液柱大约只有煤油的一半高，这就是 1:2 的升温比，也是 2:1 的比热容比。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Beide Thermometer verwenden dieselbe Skala: Die Flüssigkeitssäule des Wassers ist nur etwa halb so hoch wie die des Kerosins; das ist das Temperaturanstiegsverhältnis 1:2 und zugleich das Wärmekapazitätsverhältnis 2:1.'],
         highlights: ['thermometer', 'thermometer-2'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '比热容就是吸热能力：同样吸收 Q 焦耳，c 大的物质温度升得少。水的比热容是煤油的两倍，所以升温只有煤油的一半。',
+        'Die spezifische Wärmekapazität ist die Wärmeaufnahmefähigkeit: Bei gleicher aufgenommener Wärmemenge Q in Joule erwärmt sich ein Stoff mit größerem c weniger. Die spezifische Wärmekapazität von Wasser ist doppelt so groß wie die von Kerosin, daher beträgt sein Temperaturanstieg nur die Hälfte.',
         [
           power === undefined ? '' : `P = ${power}`,
           heat === undefined ? '' : `Q = ${heat}`,
-          waterRise === undefined ? '' : `ΔT_水 = ${waterRise} ℃`,
-          oilRise === undefined ? '' : `ΔT_油 = ${oilRise} ℃`,
-          waterC === undefined ? '' : `c_水 = ${waterC}`,
-          oilC === undefined ? '' : `c_油 = ${oilC}`,
-        ].filter(entry => entry.length > 0).join('；'),
+          waterRise === undefined ? '' : `ΔT_Wasser = ${waterRise} ℃`,
+          oilRise === undefined ? '' : `ΔT_Kerosin = ${oilRise} ℃`,
+          waterC === undefined ? '' : `c_Wasser = ${waterC}`,
+          oilC === undefined ? '' : `c_Kerosin = ${oilC}`,
+        ].filter(entry => entry.length > 0).join('; '),
       ].filter(entry => entry.length > 0),
       highlights: ['sample-1', 'sample-2', 'thermometer', 'thermometer-2'],
     },
@@ -1486,46 +1486,46 @@ const heatCapacityLesson = (context: PhysicsAgentContext): TutorScript => {
 /* ---------------------------------------------------------------- induction -- */
 
 const barMotionLesson = (context: PhysicsAgentContext): TutorScript => {
-  const emf = derivedText(context, '感应电动势 E')
-  const current = derivedText(context, '感应电流 I')
-  const field = derivedText(context, '磁感应强度 B')
-  const barLength = derivedText(context, '棒长 L')
-  const velocity = derivedText(context, '棒速 v')
-  const resistance = derivedText(context, '回路电阻 R')
+  const emf = derivedText(context, 'Induzierte Spannung E')
+  const current = derivedText(context, 'Induzierter Strom I')
+  const field = derivedText(context, 'Magnetische Flussdichte B')
+  const barLength = derivedText(context, 'Stablänge L')
+  const velocity = derivedText(context, 'Stabgeschwindigkeit v')
+  const resistance = derivedText(context, 'Kreiswiderstand R')
   return {
     id: 'induction-bar-motion',
-    topic: '导体棒切割磁感线',
+    topic: 'Leiterstab schneidet Feldlinien',
     observation: [
-      ...observeLine('磁感应强度 B', field),
-      ...observeLine('棒速 v', velocity),
-      ...observeLine('感应电动势 E', emf),
-      ...observeLine('感应电流 I', current),
+      ...observeLine('Magnetische Flussdichte B', field),
+      ...observeLine('Stabgeschwindigkeit v', velocity),
+      ...observeLine('Induzierte Spannung E', emf),
+      ...observeLine('Induzierter Strom I', current),
     ],
-    question: '棒匀速滑动，读数一直是同一个值。这根棒到底在"发电"吗？能量从哪来？',
+    question: 'Der Stab gleitet gleichförmig, und der Messwert bleibt stets derselbe. Erzeugt dieser Stab überhaupt Strom? Woher kommt die Energie?',
     hints: [
       {
         id: 'hint-what-decides-emf',
-        title: '提示 1',
-        paragraphs: ['先把读数和公式对上：E = BLv。B、L、v 三个量在棒匀速滑动时全都不变，所以电动势不变 —— 读数稳定不是"没发电"，是"稳定地发电"。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Vergleiche zuerst die Messwerte mit der Formel: E = BLv. Die drei Größen B, L und v bleiben beim gleichförmigen Gleiten des Stabs alle konstant, daher ist die induzierte Spannung konstant — ein stabiler Messwert bedeutet nicht, dass kein Strom erzeugt wird, sondern eine stabile Stromerzeugung.'],
         highlights: ['induction-field', 'induction-bench-1.bar'],
       },
       {
         id: 'hint-where-energy-from',
-        title: '提示 2',
-        paragraphs: ['棒里有电流，电流在磁场里受安培力，方向与运动相反。要让棒保持匀速，外力必须持续推它 —— 机械功正是通过克服安培力变成了电能。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Im Stab fließt ein Strom, und dieser Strom erfährt im Magnetfeld eine Ampèresche Kraft, die der Bewegung entgegengerichtet ist. Damit der Stab gleichförmig bleibt, muss eine äußere Kraft ihn ständig antreiben — die mechanische Arbeit wird gerade durch das Überwinden der Ampèreschen Kraft in elektrische Energie umgewandelt.'],
         highlights: ['induction-current-arrow'],
       },
       {
         id: 'hint-direction',
-        title: '提示 3',
-        paragraphs: ['电流方向由右手定则给出：摊开右手让磁感线穿入手心，拇指指向棒的运动方向，四指就是感应电流方向。反向滑动，四指方向跟着反过来。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Die Stromrichtung ergibt sich aus der Rechte-Hand-Regel: Öffne die rechte Hand so, dass die Feldlinien in die Handfläche eintreten, und richte den Daumen in Bewegungsrichtung des Stabs; dann zeigen die vier Finger in Richtung des induzierten Stroms. Gleitet der Stab umgekehrt, kehrt sich auch die Richtung der vier Finger um.'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '棒在稳定地发电：E = BLv 只由磁场、棒长和速度决定，与电阻无关；匀速滑动三个量都不变，电动势恒定。电流 I = E/R 同样恒定。',
+        'Der Stab erzeugt stabil Strom: E = BLv wird nur von Magnetfeld, Stablänge und Geschwindigkeit bestimmt und hängt nicht vom Widerstand ab; beim gleichförmigen Gleiten bleiben alle drei Größen konstant, die induzierte Spannung ist also konstant. Der Strom I = E/R ist ebenfalls konstant.',
         [
           field === undefined ? '' : `B = ${field}`,
           barLength === undefined ? '' : `L = ${barLength}`,
@@ -1533,8 +1533,8 @@ const barMotionLesson = (context: PhysicsAgentContext): TutorScript => {
           resistance === undefined ? '' : `R = ${resistance}`,
           emf === undefined ? '' : `E = BLv = ${emf}`,
           current === undefined ? '' : `I = E/R = ${current}`,
-        ].filter(entry => entry.length > 0).join('；'),
-        '能量账本：外力推棒的机械功，经安培力转手，变成了回路里的电能 —— 这就是发电机的雏形。棒一停（v = 0），E 立刻归零。',
+        ].filter(entry => entry.length > 0).join('; '),
+        'Energiebilanz: Die mechanische Arbeit der äußeren Kraft, die den Stab antreibt, wird über die Ampèresche Kraft in elektrische Energie im Stromkreis umgewandelt — das ist der Keim des Generators. Sobald der Stab stehen bleibt (v = 0), fällt E sofort auf null.',
       ].filter(entry => entry.length > 0),
       highlights: ['induction-bench-1.bar', 'induction-current-arrow'],
     },
@@ -1543,53 +1543,53 @@ const barMotionLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const fluxChangeLesson = (context: PhysicsAgentContext): TutorScript => {
-  const emf = derivedText(context, '感应电动势 E')
-  const current = derivedText(context, '感应电流 I')
-  const flux = derivedText(context, '磁通量 Φ')
-  const field = derivedText(context, '磁感应强度 B')
-  const resistance = derivedText(context, '回路电阻 R')
+  const emf = derivedText(context, 'Induzierte Spannung E')
+  const current = derivedText(context, 'Induzierter Strom I')
+  const flux = derivedText(context, 'Magnetischer Fluss Φ')
+  const field = derivedText(context, 'Magnetische Flussdichte B')
+  const resistance = derivedText(context, 'Kreiswiderstand R')
   return {
     id: 'induction-flux-change',
-    topic: '磁通量变化产生感应电动势',
+    topic: 'Änderung des magnetischen Flusses erzeugt eine induzierte Spannung',
     observation: [
-      ...observeLine('磁感应强度 B', field),
-      ...observeLine('磁通量 Φ', flux),
-      ...observeLine('感应电动势 E', emf),
-      ...observeLine('感应电流 I', current),
+      ...observeLine('Magnetische Flussdichte B', field),
+      ...observeLine('Magnetischer Fluss Φ', flux),
+      ...observeLine('Induzierte Spannung E', emf),
+      ...observeLine('Induzierter Strom I', current),
     ],
-    question: '线圈一动不动，磁铁一插一拔，电流表指针就摆。是什么在变？',
+    question: 'Die Spule bleibt unbewegt, doch beim Ein- und Ausführen des Magneten schlägt der Zeiger des Amperemeters aus. Was ändert sich?',
     hints: [
       {
         id: 'hint-what-is-flux',
-        title: '提示 1',
-        paragraphs: ['穿过线圈的磁感线根数叫磁通量 Φ = B·S·cosθ。线圈没动、面积没变，变的是 B —— 磁铁插近 B 变大，拔远 B 变小。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Die Anzahl der durch die Spule tretenden Feldlinien heißt magnetischer Fluss Φ = B·S·cosθ. Die Spule bewegt sich nicht, die Fläche bleibt gleich, geändert wird B — kommt der Magnet näher, wächst B, entfernt er sich, sinkt B.'],
         highlights: ['induction-field'],
       },
       {
         id: 'hint-rate-not-value',
-        title: '提示 2',
-        paragraphs: ['感应电动势看的是变化率不是变化量：E = -dΦ/dt。磁通量变化越快，指针摆得越猛；慢慢插、慢慢拔，同一个最终 Φ 读数几乎不出电动势。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Bei der induzierten Spannung zählt die Änderungsrate, nicht die Änderungsmenge: E = -dΦ/dt. Je schneller sich der magnetische Fluss ändert, desto stärker schlägt der Zeiger aus; führt man den Magneten langsam ein und aus, liefert derselbe Endwert Φ praktisch keine induzierte Spannung.'],
       },
       {
         id: 'hint-lenz',
-        title: '提示 3',
-        paragraphs: ['负号是楞次定律：插入时磁通量增加，感应电流的磁场反抗增加（与原磁场反向）；拔出时磁通量减少，感应磁场补偿（与原磁场同向）。"阻碍变化"四个字把两种情况都涵盖了。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Das Minuszeichen steht für die Lenzsche Regel: Beim Einführen wächst der magnetische Fluss, das Feld des induzierten Stroms wirkt dem Wachstum entgegen (es ist dem ursprünglichen Feld entgegengerichtet); beim Herausziehen nimmt der magnetische Fluss ab, und das induzierte Feld gleicht das aus (es ist dem ursprünglichen Feld gleichgerichtet). Der Grundsatz, der Änderung entgegenzuwirken, deckt beide Fälle ab.'],
         highlights: ['induction-current-arrow'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '变化的是磁通量：磁铁运动改变穿过线圈的 B，Φ = B·S·cosθ 随之变化。只要 dΦ/dt ≠ 0 就有感应电动势 E = -dΦ/dt，闭合回路里出现 I = E/R。',
+        'Was sich ändert, ist der magnetische Fluss: Die Bewegung des Magneten ändert das B, das die Spule durchsetzt, und damit ändert sich Φ = B·S·cosθ. Sobald dΦ/dt ≠ 0 ist, gibt es eine induzierte Spannung E = -dΦ/dt, und im geschlossenen Stromkreis fließt I = E/R.',
         [
           field === undefined ? '' : `B = ${field}`,
           flux === undefined ? '' : `Φ = ${flux}`,
           resistance === undefined ? '' : `R = ${resistance}`,
           emf === undefined ? '' : `E = -dΦ/dt = ${emf}`,
           current === undefined ? '' : `I = E/R = ${current}`,
-        ].filter(entry => entry.length > 0).join('；'),
-        '楞次定律定方向：E 的符号与 dΦ/dt 相反 —— 插入（Φ 增加）与拔出（Φ 减少）给出的电流方向正好相反，这就是指针左右各摆一次的原因。',
+        ].filter(entry => entry.length > 0).join('; '),
+        'Die Lenzsche Regel legt die Richtung fest: Das Vorzeichen von E ist dem von dΦ/dt entgegengesetzt — Einführen (Φ steigt) und Herausziehen (Φ sinkt) ergeben genau entgegengesetzte Stromrichtungen, deshalb schlägt der Zeiger einmal nach links und einmal nach rechts aus.',
       ].filter(entry => entry.length > 0),
       highlights: ['induction-bench-1', 'induction-current-arrow'],
     },
@@ -1600,56 +1600,56 @@ const fluxChangeLesson = (context: PhysicsAgentContext): TutorScript => {
 /* --------------------------------------------------------------------- wave -- */
 
 const travellingWaveLesson = (context: PhysicsAgentContext): TutorScript => {
-  const amplitude = derivedText(context, '振幅 A')
-  const wavelength = derivedText(context, '波长 λ')
-  const frequency = derivedText(context, '频率 f')
-  const speed = derivedText(context, '波速 v')
-  const period = derivedText(context, '周期 T')
+  const amplitude = derivedText(context, 'Amplitude A')
+  const wavelength = derivedText(context, 'Wellenlänge λ')
+  const frequency = derivedText(context, 'Frequenz f')
+  const speed = derivedText(context, 'Wellengeschwindigkeit v')
+  const period = derivedText(context, 'Periodendauer T')
   const marker = context.drawnIds.find(id => id.endsWith('.marker'))
   const profile = context.drawnIds.find(id => id.startsWith('wave-bench'))
   return {
     id: 'wave-travelling',
-    topic: '绳上的简谐横波',
+    topic: 'Harmonische Transversalwelle auf einem Seil',
     observation: [
-      ...observeLine('振幅 A', amplitude),
-      ...observeLine('波长 λ', wavelength),
-      ...observeLine('频率 f', frequency),
-      ...observeLine('波速 v = λf', speed),
-      ...observeLine('周期 T = 1/f', period),
+      ...observeLine('Amplitude A', amplitude),
+      ...observeLine('Wellenlänge λ', wavelength),
+      ...observeLine('Frequenz f', frequency),
+      ...observeLine('Wellengeschwindigkeit v = λf', speed),
+      ...observeLine('Periodendauer T = 1/f', period),
     ],
-    question: '波形一直向右跑，蓝色的标记质点却始终在同一条竖线上。到底是什么在向右传播？',
+    question: 'Das Wellenprofil läuft ständig nach rechts, doch das blau markierte Teilchen bleibt auf derselben senkrechten Linie. Was breitet sich denn nach rechts aus?',
     hints: [
       {
         id: 'hint-particle',
-        title: '提示 1',
-        paragraphs: ['盯住标记质点：它的横坐标一格都没动，只是沿竖直方向上下往返 —— 这是一个简谐振动，振幅就是 A。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Beobachte das markierte Teilchen: Seine horizontale Koordinate bewegt sich keinen einzigen Skalenstrich, es pendelt nur senkrecht auf und ab — das ist eine harmonische Schwingung, und die Amplitude ist A.'],
         ...(marker === undefined ? {} : { highlights: [marker] }),
       },
       {
         id: 'hint-profile',
-        title: '提示 2',
-        paragraphs: ['再看整条绳：每过一个周期 T，波形恰好整体前移一个波长 λ。位移量 λ 除以时间 T 就是波形跑的速度 v = λ/T = λf。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Betrachte nun das ganze Seil: Nach jeweils einer Periodendauer T rückt das Wellenprofil gerade um eine Wellenlänge λ vor. Die Strecke λ geteilt durch die Zeit T ergibt die Ausbreitungsgeschwindigkeit des Profils v = λ/T = λf.'],
         ...(profile === undefined ? {} : { highlights: [profile] }),
       },
       {
         id: 'hint-medium',
-        title: '提示 3',
-        paragraphs: ['把频率调大试试：波形变密（λ 变短）但 v 不变，因为波速由绳子这个介质决定；波源只决定 f，λ = v/f 是两者共同的结果。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Erhöhe einmal die Frequenz: Das Wellenprofil wird dichter (λ wird kürzer), aber v bleibt gleich, denn die Wellengeschwindigkeit wird vom Medium Seil bestimmt; die Quelle legt nur f fest, und λ = v/f ist das gemeinsame Ergebnis beider.'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '向右传播的是振动这种"形式"以及随之传递的能量，介质本身（绳上的每个质点）只在各自的平衡位置附近做简谐振动，不随波迁移。',
+        'Nach rechts breitet sich die Schwingung als solche sowie die mit ihr transportierte Energie aus; das Medium selbst (jedes Teilchen des Seils) führt nur nahe seiner eigenen Ruhelage eine harmonische Schwingung aus und wandert nicht mit der Welle.',
         [
           amplitude === undefined ? '' : `A = ${amplitude}`,
           wavelength === undefined ? '' : `λ = ${wavelength}`,
           frequency === undefined ? '' : `f = ${frequency}`,
           speed === undefined ? '' : `v = λf = ${speed}`,
           period === undefined ? '' : `T = 1/f = ${period}`,
-        ].filter(entry => entry.length > 0).join('；'),
-        '三个量的分工：介质定波速 v，波源定频率 f，波长 λ = v/f 由两者共同决定。',
+        ].filter(entry => entry.length > 0).join('; '),
+        'Die Aufgabenverteilung der drei Größen: Das Medium legt die Wellengeschwindigkeit v fest, die Quelle die Frequenz f, und die Wellenlänge λ = v/f ergibt sich aus beiden gemeinsam.',
       ].filter(entry => entry.length > 0),
       highlights: [marker, profile].filter((id): id is string => id !== undefined),
     },
@@ -1663,61 +1663,61 @@ const travellingWaveLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const waveInterferenceLesson = (context: PhysicsAgentContext): TutorScript => {
-  const pathDifference = derivedText(context, '路程差 Δ')
-  const ratio = derivedText(context, '路程差 / 波长 Δ/λ')
-  const resultant = derivedText(context, '合振幅 A_P')
-  const amplitude = derivedText(context, '振幅 A')
-  const wavelength = derivedText(context, '波长 λ')
-  const verdict = context.derived.find(row => row.label === 'P 点振动')?.value
-  const destructive = verdict === '振动减弱'
+  const pathDifference = derivedText(context, 'Wegunterschied Δ')
+  const ratio = derivedText(context, 'Wegunterschied / Wellenlänge Δ/λ')
+  const resultant = derivedText(context, 'Gesamtamplitude A_P')
+  const amplitude = derivedText(context, 'Amplitude A')
+  const wavelength = derivedText(context, 'Wellenlänge λ')
+  const verdict = context.derived.find(row => row.label === 'Schwingung am Punkt P')?.value
+  const destructive = verdict === 'Schwingung geschwächt'
   const point = context.drawnIds.find(id => id.endsWith('.point'))
   const sources = context.drawnIds.filter(id => /\.source-\d$/.test(id))
   return {
     id: destructive ? 'wave-interference-destructive' : 'wave-interference-constructive',
-    topic: '双源干涉与波的叠加',
+    topic: 'Interferenz zweier Quellen und Überlagerung',
     observation: [
-      ...observeLine('单个波源振幅 A', amplitude),
-      ...observeLine('波长 λ', wavelength),
-      ...observeLine('P 点路程差 Δ', pathDifference),
+      ...observeLine('Amplitude einer einzelnen Quelle A', amplitude),
+      ...observeLine('Wellenlänge λ', wavelength),
+      ...observeLine('Wegunterschied am Punkt P Δ', pathDifference),
       ...observeLine('Δ/λ', ratio),
-      ...observeLine('P 点合振幅 A_P', resultant),
-      ...observeLine('P 点振动', verdict),
+      ...observeLine('Gesamtamplitude am Punkt P A_P', resultant),
+      ...observeLine('Schwingung am Punkt P', verdict),
     ],
     question: destructive
-      ? '两个波源都在振动，P 点却几乎不动。两列波去哪了？'
-      : 'P 点的振幅比任何一个波源都大。多出来的振幅是哪来的？',
+      ? 'Beide Quellen schwingen, doch der Punkt P bewegt sich kaum. Wohin sind die beiden Wellen verschwunden?'
+      : 'Die Amplitude am Punkt P ist größer als die jeder einzelnen Quelle. Woher kommt die zusätzliche Amplitude?',
     hints: [
       {
         id: 'hint-path',
-        title: '提示 1',
-        paragraphs: ['两列波到 P 点走的路不一样长，路程差 Δ = |r₂ − r₁|。走得多的那列要晚到，晚到多少个周期，取决于 Δ 里装了几个波长。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Die beiden Wellen legen bis zum Punkt P unterschiedlich lange Wege zurück, der Wegunterschied ist Δ = |r₂ − r₁|. Die Welle mit dem längeren Weg kommt später an, und um wie viele Perioden, hängt davon ab, wie viele Wellenlängen in Δ passen.'],
         ...(point === undefined ? {} : { highlights: [point] }),
       },
       {
         id: 'hint-phase',
-        title: '提示 2',
-        paragraphs: ['Δ 是波长的整数倍时，两列波同相到达，波峰遇波峰，位移相加得 2A；Δ 是半波长的奇数倍时，反相到达，波峰遇波谷，位移相消得 0。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Ist Δ ein ganzzahliges Vielfaches der Wellenlänge, kommen beide Wellen in Phase an, Wellenberg trifft auf Wellenberg, und die Auslenkungen addieren sich zu 2A; ist Δ ein ungeradzahliges Vielfaches der halben Wellenlänge, kommen sie gegenphasig an, Wellenberg trifft auf Wellental, und die Auslenkungen heben sich zu 0 auf.'],
         highlights: sources,
       },
       {
         id: 'hint-formula',
-        title: '提示 3',
-        paragraphs: ['统一写成合振幅 A_P = |2A·cos(πΔ/λ)|：Δ/λ 取整数时 cos = ±1 得 2A，取半整数时 cos = 0 得 0，其余情况介于两者之间。拖动路程差看 A_P 连续变化。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Einheitlich geschrieben: Gesamtamplitude A_P = |2A·cos(πΔ/λ)|. Bei ganzzahligem Δ/λ ist cos = ±1 und ergibt 2A, bei halbzahligem Δ/λ ist cos = 0 und ergibt 0, in allen übrigen Fällen liegt der Wert dazwischen. Verschiebe den Wegunterschied und beobachte, wie sich A_P stetig ändert.'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
         destructive
-          ? '两列波没有消失，只是在 P 点始终反相：一列到达波峰时另一列正好到达波谷，位移之和恒为零。能量被重新分配到了加强点上。'
-          : '多出来的振幅来自叠加：两列波同相到达 P，位移逐时刻相加，合振幅达到 2A。这不是能量凭空产生，而是干涉把能量从减弱点搬到了加强点。',
+          ? 'Die beiden Wellen sind nicht verschwunden, sie sind am Punkt P nur stets gegenphasig: Wenn die eine am Wellenberg ankommt, erreicht die andere gerade das Wellental, und die Summe der Auslenkungen ist immer null. Die Energie wurde auf die Verstärkungspunkte umverteilt.'
+          : 'Die zusätzliche Amplitude entsteht durch Überlagerung: Beide Wellen kommen in Phase in P an, die Auslenkungen addieren sich zu jedem Zeitpunkt, und die Gesamtamplitude erreicht 2A. Die Energie entsteht nicht aus dem Nichts, sondern die Interferenz hat sie von den Abschwächungspunkten zu den Verstärkungspunkten verschoben.',
         [
           pathDifference === undefined ? '' : `Δ = ${pathDifference}`,
           ratio === undefined ? '' : `Δ/λ = ${ratio}`,
           resultant === undefined ? '' : `A_P = |2A·cos(πΔ/λ)| = ${resultant}`,
-        ].filter(entry => entry.length > 0).join('；'),
-        '判据：Δ = nλ 振动加强，Δ = (n + ½)λ 振动减弱；相干条件是两源频率相同、相位差恒定。',
+        ].filter(entry => entry.length > 0).join('; '),
+        'Kriterium: Bei Δ = nλ ist die Schwingung verstärkt, bei Δ = (n + ½)λ geschwächt; die Kohärenzbedingung ist, dass beide Quellen dieselbe Frequenz und eine konstante Phasendifferenz haben.',
       ].filter(entry => entry.length > 0),
       highlights: [point, ...sources].filter((id): id is string => id !== undefined),
     },
@@ -1731,50 +1731,50 @@ const waveInterferenceLesson = (context: PhysicsAgentContext): TutorScript => {
 }
 
 const standingWaveLesson = (context: PhysicsAgentContext): TutorScript => {
-  const stringLength = derivedText(context, '弦长 L')
-  const harmonic = derivedText(context, '谐波次数 n')
-  const speed = derivedText(context, '波速 v')
-  const wavelength = derivedText(context, '波长 λ')
-  const frequency = derivedText(context, '频率 f')
-  const fundamental = derivedText(context, '基频 f₁')
+  const stringLength = derivedText(context, 'Saitenlänge L')
+  const harmonic = derivedText(context, 'Harmonische Ordnung n')
+  const speed = derivedText(context, 'Wellengeschwindigkeit v')
+  const wavelength = derivedText(context, 'Wellenlänge λ')
+  const frequency = derivedText(context, 'Frequenz f')
+  const fundamental = derivedText(context, 'Grundfrequenz f₁')
   const nodes = context.drawnIds.filter(id => id.includes('.node.'))
   const antinodes = context.drawnIds.filter(id => id.includes('.antinode.'))
   return {
     id: 'wave-standing',
-    topic: '两端固定的弦驻波',
+    topic: 'Stehende Welle auf einer beidseitig eingespannten Saite',
     observation: [
-      ...observeLine('弦长 L', stringLength),
-      ...observeLine('谐波次数 n', harmonic),
-      ...observeLine('弦上波速 v', speed),
-      ...observeLine('波长 λ = 2L/n', wavelength),
-      ...observeLine('频率 f_n = n·v/2L', frequency),
-      ...observeLine('基频 f₁', fundamental),
+      ...observeLine('Saitenlänge L', stringLength),
+      ...observeLine('Harmonische Ordnung n', harmonic),
+      ...observeLine('Wellengeschwindigkeit auf der Saite v', speed),
+      ...observeLine('Wellenlänge λ = 2L/n', wavelength),
+      ...observeLine('Frequenz f_n = n·v/2L', frequency),
+      ...observeLine('Grundfrequenz f₁', fundamental),
     ],
-    question: '弦在两条虚线之间来回摆，有几个点却始终纹丝不动。为什么这里的波"不走"了？',
+    question: 'Die Saite schwingt zwischen zwei gestrichelten Linien hin und her, doch einige Punkte bleiben völlig unbewegt. Warum läuft die Welle hier nicht weiter?',
     hints: [
       {
         id: 'hint-nodes',
-        title: '提示 1',
-        paragraphs: ['先数不动的点：两端被夹住，本来就不能动；中间那些不动的点叫波节。相邻两个波节之间恰好隔半个波长 λ/2。'],
+        title: 'Hinweis 1',
+        paragraphs: ['Zähle zuerst die unbewegten Punkte: Die beiden Enden sind eingespannt und können sich ohnehin nicht bewegen; die unbewegten Punkte dazwischen heißen Knoten. Zwischen zwei benachbarten Knoten liegt gerade eine halbe Wellenlänge λ/2.'],
         highlights: nodes,
       },
       {
         id: 'hint-superpose',
-        title: '提示 2',
-        paragraphs: ['驻波是两列相同的波沿相反方向传播叠加的结果：波节处两列波始终反相、相消为零；波腹处始终同相、振幅最大。波形不再向前跑，只在原地涨落。'],
+        title: 'Hinweis 2',
+        paragraphs: ['Eine stehende Welle entsteht durch die Überlagerung zweier gleicher, entgegengesetzt laufender Wellen: An den Knoten sind beide Wellen stets gegenphasig und heben sich zu null auf; an den Bäuchen sind sie stets in Phase und die Amplitude ist maximal. Das Wellenprofil läuft nicht mehr vorwärts, sondern schwingt nur noch an Ort und Stelle auf und ab.'],
         highlights: antinodes,
       },
       {
         id: 'hint-harmonic',
-        title: '提示 3',
-        paragraphs: ['要两端都是波节，弦长必须装下整数个半波长：L = n·λ/2。于是 λ = 2L/n，再用 v = λf 得 f_n = n·v/(2L) = n·f₁ —— 把 n 改成 3 看频率和波节数怎么变。'],
+        title: 'Hinweis 3',
+        paragraphs: ['Damit beide Enden Knoten sind, muss die Saitenlänge eine ganze Zahl von Halbwellenlängen aufnehmen: L = n·λ/2. Daraus folgt λ = 2L/n, und mit v = λf ergibt sich f_n = n·v/(2L) = n·f₁ — ändere n auf 3 und beobachte, wie sich Frequenz und Knotenzahl ändern.'],
       },
     ],
     answer: {
       id: 'answer',
-      title: '答案',
+      title: 'Antwort',
       paragraphs: [
-        '两列反向传播的波叠加成了驻波：在波节处它们永远反相抵消，位移恒为零；在波腹处永远同相，振幅最大。波形不传播，能量在相邻波节之间来回交换。',
+        'Zwei entgegengesetzt laufende Wellen überlagern sich zu einer stehenden Welle: An den Knoten heben sie sich dauerhaft gegenphasig auf, die Auslenkung ist immer null; an den Bäuchen sind sie dauerhaft in Phase, die Amplitude ist maximal. Das Profil breitet sich nicht aus, die Energie pendelt zwischen benachbarten Knoten hin und her.',
         [
           stringLength === undefined ? '' : `L = ${stringLength}`,
           harmonic === undefined ? '' : `n = ${harmonic}`,
@@ -1782,8 +1782,8 @@ const standingWaveLesson = (context: PhysicsAgentContext): TutorScript => {
           speed === undefined ? '' : `v = ${speed}`,
           frequency === undefined ? '' : `f_n = n·v/(2L) = ${frequency}`,
           fundamental === undefined ? '' : `f₁ = ${fundamental}`,
-        ].filter(entry => entry.length > 0).join('；'),
-        '两端固定的弦只能在 f_n = n·f₁ 这些离散频率上共振，这就是弦乐器音高由弦长、张力（决定 v）与谐波次数共同决定的原因。',
+        ].filter(entry => entry.length > 0).join('; '),
+        'Eine beidseitig eingespannte Saite kann nur bei diesen diskreten Frequenzen f_n = n·f₁ resonieren; deshalb wird die Tonhöhe eines Saiteninstruments von Saitenlänge, Spannung (die v bestimmt) und Harmonischer Ordnung gemeinsam festgelegt.',
       ].filter(entry => entry.length > 0),
       highlights: [...nodes, ...antinodes],
     },
@@ -1805,15 +1805,15 @@ const standingWaveLesson = (context: PhysicsAgentContext): TutorScript => {
  * spectrometer's drift/deflection regions, the gravity contribution, the
  * selection-condition check); circuit frames by the lab topics the self-checks
  * resolve (circuit facts first — internal resistance, rheostat symbol,
- * junction dots — with the 初中 伏安法/灯泡功率 measurement intents read off
+ * junction dots — with the Mittelstufe Strom-Spannungs-Methode/Lampenleistung measurement intents read off
  * the stamped title); optics frames by the imaging element actually on the
  * bench (plane mirror vs thin lens vs curved mirror, with the lens and mirror
- * lessons sub-dispatched on the 物距区间 the runtime published); acoustics
+ * lessons sub-dispatched on the Gegenstandsabstand-Bereich the runtime published); acoustics
  * frames all teach echo ranging, fluid frames the weighing method and thermal
  * frames split on whether a second sample is drawn (two-beaker heat-capacity
  * comparison vs the melting curve);
  * mechanics frames: a lever (two hangers drawn) teaches F₁l₁ = F₂l₂, otherwise
- * the scene title the template stamped (测平均速度 / 抛体 / 斜面 / 力与运动). Unknown
+ * the scene title the template stamped (Durchschnittsgeschwindigkeit messen / Wurfbewegung / schiefe Ebene / Kraft und Bewegung). Unknown
  * frames return undefined and the drawer keeps Q&A.
  * @returns the tutor script.
  * @param context - the agent context.
@@ -1822,7 +1822,7 @@ export const tutorScriptOf = (context: PhysicsAgentContext): TutorScript | undef
   if (context.status === 'failed') return undefined
   if (context.domain === 'composite') {
     if (context.drawnIds.includes('spectrometer-deflection')) return spectrometerLesson(context)
-    const gravity = context.derived.find(row => row.label === '重力大小')
+    const gravity = context.derived.find(row => row.label === 'Betrag der Schwerkraft')
     if (gravity !== undefined && !/^0(\.0+)?$/.test(gravity.value)) return threeFieldLesson(context)
     if (context.verification.some(check => check.id === 'velocity_selection_condition')) {
       return velocitySelectorLesson(context)
@@ -1833,8 +1833,8 @@ export const tutorScriptOf = (context: PhysicsAgentContext): TutorScript | undef
   if (context.domain === 'mechanics') {
     if (mechanicsTopicOf(context) === 'mechanics-lever') return leverBalanceLesson(context)
     if (mechanicsTopicOf(context) === 'mechanics-average-speed') return averageSpeedLesson(context)
-    if (/平抛|斜抛|抛体/.test(context.sceneTitle)) return projectileLesson(context)
-    if (/斜面/.test(context.sceneTitle)) return inclineLesson(context)
+    if (/Wurf/.test(context.sceneTitle)) return projectileLesson(context)
+    if (/schiefe Ebene|geneigte Ebene|Rampe/.test(context.sceneTitle)) return inclineLesson(context)
     return forceMotionLesson(context)
   }
   if (context.domain === 'circuit') {

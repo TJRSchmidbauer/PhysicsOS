@@ -18,95 +18,95 @@ export interface GoldenQuestionDefinition {
   expectedChargeSign: 'positive' | 'negative' | 'unknown'
   expectedFieldDirection: 'into_page' | 'out_of_page' | 'unknown'
   expectedValidation: 'VALID' | 'AMBIGUOUS' | 'INVALID_SEMANTICS' | 'UNSUPPORTED_MODEL'
-  /** Composite apparatus the question describes, when it is a composite one. */
+  /** Komplexes Gerät, das die Frage beschreibt, falls es sich um ein komplexes handelt. */
   expectedModel?: PhysicsModelId
 }
 
 export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   {
     id: '01-proton-basic',
-    title: '质子垂直进入匀强磁场',
-    text: '一个质子以 2.0×10^6 m/s 的速度，垂直进入磁感应强度为 0.50 T，方向垂直纸面向里的匀强磁场。已知：m = 1.67×10^-27 kg，q = +1.60×10^-19 C。求：1. 洛伦兹力大小 2. 轨道半径 3. 运动周期 4. 判断运动方向 5. 显示运动轨迹',
+    title: 'Proton tritt senkrecht in homogenes Magnetfeld ein',
+    text: 'Ein Proton tritt mit einer Geschwindigkeit von 2,0×10^6 m/s senkrecht in ein homogenes Magnetfeld der magnetischen Flussdichte 0,50 T ein, dessen Richtung senkrecht zur Papierfläche nach innen zeigt. Gegeben: m = 1,67×10^-27 kg, q = +1,60×10^-19 C. Gesucht: 1. Betrag der Lorentzkraft 2. Bahnradius 3. Umlaufperiode 4. Bewegungsrichtung bestimmen 5. Bewegungsbahn anzeigen',
     expectedChargeSign: 'positive',
     expectedFieldDirection: 'into_page',
     expectedValidation: 'VALID',
   },
   {
     id: '02-electron-negative-charge',
-    title: '电子垂直进入匀强磁场',
-    text: '一个电子以 2.0×10^6 m/s 的速度，垂直进入磁感应强度为 0.50 T，方向垂直纸面向里的匀强磁场。已知：m = 9.11×10^-31 kg，q = -1.60×10^-19 C。求：1. 洛伦兹力大小 2. 轨道半径 3. 运动周期 4. 判断运动方向',
+    title: 'Elektron tritt senkrecht in homogenes Magnetfeld ein',
+    text: 'Ein Elektron tritt mit einer Geschwindigkeit von 2,0×10^6 m/s senkrecht in ein homogenes Magnetfeld der magnetischen Flussdichte 0,50 T ein, dessen Richtung senkrecht zur Papierfläche nach innen zeigt. Gegeben: m = 9,11×10^-31 kg, q = -1,60×10^-19 C. Gesucht: 1. Betrag der Lorentzkraft 2. Bahnradius 3. Umlaufperiode 4. Bewegungsrichtung bestimmen',
     expectedChargeSign: 'negative',
     expectedFieldDirection: 'into_page',
     expectedValidation: 'VALID',
   },
   {
     id: '03-field-out-of-page',
-    title: '磁场垂直纸面向外',
-    text: '一个质子以 1.0×10^6 m/s 的速度，垂直进入磁感应强度为 0.40 T，方向垂直纸面向外的匀强磁场。已知：m = 1.67×10^-27 kg，q = +1.60×10^-19 C。求：1. 轨道半径 2. 运动周期 3. 判断运动方向',
+    title: 'Magnetfeld senkrecht zur Papierfläche nach außen',
+    text: 'Ein Proton tritt mit einer Geschwindigkeit von 1,0×10^6 m/s senkrecht in ein homogenes Magnetfeld der magnetischen Flussdichte 0,40 T ein, dessen Richtung senkrecht zur Papierfläche nach außen zeigt. Gegeben: m = 1,67×10^-27 kg, q = +1,60×10^-19 C. Gesucht: 1. Bahnradius 2. Umlaufperiode 3. Bewegungsrichtung bestimmen',
     expectedChargeSign: 'positive',
     expectedFieldDirection: 'out_of_page',
     expectedValidation: 'VALID',
   },
   {
     id: '04-radius-only',
-    title: '仅求轨道半径',
-    text: '一个质子以 3.0×10^6 m/s 的速度，垂直进入磁感应强度为 0.20 T，方向垂直纸面向里的匀强磁场。已知：m = 1.67×10^-27 kg，q = +1.60×10^-19 C。求：轨道半径',
+    title: 'Nur Bahnradius berechnen',
+    text: 'Ein Proton tritt mit einer Geschwindigkeit von 3,0×10^6 m/s senkrecht in ein homogenes Magnetfeld der magnetischen Flussdichte 0,20 T ein, dessen Richtung senkrecht zur Papierfläche nach innen zeigt. Gegeben: m = 1,67×10^-27 kg, q = +1,60×10^-19 C. Gesucht: Bahnradius',
     expectedChargeSign: 'positive',
     expectedFieldDirection: 'into_page',
     expectedValidation: 'VALID',
   },
   {
     id: '05-period-only',
-    title: '仅求运动周期',
-    text: '一个质子以 5.0×10^5 m/s 的速度，垂直进入磁感应强度为 0.30 T，方向垂直纸面向里的匀强磁场。已知：m = 1.67×10^-27 kg，q = +1.60×10^-19 C。求：运动周期',
+    title: 'Nur Umlaufperiode berechnen',
+    text: 'Ein Proton tritt mit einer Geschwindigkeit von 5,0×10^5 m/s senkrecht in ein homogenes Magnetfeld der magnetischen Flussdichte 0,30 T ein, dessen Richtung senkrecht zur Papierfläche nach innen zeigt. Gegeben: m = 1,67×10^-27 kg, q = +1,60×10^-19 C. Gesucht: Umlaufperiode',
     expectedChargeSign: 'positive',
     expectedFieldDirection: 'into_page',
     expectedValidation: 'VALID',
   },
   {
     id: '06-missing-charge-sign',
-    title: '缺少电荷正负',
-    text: '一个带电粒子以 2.0×10^6 m/s 的速度，垂直进入磁感应强度为 0.50 T，方向垂直纸面向里的匀强磁场。已知：m = 1.67×10^-27 kg，q = 1.60×10^-19 C。求：1. 轨道半径 2. 判断运动方向',
+    title: 'Ladungszeichen fehlt',
+    text: 'Ein geladenes Teilchen tritt mit einer Geschwindigkeit von 2,0×10^6 m/s senkrecht in ein homogenes Magnetfeld der magnetischen Flussdichte 0,50 T ein, dessen Richtung senkrecht zur Papierfläche nach innen zeigt. Gegeben: m = 1,67×10^-27 kg, q = 1,60×10^-19 C. Gesucht: 1. Bahnradius 2. Bewegungsrichtung bestimmen',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'into_page',
     expectedValidation: 'AMBIGUOUS',
   },
   {
     id: '07-zero-field',
-    title: '磁感应强度为零',
-    text: '一个质子以 2.0×10^6 m/s 的速度进入磁感应强度为 0 T 的区域。已知：m = 1.67×10^-27 kg，q = +1.60×10^-19 C。求：轨道半径',
+    title: 'Magnetische Flussdichte ist null',
+    text: 'Ein Proton tritt mit einer Geschwindigkeit von 2,0×10^6 m/s in einen Bereich mit magnetischer Flussdichte 0 T ein. Gegeben: m = 1,67×10^-27 kg, q = +1,60×10^-19 C. Gesucht: Bahnradius',
     expectedChargeSign: 'positive',
     expectedFieldDirection: 'unknown',
     expectedValidation: 'INVALID_SEMANTICS',
   },
   {
     id: '08-parallel-velocity',
-    title: '速度与磁场平行',
-    text: '一个质子以 2.0×10^6 m/s 的速度，平行于磁感应强度为 0.50 T 的匀强磁场方向运动。已知：m = 1.67×10^-27 kg，q = +1.60×10^-19 C。求：轨道半径',
+    title: 'Geschwindigkeit parallel zum Magnetfeld',
+    text: 'Ein Proton bewegt sich mit einer Geschwindigkeit von 2,0×10^6 m/s parallel zur Richtung eines homogenen Magnetfeldes der magnetischen Flussdichte 0,50 T. Gegeben: m = 1,67×10^-27 kg, q = +1,60×10^-19 C. Gesucht: Bahnradius',
     expectedChargeSign: 'positive',
     expectedFieldDirection: 'unknown',
     expectedValidation: 'UNSUPPORTED_MODEL',
   },
   {
     id: '09-unit-conversion',
-    title: '单位转换',
-    text: '一个质子以 2000 km/s 的速度，垂直进入磁感应强度为 500 mT，方向垂直纸面向里的匀强磁场。已知：m = 1.67×10^-27 kg，q = +1.60×10^-19 C。求：轨道半径和运动周期',
+    title: 'Einheitenumrechnung',
+    text: 'Ein Proton tritt mit einer Geschwindigkeit von 2000 km/s senkrecht in ein homogenes Magnetfeld der magnetischen Flussdichte 500 mT ein, dessen Richtung senkrecht zur Papierfläche nach innen zeigt. Gegeben: m = 1,67×10^-27 kg, q = +1,60×10^-19 C. Gesucht: Bahnradius und Umlaufperiode',
     expectedChargeSign: 'positive',
     expectedFieldDirection: 'into_page',
     expectedValidation: 'VALID',
   },
   {
     id: '10-scientific-notation',
-    title: '科学计数法',
-    text: '一个质子以 2.0e6 m/s 的速度，垂直进入磁感应强度为 0.50 T，方向垂直纸面向里的匀强磁场。已知：m = 1.67e-27 kg，q = +1.60e-19 C。求：1. 洛伦兹力大小 2. 轨道半径 3. 运动周期',
+    title: 'Wissenschaftliche Notation',
+    text: 'Ein Proton tritt mit einer Geschwindigkeit von 2,0e6 m/s senkrecht in ein homogenes Magnetfeld der magnetischen Flussdichte 0,50 T ein, dessen Richtung senkrecht zur Papierfläche nach innen zeigt. Gegeben: m = 1,67e-27 kg, q = +1,60e-19 C. Gesucht: 1. Betrag der Lorentzkraft 2. Bahnradius 3. Umlaufperiode',
     expectedChargeSign: 'positive',
     expectedFieldDirection: 'into_page',
     expectedValidation: 'VALID',
   },
   {
     id: 'electric-01-perpendicular-deflection',
-    title: '正电荷在匀强电场中偏转',
-    text: '一个带正电粒子，质量 m = 4 kg，电荷量 q = +2 C，初速度为 3 m/s，沿 x 轴正方向进入匀强电场。电场强度 E = 6 N/C，电场方向沿 y 轴正方向，运动 2 s。求电场力、加速度、末速度、位移、电势变化、电势能变化、电场力做功和动能变化。',
+    title: 'Positive Ladung wird in homogenem elektrischen Feld abgelenkt',
+    text: 'Ein positiv geladenes Teilchen mit Masse m = 4 kg und Ladung q = +2 C tritt mit einer Anfangsgeschwindigkeit von 3 m/s in positive x-Richtung in ein homogenes elektrisches Feld ein. Die elektrische Feldstärke beträgt E = 6 N/C, die Feldrichtung zeigt in positive y-Richtung, die Bewegungsdauer beträgt 2 s. Gesucht: Elektrische Kraft, Beschleunigung, Endgeschwindigkeit, Verschiebung, Änderung des elektrischen Potenzials, Änderung der potentiellen Energie, Arbeit der elektrischen Kraft und Änderung der kinetischen Energie.',
     expectedDomain: 'electric',
     expectedChargeSign: 'positive',
     expectedFieldDirection: 'unknown',
@@ -114,8 +114,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-02-negative-parallel',
-    title: '负电荷沿电场方向减速',
-    text: '一个带负电粒子，质量 m = 2 kg，电荷量 q = -1 C，初速度为 4 m/s，沿 x 轴正方向运动。空间存在匀强电场，电场强度 E = 2 V/m，电场方向沿 x 轴正方向，运动 2 s。求电场力、加速度、末速度、位移、电势变化、电势能变化和动能变化。',
+    title: 'Negative Ladung wird entlang der Feldrichtung abgebremst',
+    text: 'Ein negativ geladenes Teilchen mit Masse m = 2 kg und Ladung q = -1 C bewegt sich mit einer Anfangsgeschwindigkeit von 4 m/s in positive x-Richtung. Im Raum existiert ein homogenes elektrisches Feld mit der Feldstärke E = 2 V/m, dessen Richtung in positive x-Richtung zeigt, die Bewegungsdauer beträgt 2 s. Gesucht: Elektrische Kraft, Beschleunigung, Endgeschwindigkeit, Verschiebung, Änderung des elektrischen Potenzials, Änderung der potentiellen Energie und Änderung der kinetischen Energie.',
     expectedDomain: 'electric',
     expectedChargeSign: 'negative',
     expectedFieldDirection: 'unknown',
@@ -123,8 +123,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-03-point-charge-field',
-    title: '点电荷的电场强度',
-    text: '一个点电荷 q = +5 μC，在距其 r = 20 cm 处放一个试探电荷。求该点的电场强度大小。',
+    title: 'Elektrische Feldstärke einer Punktladung',
+    text: 'Eine Punktladung q = +5 μC befindet sich im Raum. In einem Abstand von r = 20 cm wird eine Testladung platziert. Gesucht: Betrag der elektrischen Feldstärke an diesem Punkt.',
     expectedDomain: 'electric',
     expectedChargeSign: 'positive',
     expectedFieldDirection: 'unknown',
@@ -132,8 +132,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-04-point-charge-force',
-    title: '点电荷对试探电荷的电场力',
-    text: "一个点电荷 q = +5 μC，在距其 r = 20 cm 处放一个试探电荷 q' = +2 μC。求试探电荷受到的电场力。",
+    title: 'Elektrische Feldkraft einer Punktladung auf Testladung',
+    text: "Eine Punktladung q = +5 μC befindet sich im Raum. In einem Abstand von r = 20 cm wird eine Testladung q' = +2 μC platziert. Gesucht: Elektrische Feldkraft auf die Testladung.",
     expectedDomain: 'electric',
     expectedChargeSign: 'positive',
     expectedFieldDirection: 'unknown',
@@ -141,8 +141,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-05-point-charge-direction',
-    title: '负点电荷的电场方向',
-    text: '一个点电荷 q = -3 μC，在距其 r = 10 cm 处放一个试探电荷，判断该点电场方向。',
+    title: 'Richtung des elektrischen Feldes einer negativen Punktladung',
+    text: 'Eine Punktladung q = -3 μC befindet sich im Raum. In einem Abstand von r = 10 cm wird eine Testladung platziert. Bestimmen Sie die Richtung des elektrischen Feldes an diesem Punkt.',
     expectedDomain: 'electric',
     expectedChargeSign: 'negative',
     expectedFieldDirection: 'unknown',
@@ -150,8 +150,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-06-dipole-midpoint-field',
-    title: '等量异种点电荷中点的电场强度',
-    text: '两个点电荷 q1 = +2 μC，q2 = -2 μC，相距 20 cm。求两电荷连线中点处的电场强度大小。',
+    title: 'Elektrische Feldstärke im Mittelpunkt zweier gleichgroßer ungleichartiger Punktladungen',
+    text: 'Zwei Punktladungen q1 = +2 μC und q2 = -2 μC befinden sich im Abstand von 20 cm. Gesucht: Betrag der elektrischen Feldstärke im Mittelpunkt der Verbindungslinie.',
     expectedDomain: 'electric',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -159,8 +159,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-07-like-charges-midpoint',
-    title: '等量同种点电荷中点的电场强度',
-    text: '两个点电荷 q1 = +3 μC，q2 = +3 μC，相距 30 cm。求两电荷连线中点处的电场强度大小。',
+    title: 'Elektrische Feldstärke im Mittelpunkt zweier gleichgroßer gleichartiger Punktladungen',
+    text: 'Zwei Punktladungen q1 = +3 μC und q2 = +3 μC befinden sich im Abstand von 30 cm. Gesucht: Betrag der elektrischen Feldstärke im Mittelpunkt der Verbindungslinie.',
     expectedDomain: 'electric',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -168,8 +168,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-08-dipole-axis-field',
-    title: '电偶极子中点的电场强度',
-    text: '两个点电荷 q1 = +1 μC，q2 = -1 μC，相距 10 cm。求两电荷连线中点处的电场强度大小。',
+    title: 'Elektrische Feldstärke im Mittelpunkt eines elektrischen Dipols',
+    text: 'Zwei Punktladungen q1 = +1 μC und q2 = -1 μC befinden sich im Abstand von 10 cm. Gesucht: Betrag der elektrischen Feldstärke im Mittelpunkt der Verbindungslinie.',
     expectedDomain: 'electric',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -177,8 +177,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-09-off-axis-field',
-    title: '点电荷轴外的电场强度',
-    text: '一个点电荷 q = +4 μC，在距其左侧 15 cm 处放一个试探电荷。求该点的电场强度大小与方向。',
+    title: 'Elektrische Feldstärke außerhalb der Achse einer Punktladung',
+    text: 'Eine Punktladung q = +4 μC befindet sich im Raum. In einem Abstand von 15 cm links davon wird eine Testladung platziert. Gesucht: Betrag und Richtung der elektrischen Feldstärke an diesem Punkt.',
     expectedDomain: 'electric',
     expectedChargeSign: 'positive',
     expectedFieldDirection: 'unknown',
@@ -186,8 +186,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-10-electron-deflection',
-    title: '电子在平行板电场中的偏转距离',
-    text: '一个电子以初速度 v0 = 3×10^7 m/s 水平射入平行板电场。已知电子质量 m = 9.11×10^-31 kg，电荷量 q = -1.6×10^-19 C，电场强度 E = 2000 V/m，方向竖直向下，板间距 d = 4 cm，板长 L = 12 cm。求电子的偏转距离。',
+    title: 'Ablenkung eines Elektrons im Plattenkondensator',
+    text: 'Ein Elektron tritt mit der Anfangsgeschwindigkeit v0 = 3×10^7 m/s horizontal in ein Plattenkondensatorfeld ein. Gegeben: Elektronenmasse m = 9,11×10^-31 kg, Ladung q = -1,6×10^-19 C, elektrische Feldstärke E = 2000 V/m, Richtung senkrecht nach unten, Plattenabstand d = 4 cm, Plattenlänge L = 12 cm. Gesucht: Ablenkweg des Elektrons.',
     expectedDomain: 'electric',
     expectedChargeSign: 'negative',
     expectedFieldDirection: 'unknown',
@@ -195,8 +195,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-11-proton-deflection',
-    title: '质子在平行板电场中的偏转',
-    text: '一个质子以初速度 v0 = 2×10^6 m/s 水平射入平行板电场。已知质子质量 m = 1.67×10^-27 kg，电荷量 q = +1.6×10^-19 C，电场强度 E = 5000 V/m，方向竖直向下，板间距 d = 2 cm，板长 L = 10 cm。求质子的偏转距离。',
+    title: 'Ablenkung eines Protons im Plattenkondensator',
+    text: 'Ein Proton tritt mit der Anfangsgeschwindigkeit v0 = 2×10^6 m/s horizontal in ein Plattenkondensatorfeld ein. Gegeben: Protonenmasse m = 1,67×10^-27 kg, Ladung q = +1,6×10^-19 C, elektrische Feldstärke E = 5000 V/m, Richtung senkrecht nach unten, Plattenabstand d = 2 cm, Plattenlänge L = 10 cm. Gesucht: Ablenkweg des Protons.',
     expectedDomain: 'electric',
     expectedChargeSign: 'positive',
     expectedFieldDirection: 'unknown',
@@ -204,8 +204,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-12-exit-velocity',
-    title: '离开平行板电场时的速度',
-    text: '一个电子以初速度 v0 = 3×10^7 m/s 水平射入平行板电场。已知电子质量 m = 9.11×10^-31 kg，电荷量 q = -1.6×10^-19 C，电场强度 E = 2000 V/m，方向竖直向下，板间距 d = 4 cm，板长 L = 12 cm。求电子离开电场时的速度大小。',
+    title: 'Geschwindigkeit beim Verlassen des Plattenkondensators',
+    text: 'Ein Elektron tritt mit der Anfangsgeschwindigkeit v0 = 3×10^7 m/s horizontal in ein Plattenkondensatorfeld ein. Gegeben: Elektronenmasse m = 9,11×10^-31 kg, Ladung q = -1,6×10^-19 C, elektrische Feldstärke E = 2000 V/m, Richtung senkrecht nach unten, Plattenabstand d = 4 cm, Plattenlänge L = 12 cm. Gesucht: Betrag der Geschwindigkeit des Elektrons beim Verlassen des elektrischen Feldes.',
     expectedDomain: 'electric',
     expectedChargeSign: 'negative',
     expectedFieldDirection: 'unknown',
@@ -213,8 +213,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-13-hit-plate-time',
-    title: '电子打到极板的时间',
-    text: '一个电子以初速度 v0 = 1×10^7 m/s 水平射入平行板电场。已知电子质量 m = 9.11×10^-31 kg，电荷量 q = -1.6×10^-19 C，电场强度 E = 5000 V/m，方向竖直向下，板间距 d = 2 cm，板长 L = 20 cm。求电子打到极板的时间。',
+    title: 'Zeit bis das Elektron die Platte trifft',
+    text: 'Ein Elektron tritt mit der Anfangsgeschwindigkeit v0 = 1×10^7 m/s horizontal in ein Plattenkondensatorfeld ein. Gegeben: Elektronenmasse m = 9,11×10^-31 kg, Ladung q = -1,6×10^-19 C, elektrische Feldstärke E = 5000 V/m, Richtung senkrecht nach unten, Plattenabstand d = 2 cm, Plattenlänge L = 20 cm. Gesucht: Zeit bis das Elektron die Platte trifft.',
     expectedDomain: 'electric',
     expectedChargeSign: 'negative',
     expectedFieldDirection: 'unknown',
@@ -222,8 +222,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-14-deflection-direction',
-    title: '电子偏转方向判断',
-    text: '一个电子以初速度 v0 = 3×10^7 m/s 水平射入平行板电场。已知电子质量 m = 9.11×10^-31 kg，电荷量 q = -1.6×10^-19 C，电场强度 E = 2000 V/m，方向竖直向下，板间距 d = 4 cm，板长 L = 12 cm。判断电子的偏转方向（向上或向下）。',
+    title: 'Bestimmung der Ablenkrichtung des Elektrons',
+    text: 'Ein Elektron tritt mit der Anfangsgeschwindigkeit v0 = 3×10^7 m/s horizontal in ein Plattenkondensatorfeld ein. Gegeben: Elektronenmasse m = 9,11×10^-31 kg, Ladung q = -1,6×10^-19 C, elektrische Feldstärke E = 2000 V/m, Richtung senkrecht nach unten, Plattenabstand d = 4 cm, Plattenlänge L = 12 cm. Bestimmen Sie die Ablenkrichtung des Elektrons (nach oben oder unten).',
     expectedDomain: 'electric',
     expectedChargeSign: 'negative',
     expectedFieldDirection: 'unknown',
@@ -231,8 +231,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-15-field-reversed',
-    title: '电场反向后的偏转方向',
-    text: '一个电子以初速度 v0 = 3×10^7 m/s 水平射入平行板电场。已知电子质量 m = 9.11×10^-31 kg，电荷量 q = -1.6×10^-19 C，电场强度 E = 2000 V/m，方向竖直向上，板间距 d = 4 cm，板长 L = 12 cm。判断电子的偏转方向。',
+    title: 'Ablenkrichtung nach Umkehr des elektrischen Feldes',
+    text: 'Ein Elektron tritt mit der Anfangsgeschwindigkeit v0 = 3×10^7 m/s horizontal in ein Plattenkondensatorfeld ein. Gegeben: Elektronenmasse m = 9,11×10^-31 kg, Ladung q = -1,6×10^-19 C, elektrische Feldstärke E = 2000 V/m, Richtung senkrecht nach oben, Plattenabstand d = 4 cm, Plattenlänge L = 12 cm. Bestimmen Sie die Ablenkrichtung des Elektrons.',
     expectedDomain: 'electric',
     expectedChargeSign: 'negative',
     expectedFieldDirection: 'unknown',
@@ -240,8 +240,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-16-different-velocity',
-    title: '不同初速度对偏转的影响',
-    text: '两个电子分别以初速度 v0 = 3×10^7 m/s 和 v0 = 1.5×10^7 m/s 水平射入相同的平行板电场。已知电子质量 m = 9.11×10^-31 kg，电荷量 q = -1.6×10^-19 C，电场强度 E = 2000 V/m，方向竖直向下，板间距 d = 4 cm，板长 L = 12 cm。比较两个电子的偏转距离大小关系。',
+    title: 'Einfluss unterschiedlicher Anfangsgeschwindigkeiten auf die Ablenkung',
+    text: 'Zwei Elektronen treten jeweils mit den Anfangsgeschwindigkeiten v0 = 3×10^7 m/s und v0 = 1,5×10^7 m/s horizontal in dasselbe Plattenkondensatorfeld ein. Gegeben: Elektronenmasse m = 9,11×10^-31 kg, Ladung q = -1,6×10^-19 C, elektrische Feldstärke E = 2000 V/m, Richtung senkrecht nach unten, Plattenabstand d = 4 cm, Plattenlänge L = 12 cm. Vergleichen Sie die Ablenkwege der beiden Elektronen.',
     expectedDomain: 'electric',
     expectedChargeSign: 'negative',
     expectedFieldDirection: 'unknown',
@@ -249,8 +249,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-17-different-charge',
-    title: '不同电荷量的偏转比较',
-    text: '一个电子和一个质子以相同初速度 v0 = 2×10^6 m/s 水平射入相同的平行板电场。已知电子质量 m = 9.11×10^-31 kg，电荷量 q = -1.6×10^-19 C，质子质量 m = 1.67×10^-27 kg，电荷量 q = +1.6×10^-19 C，电场强度 E = 5000 V/m，方向竖直向下，板间距 d = 2 cm，板长 L = 10 cm。比较两者的偏转距离。',
+    title: 'Vergleich der Ablenkung bei unterschiedlichen Ladungsmengen',
+    text: 'Ein Elektron und ein Proton treten mit derselben Anfangsgeschwindigkeit v0 = 2×10^6 m/s horizontal in dasselbe Plattenkondensatorfeld ein. Gegeben: Elektronenmasse m = 9,11×10^-31 kg, Ladung q = -1,6×10^-19 C, Protonenmasse m = 1,67×10^-27 kg, Ladung q = +1,6×10^-19 C, elektrische Feldstärke E = 5000 V/m, Richtung senkrecht nach unten, Plattenabstand d = 2 cm, Plattenlänge L = 10 cm. Vergleichen Sie die Ablenkwege beider Teilchen.',
     expectedDomain: 'electric',
     expectedChargeSign: 'negative',
     expectedFieldDirection: 'unknown',
@@ -258,8 +258,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-18-plate-length-effect',
-    title: '板长对偏转的影响',
-    text: '一个电子以初速度 v0 = 3×10^7 m/s 水平射入平行板电场。已知电子质量 m = 9.11×10^-31 kg，电荷量 q = -1.6×10^-19 C，电场强度 E = 2000 V/m，方向竖直向下，板间距 d = 4 cm，板长 L = 6 cm。求电子的偏转距离，并与板长为 12 cm 时的偏转距离比较。',
+    title: 'Einfluss der Plattenlänge auf die Ablenkung',
+    text: 'Ein Elektron tritt mit der Anfangsgeschwindigkeit v0 = 3×10^7 m/s horizontal in ein Plattenkondensatorfeld ein. Gegeben: Elektronenmasse m = 9,11×10^-31 kg, Ladung q = -1,6×10^-19 C, elektrische Feldstärke E = 2000 V/m, Richtung senkrecht nach unten, Plattenabstand d = 4 cm, Plattenlänge L = 6 cm. Gesucht: Ablenkweg des Elektrons, und Vergleich mit dem Ablenkweg bei Plattenlänge 12 cm.',
     expectedDomain: 'electric',
     expectedChargeSign: 'negative',
     expectedFieldDirection: 'unknown',
@@ -267,8 +267,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'electric-19-energy',
-    title: '平行板电场中电场力做功与动能变化',
-    text: '一个电子以初速度 v0 = 3×10^7 m/s 水平射入平行板电场。已知电子质量 m = 9.11×10^-31 kg，电荷量 q = -1.6×10^-19 C，电场强度 E = 2000 V/m，方向竖直向下，板间距 d = 4 cm，板长 L = 12 cm。求电场力对电子做的功和电子动能的变化。',
+    title: 'Arbeit der elektrischen Feldkraft und kinetische Energieänderung im Plattenkondensator',
+    text: 'Ein Elektron tritt mit der Anfangsgeschwindigkeit v0 = 3×10^7 m/s horizontal in ein Plattenkondensatorfeld ein. Gegeben: Elektronenmasse m = 9,11×10^-31 kg, Ladung q = -1,6×10^-19 C, elektrische Feldstärke E = 2000 V/m, Richtung senkrecht nach unten, Plattenabstand d = 4 cm, Plattenlänge L = 12 cm. Gesucht: Arbeit der elektrischen Feldkraft am Elektron und Änderung der kinetischen Energie des Elektrons.',
     expectedDomain: 'electric',
     expectedChargeSign: 'negative',
     expectedFieldDirection: 'unknown',
@@ -276,66 +276,67 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'mech-01-uniform-acceleration',
-    title: '匀加速直线运动',
-    text: '汽车初速度为 10 m/s，加速度为 2 m/s²，运动 5 s。求末速度和位移。',
+    title: 'Gleichmäßig beschleunigte geradlinige Bewegung',
+    text: 'Ein Auto hat eine Anfangsgeschwindigkeit von 10 m/s und eine Beschleunigung von 2 m/s², es bewegt sich 5 s lang. Gesucht: Endgeschwindigkeit und Verschiebung.',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
     expectedValidation: 'VALID',
   },
   {
     id: 'mech-02-projectile-horizontal',
-    title: '平抛运动',
-    text: '物体从 20 m 高处，以 10 m/s 水平抛出，g = 10 m/s²。求落地时间和水平射程。',
+    title: 'Horizontalwurf',
+    text: 'Ein Gegenstand wird aus 20 m Höhe mit 10 m/s horizontal abgeworfen, g = 10 m/s². Gesucht: Fallzeit und horizontale Wurfweite.',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
     expectedValidation: 'VALID',
   },
   {
     id: 'mech-03-projectile-oblique',
-    title: '斜抛运动',
-    text: '物体以初速度 20 m/s，抛射角 30° 抛出，g = 10 m/s²。求最大高度、飞行时间和射程。',
+    title: 'Schräger Wurf',
+    text: 'Ein Gegenstand wird mit einer Anfangsgeschwindigkeit von 20 m/s unter einem Wurfwinkel von 30° abgeworfen, g = 10 m/s². Gesucht: Maximale Höhe, Flugzeit und Wurfweite.',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
     expectedValidation: 'VALID',
   },
   {
     id: 'mech-04-newton-second-law',
-    title: '牛顿第二定律',
-    text: '质量为 2 kg 的物体受到水平合力 10 N。求加速度。',
+    title: 'Zweites Newtonsches Gesetz',
+    text: 'Ein Objekt mit einer Masse von 2 kg erfährt eine horizontale resultierende Kraft von 10 N. Bestimme die Beschleunigung.',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
     expectedValidation: 'VALID',
   },
   {
     id: 'mech-05-incline-no-friction',
-    title: '无摩擦斜面',
-    text: '质量为 2 kg 的物体在倾角 30° 的光滑斜面上，g = 10 m/s²。求沿斜面加速度和支持力。',
+    title: 'Reibungsfreie schiefe Ebene',
+    text: 'Ein Objekt mit einer Masse von 2 kg befindet sich auf einer glatten schiefen Ebene mit einem Neigungswinkel von 30°, g = 10 m/s². Bestimme die Beschleunigung entlang der Ebene und die Stützkraft.',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
     expectedValidation: 'VALID',
   },
   {
     id: 'mech-06-unit-conversion',
-    title: '单位转换 72km/h',
-    text: '汽车以 72 km/h 的速度行驶，加速度为 2 m/s²，运动 5 s。求末速度。',
+    title: 'Einheitenumrechnung 72 km/h',
+    text: 'Ein Auto fährt mit einer Geschwindigkeit von 72 km/h, die Beschleunigung beträgt 2 m/s², die Bewegungsdauer 5 s. Bestimme die Endgeschwindigkeit.',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
     expectedValidation: 'VALID',
   },
 
   /* ------------------------------------------------------------- composite -- *
-   * Crossed-field apparatuses: a velocity selector, a mass spectrometer, and
-   * E+B / E+B+g worlds. Every question states the charge sign, the electric-field
-   * direction and the magnetic-field orientation, because those three are what
-   * turn magnitudes into a force balance — without them the apparatus geometry is
-   * undetermined and the IR is legitimately AMBIGUOUS rather than solvable.
-   * Field magnitudes are chosen so the selection condition is exact
-   * (v = E/B) unless the question is specifically about a rejected particle.       */
+   * Kreuzfeldapparaturen: ein Geschwindigkeitswähler, ein Massenspektrometer und
+   * E+B / E+B+g-Welten. Jede Aufgabe gibt das Vorzeichen der Ladung, die Richtung
+   * des elektrischen Feldes und die Orientierung des magnetischen Feldes an,
+   * weil diese drei Größen die Beträge in eine Kraftbilanz verwandeln — ohne sie
+   * ist die Apparaturgeometrie unbestimmt und die IR ist legitim AMBIGUOUS
+   * anstatt lösbar. Feldstärken werden so gewählt, dass die Selektionsbedingung
+   * exakt ist (v = E/B), es sei denn, die Aufgabe handelt spezifisch von einem
+   * abgewiesenen Teilchen.       */
 
   {
     id: 'comp-01-selector-balance',
-    title: '速度选择器：恰好通过',
-    text: '速度选择器中有互相垂直的匀强电场和匀强磁场，电场方向竖直向上，E = 2.0×10^4 V/m，磁场方向垂直纸面向外，B = 0.20 T。一个正电粒子（q = 1.6×10^-19 C，m = 1.67×10^-27 kg）以 v = 1.0×10^5 m/s 沿水平方向从左端射入，沿直线通过。求：1. 电场力大小 2. 洛伦兹力大小 3. 合力大小',
+    title: 'Geschwindigkeitswähler: gerade durchgelassen',
+    text: 'Im Geschwindigkeitswähler wirken ein homogenes elektrisches Feld und ein homogenes magnetisches Feld, die senkrecht aufeinander stehen. Die Richtung des elektrischen Feldes ist senkrecht nach oben, E = 2,0×10⁴ V/m, die Richtung des magnetischen Feldes ist senkrecht aus der Zeichenebene heraus, B = 0,20 T. Ein positiv geladenes Teilchen (q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg) tritt mit v = 1,0×10⁵ m/s horizontal vom linken Ende ein und durchläuft geradlinig. Bestimme: 1. Betrag der elektrischen Feldkraft 2. Betrag der Lorentzkraft 3. Betrag der resultierenden Kraft',
     expectedDomain: 'composite',
     expectedModel: 'velocity_selector',
     expectedChargeSign: 'positive',
@@ -344,8 +345,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-02-selector-selected-velocity',
-    title: '速度选择器：求选择速度',
-    text: '速度选择器的电场方向竖直向上，电场强度 E = 4.0×10^4 V/m，磁场方向垂直纸面向外，磁感应强度 B = 0.50 T。一束正离子（q = 1.6×10^-19 C，m = 1.67×10^-27 kg）沿水平方向射入。求能够沿直线通过的粒子速度大小。',
+    title: 'Geschwindigkeitswähler: Wahlgeschwindigkeit bestimmen',
+    text: 'Die Richtung des elektrischen Feldes im Geschwindigkeitswähler ist senkrecht nach oben, die elektrische Feldstärke E = 4,0×10⁴ V/m, die Richtung des magnetischen Feldes ist senkrecht aus der Zeichenebene heraus, die magnetische Flussdichte B = 0,50 T. Ein Strahl positiver Ionen (q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg) tritt horizontal ein. Bestimme den Betrag der Teilchengeschwindigkeit, der ein geradliniges Durchlaufen ermöglicht.',
     expectedDomain: 'composite',
     expectedModel: 'velocity_selector',
     expectedChargeSign: 'positive',
@@ -354,8 +355,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-03-selector-too-fast',
-    title: '速度选择器：速度偏大',
-    text: '速度选择器中电场方向竖直向上，E = 2.0×10^4 V/m，磁场方向垂直纸面向外，B = 0.20 T。一个正电粒子（q = 1.6×10^-19 C，m = 1.67×10^-27 kg）以 v = 2.0×10^5 m/s 水平射入。求：1. 电场力大小 2. 洛伦兹力大小 3. 合力大小 4. 画出运动轨迹',
+    title: 'Geschwindigkeitswähler: Geschwindigkeit zu groß',
+    text: 'Im Geschwindigkeitswähler ist die Richtung des elektrischen Feldes senkrecht nach oben, E = 2,0×10⁴ V/m, die Richtung des magnetischen Feldes ist senkrecht aus der Zeichenebene heraus, B = 0,20 T. Ein positiv geladenes Teilchen (q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg) tritt mit v = 2,0×10⁵ m/s horizontal ein. Bestimme: 1. Betrag der elektrischen Feldkraft 2. Betrag der Lorentzkraft 3. Betrag der resultierenden Kraft 4. Zeichne die Bewegungsbahn',
     expectedDomain: 'composite',
     expectedModel: 'velocity_selector',
     expectedChargeSign: 'positive',
@@ -364,8 +365,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-04-selector-too-slow',
-    title: '速度选择器：速度偏小',
-    text: '速度选择器中电场方向竖直向上，E = 2.0×10^4 V/m，磁场方向垂直纸面向外，B = 0.20 T。一个正电粒子（q = 1.6×10^-19 C，m = 1.67×10^-27 kg）以 v = 5.0×10^4 m/s 水平射入。求：1. 电场力大小 2. 洛伦兹力大小 3. 合力大小',
+    title: 'Geschwindigkeitswähler: Geschwindigkeit zu klein',
+    text: 'Im Geschwindigkeitswähler ist die Richtung des elektrischen Feldes senkrecht nach oben, E = 2,0×10⁴ V/m, die Richtung des magnetischen Feldes ist senkrecht aus der Zeichenebene heraus, B = 0,20 T. Ein positiv geladenes Teilchen (q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg) tritt mit v = 5,0×10⁴ m/s horizontal ein. Bestimme: 1. Betrag der elektrischen Feldkraft 2. Betrag der Lorentzkraft 3. Betrag der resultierenden Kraft',
     expectedDomain: 'composite',
     expectedModel: 'velocity_selector',
     expectedChargeSign: 'positive',
@@ -374,8 +375,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-05-selector-electron',
-    title: '速度选择器：电子通过',
-    text: '速度选择器中电场方向竖直向上，E = 1.0×10^4 V/m，磁场方向垂直纸面向里，B = 0.10 T。一个电子（q = -1.6×10^-19 C，m = 9.11×10^-31 kg）以 v = 1.0×10^5 m/s 水平向右射入，恰好沿直线通过。求：1. 电场力大小 2. 洛伦兹力大小',
+    title: 'Geschwindigkeitswähler: Elektron durchläuft',
+    text: 'Im Geschwindigkeitswähler ist die Richtung des elektrischen Feldes senkrecht nach oben, E = 1,0×10⁴ V/m, die Richtung des magnetischen Feldes ist senkrecht in die Zeichenebene hinein, B = 0,10 T. Ein Elektron (q = -1,6×10⁻¹⁹ C, m = 9,11×10⁻³¹ kg) tritt mit v = 1,0×10⁵ m/s horizontal nach rechts ein und durchläuft gerade. Bestimme: 1. Betrag der elektrischen Feldkraft 2. Betrag der Lorentzkraft',
     expectedDomain: 'composite',
     expectedModel: 'velocity_selector',
     expectedChargeSign: 'negative',
@@ -384,8 +385,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-06-selector-low-field',
-    title: '速度选择器：弱场',
-    text: '速度选择器中电场方向竖直向上，E = 200 V/m，磁场方向垂直纸面向外，B = 2.0×10^-3 T。质子（q = 1.6×10^-19 C，m = 1.67×10^-27 kg）以 v = 1.0×10^5 m/s 水平射入并沿直线通过。求：1. 选择速度 2. 电场力大小 3. 合力大小',
+    title: 'Geschwindigkeitswähler: schwaches Feld',
+    text: 'Im Geschwindigkeitswähler ist die Richtung des elektrischen Feldes senkrecht nach oben, E = 200 V/m, die Richtung des magnetischen Feldes ist senkrecht aus der Zeichenebene heraus, B = 2,0×10⁻³ T. Ein Proton (q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg) tritt mit v = 1,0×10⁵ m/s horizontal ein und durchläuft geradlinig. Bestimme: 1. Wahlgeschwindigkeit 2. Betrag der elektrischen Feldkraft 3. Betrag der resultierenden Kraft',
     expectedDomain: 'composite',
     expectedModel: 'velocity_selector',
     expectedChargeSign: 'positive',
@@ -394,8 +395,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-07-selector-trajectory',
-    title: '速度选择器：轨迹与合力',
-    text: '在速度选择器中，电场方向竖直向下，E = 3.0×10^4 V/m，磁场方向垂直纸面向里，B = 0.30 T。正电粒子（q = 1.6×10^-19 C，m = 1.67×10^-27 kg）以 v = 1.0×10^5 m/s 水平向右射入。求：1. 合力大小 2. 运动轨迹 3. 加速度',
+    title: 'Geschwindigkeitswähler: Bahn und resultierende Kraft',
+    text: 'Im Geschwindigkeitswähler ist die Richtung des elektrischen Feldes senkrecht nach unten, E = 3,0×10⁴ V/m, die Richtung des magnetischen Feldes ist senkrecht in die Zeichenebene hinein, B = 0,30 T. Ein positiv geladenes Teilchen (q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg) tritt mit v = 1,0×10⁵ m/s horizontal nach rechts ein. Bestimme: 1. Betrag der resultierenden Kraft 2. Bewegungsbahn 3. Beschleunigung',
     expectedDomain: 'composite',
     expectedModel: 'velocity_selector',
     expectedChargeSign: 'positive',
@@ -404,8 +405,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-08-selector-missing-direction',
-    title: '速度选择器：未给磁场方向',
-    text: '速度选择器中电场方向竖直向上，E = 2.0×10^4 V/m，磁感应强度 B = 0.20 T。正电粒子（q = 1.6×10^-19 C，m = 1.67×10^-27 kg）以 v = 1.0×10^5 m/s 水平射入。求电场力大小。',
+    title: 'Geschwindigkeitswähler: magnetische Feldrichtung nicht gegeben',
+    text: 'Im Geschwindigkeitswähler ist die Richtung des elektrischen Feldes senkrecht nach oben, E = 2,0×10⁴ V/m, die magnetische Flussdichte B = 0,20 T. Ein positiv geladenes Teilchen (q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg) tritt mit v = 1,0×10⁵ m/s horizontal ein. Bestimme den Betrag der elektrischen Feldkraft.',
     expectedDomain: 'composite',
     expectedModel: 'velocity_selector',
     expectedChargeSign: 'positive',
@@ -414,8 +415,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-09-spectrometer-radius',
-    title: '质谱仪：偏转半径',
-    text: '质谱仪由速度选择器和偏转磁场组成。速度选择器的电场方向竖直向上，E = 200 V/m，磁场方向垂直纸面向外，B = 2.0×10^-3 T。质子（q = 1.6×10^-19 C，m = 1.67×10^-27 kg）以 v = 1.0×10^5 m/s 水平射入并沿直线通过选择器，随后进入偏转磁场做圆周运动。求：1. 圆周半径 2. 洛伦兹力大小',
+    title: 'Massenspektrometer: Ablenkradius',
+    text: 'Das Massenspektrometer besteht aus einem Geschwindigkeitswähler und einem Ablenkmagnetfeld. Im Geschwindigkeitswähler ist die Richtung des elektrischen Feldes senkrecht nach oben, E = 200 V/m, die Richtung des magnetischen Feldes ist senkrecht aus der Zeichenebene heraus, B = 2,0×10⁻³ T. Ein Proton (q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg) tritt mit v = 1,0×10⁵ m/s horizontal ein und durchläuft den Wahlgeradlinig, woraufhin es in das Ablenkmagnetfeld eintritt und eine Kreisbewegung ausführt. Bestimme: 1. Kreisradius 2. Betrag der Lorentzkraft',
     expectedDomain: 'composite',
     expectedModel: 'mass_spectrometer',
     expectedChargeSign: 'positive',
@@ -424,8 +425,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-10-spectrometer-charge-mass',
-    title: '质谱仪：荷质比',
-    text: '在质谱仪中，速度选择器的电场方向竖直向上，E = 200 V/m，磁场方向垂直纸面向外，B = 2.0×10^-3 T。一个正离子（q = 1.6×10^-19 C，m = 1.67×10^-27 kg）以 v = 1.0×10^5 m/s 通过选择器后进入偏转磁场，测得圆周半径 r = 0.52 m。求该离子的荷质比。',
+    title: 'Massenspektrometer: spezifische Ladung',
+    text: 'Im Massenspektrometer ist die Richtung des elektrischen Feldes im Geschwindigkeitswähler senkrecht nach oben, E = 200 V/m, die Richtung des magnetischen Feldes ist senkrecht aus der Zeichenebene heraus, B = 2,0×10⁻³ T. Ein positives Ion (q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg) tritt mit v = 1,0×10⁵ m/s durch den Wahlger und gelangt in das Ablenkmagnetfeld, wobei ein Kreisradius von r = 0,52 m gemessen wird. Bestimme die spezifische Ladung dieses Ions.',
     expectedDomain: 'composite',
     expectedModel: 'mass_spectrometer',
     expectedChargeSign: 'positive',
@@ -434,8 +435,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-11-spectrometer-isotope',
-    title: '质谱仪：同位素分离',
-    text: '质谱仪用于分离同位素。速度选择器电场方向竖直向上，E = 200 V/m，磁场方向垂直纸面向外，B = 2.0×10^-3 T，正离子 q = 1.6×10^-19 C，m = 3.34×10^-27 kg，以 v = 1.0×10^5 m/s 通过选择器进入偏转磁场。求：1. 圆周半径 2. 回旋周期',
+    title: 'Massenspektrometer: Isotopentrennung',
+    text: 'Das Massenspektrometer dient der Isotopentrennung. Die Richtung des elektrischen Feldes im Geschwindigkeitswähler ist senkrecht nach oben, E = 200 V/m, die Richtung des magnetischen Feldes ist senkrecht aus der Zeichenebene heraus, B = 2,0×10⁻³ T, positives Ion q = 1,6×10⁻¹⁹ C, m = 3,34×10⁻²⁷ kg, tritt mit v = 1,0×10⁵ m/s durch den Wahlger in das Ablenkmagnetfeld ein. Bestimme: 1. Kreisradius 2. Umlaufperiode',
     expectedDomain: 'composite',
     expectedModel: 'mass_spectrometer',
     expectedChargeSign: 'positive',
@@ -444,8 +445,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-12-spectrometer-period',
-    title: '质谱仪：回旋周期',
-    text: '质谱仪的速度选择器电场方向竖直向上，E = 400 V/m，磁场方向垂直纸面向外，B = 4.0×10^-3 T。质子（q = 1.6×10^-19 C，m = 1.67×10^-27 kg）以 v = 1.0×10^5 m/s 沿直线通过后进入偏转磁场。求：1. 回旋周期 2. 圆周半径',
+    title: 'Massenspektrometer: Umlaufperiode',
+    text: 'Der Geschwindigkeitswähler des Massenspektrometers hat eine elektrische Feldrichtung senkrecht nach oben, E = 400 V/m, die magnetische Feldrichtung ist senkrecht aus der Zeichenebene heraus, B = 4,0×10⁻³ T. Ein Proton (q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg) durchläuft mit v = 1,0×10⁵ m/s geradlinig und gelangt in das Ablenkmagnetfeld. Bestimme: 1. Umlaufperiode 2. Kreisradius',
     expectedDomain: 'composite',
     expectedModel: 'mass_spectrometer',
     expectedChargeSign: 'positive',
@@ -454,8 +455,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-13-spectrometer-electron',
-    title: '质谱仪：电子束偏转',
-    text: '质谱仪中速度选择器的电场方向竖直向上，E = 100 V/m，磁场方向垂直纸面向里，B = 1.0×10^-3 T。电子（q = -1.6×10^-19 C，m = 9.11×10^-31 kg）以 v = 1.0×10^5 m/s 水平向右通过选择器，进入偏转磁场。求：1. 圆周半径 2. 洛伦兹力大小',
+    title: 'Massenspektrometer: Elektronenstrahlablenkung',
+    text: 'Im Massenspektrometer hat der Geschwindigkeitswähler eine elektrische Feldrichtung senkrecht nach oben, E = 100 V/m, die magnetische Feldrichtung ist senkrecht in die Zeichenebene hinein, B = 1,0×10⁻³ T. Ein Elektron (q = -1,6×10⁻¹⁹ C, m = 9,11×10⁻³¹ kg) durchläuft den Wahlger mit v = 1,0×10⁵ m/s horizontal nach rechts und gelangt in das Ablenkmagnetfeld. Bestimme: 1. Kreisradius 2. Betrag der Lorentzkraft',
     expectedDomain: 'composite',
     expectedModel: 'mass_spectrometer',
     expectedChargeSign: 'negative',
@@ -464,8 +465,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-14-spectrometer-selected-velocity',
-    title: '质谱仪：选择速度与半径',
-    text: '质谱仪的速度选择器电场方向竖直向上，E = 300 V/m，磁场方向垂直纸面向外，B = 3.0×10^-3 T，正离子 q = 1.6×10^-19 C，m = 1.67×10^-27 kg。求：1. 能够通过选择器的粒子速度 2. 进入偏转磁场后的圆周半径',
+    title: 'Massenspektrometer: Wahlgeschwindigkeit und Radius',
+    text: 'Der Geschwindigkeitswähler des Massenspektrometers hat eine elektrische Feldrichtung senkrecht nach oben, E = 300 V/m, die magnetische Feldrichtung ist senkrecht aus der Zeichenebene heraus, B = 3,0×10⁻³ T, positives Ion q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg. Bestimme: 1. Die Teilchengeschwindigkeit, die den Wahlger durchlaufen kann 2. Den Kreisradius nach Eintritt in das Ablenkmagnetfeld',
     expectedDomain: 'composite',
     expectedModel: 'mass_spectrometer',
     expectedChargeSign: 'positive',
@@ -474,8 +475,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-15-eb-crossed',
-    title: '复合场：E 与 B 同时作用',
-    text: '一个正电粒子（q = 1.6×10^-19 C，m = 1.67×10^-27 kg）同时受到匀强电场和匀强磁场作用，电场方向竖直向上，E = 2.0×10^4 V/m，磁场方向垂直纸面向里，B = 0.20 T，粒子以 v = 1.0×10^5 m/s 水平向右射入，不计重力。求：1. 电场力大小 2. 洛伦兹力大小 3. 合力大小 4. 加速度',
+    title: 'Kombiniertes Feld: E und B wirken gleichzeitig',
+    text: 'Ein positiv geladenes Teilchen (q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg) wird gleichzeitig von einem homogenen elektrischen Feld und einem homogenen magnetischen Feld beeinflusst. Die Richtung des elektrischen Feldes ist senkrecht nach oben, E = 2,0×10⁴ V/m, die Richtung des magnetischen Feldes ist senkrecht in die Zeichenebene hinein, B = 0,20 T. Das Teilchen tritt mit v = 1,0×10⁵ m/s horizontal nach rechts ein, die Schwerkraft wird vernachlässigt. Bestimme: 1. Betrag der elektrischen Feldkraft 2. Betrag der Lorentzkraft 3. Betrag der resultierenden Kraft 4. Beschleunigung',
     expectedDomain: 'composite',
     expectedModel: 'charged_particle_composite_field',
     expectedChargeSign: 'positive',
@@ -484,8 +485,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-16-eb-electron-trajectory',
-    title: '复合场：电子在正交场中的轨迹',
-    text: '电子（q = -1.6×10^-19 C，m = 9.11×10^-31 kg）在互相垂直的电场和磁场中运动，电场方向竖直向下，E = 1.0×10^3 V/m，磁场方向垂直纸面向外，B = 0.010 T，初速度 v = 1.0×10^5 m/s 水平向右，不计重力。求：1. 合力大小 2. 运动轨迹 3. 动能变化',
+    title: 'Kombiniertes Feld: Elektronenbahn in gekreuzten Feldern',
+    text: 'Ein Elektron (q = -1,6×10⁻¹⁹ C, m = 9,11×10⁻³¹ kg) bewegt sich in sich senkrecht schneidenden elektrischen und magnetischen Feldern. Die Richtung des elektrischen Feldes ist senkrecht nach unten, E = 1,0×10³ V/m, die Richtung des magnetischen Feldes ist senkrecht aus der Zeichenebene heraus, B = 0,010 T, die Anfangsgeschwindigkeit beträgt v = 1,0×10⁵ m/s horizontal nach rechts, die Schwerkraft wird vernachlässigt. Bestimme: 1. Betrag der resultierenden Kraft 2. Bewegungsbahn 3. Änderung der kinetischen Energie',
     expectedDomain: 'composite',
     expectedModel: 'charged_particle_composite_field',
     expectedChargeSign: 'negative',
@@ -494,8 +495,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-17-eb-energy',
-    title: '复合场：动能与洛伦兹力做功',
-    text: '正电粒子（q = 1.6×10^-19 C，m = 1.67×10^-27 kg）同时处于匀强电场与匀强磁场中，电场方向竖直向上，E = 5.0×10^3 V/m，磁场方向垂直纸面向里，B = 0.050 T，初速度 v = 1.0×10^5 m/s 水平向右，不计重力。求：1. 动能 2. 动能变化 3. 合力大小',
+    title: 'Kombiniertes Feld: kinetische Energie und Arbeit der Lorentzkraft',
+    text: 'Ein positiv geladenes Teilchen (q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg) befindet sich gleichzeitig in einem homogenen elektrischen Feld und einem homogenen magnetischen Feld. Die Richtung des elektrischen Feldes ist senkrecht nach oben, E = 5,0×10³ V/m, die Richtung des magnetischen Feldes ist senkrecht in die Zeichenebene hinein, B = 0,050 T, die Anfangsgeschwindigkeit beträgt v = 1,0×10⁵ m/s horizontal nach rechts, die Schwerkraft wird vernachlässigt. Bestimme: 1. Kinetische Energie 2. Änderung der kinetischen Energie 3. Betrag der resultierenden Kraft',
     expectedDomain: 'composite',
     expectedModel: 'charged_particle_composite_field',
     expectedChargeSign: 'positive',
@@ -504,8 +505,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-18-ebg-balance',
-    title: '复合场：电场、磁场与重力平衡',
-    text: '一个带正电的微粒（q = 1.0×10^-6 C，m = 2.0×10^-6 kg）同时受到匀强电场、匀强磁场和重力作用，电场方向竖直向上，E = 20 V/m，磁场方向垂直纸面向外，B = 0.20 T，重力加速度 g = 10 m/s²，以 v = 100 m/s 水平向右射入。求：1. 电场力大小 2. 洛伦兹力大小 3. 合力大小',
+    title: 'Kombiniertes Feld: Gleichgewicht von elektrischem Feld, magnetischem Feld und Schwerkraft',
+    text: 'Ein positiv geladenes Mikroteilchen (q = 1,0×10⁻⁶ C, m = 2,0×10⁻⁶ kg) wird gleichzeitig von einem homogenen elektrischen Feld, einem homogenen magnetischen Feld und der Schwerkraft beeinflusst. Die Richtung des elektrischen Feldes ist senkrecht nach oben, E = 20 V/m, die Richtung des magnetischen Feldes ist senkrecht aus der Zeichenebene heraus, B = 0,20 T, die Fallbeschleunigung g = 10 m/s². Es tritt mit v = 100 m/s horizontal nach rechts ein. Bestimme: 1. Betrag der elektrischen Feldkraft 2. Betrag der Lorentzkraft 3. Betrag der resultierenden Kraft',
     expectedDomain: 'composite',
     expectedModel: 'charged_particle_composite_field',
     expectedChargeSign: 'positive',
@@ -514,8 +515,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-19-ebg-droplet',
-    title: '复合场：带电液滴三力叠加',
-    text: '带负电的液滴（q = -2.0×10^-6 C，m = 4.0×10^-6 kg）同时存在电场、磁场和重力，电场方向竖直向下，E = 10 V/m，磁场方向垂直纸面向外，B = 0.20 T，g = 10 m/s²，以 v = 50 m/s 水平向右射入。求：1. 合力大小 2. 加速度 3. 运动轨迹',
+    title: 'Kombiniertes Feld: Dreikraftüberlagerung bei geladenem Tröpfchen',
+    text: 'Ein negativ geladenes Tröpfchen (q = -2,0×10⁻⁶ C, m = 4,0×10⁻⁶ kg) befindet sich gleichzeitig in einem elektrischen Feld, einem magnetischen Feld und der Schwerkraft. Die Richtung des elektrischen Feldes ist senkrecht nach unten, E = 10 V/m, die Richtung des magnetischen Feldes ist senkrecht aus der Zeichenebene heraus, B = 0,20 T, g = 10 m/s². Es tritt mit v = 50 m/s horizontal nach rechts ein. Bestimme: 1. Betrag der resultierenden Kraft 2. Beschleunigung 3. Bewegungsbahn',
     expectedDomain: 'composite',
     expectedModel: 'charged_particle_composite_field',
     expectedChargeSign: 'negative',
@@ -524,8 +525,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-20-ebg-heavy-particle',
-    title: '复合场：三场中的带电微粒',
-    text: '带正电的微粒（q = 5.0×10^-7 C，m = 1.0×10^-6 kg）同时受到电场力、洛伦兹力和重力，电场方向竖直向上，E = 20 V/m，磁场方向垂直纸面向外，B = 0.20 T，重力加速度 g = 10 m/s²，以 v = 100 m/s 水平向右射入。求：1. 电场力大小 2. 合力大小 3. 加速度',
+    title: 'Kombiniertes Feld: geladenes Mikroteilchen in drei Feldern',
+    text: 'Ein positiv geladenes Mikroteilchen (q = 5,0×10⁻⁷ C, m = 1,0×10⁻⁶ kg) wird gleichzeitig von elektrischer Feldkraft, Lorentzkraft und Schwerkraft beeinflusst. Die Richtung des elektrischen Feldes ist senkrecht nach oben, E = 20 V/m, die Richtung des magnetischen Feldes ist senkrecht aus der Zeichenebene heraus, B = 0,20 T, die Fallbeschleunigung g = 10 m/s². Es tritt mit v = 100 m/s horizontal nach rechts ein. Bestimme: 1. Betrag der elektrischen Feldkraft 2. Betrag der resultierenden Kraft 3. Beschleunigung',
     expectedDomain: 'composite',
     expectedModel: 'charged_particle_composite_field',
     expectedChargeSign: 'positive',
@@ -534,8 +535,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'comp-21-cyclotron',
-    title: '回旋加速器',
-    text: '回旋加速器的匀强磁场方向垂直纸面向外，B = 1.5 T，加速电压 U = 2000 V，D形盒半径 R = 0.50 m，加速电场频率与质子回旋频率相同。质子 q = 1.6×10^-19 C，m = 1.67×10^-27 kg，以 v = 1.0×10^5 m/s 开始加速。求：1. 回旋周期 2. 最大速度 3. 最大动能',
+    title: 'Zyklotron',
+    text: 'Das homogene Magnetfeld des Zyklotrons zeigt senkrecht aus der Zeichenebene heraus, B = 1,5 T, die Beschleunigungsspannung beträgt U = 2000 V, der Radius der D-förmigen Hohlräume R = 0,50 m, die Frequenz des Beschleunigungsfeldes entspricht der Umlauffrequenz des Protons. Proton q = 1,6×10⁻¹⁹ C, m = 1,67×10⁻²⁷ kg, beginnt mit v = 1,0×10⁵ m/s zu beschleunigen. Bestimme: 1. Umlaufperiode 2. Maximale Geschwindigkeit 3. Maximale kinetische Energie',
     expectedDomain: 'composite',
     expectedModel: 'cyclotron',
     expectedChargeSign: 'positive',
@@ -544,14 +545,15 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
 
   /* --------------------------------------------------------------- optics --- *
-   * Geometric optics imaging questions. Each names an optical element and
-   * the imaging quantities (focal length, object/image distance, magnification,
-   * image nature). The optics engine solves by the thin-lens / mirror equation
-   * (1/u + 1/v = 1/f) and reports image nature from the sign of v. */
+   * Aufgaben zur geometrischen Optik/Bildgebung. Jede benennt ein optisches
+   * Element und die Abbildungsgrößen (Brennweite, Gegenstands-/Bildweite,
+   * Vergrößerung, Bildart). Die Optik-Engine löst mittels der
+   * Dünnlinsen-/Spiegelgleichung (1/u + 1/v = 1/f) und bestimmt die Bildart
+   * aus dem Vorzeichen von v. */
   {
     id: 'opt-01-plane-mirror',
-    title: '平面镜成像',
-    text: '一支蜡烛放在平面镜前 15 cm 处。已知：蜡烛到平面镜的距离 u = 15 cm。求：1. 像距 v 2. 像的性质（正立或倒立、实像或虚像、放大或缩小）',
+    title: 'Abbildung am ebenen Spiegel',
+    text: 'Eine Kerze wird 15 cm vor einem ebenen Spiegel platziert. Gegeben: Abstand der Kerze zum ebenen Spiegel u = 15 cm. Bestimme: 1. Bildweite v 2. Bildart (aufrecht oder umgekehrt, reelles oder virtuelles Bild, vergrößert oder verkleinert)',
     expectedDomain: 'optics',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -559,8 +561,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'opt-02-convex-lens-beyond-2f',
-    title: '凸透镜成像（u>2f，倒立缩小实像）',
-    text: '凸透镜焦距 f = 10 cm，物体放在主光轴上距透镜 u = 30 cm 处。已知：f = 10 cm，u = 30 cm。求：1. 像距 v 2. 放大率 m 3. 像的性质',
+    title: 'Abbildung durch Konvexlinse (u>2f, umgekehrtes verkleinertes reelles Bild)',
+    text: 'Eine Konvexlinse hat die Brennweite f = 10 cm, ein Gegenstand wird auf der Hauptoptischen Achse in einem Abstand von u = 30 cm von der Linse platziert. Gegeben: f = 10 cm, u = 30 cm. Bestimme: 1. Bildweite v 2. Vergrößerung m 3. Bildart',
     expectedDomain: 'optics',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -568,8 +570,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'opt-03-convex-lens-between-f-and-2f',
-    title: '凸透镜成像（f<u<2f，倒立放大实像）',
-    text: '凸透镜焦距 f = 10 cm，物体距透镜 u = 15 cm。已知：f = 10 cm，u = 15 cm。求：1. 像距 v 2. 放大率 m 3. 像的性质',
+    title: 'Abbildung durch Konvexlinse (f<u<2f, umgekehrtes vergrößertes reelles Bild)',
+    text: 'Eine Konvexlinse hat die Brennweite f = 10 cm, der Gegenstand ist u = 15 cm von der Linse entfernt. Gegeben: f = 10 cm, u = 15 cm. Bestimme: 1. Bildweite v 2. Vergrößerung m 3. Bildart',
     expectedDomain: 'optics',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -577,8 +579,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'opt-04-convex-lens-within-f',
-    title: '凸透镜成像（u<f，正立放大虚像）',
-    text: '凸透镜焦距 f = 10 cm，物体距透镜 u = 6 cm。已知：f = 10 cm，u = 6 cm。求：1. 像距 v 2. 像的性质',
+    title: 'Abbildung durch Konvexlinse (u<f, aufrechtes vergrößertes virtuelles Bild)',
+    text: 'Eine Konvexlinse hat die Brennweite f = 10 cm, der Gegenstand ist u = 6 cm von der Linse entfernt. Gegeben: f = 10 cm, u = 6 cm. Bestimme: 1. Bildweite v 2. Bildart',
     expectedDomain: 'optics',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -586,8 +588,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'opt-05-concave-mirror-beyond-2f',
-    title: '凹面镜成像（u>2f，倒立缩小实像）',
-    text: '凹面镜焦距 f = 10 cm，物体距镜面 u = 30 cm（u>2f）。已知：f = 10 cm，u = 30 cm。求：1. 像距 v 2. 像的性质',
+    title: 'Abbildung durch konkaven Spiegel (u>2f, umgekehrtes verkleinertes reelles Bild)',
+    text: 'Ein konkaver Spiegel hat die Brennweite f = 10 cm, der Gegenstand ist u = 30 cm vom Spiegel entfernt (u>2f). Gegeben: f = 10 cm, u = 30 cm. Bestimme: 1. Bildweite v 2. Bildart',
     expectedDomain: 'optics',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -595,8 +597,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'opt-06-convex-mirror',
-    title: '凸面镜成像（正立缩小虚像）',
-    text: '凸面镜焦距 f = -10 cm（发散面镜），物体距镜面 u = 20 cm。已知：f = -10 cm，u = 20 cm。求：像的性质',
+    title: 'Abbildung durch konvexen Spiegel (aufrechtes verkleinertes virtuelles Bild)',
+    text: 'Ein konvexer Spiegel hat die Brennweite f = -10 cm (Divergenzspiegel), der Gegenstand ist u = 20 cm vom Spiegel entfernt. Gegeben: f = -10 cm, u = 20 cm. Bestimme: Bildart',
     expectedDomain: 'optics',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -604,15 +606,15 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
 
   /* --------------------------------------------------------------- circuit -- *
-   * DC steady-state circuit questions. Each names an EMF, resistors and the
-   * topology (series / parallel / rheostat / emf-measurement), and asks for one
-   * of {电流, 电压, 电阻, 功率, 路端电压, 内阻}. The circuit engine solves the
-   * scene by MNA; values are chosen so the answer is exact or nearly so. */
+   * Gleichstrom-Stationärzustands-Fragen. Jede nennt eine EMK, Widerstände und die
+   * Topologie (Reihe / Parallel / Rheostat / EMK-Messung), und fragt nach einer
+   * von {Strom, Spannung, Widerstand, Leistung, Klemmenspannung, Innenwiderstand}. Die Schaltungs-Engine löst die
+   * Szene per MNA; Werte sind so gewählt, dass die Antwort exakt oder nahezu exakt ist. */
 
   {
     id: 'circ-01-series-current',
-    title: '串联电路求电流',
-    text: '一个串联电路由电源、开关、电流表和两个电阻组成。电源电动势 E = 6 V（理想电源，内阻不计），电阻 R1 = 10 Ω，R2 = 20 Ω，串联连接。闭合开关，求电路中的电流。',
+    title: 'Strom in Reihenschaltung berechnen',
+    text: 'Eine Reihenschaltung besteht aus einer Stromquelle, einem Schalter, einem Amperemeter und zwei Widerständen. Die elektromotorische Kraft der Quelle beträgt E = 6 V (ideale Quelle, Innenwiderstand vernachlässigbar), die Widerstände sind R1 = 10 Ω, R2 = 20 Ω, in Reihe geschaltet. Schalter schließen, den Strom in der Schaltung bestimmen.',
     expectedDomain: 'circuit',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -620,8 +622,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'circ-02-parallel-total-resistance',
-    title: '并联电路总电阻',
-    text: '一个并联电路由电源和两个并联电阻组成。电源电动势 E = 6 V（理想电源），电阻 R1 = 10 Ω，R2 = 15 Ω，并联连接。闭合开关，求电路的总电阻和干路电流。',
+    title: 'Gesamtwiderstand in Parallelschaltung',
+    text: 'Eine Parallelschaltung besteht aus einer Stromquelle und zwei parallel geschalteten Widerständen. Die elektromotorische Kraft der Quelle beträgt E = 6 V (ideale Quelle), die Widerstände sind R1 = 10 Ω, R2 = 15 Ω, parallel geschaltet. Schalter schließen, den Gesamtwiderstand der Schaltung und den Hauptstrom bestimmen.',
     expectedDomain: 'circuit',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -629,8 +631,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'circ-03-emf-internal',
-    title: '测电源电动势与内阻',
-    text: '用电流表、电压表和滑动变阻器测量电源的电动势和内阻。电源电动势 E = 4.5 V，内阻 r = 0.5 Ω，滑动变阻器最大阻值为 20 Ω，滑片置于中间位置。闭合开关，求电流表读数和电压表读数。',
+    title: 'Ermittlung von elektromotorischer Kraft und Innenwiderstand der Stromquelle',
+    text: 'Mit Amperemeter, Voltmeter und Gleitwiderstand werden die elektromotorische Kraft und der Innenwiderstand der Stromquelle gemessen. Die elektromotorische Kraft der Quelle beträgt E = 4,5 V, der Innenwiderstand r = 0,5 Ω, der maximale Widerstand des Gleitwiderstands beträgt 20 Ω, der Schieber befindet sich in der Mittelposition. Schalter schließen, die Anzeigen von Amperemeter und Voltmeter bestimmen.',
     expectedDomain: 'circuit',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -638,8 +640,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'circ-04-rheostat',
-    title: '滑动变阻器调节电流',
-    text: '一个串联电路由电源、电流表、滑动变阻器和一个定值电阻组成。电源电动势 E = 6 V（理想电源），定值电阻 R0 = 10 Ω，滑动变阻器最大阻值为 20 Ω，滑片置于中间位置。闭合开关，求电路中的电流。',
+    title: 'Stromregelung mit Gleitwiderstand',
+    text: 'Eine Reihenschaltung besteht aus einer Stromquelle, einem Amperemeter, einem Gleitwiderstand und einem Festwiderstand. Die elektromotorische Kraft der Quelle beträgt E = 6 V (ideale Quelle), der Festwiderstand R0 = 10 Ω, der maximale Widerstand des Gleitwiderstands beträgt 20 Ω, der Schieber befindet sich in der Mittelposition. Schalter schließen, den Strom in der Schaltung bestimmen.',
     expectedDomain: 'circuit',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -647,8 +649,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'circ-05-power',
-    title: '电源功率',
-    text: '一个串联电路由电源和两个电阻组成。电源电动势 E = 6 V（理想电源），电阻 R1 = 10 Ω，R2 = 20 Ω，串联连接。闭合开关，求电源的总功率和外电路功率。',
+    title: 'Leistung der Stromquelle',
+    text: 'Eine Reihenschaltung besteht aus einer Stromquelle und zwei Widerständen. Die elektromotorische Kraft der Quelle beträgt E = 6 V (ideale Quelle), die Widerstände sind R1 = 10 Ω, R2 = 20 Ω, in Reihe geschaltet. Schalter schließen, die Gesamtleistung der Quelle und die Leistung des Außenkreises bestimmen.',
     expectedDomain: 'circuit',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -656,8 +658,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'circ-06-terminal-voltage',
-    title: '路端电压',
-    text: '一个串联电路由电源和电阻组成。电源电动势 E = 9 V，内阻 r = 1 Ω，外电路电阻 R = 5 Ω，串联连接。闭合开关，求电路中的电流和路端电压。',
+    title: 'Klemmenspannung',
+    text: 'Eine Reihenschaltung besteht aus einer Stromquelle und einem Widerstand. Die elektromotorische Kraft der Quelle beträgt E = 9 V, der Innenwiderstand r = 1 Ω, der Außenkreiswiderstand R = 5 Ω, in Reihe geschaltet. Schalter schließen, den Strom in der Schaltung und die Klemmenspannung bestimmen.',
     expectedDomain: 'circuit',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -665,14 +667,14 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
 
   /* --------------------------------------------------------------- induction -- *
-   * Electromagnetic induction questions (电磁感应). Each names either a
-   * conducting rod cutting field lines (E = BLv) or a coil whose flux changes
-   * (E = -dΦ/dt), plus the loop resistance R so I = E/R. Values follow the
-   * engine's textbook templates so the answers are exact. */
+   * Fragen zur elektromagnetischen Induktion. Jede nennt entweder einen
+   * Leiterstab, der Feldlinien schneidet (E = BLv), oder eine Spule, deren Fluss sich ändert
+   * (E = -dΦ/dt), plus den Schleifenwiderstand R, so dass I = E/R. Werte folgen den
+   * Lehrbuchvorlagen der Engine, sodass die Antworten exakt sind. */
   {
     id: 'ind-01-bar-motion-emf',
-    title: '导体棒切割磁感线求电动势',
-    text: '一个电磁感应实验：匀强磁场磁感应强度 B = 0.5 T，一根长 L = 20 cm 的导体棒垂直放在磁场中，以 v = 2 m/s 的速度垂直切割磁感线，与一个 R = 5 Ω 的回路构成闭合电路。求：1. 感应电动势 2. 感应电流',
+    title: 'Induzierte Spannung bei schneidendem Leiterstab',
+    text: 'Ein elektromagnetisches Induktionsexperiment: Die magnetische Flussdichte des homogenen Magnetfelds beträgt B = 0,5 T, ein Leiterstab der Länge L = 20 cm wird senkrecht in das Magnetfeld gelegt und schneidet mit der Geschwindigkeit v = 2 m/s senkrecht die Feldlinien, zusammen mit einem Stromkreis von R = 5 Ω bildet er einen geschlossenen Stromkreis. Gesucht: 1. Induzierte Spannung 2. Induzierter Strom',
     expectedDomain: 'induction',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -680,8 +682,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'ind-02-bar-motion-lenz',
-    title: '导体棒反向切割的楞次方向',
-    text: '电磁感应装置：匀强磁场的磁感应强度 B = 0.2 T，导体棒长 L = 50 cm，以 v = -4 m/s 的速度沿反方向切割磁感线，回路电阻 R = 2 Ω。求：1. 感应电动势 2. 感应电流方向（楞次定律）',
+    title: 'Lenzsche Richtung bei entgegengesetztem Schneiden des Leiterstabs',
+    text: 'Elektromagnetisches Induktionsgerät: Die magnetische Flussdichte des homogenen Magnetfelds beträgt B = 0,2 T, die Länge des Leiterstabs beträgt L = 50 cm, er schneidet mit der Geschwindigkeit v = -4 m/s in entgegengesetzter Richtung die Feldlinien, der Schleifenwiderstand beträgt R = 2 Ω. Gesucht: 1. Induzierte Spannung 2. Richtung des induzierten Stroms (Lenzsches Gesetz)',
     expectedDomain: 'induction',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -689,8 +691,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'ind-03-flux-change-emf',
-    title: '磁通量变化求感应电动势',
-    text: '一个匝线圈放在磁场中，磁感应强度 B = 0.4 T，线圈面积 S = 50 cm²，磁通量变化率为 0.05 Wb/s（均匀增加），线圈回路电阻 R = 2 Ω。求：1. 感应电动势 2. 感应电流',
+    title: 'Induzierte Spannung durch magnetischen Flussänderung',
+    text: 'Eine eindrähtige Spule wird in ein Magnetfeld gelegt, die magnetische Flussdichte beträgt B = 0,4 T, die Spulenfläche S = 50 cm², die Änderungsrate des magnetischen Flusses beträgt 0,05 Wb/s (gleichmäßig zunehmend), der Spulenwiderstand beträgt R = 2 Ω. Gesucht: 1. Induzierte Spannung 2. Induzierter Strom',
     expectedDomain: 'induction',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -698,8 +700,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'ind-04-flux-change-lenz',
-    title: '磁通量减小时的楞次方向',
-    text: '电磁铁断电过程中，穿过线圈的磁通量每秒减少 0.08 Wb（磁通量变化率为 -0.08 Wb/s），线圈面积 S = 25 cm²，磁感应强度 B = 0.6 T，回路电阻 R = 4 Ω。求：1. 感应电动势 2. 感应电流方向',
+    title: 'Lenzsche Richtung bei abnehmendem magnetischem Fluss',
+    text: 'Beim Abschalten des Elektromagneten verringert sich der durch die Spule gehende magnetische Fluss um 0,08 Wb pro Sekunde (Änderungsrate des magnetischen Flusses -0,08 Wb/s), die Spulenfläche beträgt S = 25 cm², die magnetische Flussdichte B = 0,6 T, der Schleifenwiderstand R = 4 Ω. Gesucht: 1. Induzierte Spannung 2. Richtung des induzierten Stroms',
     expectedDomain: 'induction',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -707,8 +709,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'ind-05-bar-zero-velocity',
-    title: '导体棒静止无感应',
-    text: '电磁感应装置：磁感应强度 B = 0.5 T 的匀强磁场中，一根 L = 20 cm 的导体棒静止不动（v = 0 m/s），回路电阻 R = 5 Ω。求：感应电动势与感应电流',
+    title: 'Keine Induktion bei ruhendem Leiterstab',
+    text: 'Elektromagnetisches Induktionsgerät: In einem homogenen Magnetfeld mit der magnetischen Flussdichte B = 0,5 T befindet sich ein Leiterstab der Länge L = 20 cm in Ruhe (v = 0 m/s), der Schleifenwiderstand beträgt R = 5 Ω. Gesucht: Induzierte Spannung und induzierter Strom',
     expectedDomain: 'induction',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -716,8 +718,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'ind-06-missing-resistance',
-    title: '缺少回路电阻（无效）',
-    text: '匀强磁场磁感应强度 B = 0.5 T，一根长 L = 20 cm 的导体棒以 v = 2 m/s 的速度垂直切割磁感线。求：感应电动势',
+    title: 'Fehlender Schleifenwiderstand (ungültig)',
+    text: 'Die magnetische Flussdichte des homogenen Magnetfelds beträgt B = 0,5 T, ein Leiterstab der Länge L = 20 cm schneidet mit der Geschwindigkeit v = 2 m/s senkrecht die Feldlinien. Gesucht: Induzierte Spannung',
     expectedDomain: 'induction',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -725,14 +727,14 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
 
   /* -------------------------------------------------------------------- wave -- *
-   * Mechanical-wave questions (机械波). A rope wave fixes two of v, λ, f and asks
-   * for the rest; an interference question judges a point by its path
-   * difference; a standing-wave question reads a clamped string's harmonic.
-   * Values follow the engine's textbook templates so the answers are exact. */
+   * Mechanische-Wellen-Fragen. Eine Seilwelle fixiert zwei von v, λ, f und fragt
+   * nach dem Rest; eine Interferenzfrage beurteilt einen Punkt anhand seines Gang-
+   * unterschieds; eine Stehwellenfrage liest die Harmonische einer eingespannten Saite.
+   * Werte folgen den Lehrbuchvorlagen der Engine, sodass die Antworten exakt sind. */
   {
     id: 'wave-01-speed-from-wavelength-frequency',
-    title: '由波长和频率求波速与周期',
-    text: '一列在绳上传播的简谐横波，振幅 A = 5 cm，波长 λ = 0.4 m，波源频率 f = 5 Hz。求：1. 波速 2. 周期',
+    title: 'Wellengeschwindigkeit und Periode aus Wellenlänge und Frequenz',
+    text: 'Eine auf einem Seil fortschreitende harmonische Querwelle, Amplitude A = 5 cm, Wellenlänge λ = 0,4 m, Frequenz der Wellenquelle f = 5 Hz. Gesucht: 1. Wellengeschwindigkeit 2. Periode',
     expectedDomain: 'wave',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -740,8 +742,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'wave-02-wavelength-from-speed',
-    title: '由波速和频率求波长',
-    text: '机械波在绳上以 v = 2 m/s 的速度沿绳传播，波源以 10 Hz 的频率振动，振幅 4 cm。求：绳上波的波长',
+    title: 'Wellenlänge aus Wellengeschwindigkeit und Frequenz',
+    text: 'Eine mechanische Welle breitet sich auf einem Seil mit der Geschwindigkeit v = 2 m/s entlang des Seils aus, die Wellenquelle schwingt mit der Frequenz 10 Hz, Amplitude 4 cm. Gesucht: Wellenlänge der Welle auf dem Seil',
     expectedDomain: 'wave',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -749,8 +751,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'wave-03-interference-constructive',
-    title: '双源干涉：路程差为整数倍波长',
-    text: '水面上两个相干波源 S1、S2 同相振动，振幅均为 3 cm，波长 λ = 0.2 m，频率 f = 10 Hz，两波源间距 d = 0.8 m。P 点到 S1 的距离为 1.0 m，到 S2 的距离为 1.4 m。判断 P 点振动是加强还是减弱，并求 P 点的合振幅',
+    title: 'Zweiquelleninterferenz: Gangunterschied als ganzzahliges Vielfaches der Wellenlänge',
+    text: 'Auf der Wasseroberfläche schwingen zwei kohärente Wellenquellen S1, S2 in Phase, beide mit Amplitude 3 cm, Wellenlänge λ = 0,2 m, Frequenz f = 10 Hz, Abstand der Wellenquellen d = 0,8 m. Der Abstand von Punkt P zu S1 beträgt 1,0 m, zu S2 1,4 m. Beurteilen, ob die Schwingung an Punkt P verstärkt oder abgeschwächt ist, und die resultierende Amplitude an Punkt P bestimmen.',
     expectedDomain: 'wave',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -758,8 +760,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'wave-04-interference-destructive',
-    title: '双源干涉：路程差为半波长奇数倍',
-    text: '两个相干波源发出的水波波长 λ = 0.2 m，频率 f = 10 Hz，振幅均为 3 cm，两波源间距 d = 0.8 m。某点到两波源的路程差 Δ = 0.3 m。判断该点振动是加强还是减弱，并求合振幅',
+    title: 'Zweiquelleninterferenz: Gangunterschied als ungerades Vielfaches der halben Wellenlänge',
+    text: 'Die von zwei kohärenten Wellenquellen ausgesandten Wasserwellen haben die Wellenlänge λ = 0,2 m, Frequenz f = 10 Hz, beide Amplituden 3 cm, der Abstand der Wellenquellen beträgt d = 0,8 m. Der Gangunterschied eines Punkts zu den beiden Wellenquellen beträgt Δ = 0,3 m. Beurteilen, ob die Schwingung an diesem Punkt verstärkt oder abgeschwächt ist, und die resultierende Amplitude bestimmen.',
     expectedDomain: 'wave',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -767,8 +769,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'wave-05-standing-third-harmonic',
-    title: '弦驻波的三次谐波',
-    text: '一根长 L = 1.0 m 的弦两端固定，弦上波速 v = 40 m/s，弦振动时形成三次谐波的驻波，振幅 4 cm。求：1. 波长 2. 振动频率 3. 弦上波节的个数',
+    title: 'Dritte Harmonische der Saitenschwingung',
+    text: 'Eine Saite der Länge L = 1,0 m ist an beiden Enden fixiert, die Wellengeschwindigkeit auf der Saite beträgt v = 40 m/s, beim Schwingen bildet sich eine Stehwelle der dritten Harmonischen, Amplitude 4 cm. Gesucht: 1. Wellenlänge 2. Schwingungsfrequenz 3. Anzahl der Knoten auf der Saite',
     expectedDomain: 'wave',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -776,8 +778,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'wave-06-missing-frequency',
-    title: '缺少频率（无效）',
-    text: '一列绳上的横波，波长 λ = 0.4 m，振幅 5 cm。求：波速',
+    title: 'Fehlende Frequenz (ungültig)',
+    text: 'Eine Querwelle auf einem Seil, Wellenlänge λ = 0,4 m, Amplitude 5 cm. Gesucht: Wellengeschwindigkeit',
     expectedDomain: 'wave',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -785,8 +787,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'wave-07-longitudinal',
-    title: '纵波的波长、频率与波速',
-    text: '一列纵波沿弹性介质传播，振幅 A = 2 cm，波长 λ = 0.5 m，频率 f = 4 Hz，介质长度 ℓ = 1.5 m。求：波速和周期',
+    title: 'Wellenlänge, Frequenz und Wellengeschwindigkeit einer Longitudinalwelle',
+    text: 'Eine Longitudinalwelle breitet sich in einem elastischen Medium aus, Amplitude A = 2 cm, Wellenlänge λ = 0,5 m, Frequenz f = 4 Hz, Mediumlänge ℓ = 1,5 m. Gesucht: Wellengeschwindigkeit und Periode',
     expectedDomain: 'wave',
     expectedModel: 'longitudinal_wave',
     expectedChargeSign: 'unknown',
@@ -795,8 +797,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'wave-08-reflection-refraction',
-    title: '波的反射与折射',
-    text: '水波在介质1中的波速 v1 = 4 m/s，进入介质2后的波速 v2 = 2 m/s，入射角 θ1 = 30°，频率 f = 2 Hz。求反射角和折射角。',
+    title: 'Reflexion und Brechung von Wellen',
+    text: 'Wasserwellen haben in Medium 1 die Wellengeschwindigkeit v1 = 4 m/s, nach Eintritt in Medium 2 beträgt die Wellengeschwindigkeit v2 = 2 m/s, der Einfallswinkel beträgt θ1 = 30°, die Frequenz f = 2 Hz. Reflexionswinkel und Brechungswinkel gesucht.',
     expectedDomain: 'wave',
     expectedModel: 'reflection_refraction',
     expectedChargeSign: 'unknown',
@@ -805,8 +807,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'wave-09-single-slit-diffraction',
-    title: '单缝衍射的中央明纹',
-    text: '水波通过宽 a = 1 m 的单缝发生衍射，波长 λ = 0.5 m，频率 f = 2 Hz，缝到屏距离 L = 2 m。求中央明纹宽度和第一暗纹的衍射角。',
+    title: 'Zentrales Hellfeld bei Einzelschlitzbeugung',
+    text: 'Wasserwellen beugen sich an einem Einzelschlitz der Breite a = 1 m, Wellenlänge λ = 0,5 m, Frequenz f = 2 Hz, Abstand vom Schlitz zum Schirm L = 2 m. Breite des zentralen Hellfelds und Beugungswinkel des ersten Dunkelfelds gesucht.',
     expectedDomain: 'wave',
     expectedModel: 'wave_diffraction',
     expectedChargeSign: 'unknown',
@@ -815,8 +817,8 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'wave-10-doppler',
-    title: '多普勒效应',
-    text: '一列机械波在介质中的波速 v = 340 m/s，波源频率 f = 500 Hz，波源以 vs = 34 m/s 接近静止的观察者。求观察者接收到的频率。',
+    title: 'Dopplereffekt',
+    text: 'Eine mechanische Welle breitet sich in einem Medium mit der Wellengeschwindigkeit v = 340 m/s aus, die Frequenz der Wellenquelle beträgt f = 500 Hz, die Wellenquelle nähert sich mit vs = 34 m/s einem ruhenden Beobachter. Die vom Beobachter empfangene Frequenz gesucht.',
     expectedDomain: 'wave',
     expectedModel: 'wave_doppler',
     expectedChargeSign: 'unknown',
@@ -825,37 +827,37 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
 
   /* ------------------------------------------------------------- mechanics -- *
-   * 匀速直线运动与牛顿第二定律：初中教材章节的入门题。写杠杆、单摆、浮力、热学
-   * 题目会先撞到解析器（无对应模型，PARSE_FAILED）或被误读成别的模型——所以
-   * 这里只收引擎能真实解出的题，其余章节交给 Lab 自测覆盖。 */
+   * Gleichförmige geradlinige Bewegung und Newtons zweites Gesetz: Einsteigerfragen aus Mittelstufenlehrbüchern. Fragen zu Hebeln, Einfachpendeln, Auftrieb, Wärmelehre
+   * würden zuerst auf den Parser stoßen (kein passendes Modell, PARSE_FAILED) oder als andere Modelle missverstanden werden — daher
+   * werden hier nur Fragen gesammelt, die die Engine tatsächlich lösen kann, die übrigen Kapitel überlässt man der Lab-Selbsttest-Abdeckung. */
   {
     id: 'mech-07-uniform-distance',
-    title: '匀速直线运动求路程',
-    text: '小明骑自行车沿平直道路匀速前进，速度为 5 m/s，骑行了 600 s。已知：v = 5 m/s，t = 600 s。求：小明通过的路程 s',
+    title: 'Weg bei gleichförmiger geradliniger Bewegung',
+    text: 'Xiaoming fährt mit dem Fahrrad auf einer geraden Straße gleichförmig voran, Geschwindigkeit 5 m/s, er fährt 600 s lang. Gegeben: v = 5 m/s, t = 600 s. Gesucht: der von Xiaoming zurückgelegte Weg s',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
     expectedValidation: 'VALID',
   },
   {
     id: 'mech-08-sound-propagation',
-    title: '声音的传播距离',
-    text: '声音在空气中以 340 m/s 的速度匀速传播，经过 10 s。已知：v = 340 m/s，t = 10 s。求：声音传播的路程 s',
+    title: 'Ausbreitungsweg des Schalls',
+    text: 'Schall breitet sich in Luft mit der Geschwindigkeit 340 m/s gleichförmig aus, nach 10 s. Gegeben: v = 340 m/s, t = 10 s. Gesucht: der Ausbreitungsweg des Schalls s',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
     expectedValidation: 'VALID',
   },
   {
     id: 'mech-09-echo-ranging',
-    title: '回声测距求传播路程',
-    text: '声音在海水中以 1500 m/s 的速度匀速传播，从海面竖直向下发出后 4 s 收到海底反射的回声。已知：v = 1500 m/s，t = 4 s。求：超声波传播的路程 s',
+    title: 'Entfernungsmessung mit Echo: Ausbreitungsweg',
+    text: 'Schall breitet sich in Meerwasser mit der Geschwindigkeit 1500 m/s gleichförmig aus, wird von der Meeresoberfläche senkrecht nach unten ausgesandt und nach 4 s wird das vom Meeresboden reflektierte Echo empfangen. Gegeben: v = 1500 m/s, t = 4 s. Gesucht: der Ausbreitungsweg des Ultraschalls s',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
     expectedValidation: 'VALID',
   },
   {
     id: 'mech-10-netforce-friction',
-    title: '含摩擦情境的合力与加速度',
-    text: '一个质量为 10 kg 的物体在水平面上受到拉力与摩擦力作用，水平方向的合力为 20 N，物体做匀加速直线运动。已知：m = 10 kg，合力 F = 20 N。求：物体的加速度 a',
+    title: 'Resultierende Kraft und Beschleunigung mit Reibung',
+    text: 'Ein Körper der Masse 10 kg wird auf einer horizontalen Fläche von Zugkraft und Reibungskraft beansprucht, die horizontale Resultierende beträgt 20 N, der Körper führt eine gleichmäßig beschleunigte Geradlinige Bewegung aus. Gegeben: m = 10 kg, Resultierende F = 20 N. Gesucht: die Beschleunigung a des Körpers',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
     expectedValidation: 'VALID',
@@ -863,15 +865,15 @@ export const GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
 ]
 
 /**
- * Modern-physics fixtures. Kept separate from the legacy golden list until the
- * controller adds the `modern` library/renderer locale wiring; the question
- * runtime and parser already exercise them end to end.
+ * Modern-Physik-Fixtures. Getrennt von der Legacy-Goldenen-Liste, bis der
+ * Controller die `modern`-Bibliothek/Renderer-Locale-Verdrahtung hinzufügt; die Frage-
+ * Laufzeit und der Parser üben sie bereits Ende-zu-Ende aus.
  */
 export const MODERN_GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   {
     id: 'modern-01-photoelectric-energy',
-    title: '光电效应的光子能量与最大初动能',
-    text: '某金属的逸出功 W = 2.0 eV，用波长 λ = 400 nm 的单色光照射，光强 I = 10 W/m^2，阴极面积 S = 1 cm^2。求光子能量、最大初动能、遏止电压和光电流。',
+    title: 'Photonenenergie und maximale Anfangsenergie beim photoelektrischen Effekt',
+    text: 'Das Auslösearbeitsvermögen eines Metalls beträgt W = 2,0 eV, es wird mit monochromatischem Licht der Wellenlänge λ = 400 nm bestrahlt, Lichtstärke I = 10 W/m², Kathodenfläche S = 1 cm². Photonenenergie, maximale Anfangsenergie, Sperrspannung und Photostrom gesucht.',
     expectedModel: 'photoelectric_effect',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -879,8 +881,8 @@ export const MODERN_GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'modern-02-threshold',
-    title: '光电效应的截止频率与截止波长',
-    text: '某金属的逸出功 W = 3.0 eV，用波长 λ = 500 nm 的单色光照射。求截止频率、截止波长以及能否发生光电效应。',
+    title: 'Grenzfrequenz und Grenzwelllenlänge beim photoelektrischen Effekt',
+    text: 'Das Auslösearbeitsvermögen eines Metalls beträgt W = 3,0 eV, es wird mit monochromatischem Licht der Wellenlänge λ = 500 nm bestrahlt. Grenzfrequenz, Grenzwelllenlänge und ob der photoelektrische Effekt eintreten kann, gesucht.',
     expectedModel: 'photoelectric_effect',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',
@@ -888,8 +890,8 @@ export const MODERN_GOLDEN_QUESTIONS: readonly GoldenQuestionDefinition[] = [
   },
   {
     id: 'modern-03-atomic-level-unsupported',
-    title: '氢原子能级跃迁（暂不支持）',
-    text: '处于 n = 2 能级的氢原子向低能级跃迁，求辐射光子的能量。',
+    title: 'Energielevelsprung im Wasserstoffatom (vorläufig nicht unterstützt)',
+    text: 'Ein im Energieniveau n = 2 befindliches Wasserstoffatom springt in ein niedrigeres Energieniveau, die Energie des abgestrahlten Photons gesucht.',
     expectedModel: 'atomic_energy_level',
     expectedChargeSign: 'unknown',
     expectedFieldDirection: 'unknown',

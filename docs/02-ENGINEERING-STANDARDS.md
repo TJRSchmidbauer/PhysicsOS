@@ -1,173 +1,173 @@
-# PhysicsOS 工程开发规范
+# PhysicsOS Engineering Standards
 
-> 文件：`docs/02-ENGINEERING-STANDARDS.md`  
-> 文档定位：PhysicsOS 全项目强制工程规范  
-> 上游文档：`00-PRODUCT-OVERVIEW.md`、`01-DEVELOPMENT-GUIDE.md`  
-> 下游契约：`03-DOMAIN-CONTRACTS.md`
+> Datei: `docs/02-ENGINEERING-STANDARDS.md`  
+> Dokumentrolle: PhysicsOS projektweit verbindliche Engineering-Standards  
+> Upstream-Dokumente: `00-PRODUCT-OVERVIEW.md`, `01-DEVELOPMENT-GUIDE.md`  
+> Downstream-Vertrag: `03-DOMAIN-CONTRACTS.md`
 >
-> 本规范对人工开发、Codex、Cursor、Claude Code、自动化 Agent、多 Agent 协同开发全部生效。
+> Diese Standards gelten für manuelle Entwicklung, Codex, Cursor, Claude Code, automatisierte Agenten, Multi-Agent-Kooperation.
 
 ---
 
-# 1. 文档目的
+# 1. Dokumentzweck
 
-本文档回答一个问题：
+Dieses Dokument beantwortet eine Frage:
 
-> **PhysicsOS 的所有代码必须按照什么规则开发？**
+> **Nach welchen Regeln muss der gesamte PhysicsOS-Code entwickelt werden?**
 
-PhysicsOS 不是普通 CRUD 项目。
+PhysicsOS ist kein gewöhnliches CRUD-Projekt.
 
-它同时包含：
+Es vereint gleichzeitig:
 
 ```text
-物理领域模型
-实时仿真
-可视化
-试题解析
-多模态理解
+Physik-Domänenmodell
+Echtzeit-Simulation
+Visualisierung
+Aufgabenanalyse
+Multimodales Verständnis
 Agent Runtime
 Tools
 Skills
-上下文压缩
-学习状态
+Kontextkompression
+Lernzustand
 Web
-未来 Windows Desktop
+Zukünftig Windows Desktop
 ```
 
-如果没有统一工程规范，很容易出现：
+Ohne einheitliche Engineering-Standards entstehen leicht:
 
 ```text
-UI 自己计算物理结果
-Agent 直接修改 Scene
-Renderer 内部维护第二套状态
-每个模块自己定义单位
-每个开发者写一套 Tool
-Web 与 Desktop 重复代码
-LLM 直接生成假仿真结果
-为了跑通测试删除失败用例
+UI berechnet physikalische Ergebnisse selbst
+Agent modifiziert Scene direkt
+Renderer führt intern einen zweiten State
+Jedes Modul definiert eigene Einheiten
+Jeder Entwickler schreibt eigene Tools
+Web- und Desktop-Code duplizieren sich
+LLM erzeugt gefälschte Simulationsergebnisse
+Fehlschlagende Tests werden gelöscht, um CI grün zu bekommen
 ```
 
-因此，本文件中的“禁止”“必须”“不得”均视为强制规则。
+Daher sind in diesem Dokument „verboten“, „muss“, „darf nicht“ als verbindliche Regeln zu verstehen.
 
 ---
 
-# 2. 规范等级
+# 2. Standard-Stufen
 
-PhysicsOS 规范分为四级。
+PhysicsOS Standards gliedern sich in vier Stufen.
 
-## 2.1 P0 — 架构红线
+## 2.1 P0 — Architektur-Redlines
 
-违反即必须停止合并。
+Verstoß → sofortiger Merge-Stopp.
 
-包括：
+Umfasst:
 
 ```text
-物理事实源
-Physics Engine 边界
+Physikalische Faktenquelle
+Physics Engine Grenze
 PhysicsScene Mutation
 Agent Tool Guard
 Contract
-安全
-测试真实性
+Sicherheit
+Test-Echtheit
 ```
 
 ---
 
-## 2.2 P1 — 强制工程规则
+## 2.2 P1 — Verpflichtende Engineering-Regeln
 
-原则上不得违反。
+Grundsätzlich nicht verletzen.
 
-例如：
+Beispiele:
 
 ```text
-命名
-状态管理
-日志
-错误结构
-单位
+Benennung
+State Management
+Logging
+Fehlerstruktur
+Einheiten
 Git
-测试
+Tests
 API
 ```
 
 ---
 
-## 2.3 P2 — 推荐实践
+## 2.3 P2 — Empfohlene Praktiken
 
-无特殊理由应遵守。
+Ohne besonderen Grund befolgen.
 
-例如：
+Beispiele:
 
 ```text
-目录组织
-组件拆分
-Hook 组织
-性能优化方式
+Verzeichnisorganisation
+Komponentenzerlegung
+Hook-Organisation
+Performance-Optimierungsweisen
 ```
 
 ---
 
-## 2.4 P3 — 风格建议
+## 2.4 P3 — Stil-Empfehlungen
 
-可以在不影响一致性的情况下调整。
-
----
-
-# 3. 第一架构原则：Physics Engine 决定物理结果
-
-PhysicsOS 最核心规则：
-
-> **LLM 不决定真实物理结果，Physics Engine 决定。**
-
-LLM 负责：
-
-```text
-理解题目
-提取条件
-规划求解
-选择 Tools
-决定教学策略
-解释结果
-```
-
-Physics Engine 负责：
-
-```text
-受力
-轨迹
-速度
-加速度
-场
-能量
-电路状态
-碰撞
-运动状态
-```
+Können angepasst werden, solange Konsistenz gewahrt bleibt.
 
 ---
 
-# 4. 禁止 LLM 伪造真实仿真结果
+# 3. Erstes Architekturprinzip: Physics Engine entscheidet physikalische Ergebnisse
 
-禁止：
+PhysicsOS Kernregel:
+
+> **LLM entscheidet nicht über echte physikalische Ergebnisse, die Physics Engine tut es.**
+
+LLM ist zuständig für:
 
 ```text
-LLM 根据公式直接构造 SimulationResult
-LLM 生成一组轨迹坐标冒充 Physics Engine 结果
-LLM 自行决定 Scene 的最终状态
+Aufgabe verstehen
+Bedingungen extrahieren
+Lösungsplan erstellen
+Tools auswählen
+Lehrstrategie festlegen
+Ergebnisse erklären
 ```
 
-例如以下做法禁止：
+Physics Engine ist zuständig für:
+
+```text
+Kräfte
+Bahnen / Trajektorien
+Geschwindigkeit
+Beschleunigung
+Felder
+Energie
+Stromkreiszustand
+Kollisionen
+Bewegungszustand
+```
+
+---
+
+# 4. LLM darf echte Simulationsergebnisse nicht fälschen
+
+Verboten:
+
+```text
+LLM konstruiert SimulationResult direkt aus Formeln
+LLM generiert Trajektorie-Koordinaten und gibt sie als Physics Engine Ergebnis aus
+LLM entscheidet selbst über den finalen Scene-Zustand
+```
+
+Beispiel für verbotene Vorgehensweise:
 
 ```ts
-const trajectory = await llm.generate('生成一条圆周运动轨迹')
+const trajectory = await llm.generate('Erzeuge eine Kreisbewegungsbahn')
 ```
 
-作为真实 Scene 结果。
+als echtes Scene-Ergebnis.
 
-允许：
+Erlaubt:
 
 ```text
-LLM 提议参数
+LLM schlägt Parameter vor
 ↓
 Tool
 ↓
@@ -178,15 +178,15 @@ SimulationResult
 
 ---
 
-# 5. PhysicsScene 是唯一物理事实源
+# 5. PhysicsScene ist die einzige physikalische Faktenquelle
 
-当前物理世界的正式状态必须来自：
+Der aktuelle formelle Zustand der physikalischen Welt muss stammen aus:
 
 ```text
 PhysicsScene Runtime
 ```
 
-以下都不是事实源：
+Folgendes sind **keine** Faktenquellen:
 
 ```text
 React State
@@ -197,35 +197,35 @@ Three Object3D
 Agent Prompt
 Chat History
 Working Memory
-数据库中的临时 View
+Temporäre View in der Datenbank
 ```
 
-它们只能：
+Sie dürfen nur:
 
 ```text
-引用
-投影
-缓存
-展示
+referenzieren
+projizieren
+cachen
+anzeigen
 ```
 
-PhysicsScene。
+PhysicsScene.
 
 ---
 
-# 6. 禁止出现第二套 Scene 状态
+# 6. Keine zweite Scene-State-Instanz zulassen
 
-禁止：
+Verboten:
 
 ```text
-Zustand 中保存完整 Scene
+Zustand speichert komplette Scene
 +
-PhysicsScene Runtime 中再保存 Scene
+PhysicsScene Runtime speichert erneut Scene
 ```
 
-形成“双主状态”。
+→ bildet „dualen Master-State“.
 
-允许 Zustand 保存：
+Zustand darf speichern:
 
 ```text
 selectedObjectId
@@ -234,7 +234,7 @@ sidebarWidth
 canvasZoom
 ```
 
-不允许保存并独立维护：
+Nicht erlaubt: speichern und eigenständig pflegen:
 
 ```text
 particle.mass
@@ -244,9 +244,9 @@ field.strength
 
 ---
 
-# 7. 禁止直接 Mutation PhysicsScene
+# 7. Keine direkte Mutation von PhysicsScene
 
-禁止：
+Verboten:
 
 ```ts
 scene.particles[0].mass.value = 2
@@ -254,7 +254,7 @@ scene.fields.push(field)
 scene.timeline.currentTime = 3
 ```
 
-所有 Scene 修改必须经过：
+Jede Scene-Modifikation muss laufen über:
 
 ```text
 Command
@@ -270,11 +270,11 @@ New Revision
 
 ---
 
-# 8. Scene Command 规则
+# 8. Scene Command Regeln
 
-Command 表示“希望发生什么”。
+Command drückt aus: „Was soll passieren“.
 
-命名使用动词：
+Benennung nutzt Verben:
 
 ```text
 CreateScene
@@ -286,7 +286,7 @@ SeekTimeline
 StartSimulation
 ```
 
-Command 必须包含：
+Command muss enthalten:
 
 ```text
 commandId
@@ -300,11 +300,11 @@ traceId
 
 ---
 
-# 9. Scene Event 规则
+# 9. Scene Event Regeln
 
-Event 表示“已经发生什么”。
+Ein Event stellt dar, „was bereits geschehen ist“.
 
-事件命名必须使用过去式：
+Ereignisnamen müssen die Vergangenheitsform verwenden:
 
 ```text
 SceneCreated
@@ -315,7 +315,7 @@ TimelineSeeked
 SimulationStarted
 ```
 
-禁止：
+Verboten:
 
 ```text
 AddBodyEvent
@@ -327,27 +327,27 @@ DoSimulation
 
 # 10. Scene Revision
 
-每个有效 Scene Mutation：
+Jede gültige Scene Mutation:
 
 ```text
 revision + 1
 ```
 
-Revision 必须：
+Die Revision muss:
 
 ```text
-单调递增
-不可回退
-不可复用
+monoton steigend sein
+nicht rückgängig gemacht werden können
+nicht wiederverwendet werden können
 ```
 
-写操作携带：
+Schreiboperationen tragen mit:
 
 ```text
 expectedRevision
 ```
 
-发生冲突返回：
+Bei Konflikten wird zurückgegeben:
 
 ```text
 SCENE_REVISION_CONFLICT
@@ -355,52 +355,52 @@ SCENE_REVISION_CONFLICT
 
 ---
 
-# 11. Event 不可被修改
+# 11. Events dürfen nicht verändert werden
 
-已经持久化的 Physics Event：
+Bereits persistierte Physics Events:
 
-> **不可修改。**
+> **dürfen nicht verändert werden.**
 
-发现错误时：
+Wird ein Fehler entdeckt:
 
 ```text
-追加新的纠正 Event
+einen neuen korrigierenden Event anhängen
 ```
 
-不要篡改历史。
+Die Historie nicht manipulieren.
 
-这是 Replay、Audit、Undo、Branch 能成立的基础。
+Dies ist die Grundlage, damit Replay, Audit, Undo, Branch funktionieren.
 
 ---
 
-# 12. Snapshot 不替代 EventStore
+# 12. Snapshot ersetzt nicht den EventStore
 
-Snapshot 只是：
+Ein Snapshot dient lediglich:
 
 ```text
-快速恢复
-快速 Seek
-Branch 基点
-大型 Scene 加速
+schneller Wiederherstellung
+schnellem Seek
+Branch-Basis
+Beschleunigung großer Szenen
 ```
 
-不能因为有 Snapshot 就删除关键 Event 语义。
+Nicht wegen eines Snapshots die semantisch wichtigen Events löschen.
 
 ---
 
-# 13. Physics Core 纯净性
+# 13. Physics Core Reinheit
 
-以下 package：
+Die folgenden Packages:
 
 ```text
 physics-core
 physics-scene
 physics-units
-各 engine-*
+alle engine-*
 physics-verifier
 ```
 
-禁止依赖：
+dürfen nicht abhängen von:
 
 ```text
 React
@@ -410,24 +410,24 @@ Three.js
 DeepSeek Harness
 Tauri
 Spring Controller
-数据库 ORM
+Datenbank ORM
 Redis Client
-具体 HTTP Framework
+konkretem HTTP Framework
 ```
 
 ---
 
-# 14. UI 禁止计算核心物理结果
+# 14. UI darf keine physikalischen Kernberechnungen durchführen
 
-禁止在 React：
+Verboten in React:
 
 ```tsx
 const radius = (m * v) / (q * B)
 ```
 
-直接作为正式结果。
+als offizielles Ergebnis direkt zu verwenden.
 
-正确：
+Richtig:
 
 ```text
 UI
@@ -443,27 +443,27 @@ Result
 UI
 ```
 
-UI 可以进行：
+Die UI darf durchführen:
 
 ```text
-格式化
-单位显示
-简单百分比
-布局计算
+Formatierung
+Einheitendarstellung
+einfache Prozentwerte
+Layout-Berechnung
 ```
 
-不能承担领域求解。
+Sie darf keine fachliche Berechnung übernehmen.
 
 ---
 
-# 15. Renderer 禁止参与物理求解
+# 15. Renderer darf nicht an der physikalischen Berechnung teilnehmen
 
-Renderer 负责：
+Der Renderer ist zuständig für:
 
 ```text
-绘制
-动画表现
-坐标映射
+Zeichnen
+Animationsdarstellung
+Koordinatenabbildung
 Camera
 Viewport
 Hit Test
@@ -471,30 +471,30 @@ Selection
 Render Layer
 ```
 
-禁止 Renderer：
+Dem Renderer ist verboten:
 
 ```text
-判断洛伦兹力方向
-计算轨迹半径
-求受力合力
-计算电势
-计算电流
-判断碰撞后的速度
+Richtung der Lorentzkraft bestimmen
+Bahnradius berechnen
+resultierende Kraft ermitteln
+elektrisches Potenzial berechnen
+elektrischen Strom berechnen
+Geschwindigkeit nach Kollision bestimmen
 ```
 
 ---
 
-# 16. Renderer 不得写回领域状态
+# 16. Renderer darf den Domänenzustand nicht zurückschreiben
 
-禁止：
+Verboten:
 
 ```text
-拖动 Pixi Sprite
+Pixi Sprite ziehen
 ↓
-直接修改 Particle.position
+Particle.position direkt modifizieren
 ```
 
-正确：
+Richtig:
 
 ```text
 Pointer Interaction
@@ -510,87 +510,87 @@ Renderer Subscription
 
 ---
 
-# 17. Observation 与 Physics Engine 分离
+# 17. Trennung von Observation und Physics Engine
 
-Physics Engine 决定：
-
-```text
-现实状态
-```
-
-Observation 决定：
+Die Physics Engine bestimmt:
 
 ```text
-学生当前看到什么
+den realen Zustand
 ```
 
-例如：
+Die Observation bestimmt:
 
 ```text
-洛伦兹力真实存在
+was der Schüler aktuell sieht
 ```
 
-和：
+Beispiel:
 
 ```text
-界面是否显示洛伦兹力箭头
+Die Lorentzkraft existiert real
 ```
 
-是两回事。
+und:
 
-显示与隐藏必须由：
+```text
+ob die Oberfläche den Lorentzkraft-Pfeil anzeigt
+```
+
+sind zwei unterschiedliche Dinge.
+
+Anzeige und Ausblendung müssen durch den:
 
 ```text
 Observation Layer
 ```
 
-控制。
+gesteuert werden.
 
 ---
 
-# 18. 2D / 3D 数据模型统一
+# 18. Vereinheitlichung des 2D / 3D Datenmodells
 
-不能为 2D 和 3D 分别做两套 PhysicsScene。
+Es darf nicht für 2D und 3D je ein separates PhysicsScene erstellt werden.
 
-领域统一使用：
+Die Domäne verwendet einheitlich:
 
 ```text
 Vector3
 ```
 
-2D 场景：
+2D-Szenen:
 
 ```text
 z = 0
 ```
 
-Renderer 决定以 2D 或 3D 展现。
+Der Renderer entscheidet, ob in 2D oder 3D dargestellt wird.
 
 ---
 
-# 19. 单位体系最高规则
+# 19. Oberste Regel für das Einheitensystem
 
-PhysicsOS 内部计算统一使用：
+PhysicsOS verwendet für interne Berechnungen einheitlich:
 
-> **SI Canonical Units**
+> **SI-Kanonische Einheiten**
 
-包括：
+Dazu gehören:
 
 ```text
-长度 m
-时间 s
-质量 kg
-电荷 C
-电流 A
-力 N
-能量 J
-电压 V
-磁感应强度 T
-速度 m/s
-加速度 m/s²
+Länge m
+Zeit s
+Masse kg
+Ladung C
+Strom A
+Kraft N
+Energie J
+Spannung V
+magnetische Flussdichte T
+Geschwindigkeit m/s
+Beschleunigung m/s²
 ```
 
-UI 可显示：
+Die UI darf anzeigen:
 
 ```text
 cm
@@ -605,13 +605,13 @@ ms
 ns
 ```
 
-进入 Engine 前必须转换。
+Vor Eintritt in die Engine muss die Umwandlung erfolgen.
 
 ---
 
-# 20. 禁止重要物理量使用裸 number
+# 20. Verbot von nackten number-Werten für wichtige physikalische Größen
 
-不推荐：
+Nicht empfohlen:
 
 ```ts
 interface Particle {
@@ -619,7 +619,7 @@ interface Particle {
 }
 ```
 
-应使用：
+Stattdessen verwenden:
 
 ```ts
 interface Quantity<D extends PhysicalDimension> {
@@ -629,39 +629,39 @@ interface Quantity<D extends PhysicalDimension> {
 }
 ```
 
-或 Canonical Quantity。
+oder Canonical Quantity.
 
 ---
 
-# 21. 量纲检查
+# 21. Dimensionsprüfung
 
-任何公式、Tool、Simulation 输入应能够执行：
+Jede Formel, jedes Tool und jeder Simulationseingang muss in der Lage sein, auszuführen:
 
 ```text
 Dimension Validation
 ```
 
-例如：
+Beispiel:
 
 ```text
-质量 + 时间
+Masse + Zeit
 ```
 
-应在进入 Physics Engine 前被拒绝。
+Sollte vor dem Eintritt in die Physics Engine abgelehnt werden.
 
 ---
 
-# 22. 浮点比较
+# 22. Gleitkomma-Vergleich
 
-禁止：
+Verboten:
 
 ```ts
 a === b
 ```
 
-用于物理浮点结果判断。
+für die Beurteilung physikalischer Gleitkomma-Ergebnisse.
 
-统一使用：
+Einheitlich verwenden:
 
 ```text
 absoluteTolerance
@@ -669,7 +669,7 @@ relativeTolerance
 domainTolerance
 ```
 
-示意：
+Beispielhaft:
 
 ```ts
 isClose(actual, expected, {
@@ -680,9 +680,9 @@ isClose(actual, expected, {
 
 ---
 
-# 23. 数值稳定性
+# 23. Numerische Stabilität
 
-Engine 必须明确：
+Die Engine muss explizit festlegen:
 
 ```text
 timeStep
@@ -692,13 +692,13 @@ maxIterations
 convergence condition
 ```
 
-禁止使用无法解释的魔法常数。
+Verboten ist die Verwendung unerklärlicher Magischer Konstanten.
 
 ---
 
-# 24. 仿真确定性
+# 24. Simulations-Determinismus
 
-相同：
+Bei identischen:
 
 ```text
 Scene
@@ -708,9 +708,9 @@ Simulation Options
 Random Seed
 ```
 
-应得到可重复结果。
+müssen reproduzierbare Ergebnisse erzielt werden.
 
-任何随机过程必须保存：
+Jeder zufällige Prozess muss speichern:
 
 ```text
 randomSeed
@@ -718,9 +718,9 @@ randomSeed
 
 ---
 
-# 25. 时间步与显示帧率分离
+# 25. Trennung von Zeitschritt und Anzeige-Bildrate
 
-必须区分：
+Es muss unterschieden werden:
 
 ```text
 solver timestep
@@ -729,25 +729,25 @@ render frame rate
 chart sample rate
 ```
 
-禁止：
+Verboten:
 
 ```text
-60fps = Physics Solver 只算 60 次每秒
+60fps = Physics Solver rechnet nur 60 mal pro Sekunde
 ```
 
-这种耦合。
+diese Kopplung.
 
 ---
 
-# 26. 性能计算禁止阻塞 UI
+# 26. Rechenintensive Berechnungen dürfen UI nicht blockieren
 
-高耗时浏览器 Simulation：
+Rechenintensive Browser-Simulationen:
 
 ```text
 Web Worker
 ```
 
-主线程：
+Hauptthread:
 
 ```text
 UI
@@ -755,7 +755,7 @@ Interaction
 Renderer
 ```
 
-Worker：
+Worker:
 
 ```text
 Physics Calculation
@@ -765,13 +765,13 @@ Large Sampling
 
 ---
 
-# 27. React 状态规范
+# 27. React-Zustandsspezifikation
 
-状态明确分四类。
+Zustand wird explizit in vier Kategorien unterteilt.
 
 ## UI State
 
-Zustand：
+Zustand:
 
 ```text
 sidebarOpen
@@ -786,7 +786,7 @@ temporarySelection
 
 ## Server State
 
-TanStack Query：
+TanStack Query:
 
 ```text
 user
@@ -801,7 +801,7 @@ resources
 
 ## Physics State
 
-PhysicsScene Runtime：
+PhysicsScene Runtime:
 
 ```text
 body
@@ -817,7 +817,7 @@ revision
 
 ## Agent State
 
-Agent State（由 Harness 宿主维护，PhysicsOS 不自建独立 Agent runtime）：
+Agent State (wird vom Harness-Host verwaltet, PhysicsOS baut keine eigene Agent-Runtime):
 
 ```text
 session
@@ -828,23 +828,23 @@ stream
 status
 ```
 
-禁止混成一个 Store。
+Verboten, in einen einzigen Store zu vermischen.
 
 ---
 
-# 28. Zustand 使用规范
+# 28. Zustand-Verwendungsregeln
 
-禁止创建：
+Verboten zu erstellen:
 
 ```text
 useEverythingStore
 ```
 
-包含整个系统。
+der das gesamte System enthält.
 
-Store 按 UI 领域拆。
+Stores nach UI-Domänen aufteilen.
 
-例如：
+Beispiel:
 
 ```text
 useWorkspaceLayoutStore
@@ -854,23 +854,23 @@ useQuestionUIStore
 
 ---
 
-# 29. TanStack Query 使用规范
+# 29. TanStack Query-Verwendungsregeln
 
-后端资源读取通过 Query。
+Backend-Ressourcen werden per Query gelesen.
 
-Mutation 完成后：
+Nach Abschluss einer Mutation:
 
 ```text
 invalidate / update cache
 ```
 
-不要将服务端数据复制进 Zustand 长期维护。
+Serverseitige Daten nicht in den Zustand kopieren, um sie dort langfristig zu pflegen.
 
 ---
 
-# 30. React 组件职责
+# 30. React-Komponenten-Verantwortlichkeiten
 
-组件分为：
+Komponenten werden unterteilt in:
 
 ```text
 Page
@@ -880,36 +880,36 @@ Presentational
 Primitive
 ```
 
-Page 负责组合。
+Page ist für die Komposition zuständig.
 
-禁止页面文件包含：
+In Seiten-Dateien verboten:
 
 ```text
-巨大领域逻辑
-复杂计算
-大量 API 细节
-大量 Engine 逻辑
+umfangreiche Domänenlogik
+komplexe Berechnungen
+zahlreiche API-Details
+viel Engine-Logik
 ```
 
 ---
 
-# 31. React Component 大小
+# 31. React-Komponenten-Größe
 
-没有绝对行数限制，但出现以下情况必须拆：
+Es gibt keine absolute Zeilenbegrenzung, aber bei Auftreten folgender Situationen muss aufgeteilt werden:
 
 ```text
-同时处理多个业务领域
-超过 3 层嵌套副作用
-大量条件渲染
-同时管理 API、Canvas、Agent、表单
-难以单独测试
+Mehrere Geschäftsbereiche gleichzeitig verarbeiten
+Mehr als 3 Ebenen verschachtelter Nebeneffekte
+Große Mengen bedingter Renderings
+Gleichzeitige Verwaltung von API, Canvas, Agent, Formularen
+Schwer separat testbar
 ```
 
 ---
 
-# 32. Hook 规范
+# 32. Hook-Spezifikation
 
-复杂逻辑优先拆 Hook：
+Komplexe Logik priorisiert als Hook auslagern:
 
 ```text
 usePhysicsWorkspace
@@ -919,19 +919,19 @@ useObservablePanel
 useAgentSession
 ```
 
-禁止创建：
+Verboten zu erstellen:
 
 ```text
 useEverything()
 ```
 
-1000 行大 Hook。
+1000-Zeilen-großer Hook.
 
 ---
 
-# 33. TypeScript 严格模式
+# 33. TypeScript-Strict-Modus
 
-必须：
+Muss:
 
 ```json
 {
@@ -939,7 +939,7 @@ useEverything()
 }
 ```
 
-原则上禁止：
+Grundsätzlich verboten:
 
 ```ts
 any
@@ -947,7 +947,7 @@ any
 // @ts-nocheck
 ```
 
-优先：
+Bevorzugt:
 
 ```text
 unknown
@@ -958,33 +958,33 @@ discriminated union
 
 ---
 
-# 34. any 例外
+# 34. any-Ausnahme
 
-如果第三方库边界确实只能使用 any：
+Wenn Drittanbieter-Bibliotheksgrenzen zwingend any erfordern:
 
-必须：
+Muss:
 
 ```text
-限制在 Adapter
-写注释说明原因
-尽快转换为内部安全类型
+Auf Adapter beschränken
+Kommentar mit Begründung schreiben
+So schnell wie möglich in interne sichere Typen umwandeln
 ```
 
-禁止 any 向领域层扩散。
+Verboten, dass any in die Domänenschicht ausstrahlt.
 
 ---
 
-# 35. ID 类型
+# 35. ID-Typ
 
-禁止整个项目都用普通：
+Im gesamten Projekt ist die Verwendung von einfachem:
 
 ```ts
 string
 ```
 
-表达 ID。
+für IDs verboten.
 
-推荐 branded type：
+Empfohlen: branded type:
 
 ```ts
 type SceneId = Brand<string, 'SceneId'>
@@ -995,37 +995,37 @@ type ToolCallId = Brand<string, 'ToolCallId'>
 
 ---
 
-# 36. Discriminated Union
+# 36. Diskriminierte Union
 
-领域对象优先使用：
+Domänenobjekte bevorzugt verwenden:
 
 ```ts
 type Field = UniformElectricField | UniformMagneticField | GravityField
 ```
 
-以 `type` 作为 discriminator。
+Mit `type` als Diskriminator.
 
-避免：
+Vermeiden:
 
 ```text
-大量 optional 字段
+Große Mengen optionaler Felder
 ```
 
-构造模糊对象。
+die mehrdeutige Objekte erzeugen.
 
 ---
 
-# 37. 函数设计
+# 37. Funktionsdesign
 
-一个函数只做一个主要工作。
+Eine Funktion erledigt nur eine Hauptaufgabe.
 
-禁止：
+Verboten:
 
 ```text
 parseQuestionAndBuildSceneAndSolveAndSave()
 ```
 
-拆成：
+Aufteilen in:
 
 ```text
 parseQuestion()
@@ -1037,12 +1037,12 @@ saveResult()
 
 ---
 
-# 38. 纯函数优先
+# 38. Reine Funktionen zuerst
 
-以下逻辑优先纯函数：
+Folgende Logik wird bevorzugt als reine Funktionen implementiert:
 
 ```text
-单位转换
+Einheitenumrechnung
 Vector
 Geometry
 Scene Reducer
@@ -1051,43 +1051,43 @@ Parser Normalize
 Verifier
 ```
 
-便于测试和复现。
+Erleichtert Tests und Reproduktion.
 
 ---
 
-# 39. 禁止 Magic Number
+# 39. Magic Numbers verboten
 
-禁止：
+Verboten:
 
 ```ts
 if (speed > 999999) {
 }
 ```
 
-没有解释。
+Ohne Erklärung.
 
-必须通过：
+Muss durch:
 
 ```text
-named constant
-config
-domain rule
+benannte Konstante
+Config
+Domänenregel
 ```
 
-定义。
+definiert werden.
 
 ---
 
-# 40. 文件命名
+# 40. Dateinamen
 
-TypeScript：
+TypeScript:
 
 ```text
 kebab-case.ts
 kebab-case.tsx
 ```
 
-例如：
+Beispiel:
 
 ```text
 physics-workspace.tsx
@@ -1095,13 +1095,13 @@ scene-reducer.ts
 magnetic-engine.ts
 ```
 
-React Component 导出仍使用 PascalCase。
+React-Komponenten-Exporte verwenden weiterhin PascalCase.
 
 ---
 
-# 41. Java 命名
+# 41. Java-Benennung
 
-遵守标准 Java：
+Standard Java beachten:
 
 ```text
 PascalCase class
@@ -1109,7 +1109,7 @@ camelCase method
 UPPER_SNAKE_CASE constant
 ```
 
-数据库：
+Datenbank:
 
 ```text
 snake_case
@@ -1117,29 +1117,28 @@ snake_case
 
 ---
 
-# 42. Python 命名
+# 42. Python-Benennung
 
-遵守：
+PEP 8 beachten:
 
 ```text
-PEP 8
 snake_case
 PascalCase class
 ```
 
 ---
 
-# 43. Package API
+# 43. Package-API
 
-Package 对外 API 必须集中暴露。
+Package-öffentliche API muss zentral exponiert werden.
 
-例如：
+Beispiel:
 
 ```text
 packages/physics-scene/src/index.ts
 ```
 
-禁止其他 package 深层 import：
+Andere Packages dürfen keine tiefen Imports tätigen:
 
 ```ts
 import x from '@physics/scene/src/internal/reducer/private'
@@ -1147,23 +1146,19 @@ import x from '@physics/scene/src/internal/reducer/private'
 
 ---
 
-# 44. internal 目录
+# 44. internal-Verzeichnis
 
-不稳定内部实现可以放：
+Unstabile interne Implementierungen können in `internal/` platziert werden.
 
-```text
-internal/
-```
-
-其他 package 不得依赖。
+Andere Packages dürfen nicht davon abhängen.
 
 ---
 
-# 45. 循环依赖
+# 45. Zyklische Abhängigkeiten
 
-禁止 package 循环依赖。
+Package-zyklische Abhängigkeiten verboten.
 
-正确：
+Korrekt:
 
 ```text
 renderer
@@ -1173,19 +1168,19 @@ observation
 physics contracts
 ```
 
-禁止：
+Verboten:
 
 ```text
 renderer ↔ physics-core
 ```
 
-互相引用。
+Gegenseitige Referenz.
 
 ---
 
-# 46. 依赖方向
+# 46. Abhängigkeitsrichtung
 
-长期保持：
+Langfristig beibehalten:
 
 ```text
 Apps
@@ -1197,21 +1192,21 @@ Domain
 Core
 ```
 
-底层不得反向依赖上层。
+Untere Schichten dürfen nicht rückwärts auf obere Schichten abhängen.
 
 ---
 
-# 47. Platform 隔离
+# 47. Platform-Isolation
 
-业务代码禁止直接依赖：
+Geschäftslogik-Code darf nicht direkt abhängen:
 
 ```text
 Tauri API
 Node fs
-Browser 特殊 API
+Browser-spezielle API
 ```
 
-统一通过：
+Einheitlich über:
 
 ```text
 PlatformBridge
@@ -1221,45 +1216,45 @@ PlatformBridge
 
 # 48. BrowserPlatformBridge
 
-处理：
+Behandelt:
 
 ```text
 File API
 Download
 Clipboard
-Browser Notification
+Browser-Benachrichtigung
 ```
 
 ---
 
 # 49. TauriPlatformBridge
 
-处理：
+Behandelt:
 
 ```text
 Native File Dialog
 Local FS
-Windows Notification
+Windows-Benachrichtigung
 Sidecar
-Auto Update
+Auto-Update
 ```
 
 ---
 
-# 50. DeepSeek Harness 隔离
+# 50. DeepSeek Harness-Isolation
 
-正式 Web 展示集成边界只有：
+Die formale Web-Präsentations-Integrationsgrenze umfasst nur:
 
 ```text
 vendor/deepseek-harness/apps/web
 vendor/deepseek-harness/packages/client/ui-physicsos
 ```
 
-它们可以依赖已声明的 Harness 客户端插件、layout、sidebar 与 conversation slot contract。
+Sie können von bereits deklarierten Harness-Client-Plugins, Layout, Sidebar und Conversation-Slot-Contract abhängen.
 
-> **已退役（ADR-0002，2026-09-27）**：曾「PhysicsOS Agent/Domain 中唯一允许直接依赖 DeepSeek Harness Agent Runtime」的 `agent-dsh-adapter`（`@physicsos/agent-dsh-adapter`）与 `agent-runtime`（`@physicsos/agent-runtime`）已退役删除，见 `docs/adr/0002-agent-runtime-adapter-disposition.md`。Harness 是 Agent 宿主；PhysicsOS 不自建独立 Agent runtime，自己的 runtime 是物理世界 runtime（Scene → Engine → Verifier）。真实生产链路是 Harness 工具运行时 → `dsh-tool-physicsos` → `@physicsos/agent-tools` → 物理引擎 / verifier。
+> **Stillgelegt (ADR-0002, 2026-09-27)**: Der ehemals „einzige im PhysicsOS Agent/Domain erlaubte direkte Abhängigkeit vom DeepSeek Harness Agent Runtime“ `agent-dsh-adapter` (`@physicsos/agent-dsh-adapter`) und `agent-runtime` (`@physicsos/agent-runtime`) wurden stillgelegt und gelöscht, siehe `docs/adr/0002-agent-runtime-adapter-disposition.md`. Harness ist der Agent-Host; PhysicsOS baut keine eigene Agent-Runtime, seine Runtime ist die Physikwelt-Runtime (Scene → Engine → Verifier). Die echte Produktionskette ist Harness-Tool-Runtime → `dsh-tool-physicsos` → `@physicsos/agent-tools` → Physik-Engine / Verifier.
 
-禁止：
+Verboten:
 
 ```text
 physics-core
@@ -1269,15 +1264,15 @@ physics-verifier
 physics-observation
 ```
 
-直接依赖 Harness。客户端展示契约与 Agent Runtime 内部 API 不得扩散到上述领域包。
+Nicht direkt von Harness abhängen. Der Client-Darstellungsvertrag und die interne Agent-Runtime-API dürfen nicht in die oben genannten Domänenpakete ausstrahlen.
 
-根目录 `apps/web` 是废弃的独立原型，不得继续新增正式功能或作为发布入口。
+Das Wurzelverzeichnis `apps/web` ist ein veralteter eigenständiger Prototyp; es dürfen keine weiteren offiziellen Funktionen hinzugefügt werden, noch darf er als Veröffentlichungs-Eintrittspunkt dienen.
 
 ---
 
-# 51. Agent 不允许直接修改 Scene
+# 51. Agent darf Scene nicht direkt modifizieren
 
-禁止：
+Verboten:
 
 ```text
 Agent
@@ -1285,7 +1280,7 @@ Agent
 SceneStore.patch()
 ```
 
-必须：
+Erforderlich:
 
 ```text
 Agent
@@ -1301,15 +1296,15 @@ Scene Runtime
 
 ---
 
-# 52. Tool 命名规范
+# 52. Tool-Benennungskonvention
 
-统一：
+Einheitlich:
 
 ```text
 physics.<domain>.<action>
 ```
 
-例如：
+Zum Beispiel:
 
 ```text
 physics.scene.create
@@ -1322,9 +1317,9 @@ physics.observe.force
 
 ---
 
-# 53. 禁止万能 Tool
+# 53. Universelle Tools verboten
 
-禁止：
+Verboten:
 
 ```text
 physics.solve_everything
@@ -1333,20 +1328,20 @@ modify_scene(any)
 do_physics()
 ```
 
-Tool 必须：
+Tools müssen:
 
 ```text
-职责单一
-输入明确
-输出明确
-副作用明确
+Einzelfachliche Verantwortung
+Eingabe eindeutig
+Ausgabe eindeutig
+Nebenwirkungen eindeutig
 ```
 
 ---
 
-# 54. Tool Schema
+# 54. Tool-Schema
 
-每个 Tool 必须有：
+Jedes Tool muss haben:
 
 ```text
 name
@@ -1358,7 +1353,7 @@ timeout
 error codes
 ```
 
-禁止输入只定义：
+Eingabe, die nur definiert, ist verboten:
 
 ```json
 {
@@ -1366,30 +1361,30 @@ error codes
 }
 ```
 
-然后内部随意解析一切。
+Und intern wird dann willkürlich alles geparst.
 
 ---
 
 # 55. Tool Guard
 
-所有写操作至少经过：
+Alle Schreiboperationen durchlaufen mindestens:
 
 ```text
-Schema Validation
-Permission Validation
-Unit Validation
-Domain Validation
-Physics Constraint Validation
-Revision Validation
+Schema-Validierung
+Berechtigungsvalidierung
+Einheitenvalidierung
+Domänenvalidierung
+Physikalische-Restriktionsvalidierung
+Revisionsvalidierung
 Timeout
 Audit
 ```
 
 ---
 
-# 56. Tool Error
+# 56. Tool-Fehler
 
-统一结构：
+Einheitliche Struktur:
 
 ```json
 {
@@ -1400,7 +1395,7 @@ Audit
 }
 ```
 
-标准错误至少覆盖：
+Standardfehler decken mindestens ab:
 
 ```text
 INVALID_UNIT
@@ -1417,33 +1412,33 @@ TOOL_TIMEOUT
 
 ---
 
-# 57. Tool Result 禁止自由文本化
+# 57. Tool-Ergebnis darf nicht freier Text sein
 
-Tool 的真实结果必须结构化。
+Das tatsächliche Tool-Ergebnis muss strukturiert sein.
 
-允许附加：
+Erlaubt ist das Hinzufügen:
 
 ```text
 humanReadableSummary
 ```
 
-但不能只有：
+Aber es darf nicht nur geben:
 
 ```text
-“半径大约是 2cm。”
+„Der Radius beträgt etwa 2 cm.“
 ```
 
 ---
 
-# 58. Prompt 管理
+# 58. Prompt-Verwaltung
 
-禁止：
+Verboten:
 
 ```text
-一个 system_prompt.txt 放整个项目所有规则
+Eine system_prompt.txt enthält alle Projektregeln
 ```
 
-Prompt 必须模块化：
+Prompts müssen modular sein:
 
 ```text
 Identity
@@ -1461,9 +1456,9 @@ Recent Context
 
 ---
 
-# 59. Prompt 版本化
+# 59. Prompt-Versionierung
 
-关键 Prompt 必须有：
+Kritische Prompts müssen haben:
 
 ```text
 id
@@ -1472,21 +1467,21 @@ change log
 tests
 ```
 
-Agent 行为改变时必须可追踪。
+Bei Änderungen des Agent-Verhaltens muss Rückverfolgbarkeit gewährleistet sein.
 
 ---
 
-# 60. Prompt 不散落在代码中
+# 60. Prompts nicht im Code verstreut
 
-禁止几十个：
+Dutzende davon verboten:
 
 ```ts
-const prompt = `你是...`
+const prompt = `Du bist...`
 ```
 
-散落页面和 service。
+Verstreut auf Seiten und Services.
 
-统一进入：
+Einheitlicher Einstieg:
 
 ```text
 agent-prompt
@@ -1494,9 +1489,9 @@ agent-prompt
 
 ---
 
-# 61. Context 分层
+# 61. Context-Schichtung
 
-严格使用：
+Streng verwenden:
 
 ```text
 L0 Constitution
@@ -1510,31 +1505,31 @@ L6 Retrieval
 
 ---
 
-# 62. Scene 不塞进 Prompt
+# 62. Scene nicht in den Prompt
 
-禁止每轮将整个：
+Verbieten, jede Runde das Ganze:
 
 ```json
 PhysicsScene
 ```
 
-序列化塞给模型。
+serialisiert an das Modell zu übergeben.
 
-Context 只保存：
+Context speichert nur:
 
 ```text
 sceneId
 revision
 snapshotId
-必要 Observation
-当前任务相关 Slice
+notwendige Observation
+dem aktuellen Task relevante Slices
 ```
 
 ---
 
 # 63. Context Compaction
 
-压缩必须保留结构化事实：
+Komprimierung muss strukturierte Fakten beibehalten:
 
 ```text
 task
@@ -1547,17 +1542,17 @@ misconceptions
 importantEvents
 ```
 
-禁止只生成：
+Verbieten, nur zu generieren:
 
 ```text
-用户正在学习磁场。
+Der Nutzer lernt gerade Magnetfeld.
 ```
 
 ---
 
-# 64. Memory 分类
+# 64. Memory-Klassifizierung
 
-Memory 必须分类：
+Memory muss klassifiziert werden:
 
 ```text
 Session Memory
@@ -1568,46 +1563,46 @@ Knowledge Memory
 Preference Memory
 ```
 
-禁止一个 Vector Store 全塞进去就叫 Memory。
+Verbieten, einen Vector Store komplett hineinzustecken und es Memory zu nennen.
 
 ---
 
 # 65. Learning Memory
 
-Learning Memory 应保存：
+Learning Memory sollte speichern:
 
 ```text
-知识点
-错误模式
-掌握程度
-置信度
-证据
-更新时间
+Wissenspunkt
+Fehlermuster
+Beherrschungsgrad
+Konfidenz
+Evidenz
+Aktualisierungszeitpunkt
 ```
 
-不要只保存一句模糊文本。
+Nicht nur einen vagen Text speichern.
 
 ---
 
-# 66. Solver 与 Tutor 分离
+# 66. Trennung von Solver und Tutor
 
-Solver 回答：
+Solver antwortet:
 
-> **怎么正确得到结果。**
+> **Wie man das Ergebnis richtig erhält.**
 
-Tutor 回答：
+Tutor antwortet:
 
-> **怎么让学生理解。**
+> **Wie man dem Schüler Verständnis vermittelt.**
 
-禁止 Solver 为了“教学体验”修改真实答案。
+Verbieten, dass Solver aus „Lernerfahrung“ die echte Antwort ändert.
 
-禁止 Tutor 自己重新推导出与 Solver 不一致的物理事实。
+Verbieten, dass Tutor selbst physikalische Fakten neu herleitet, die mit Solver inkonsistent sind.
 
 ---
 
-# 67. Verifier 优先规则
+# 67. Verifier-Prioritätsregeln
 
-验证顺序：
+Prüfreihenfolge:
 
 ```text
 Schema
@@ -1625,31 +1620,31 @@ Numerical
 LLM Semantic Review
 ```
 
-LLM 只能做最后补充。
+LLM darf nur die letzte Ergänzung machen.
 
 ---
 
-# 68. Question Parser 原则
+# 68. Question-Parser-Prinzipien
 
-Question Parser 输出：
+Question Parser gibt aus:
 
 ```text
 Physics IR
 ```
 
-不得直接输出：
+Darf nicht direkt ausgeben:
 
 ```text
-最终 Canvas 坐标
+finale Canvas-Koordinaten
 SimulationResult
 Renderer Object
 ```
 
 ---
 
-# 69. Physics IR 必须保留证据
+# 69. Physics IR muss Evidenz beibehalten
 
-从题目抽取的关键条件尽量关联：
+Aus der Aufgabe extrahierte Schlüsselbedingungen möglichst verknüpfen:
 
 ```text
 text range
@@ -1659,50 +1654,50 @@ diagram element
 confidence
 ```
 
-避免 Agent 不知道：
+Vermeiden, dass Agent nicht weiß:
 
-> 这个 B=0.5T 是哪里来的。
+> Woher kommt dieses B=0,5T.
 
 ---
 
-# 70. Diagram Parser 原则
+# 70. Diagram-Parser-Prinzipien
 
-图像识别不能止于：
+Bilderkennung darf nicht bei Folgendem aufhören:
 
 ```text
-“图中有一个斜面和小球。”
+„Im Bild gibt es eine schiefe Ebene und einen Ball.“
 ```
 
-需要结构化成：
+Muss strukturiert werden zu:
 
 ```text
 Diagram IR
 ```
 
-再映射 PhysicsScene。
+Dann auf PhysicsScene abbilden.
 
 ---
 
-# 71. Question → Scene 必须可检查
+# 71. Question → Scene muss prüfbar sein
 
-Scene Builder 完成后必须可输出：
+Nach Abschluss des Scene Builders muss Folgendes ausgabefähig sein:
 
 ```text
-对象
-条件
-假设
-未确定项
-映射证据
-Scene Validation
+Objekte
+Bedingungen
+Annahmen
+Unbestimmte Punkte
+Abbildungsevidenz
+Scene-Validierung
 ```
 
-不允许黑箱生成 Scene 后直接运行。
+Nicht erlauben, Scene als Black Box zu generieren und direkt auszuführen.
 
 ---
 
-# 72. 动态题生成原则
+# 72. Prinzipien der dynamischen Aufgabengenerierung
 
-Dynamic Question 必须以：
+Dynamic Question muss basieren auf:
 
 ```text
 PhysicsScene
@@ -1712,39 +1707,39 @@ Question Pattern
 Variable Policy
 ```
 
-为基础。
+als Basis.
 
-不能纯 LLM 随机编数字。
+Kein reines LLM-zufälliges Erfinden von Zahlen.
 
 ---
 
-# 73. API 路径规范
+# 73. API-Pfad-Spezifikation
 
-业务 API：
+Business API:
 
 ```text
 /api/v1/*
 ```
 
-Agent：
+Agent:
 
 ```text
 /agent/v1/*
 ```
 
-Simulation：
+Simulation:
 
 ```text
 /simulation/v1/*
 ```
 
-Document：
+Document:
 
 ```text
 /document/v1/*
 ```
 
-Math：
+Math:
 
 ```text
 /math/v1/*
@@ -1752,9 +1747,9 @@ Math：
 
 ---
 
-# 74. REST 命名
+# 74. REST-Benennung
 
-推荐：
+Empfohlen:
 
 ```text
 GET /api/v1/questions/{id}
@@ -1762,7 +1757,7 @@ POST /api/v1/scenes
 PATCH /api/v1/scenes/{id}
 ```
 
-禁止：
+Verboten:
 
 ```text
 /api/getQuestion
@@ -1773,14 +1768,14 @@ PATCH /api/v1/scenes/{id}
 
 # 75. API DTO
 
-对外接口必须使用：
+Nach außen gerichtete Schnittstellen müssen verwenden:
 
 ```text
 Request DTO
 Response DTO
 ```
 
-禁止直接暴露：
+Verbieten, direkt offenzulegen:
 
 ```text
 Database Entity
@@ -1790,9 +1785,9 @@ Internal Scene Aggregate
 
 ---
 
-# 76. API Error
+# 76. API-Fehler
 
-统一：
+Einheitlich:
 
 ```json
 {
@@ -1807,30 +1802,30 @@ Internal Scene Aggregate
 
 ---
 
-# 77. HTTP Status
+# 77. HTTP-Status
 
-基本约定：
+Grundlegende Konventionen:
 
 ```text
-200 成功查询
-201 创建成功
-204 无响应体成功
-400 请求结构错误
-401 未认证
-403 无权限
-404 资源不存在
-409 Revision / Conflict
-422 领域验证失败
+200 Erfolgreiche Abfrage
+201 Erfolgreich erstellt
+204 Erfolg ohne Antwortkörper
+400 Fehlerhafte Anfragestruktur
+401 Nicht authentifiziert
+403 Keine Berechtigung
+404 Ressource nicht gefunden
+409 Revision / Konflikt
+422 Domänenvalidierung fehlgeschlagen
 429 Rate Limit
-500 内部错误
-503 下游不可用
+500 Interner Fehler
+503 Downstream nicht verfügbar
 ```
 
 ---
 
-# 78. Java 分层
+# 78. Java-Schichtung
 
-Spring Boot 业务服务：
+Spring Boot Geschäftsservices:
 
 ```text
 controller
@@ -1839,53 +1834,53 @@ domain
 infrastructure
 ```
 
-Controller 负责：
+Controller ist zuständig für:
 
 ```text
 HTTP
 Validation
-DTO conversion
+DTO-Konvertierung
 ```
 
-禁止 Controller 写领域业务。
+Es ist verboten, im Controller Domänenlogik zu schreiben.
 
 ---
 
 # 79. Java Entity
 
-数据库 Entity 不直接作为 Response DTO。
+Datenbank-Entity wird nicht direkt als Response-DTO verwendet.
 
-Domain Model 与 Persistence Model 可根据复杂度隔离。
+Domain Model und Persistence Model können je nach Komplexität isoliert werden.
 
 ---
 
-# 80. 数据库 Migration
+# 80. Datenbank-Migration
 
-所有 Schema 修改必须：
+Alle Schema-Änderungen müssen:
 
 ```text
 migration
 ```
 
-推荐：
+Empfohlen:
 
 ```text
 Flyway
 ```
 
-禁止手工修改生产数据库后不留记录。
+Es ist verboten, die Produktionsdatenbank manuell zu ändern, ohne Aufzeichnungen zu hinterlassen.
 
 ---
 
-# 81. 数据库命名
+# 81. Datenbankbenennung
 
-统一：
+Einheitlich:
 
 ```text
 snake_case
 ```
 
-例如：
+Beispielsweise:
 
 ```text
 scene_id
@@ -1896,17 +1891,17 @@ created_at
 
 ---
 
-# 82. 时间规范
+# 82. Zeitkonvention
 
-后端与数据库统一：
+Backend und Datenbank einheitlich:
 
 ```text
 UTC
 ```
 
-客户端转换本地时间。
+Client wandelt in Ortszeit um.
 
-字段命名：
+Feldnamen:
 
 ```text
 created_at
@@ -1917,9 +1912,9 @@ finished_at
 
 ---
 
-# 83. 文件上传
+# 83. Datei-Upload
 
-上传必须检查：
+Beim Upload muss geprüft werden:
 
 ```text
 MIME
@@ -1930,15 +1925,15 @@ malware / dangerous format
 owner
 ```
 
-复杂文档解析应隔离运行。
+Komplexe Dokumentenverarbeitung sollte isoliert ausgeführt werden.
 
 ---
 
 # 84. Object Storage
 
-大型文件不要直接存数据库 BLOB。
+Große Dateien nicht direkt als Datenbank-BLOB speichern.
 
-数据库存：
+In der Datenbank speichern:
 
 ```text
 object_key
@@ -1951,9 +1946,9 @@ metadata
 
 ---
 
-# 85. Redis 规范
+# 85. Redis-Konvention
 
-Redis 只适合：
+Redis eignet sich nur für:
 
 ```text
 Cache
@@ -1963,7 +1958,7 @@ Rate Limit
 Temporary Runtime
 ```
 
-禁止唯一保存：
+Es ist verboten, ausschließlich zu speichern:
 
 ```text
 PhysicsScene Event
@@ -1971,28 +1966,28 @@ Question
 Learning Record
 ```
 
-等永久数据。
+usw. als permanente Daten.
 
 ---
 
-# 86. Vector Store 规范
+# 86. Vector Store-Konvention
 
-Vector Store 用于：
+Vector Store wird verwendet für:
 
 ```text
 Retrieval
 Semantic Search
 ```
 
-不是关系数据库替代品。
+Er ist kein Ersatz für relationale Datenbanken.
 
 ---
 
-# 87. 日志结构
+# 87. Protokollstruktur
 
-日志必须结构化。
+Protokolle müssen strukturiert sein.
 
-至少支持：
+Mindestens unterstützen:
 
 ```text
 timestamp
@@ -2010,32 +2005,32 @@ toolCallId
 
 ---
 
-# 88. 禁止日志敏感信息
+# 88. Verbot sensibler Informationen in Protokollen
 
-禁止输出：
+Verboten ist die Ausgabe von:
 
 ```text
 Password
 API Key
-完整 Access Token
+vollständiger Access Token
 Authorization Header
-身份证原文
-私密文件完整内容
+Personalausweis im Originaltext
+vollständiger Inhalt vertraulicher Dateien
 ```
 
 ---
 
 # 89. console.log
 
-正式业务代码禁止无控制：
+In produktivem Geschäftscode verboten ohne Kontrolle:
 
 ```ts
 console.log(...)
 ```
 
-统一使用 Logger。
+Einheitlich Logger verwenden.
 
-浏览器开发日志需支持：
+Browser-Entwicklungsprotokolle müssen unterstützen:
 
 ```text
 level
@@ -2047,13 +2042,13 @@ environment control
 
 # 90. Trace ID
 
-跨服务链路必须沿用：
+Bei serviceübergreifenden Spuren muss weiterverwendet werden:
 
 ```text
 traceId
 ```
 
-Agent 追加：
+Agent fügt hinzu:
 
 ```text
 sessionId
@@ -2062,7 +2057,7 @@ turnId
 toolCallId
 ```
 
-Physics 追加：
+Physics fügt hinzu:
 
 ```text
 sceneId
@@ -2072,80 +2067,80 @@ physicsEventId
 
 ---
 
-# 91. 错误处理
+# 91. Fehlerbehandlung
 
-禁止：
+Verboten:
 
 ```text
 catch (e) {}
 ```
 
-吞掉异常。
+Ausnahmen verschlucken.
 
-必须：
+Es muss:
 
 ```text
-处理
-转换
-记录
-重新抛出
+behandelt
+umgewandelt
+protokolliert
+neu geworfen
 ```
 
-三选一或组合。
+werden. Einer der drei oder Kombination.
 
 ---
 
-# 92. 用户错误与系统错误分离
+# 92. Trennung von Benutzerfehlern und Systemfehlern
 
-例如：
+Beispielsweise:
 
 ```text
 INVALID_PARAMETER
 ```
 
-属于用户/模型输入错误。
+Gehört zu Benutzer-/Modelleingabefehler.
 
 ```text
 SIMULATION_INTERNAL_ERROR
 ```
 
-属于系统错误。
+Gehört zu Systemfehler.
 
-不要统一显示：
+Nicht einheitlich anzeigen:
 
 ```text
 Something went wrong
 ```
 
-而后台无可追踪信息。
+Aber das Backend hat keine nachverfolgbaren Informationen.
 
 ---
 
 # 93. Graceful Degradation
 
-非核心能力失败时可降级。
+Bei Ausfall nicht-kerniger Fähigkeiten ist Degradation erlaubt.
 
-例如：
-
-```text
-Agent 暂时不可用
-```
-
-不应阻止用户手工使用已有 PhysicsScene 实验。
-
-但：
+Beispiel:
 
 ```text
-Physics Engine 验证失败
+Agent vorübergehend nicht verfügbar
 ```
 
-不能伪装成功继续展示假结果。
+Sollte den Benutzer nicht daran hindern, bestehende PhysicsScene-Experimente manuell zu nutzen.
+
+Aber:
+
+```text
+Physics Engine Validierung fehlgeschlagen
+```
+
+Nicht vortäuschen, dass es erfolgreich war, und gefälschte Ergebnisse weiter anzeigen.
 
 ---
 
-# 94. 测试最高规则
+# 94. Höchstes Test-Regel
 
-以下 package 无测试不得合并：
+Die folgenden Pakete dürfen ohne Tests nicht gemergt werden:
 
 ```text
 physics-core
@@ -2161,7 +2156,7 @@ question-parser
 
 # 95. Unit Tests
 
-应覆盖：
+Soll abdecken:
 
 ```text
 Vector
@@ -2178,69 +2173,69 @@ Parser Normalization
 
 # 96. Physics Golden Tests
 
-必须为经典模型建立稳定 Golden Case。
+Für klassische Modelle müssen stabile Golden Cases erstellt werden.
 
-至少包括：
+Mindestens einschließen:
 
 ```text
-匀速直线运动
-匀变速运动
-自由落体
-竖直上抛
-平抛
-斜抛
-圆周运动
-斜面受力
-摩擦
-弹簧
-动量守恒
-完全弹性碰撞
-库仑力
-匀强电场偏转
-带电粒子匀强磁场运动
-速度选择器
-简单串并联
-闭合电路
-法拉第电磁感应
+Gleichförmige geradlinige Bewegung
+Gleichmäßig beschleunigte Bewegung
+Freier Fall
+Senkrechter Wurf nach oben
+Waagerechter Wurf
+Schräger Wurf
+Kreisbewegung
+Kraftanalyse auf geneigter Ebene
+Reibung
+Feder
+Impulserhaltung
+Vollständig elastischer Stoß
+Coulomb-Kraft
+Ablenkung im homogenen elektrischen Feld
+Bewegung geladener Teilchen im homogenen Magnetfeld
+Geschwindigkeitswähler
+Einfache Reihen- und Parallelschaltung
+Geschlossener Stromkreis
+Faradaysche elektromagnetische Induktion
 ```
 
 ---
 
-# 97. Golden Test 原则
+# 97. Golden-Test-Prinzipien
 
-Golden Test 不只是：
+Golden Test ist nicht nur:
 
 ```text
-snapshot 一个大 JSON
+snapshot ein großes JSON
 ```
 
-核心物理量要明确断言：
+Kernphysikalische Größen müssen explizit behauptet/geprüft werden:
 
 ```text
-公式
-数值范围
-守恒量
-方向
-运动类型
-周期
-轨迹性质
+Formel
+Wertebereich
+Erhaltungsgröße
+Richtung
+Bewegungstyp
+Periode
+Bahnart
 ```
 
 ---
 
-# 98. Bug 修复规范
+# 98. Bug-Fix-Regel
 
-修复核心 Physics Bug：
+Beim Fixen von Kern-Physics-Bugs:
 
-> **先增加失败的回归测试，再修复代码。**
+> **Zuerst fehlschlagenden Regressionstest hinzufügen, dann Code fixen.**
 
-禁止只改代码不留测试。
+Verboten, nur Code zu ändern ohne Test zu hinterlassen.
 
 ---
 
 # 99. Agent Contract Test
 
-重点测试：
+Schwerpunkttests:
 
 ```text
 Tool Schema
@@ -2252,17 +2247,17 @@ Scene Builder Contract
 Physics IR Contract
 ```
 
-不要把主要测试目标设为：
+Nicht das Haupttestziel darauf setzen:
 
 ```text
-模型措辞是否漂亮
+Ob die Modellformulierung schön ist
 ```
 
 ---
 
 # 100. Integration Test
 
-覆盖：
+Abdecken:
 
 ```text
 Question
@@ -2284,102 +2279,102 @@ Observation
 
 # 101. E2E Test
 
-Web 核心流程使用 Playwright。
+Web-Kernabläufe verwenden Playwright.
 
-至少：
+Mindestens:
 
 ```text
-进入实验室
-打开实验
-修改参数
-运行
-暂停
-Seek Timeline
-切换 Observable
-询问 Agent
+Labor betreten
+Experiment öffnen
+Parameter ändern
+Ausführen
+Pausieren
+Timeline suchen/positionieren
+Observable wechseln
+Agent fragen
 ```
 
-试题：
+Prüfungsaufgaben:
 
 ```text
-上传题目
-解析
-生成 Scene
-进入可视化
-查看解析
-在物理世界中打开
+Aufgabe hochladen
+Analysieren
+Szene generieren
+Visualisierung betreten
+Analyse ansehen
+In der Physikwelt öffnen
 ```
 
 ---
 
 # 102. Visual Regression
 
-适合：
+Geeignet für:
 
 ```text
 Physics Workspace
-受力图
-磁场区域
-电场线
-轨迹
-电路图
-核心 UI
+Kraftdiagramm
+Magnetfeldbereich
+Elektrische Feldlinien
+Bahn
+Schaltplan
+Kern-UI
 ```
 
-视觉测试不替代 Physics Golden Test。
+Visuelle Tests ersetzen keine Physics Golden Tests.
 
 ---
 
 # 103. Snapshot Test
 
-禁止滥用 Snapshot Test。
+Missbrauch von Snapshot Tests verboten.
 
-核心 Physics Result 应明确断言。
+Kern-Physics-Ergebnisse müssen explizit behauptet/geprüft werden.
 
-UI Primitive 可合理 Snapshot。
+UI-Primitiven dürfen sinnvoll gesnapshottet werden.
 
 ---
 
 # 104. Test Mock
 
-允许 Mock：
+Mocken erlaubt:
 
 ```text
-不可控第三方模型
-网络
-Object Storage
+Unkontrollierbare Drittmodelle
+Netzwerk
+Objektspeicher
 ```
 
-禁止 Mock：
+Mocken verboten:
 
 ```text
-本来应该实现的 Physics Engine
-真实 Tool Handler
-核心领域功能
+Eigentlich zu implementierende Physics Engine
+Echte Tool Handler
+Kerndomänenfunktionen
 ```
 
-然后宣称开发完成。
+Und dann Entwicklung als abgeschlossen erklären.
 
 ---
 
-# 105. 禁止删除失败测试
+# 105. Verbot, fehlschlagende Tests zu löschen
 
-AI 或人工不得：
+KI oder Mensch darf nicht:
 
 ```text
-删测试
+Tests löschen
 .skip
 .only
-修改 expected 为错误结果
+expected in falsches Ergebnis ändern
 ```
 
-只是为了 CI 通过。
+Nur damit CI durchläuft.
 
 ---
 
-# 106. CI 必须通过
+# 106. CI muss durchlaufen
 
-PR 最少：
+PR mindestens:
 
 ```text
 format check
@@ -2391,7 +2386,7 @@ agent contract tests
 build
 ```
 
-核心改动追加：
+Bei Kernänderungen zusätzlich:
 
 ```text
 integration
@@ -2401,24 +2396,24 @@ visual regression
 
 ---
 
-# 107. Git 主分支
+# 107. Git-Hauptzweig
 
-长期主分支：
+Langfristiger Hauptzweig:
 
 ```text
 main
 ```
 
-必须保持：
+Muss beibehalten:
 
 ```text
-可构建
-核心测试通过
+Buildbar
+Kern-Tests bestehen
 ```
 
 ---
 
-# 108. Git 分支命名
+# 108. Git-Zweigbenennung
 
 ```text
 feat/physics-scene
@@ -2431,11 +2426,11 @@ docs/domain-contract
 
 ---
 
-# 109. Commit 规范
+# 109. Commit-Regeln
 
-使用 Conventional Commits。
+Conventional Commits verwenden.
 
-例如：
+Zum Beispiel:
 
 ```text
 feat(scene): add field region model
@@ -2448,23 +2443,23 @@ docs(contract): define simulation result schema
 
 ---
 
-# 110. 禁止巨型 Commit
+# 110. Riesen-Commits verboten
 
-禁止：
+Verboten:
 
 ```text
 feat: update project
 ```
 
-包含几百个无关文件。
+Enthält mehrere hundert unabhängige Dateien.
 
-Commit 应表达单一逻辑目的。
+Ein Commit soll einen einzelnen logischen Zweck ausdrücken.
 
 ---
 
-# 111. PR 内容
+# 111. PR-Inhalt
 
-必须说明：
+Muss angeben:
 
 ```text
 What
@@ -2481,132 +2476,132 @@ Migration
 
 # 112. Breaking Change
 
-以下修改视为 Breaking：
+Folgende Änderungen gelten als Breaking:
 
 ```text
-PhysicsScene 字段
-Physics IR 字段
+PhysicsScene Felder
+Physics IR Felder
 Tool Schema
 Physics Event
 SimulationResult
-公共 Package API
-服务 API
+Öffentliche Package API
+Service API
 ```
 
-必须：
+Muss:
 
 ```text
-明确标记 BREAKING CHANGE
-更新 Contract
-更新 Migration
-更新 Tests
+Explizit BREAKING CHANGE kennzeichnen
+Contract aktualisieren
+Migration aktualisieren
+Tests aktualisieren
 ```
 
 ---
 
-# 113. 文档同步
+# 113. Dokumentations-Synchronisation
 
-修改以下内容必须同步文档：
+Änderungen an Folgendem erfordern Dokumentationsaktualisierung:
 
 ```text
-架构
+Architektur
 Contract
 Public Tool
 Public API
 Physics Domain
-状态机
-上下文层
-重大目录
+Zustandsmaschine
+Kontext-Ebene
+Wichtige Verzeichnisse
 ```
 
 ---
 
-# 114. TODO 规范
+# 114. TODO-Regeln
 
-禁止使用 TODO 代替核心实现，然后宣称完成。
+TODO nicht als Ersatz für die Kernimplementierung verwenden und dann als fertig erklären.
 
-TODO 必须：
+TODO muss:
 
 ```text
-描述具体
-标 Issue / task
-不影响当前功能完整性
+Konkrete Beschreibung
+Issue / Task verknüpfen
+Aktuelle Funktionsvollständigkeit nicht beeinträchtigen
 ```
 
 ---
 
 # 115. Feature Flag
 
-未完成但需要合并的实验能力：
+Unvollendete, aber zusammenzuführende experimentelle Fähigkeiten:
 
-应放 Feature Flag 后。
+Hinter Feature Flag stellen.
 
-禁止半成品直接暴露正式用户。
-
----
-
-# 116. UI 视觉规范
-
-PhysicsOS 主视觉：
-
-```text
-暖白
-雾白
-自然蓝
-冰蓝透明层
-少量青绿
-极少量警告橙
-深灰文字
-```
-
-禁止：
-
-```text
-大面积死紫色
-紫色渐变满屏
-暗黑赛博朋克
-廉价发光
-传统政务/教育后台蓝
-```
+Halbfertige Produkte nicht direkt offiziellen Nutzern aussetzen.
 
 ---
 
-# 117. UI 层级
+# 116. UI-Visuelle Regeln
 
-优先：
+PhysicsOS-Hauptvisueller Stil:
 
 ```text
-留白
-内容层级
-物理世界主视觉
-细线
-轻阴影
-克制 Glass
+Warmweiß
+Nebelweiß
+Naturblau
+Eisblau transparente Schicht
+Wenig Blaugrün
+Sehr wenig Warnorange
+Dunkelgrauer Text
 ```
 
-不要所有内容都做卡片。
+Verboten:
+
+```text
+Großflächiges totes Violett
+Violetter Verlauf vollflächig
+Dunkler Cyberpunk
+Billiges Leuchten
+Traditionelles Behörden-/Bildungs-Backend-Blau
+```
 
 ---
 
-# 118. Glass 使用
+# 117. UI-Ebenen
 
-液态玻璃只用于：
+Priorität:
 
 ```text
-导航
-浮层
+Leerraum
+Inhaltshierarchie
+Physikwelt-Hauptvisueller Stil
+Feine Linien
+Leichte Schatten
+Zurückhaltendes Glass
+```
+
+Nicht alle Inhalte als Karten gestalten.
+
+---
+
+# 118. Glass-Verwendung
+
+Flüssiges Glas nur für:
+
+```text
+Navigation
+Schwebende Ebenen
 Inspector
 Toolbar
-重要 Overlay
+Wichtige Overlays
 ```
 
-禁止每一层都 Blur。
+Nicht jede Ebene mit Blur versehen.
 
 ---
 
-# 119. 颜色语义
+# 119. Farbsemantik
 
-建议：
+Empfehlung:
 
 ```text
 Blue    = Primary / Physics
@@ -2616,17 +2611,17 @@ Red     = Error / Danger
 Gray    = Neutral
 ```
 
-颜色不能随页面随意改变语义。
+Farben dürfen ihre Semantik nicht seitenweise willkürlich ändern.
 
 ---
 
-# 120. Physics 可视化颜色
+# 120. Physics-Visualisierungsfarben
 
-Force、Velocity、Acceleration 等应建立统一设计 Token。
+Force, Velocity, Acceleration etc. sollen einheitliche Design-Tokens festlegen.
 
-设计 Token 在 UI Design System 中定义。
+Design-Tokens werden im UI Design System definiert.
 
-业务代码不得随意：
+Geschäftslogik-Code darf nicht willkürlich:
 
 ```ts
 color: '#ff00ff'
@@ -2634,9 +2629,9 @@ color: '#ff00ff'
 
 ---
 
-# 121. Accessibility
+# 121. Barrierefreiheit
 
-重要操作必须支持：
+Wichtige Operationen müssen unterstützen:
 
 ```text
 Keyboard
@@ -2645,13 +2640,13 @@ ARIA
 High Contrast consideration
 ```
 
-颜色不能作为唯一状态表达方式。
+Farbe darf nicht die einzige Art der Statusdarstellung sein.
 
 ---
 
-# 122. Responsive 范围
+# 122. Responsive-Bereich
 
-主攻：
+Fokus auf:
 
 ```text
 1366×768
@@ -2660,22 +2655,22 @@ High Contrast consideration
 1920×1080
 ```
 
-Physics Workspace 优先桌面横屏体验。
+Physics Workspace priorisiert Desktop-Querformat-Erfahrung.
 
-移动端暂不作为核心工作台目标。
+Mobile ist vorerst kein Kernarbeitsplatz-Ziel.
 
 ---
 
-# 123. Canvas 性能
+# 123. Canvas-Performance
 
-禁止 React 每个 Frame 更新整棵组件树。
+Verboten: React bei jedem Frame den gesamten Komponentenbaum aktualisieren.
 
-Renderer 应有独立更新循环。
+Renderer sollte eine unabhängige Aktualisierungsschleife haben.
 
-React 只订阅：
+React abonniert nur:
 
 ```text
-低频摘要
+Niedrigfrequenz-Zusammenfassung
 Selection
 Panel Data
 Status
@@ -2683,9 +2678,9 @@ Status
 
 ---
 
-# 124. 大数据轨迹
+# 124. Große-Daten-Trajektorien
 
-长时间 Simulation 必须：
+Langzeit-Simulation muss:
 
 ```text
 sampling
@@ -2693,27 +2688,27 @@ decimation
 chunk
 ```
 
-不能无限保留每个 solver step。
+Nicht jeden Solver-Schritt unbegrenzt aufbewahren.
 
 ---
 
-# 125. Worker 通信
+# 125. Worker-Kommunikation
 
-Worker 消息必须使用明确 Contract。
+Worker-Nachrichten müssen explizite Contracts verwenden.
 
-禁止传：
+Verboten zu senden:
 
 ```text
-任意对象
+Beliebiges Objekt
 function
 DOM reference
 ```
 
 ---
 
-# 126. 安全权限
+# 126. Sicherheitsberechtigungen
 
-Tool 权限至少分类：
+Tool-Berechtigungen mindestens in Kategorien unterteilt:
 
 ```text
 read
@@ -2724,25 +2719,25 @@ admin
 dangerous
 ```
 
-默认最小权限。
+Standardmäßig minimale Berechtigungen.
 
 ---
 
-# 127. Agent 权限继承
+# 127. Agent-Berechtigungsvererbung
 
-Agent 不拥有高于当前用户的权限。
+Ein Agent besitzt keine höheren Berechtigungen als der aktuelle Benutzer.
 
-禁止：
+Verboten:
 
 ```text
-学生通过 Agent 调用 Teacher/Admin Tool
+Schüler ruft über Agent Teacher/Admin Tool auf
 ```
 
 ---
 
-# 128. Rate Limit
+# 128. Ratenbegrenzung
 
-至少针对：
+Mindestens für:
 
 ```text
 LLM
@@ -2753,13 +2748,13 @@ Heavy Simulation
 Export
 ```
 
-设置合理限流。
+Angemessene Ratenbegrenzung festlegen.
 
 ---
 
 # 129. Timeout
 
-所有：
+Alle:
 
 ```text
 Tool
@@ -2769,60 +2764,60 @@ Simulation
 Math Service
 ```
 
-必须定义 Timeout。
+Timeout muss definiert werden.
 
-不能无限等待。
+Kein unbegrenztes Warten.
 
 ---
 
 # 130. Retry
 
-只对：
+Nur für:
 
 ```text
-可重试的网络错误
-临时服务错误
+Wiederholbare Netzwerkfehler
+Temporäre Dienstfehler
 ```
 
-自动 Retry。
+Automatischer Retry.
 
-领域验证失败不能无限 Retry。
+Bei Domänenvalidierungsfehlern kein unbegrenzter Retry.
 
 ---
 
-# 131. Idempotency
+# 131. Idempotenz
 
-以下操作应支持 Idempotency：
+Folgende Operationen sollten Idempotenz unterstützen:
 
 ```text
-文件上传初始化
-任务创建
-支付类未来功能
-重要 Scene Command
+Datei-Upload-Initialisierung
+Aufgaben-Erstellung
+Zukünftige Zahlungsfunktionen
+Wichtige Scene Command
 ```
 
 ---
 
-# 132. 数据隐私
+# 132. Datenschutz
 
-学生：
+Schüler:
 
 ```text
-试卷
-学习记录
-聊天
-上传文件
+Prüfungsbogen
+Lernverlauf
+Chat
+Hochgeladene Dateien
 ```
 
-必须按用户和权限隔离。
+Müssen nach Benutzer und Berechtigung isoliert werden.
 
-开发日志不输出完整私密内容。
+Entwicklungsprotokolle geben keine vollständigen privaten Inhalte aus.
 
 ---
 
-# 133. 数据删除
+# 133. Datenlöschung
 
-用户删除资源后，应有明确：
+Nach Löschung einer Ressource durch den Benutzer muss es ein klares:
 
 ```text
 metadata delete
@@ -2830,56 +2825,56 @@ object delete
 derived data cleanup
 ```
 
-策略。
+Strategie geben.
 
 ---
 
-# 134. AI 开发 Agent 必须先阅读文档
+# 134. KI-Entwicklungs-Agent muss zuerst Dokumentation lesen
 
-任何 Codex / Cursor / Claude Code / Agent 在修改代码前：
+Jeglicher Codex / Cursor / Claude Code / Agent vor Code-Änderungen:
 
-必须按顺序阅读：
+Muss in folgender Reihenfolge lesen:
 
 ```text
 00-PRODUCT-OVERVIEW.md
 01-DEVELOPMENT-GUIDE.md
 02-ENGINEERING-STANDARDS.md
 03-DOMAIN-CONTRACTS.md
-目标 Package README
-相关 Tests
+README des Ziel-Packages
+Zugehörige Tests
 ```
 
 ---
 
-# 135. AI Agent 禁止私自重构总架构
+# 135. KI-Agent darf Gesamtarchitektur nicht eigenmächtig umstrukturieren
 
-没有明确任务，不得：
+Ohne explizite Aufgabe nicht:
 
 ```text
-更换技术栈
-删除领域层
-改状态架构
-重写 Contract
-替换 Agent Runtime
-把多个 package 合并成一个
+Technologie-Stack austauschen
+Domänenschicht löschen
+Statusarchitektur ändern
+Contract neu schreiben
+Agent Runtime ersetzen
+Mehrere Packages zu einem zusammenführen
 ```
 
 ---
 
-# 136. AI Agent 禁止重复造轮子
+# 136. KI-Agent darf Rad nicht neu erfinden
 
-修改前必须搜索：
+Vor Änderungen muss gesucht werden:
 
 ```text
-已有 package
-已有 type
-已有 util
-已有 tool
-已有 schema
-已有 test helper
+Vorhandenes Package
+Vorhandener Type
+Vorhandenes Util
+Vorhandenes Tool
+Vorhandenes Schema
+Vorhandener Test Helper
 ```
 
-禁止出现：
+Verboten ist das Auftreten von:
 
 ```text
 PhysicsScene2
@@ -2888,47 +2883,47 @@ AnotherUnitSystem
 ToolRegistryV2
 ```
 
-只因为没有先阅读代码。
+Nur weil der Code nicht zuerst gelesen wurde.
 
 ---
 
-# 137. AI Agent 禁止无关修改
+# 137. KI-Agent darf keine themenfremden Änderungen vornehmen
 
-任务：
+Aufgabe:
 
 ```text
-修复磁场轨迹
+Magnetfeld-Bahn korrigieren
 ```
 
-禁止顺手：
+Verboten, beiläufig zu:
 
 ```text
-重写首页
-升级全部依赖
-格式化整个仓库
-重构 Agent
-```
-
----
-
-# 138. AI Agent 禁止假完成
-
-不能称为完成：
-
-```text
-UI 有按钮但没功能
-返回 Hard-coded Result
-Simulation 使用 Mock
-Agent 使用预设回复
-Tool 没接 Runtime
-只实现 Happy Path
+Startseite neu schreiben
+Alle Abhängigkeiten aktualisieren
+Gesamtes Repository formatieren
+Agent umstrukturieren
 ```
 
 ---
 
-# 139. AI Agent 必须真实验证
+# 138. KI-Agent darf nicht vorgeben, fertig zu sein
 
-任务完成前至少执行相关：
+Darf nicht als abgeschlossen gelten:
+
+```text
+UI hat Button aber keine Funktion
+Hard-coded Result zurückgeben
+Simulation nutzt Mock
+Agent nutzt vorgefertigte Antworten
+Tool nicht an Runtime angebunden
+Nur Happy Path implementiert
+```
+
+---
+
+# 139. KI-Agent muss tatsächlich verifizieren
+
+Vor Aufgabenabschluss mindestens folgende Prüfungen ausführen:
 
 ```text
 typecheck
@@ -2938,7 +2933,7 @@ golden tests
 build
 ```
 
-根据范围追加：
+Je nach Umfang ergänzen:
 
 ```text
 integration
@@ -2947,26 +2942,26 @@ e2e
 
 ---
 
-# 140. AI Agent 完成报告
+# 140. KI-Agent-Abschlussbericht
 
-必须输出：
+Muss ausgeben:
 
 ```text
-完成内容
-修改文件
-关键设计
-Contract 是否变化
-测试命令
-测试结果
-未完成内容
-风险
+Abgeschlossene Inhalte
+Geänderte Dateien
+Wesentliche Designentscheidungen
+Ob Contract sich geändert hat
+Testbefehle
+Testergebnisse
+Unvollständige Inhalte
+Risiken
 ```
 
 ---
 
-# 141. 多 Agent 协同
+# 141. Multi-Agent-Kollaboration
 
-并行开发前必须明确：
+Vor paralleler Entwicklung müssen folgende Punkte geklärt sein:
 
 ```text
 Owner Module
@@ -2975,13 +2970,13 @@ Shared Contracts
 Integration Point
 ```
 
-避免多个 Agent 同时修改核心 Contract。
+Vermeiden, dass mehrere Agents gleichzeitig den Kern-Contract ändern.
 
 ---
 
-# 142. Shared Contract 修改锁
+# 142. Sperre für Shared-Contract-Änderungen
 
-以下文件/模块修改需串行协调：
+Änderungen an folgenden Dateien/Modulen erfordern serielle Koordination:
 
 ```text
 03-DOMAIN-CONTRACTS.md
@@ -2994,171 +2989,171 @@ SimulationResult
 
 ---
 
-# 143. Definition of Done
+# 143. Fertigstellungsdefinition (Definition of Done)
 
-功能只有满足以下全部条件才算完成：
+Eine Funktion gilt nur als abgeschlossen, wenn alle folgenden Bedingungen erfüllt sind:
 
 ```text
-真实代码完成
-真实功能接通
-类型检查通过
-Lint 通过
-Unit Test 通过
-相关 Physics Golden Test 通过
-必要 Contract Test 通过
-Build 通过
-必要 E2E 通过
-无核心 Mock
-无假成功
-无隐藏失败
-Contract 已同步
-文档已同步
+Echter Code fertiggestellt
+Echte Funktionalität angebunden
+Typprüfung bestanden
+Lint bestanden
+```Unit-Test bestanden
+Zugehörige Physics Golden Tests bestanden
+Notwendige Contract-Tests bestanden
+Build bestanden
+Notwendige E2E-Tests bestanden
+Keine Kern-Mocks
+Keine Scheinerfolge
+Keine versteckten Fehler
+Contract synchronisiert
+Dokumentation synchronisiert
 ```
 
 ---
 
-# 144. 不算完成的情况
+# 144. Nicht als abgeschlossen geltende Situationen
 
-以下明确不算完成：
+Folgende Situationen gelten explizit **nicht** als abgeschlossen:
 
 ```text
-页面做完但没后端
-Tool 注册了但 execute 是 TODO
-Agent 回复看起来对但没调用 Physics Engine
-Scene 可以显示但不能保存/replay
-测试被 skip
-接口用固定 JSON
+Seite fertig, aber kein Backend
+Tool registriert, aber execute ist TODO
+Agent-Antwort sieht richtig aus, ruft aber Physics Engine nicht auf
+Scene kann angezeigt werden, aber nicht speichern/replay
+Tests werden übersprungen (skip)
+Schnittstelle verwendet festes JSON
 ```
 
 ---
 
-# 145. Package README 要求
+# 145. Package README-Anforderungen
 
-重要 package 必须有 README，说明：
+Wichtige Pakete müssen ein README mit folgenden Angaben haben:
 
 ```text
-Purpose
-Responsibilities
+Purpose (Zweck)
+Responsibilities (Verantwortlichkeiten)
 Public API
-Allowed Dependencies
-Forbidden Dependencies
+Allowed Dependencies (Erlaubte Abhängigkeiten)
+Forbidden Dependencies (Verbotene Abhängigkeiten)
 Contracts
-Usage Example
-Test Command
+Usage Example (Verwendungsbeispiel)
+Test Command (Testbefehl)
 ```
 
 ---
 
-# 146. Code Review 检查表
+# 146. Code Review Checkliste
 
-Review 至少检查：
+Review prüft mindestens:
 
 ```text
-是否违反领域边界
-是否产生第二事实源
-是否绕过 Tool
-是否单位安全
-是否改变 Contract
-是否存在 any
-是否有测试
-是否有回归风险
-是否有安全问题
-是否有无关改动
+Verletzung von Domänengrenzen?
+Entstehung einer zweiten Faktenquelle?
+Umgehung von Tools?
+Einheitensicherheit (Unit Safety)?
+Änderung am Contract?
+Verwendung von 'any'?
+Vorhandensein von Tests?
+Regressionsrisiken?
+Sicherheitsprobleme?
+Unzusammenhängende Änderungen?
 ```
 
 ---
 
-# 147. Physics Review 检查表
+# 147. Physics Review Checkliste
 
-Physics Engine PR 额外检查：
+Physics Engine PR zusätzlich prüfen:
 
 ```text
-公式成立条件
-单位
-方向
-边界条件
-极端输入
-数值误差
-守恒关系
+Formel-Gültigkeitsbedingungen
+Einheiten
+Richtung
+Randbedingungen
+Extremeingaben
+Numerische Fehler
+Erhaltungsbeziehungen
 Golden Case
 ```
 
 ---
 
-# 148. Agent Review 检查表
+# 148. Agent Review Checkliste
 
-Agent PR 额外检查：
+Agent PR zusätzlich prüfen:
 
 ```text
 Prompt Scope
 Tool Scope
-Permission
-Structured Output
-Context Size
-Compaction
-Retry
-Trace
-是否让 LLM 决定物理事实
+Permission (Berechtigung)
+Structured Output (Strukturierte Ausgabe)
+Context Size (Kontextgröße)
+Compaction (Kompaktierung)
+Retry (Wiederholung)
+Trace (Verfolgung)
+Ob LLM physikalische Fakten entscheidet
 ```
 
 ---
 
-# 149. UI Review 检查表
+# 149. UI Review Checkliste
 
-UI PR 额外检查：
+UI PR zusätzlich prüfen:
 
 ```text
-是否符合浅色视觉
-是否出现大面积紫色
-是否让 Physics Canvas 成为主体
-是否过度卡片化
-是否可键盘操作
-是否正确响应主流桌面分辨率
+Entspricht hellem visuellen Stil?
+Großflächiges Violett vorhanden?
+Physics Canvas als Hauptakteur?
+Übermäßige Kartendarstellung (Card-Überladung)?
+Tastaturbedienung möglich?
+Korrekte Reaktion auf gängige Desktop-Auflösungen?
 ```
 
 ---
 
-# 150. 性能 Review
+# 150. Performance Review
 
-高频模块检查：
+Hochfrequente Module prüfen:
 
 ```text
-是否导致 React 高频重渲染
-是否主线程长任务
-是否无限存储轨迹
-是否存在 O(n²) 无界增长
-是否可 Worker 化
+Verursacht React hochfrequente Re-Renders?
+Lange Haupt-Thread-Aufgaben?
+Unbegrenzte Trajektorien-Speicherung?
+O(n²) unbeschränktes Wachstum vorhanden?
+Worker-Auslagerung möglich?
 ```
 
 ---
 
 # 151. Contract First
 
-跨模块新能力优先顺序：
+Prioritätsreihenfolge für neue funktionsübergreifende Fähigkeiten:
 
 ```text
-先定义 Contract
+Zuerst Contract definieren
 ↓
-写 Contract Test
+Contract Test schreiben
 ↓
-实现 Producer
+Producer implementieren
 ↓
-实现 Consumer
+Consumer implementieren
 ```
 
-不要两边各自猜数据格式。
+Nicht beide Seiten raten unabhängig das Datenformat.
 
 ---
 
 # 152. Versioning
 
-公共 Contract 必须具有：
+Öffentliche Contracts müssen besitzen:
 
 ```text
 schemaVersion
 ```
 
-例如：
+Beispiel:
 
 ```text
 physics-scene/1.0
@@ -3170,82 +3165,82 @@ diagram-ir/1.0
 
 # 153. Migration
 
-Breaking Contract 修改必须提供：
+Brechende Contract-Änderungen müssen bereitstellen:
 
 ```text
 Migration
 ```
 
-不能要求所有历史数据直接失效。
+Darf nicht verlangen, dass alle historischen Daten sofort ungültig werden.
 
 ---
 
 # 154. Deprecation
 
-公共 API 删除前：
+Vor Löschung öffentlicher APIs:
 
 ```text
-deprecated
-migration path
-removal version
+deprecated (veraltet)
+migration path (Migrationspfad)
+removal version (Entfernungsversion)
 ```
 
-明确告知。
+Explizit kommunizieren.
 
 ---
 
-# 155. Feature 开发标准流程
+# 155. Feature-Entwicklungsstandardprozess
 
-推荐统一流程：
+Empfohlener einheitlicher Prozess:
 
 ```text
-理解需求
+Anforderungen verstehen
 ↓
-确认 Domain
+Domain bestätigen
 ↓
-确认 Contract
+Contract bestätigen
 ↓
-确认依赖方向
+Abhängigkeitsrichtung bestätigen
 ↓
-补测试
+Tests nachrüsten
 ↓
-实现
+Implementieren
 ↓
-验证
+Verifizieren
 ↓
-文档
+Dokumentieren
 ↓
 Review
 ```
 
 ---
 
-# 156. Physics 功能开发标准流程
+# 156. Physics-Funktionsentwicklungsstandardprozess
 
-例如新增：
+Beispiel Neuerstellung:
 
 ```text
-带电粒子进入矩形磁场
+Geladenes Teilchen betritt rechteckiges Magnetfeld
 ```
 
-开发顺序：
+Entwicklungsreihenfolge:
 
 ```text
-定义 Scene 能力
+Scene-Fähigkeiten definieren
 ↓
-定义 Region / Boundary Contract
+Region / Boundary Contract definieren
 ↓
-增加 Golden Case
+Golden Case hinzufügen
 ↓
-实现 Magnetic Engine
+Magnetic Engine implementieren
 ↓
-实现 Verifier
+Verifier implementieren
 ↓
-增加 Observation
+Observation hinzufügen
 ↓
-Renderer 展示
+Renderer-Darstellung
 ↓
-Tool 接口
+Tool-Schnittstelle
 ↓
 Skill
 ↓
@@ -3256,14 +3251,14 @@ E2E
 
 ---
 
-# 157. Question 功能标准流程
+# 157. Question-Funktionsstandardprozess
 
 ```text
-定义题型
+Aufgabentyp definieren
 ↓
 Physics IR
 ↓
-Diagram IR 支持
+Diagram IR Unterstützung
 ↓
 Parser
 ↓
@@ -3275,138 +3270,138 @@ Verifier
 ↓
 Tutor
 ↓
-Dynamic Variation
+Dynamic Variation (Dynamische Variation)
 ```
 
 ---
 
-# 158. Tool 开发流程
+# 158. Tool-Entwicklungsprozess
 
 ```text
 Tool Contract
 ↓
 Schema
 ↓
-Permission
+Permission (Berechtigung)
 ↓
 Handler
 ↓
-Domain Validation
+Domain Validation (Domänenvalidierung)
 ↓
 Contract Test
 ↓
 Agent Scope
 ↓
-Documentation
+Documentation (Dokumentation)
 ```
 
 ---
 
-# 159. Skill 开发流程
+# 159. Skill-Entwicklungsprozess
 
 ```text
-Concept
+Concept (Konzept)
 ↓
-Rules
+Rules (Regeln)
 ↓
-Prerequisites
+Prerequisites (Voraussetzungen)
 ↓
-Misconceptions
+Misconceptions (Fehlvorstellungen)
 ↓
-Visualization
+Visualization (Visualisierung)
 ↓
 Tools
 ↓
-Teaching Strategy
+Teaching Strategy (Lehrstrategie)
 ↓
-Verification
+Verification (Verifikation)
 ↓
-Question Pattern
+Question Pattern (Aufgabenmuster)
 ↓
-Examples
+Examples (Beispiele)
 ```
 
 ---
 
-# 160. 最终架构红线清单
+# 160. Endgültige Architektur-Rotlinien-Checkliste
 
-以下任何一项出现都必须修复：
+Tritt einer der folgenden Punkte auf, muss er behoben werden:
 
-1. LLM 直接决定真实物理结果；
-2. UI 直接计算核心 Physics Result；
-3. Renderer 计算物理规律；
-4. Agent 绕过 Tool 修改 PhysicsScene；
-5. Physics Core 依赖 React；
-6. Physics Core 依赖 DeepSeek Harness；
-7. PhysicsScene 保存 Pixi/Three 对象；
-8. Zustand 成为第二个 PhysicsScene；
-9. 不带单位管理核心物理量；
-10. 2D 与 3D 各自维护不同物理事实；
-11. Tool 使用一个 prompt 参数包办所有事情；
-12. Context Summary 替代 Scene；
-13. Web 与 Desktop 复制业务代码；
-14. 模块私自定义重复 Contract；
-15. Redis 成为永久数据唯一事实源；
-16. LLM 作为第一 Physics Verifier；
-17. 删除失败测试让 CI 通过；
-18. 用 Mock 冒充完成；
-19. Agent 修改无关模块；
-20. Contract 改变但不更新文档和 Migration。
+1. LLM entscheidet direkt echte physikalische Ergebnisse;
+2. UI berechnet direkt Kern-Physics-Results;
+3. Renderer berechnet physikalische Gesetzmäßigkeiten;
+4. Agent umgeht Tool und modifiziert PhysicsScene;
+5. Physics Core hängt von React ab;
+6. Physics Core hängt von DeepSeek Harness ab;
+7. PhysicsScene speichert Pixi/Three-Objekte;
+8. Zustand wird zum zweiten PhysicsScene;
+9. Kernphysikalische Größen ohne Einheitenverwaltung;
+10. 2D und 3D pflegen jeweils unterschiedliche physikalische Fakten;
+11. Tool verwendet einen einzelnen prompt-Parameter für alles;
+12. Context Summary ersetzt Scene;
+13. Web und Desktop kopieren Business-Code;
+14. Module definieren eigenmächtig doppelte Contracts;
+15. Redis wird zur einzigen permanenten Daten-Faktenquelle;
+16. LLM als erster Physics Verifier;
+17. Fehlschlagende Tests löschen, damit CI besteht;
+18. Mocks als Fertigstellung vortäuschen;
+19. Agent modifiziert fremde Module;
+20. Contract ändert sich, aber Dokumentation und Migration werden nicht aktualisiert.
 
 ---
 
-# 161. 工程质量目标
+# 161. Engineering-Qualitätsziele
 
-PhysicsOS 不以：
+PhysicsOS misst sich **nicht** an:
 
-> **“功能暂时能跑”**
+> **„Funktioniert vorerst“**
 
-作为工程标准。
+als Engineering-Standard.
 
-长期必须做到：
+Langfristig muss gelten:
 
 ```text
-Correct
-Deterministic
-Traceable
-Replayable
-Testable
-Verifiable
-Extensible
-Replaceable
-Maintainable
+Correct (Korrekt)
+Deterministic (Deterministisch)
+Traceable (Nachvollziehbar)
+Replayable (Wiederholbar/Replay-fähig)
+Testable (Testbar)
+Verifiable (Verifizierbar)
+Extensible (Erweiterbar)
+Replaceable (Austauschbar)
+Maintainable (Wartbar)
 ```
 
-即：
+Also:
 
 ```text
-正确
-确定
-可追踪
-可回放
-可测试
-可验证
-可扩展
-可替换
-可维护
+Korrekt
+Deterministisch
+Nachvollziehbar
+Wiederholbar
+Testbar
+Verifizierbar
+Erweiterbar
+Austauschbar
+Wartbar
 ```
 
 ---
 
-# 162. 最终规范原则
+# 162. Endgültige Spezifikationsprinzipien
 
-所有模块都必须能够明确回答两个问题：
+Alle Module müssen zwei Fragen eindeutig beantworten können:
 
-> **我负责什么？**
+> **Wofür bin ich verantwortlich?**
 
-以及：
+Und:
 
-> **我绝对不负责什么？**
+> **Wofür bin ich absolut NICHT verantwortlich?**
 
-只有这样，PhysicsOS 才能在完整覆盖初高中物理、Agent、试卷理解、实时仿真和未来 Desktop 的情况下，仍然保持长期可维护。
+Nur so kann PhysicsOS bei vollständiger Abdeckung von Mittel- und Oberstufenphysik, Agent, Prüfungsverständnis, Echtzeitsimulation und zukünftigem Desktop langfristig wartbar bleiben.
 
 ---
 
-# 163. 一句话工程规范
+# 163. Ein-Satz-Engineering-Regel
 
-> **任何开发都不得以“快速实现”为理由破坏 PhysicsScene 单一事实源、Physics Engine 的确定性、跨模块 Contract 以及 Agent 与物理世界之间的 Tool Guard 边界。**
+> **Keine Entwicklung darf „schnelle Umsetzung“ als Begründung anführen, um die PhysicsScene als einzelne Faktenquelle, die Deterministik der Physics Engine, funktionsübergreifende Contracts sowie die Tool-Guard-Grenze zwischen Agent und physikalischer Welt zu verletzen.**

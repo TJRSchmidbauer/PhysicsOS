@@ -1,89 +1,89 @@
-# PhysicsOS 产品总览与系统架构
+# PhysicsOS Produktübersicht und Systemarchitektur
 
-> 文件：`docs/00-PRODUCT-OVERVIEW.md`  
-> 文档定位：PhysicsOS 完整产品定义与系统架构  
-> **版本定位：完整版产品架构 / Web First**
+> Datei: `docs/00-PRODUCT-OVERVIEW.md`  
+> Dokumentzweck: PhysicsOS vollständige Produktdefinition und Systemarchitektur  
+> **Version: Vollständige Produktarchitektur / Web First**
 >
-> **产品类型：初高中物理可视化推演 + AI Agent 学习平台**
+> **Produkttyp: Visualisierung und Schlussfolgerung für Physik Mittel- und Oberstufe + KI-Agent-Lernplattform**
 >
-> **核心理念：让看不见的物理过程被看见。**
+> **Kernidee: Unsichtbare physikalische Prozesse sichtbar machen.**
 
 ---
 
-# 1. 产品概述
+# 1. Produktübersicht
 
-## 1.1 产品名称
+## 1.1 Produktname
 
 **PhysicsOS**
 
-中文定位：
+Chinesische Positionierung:
 
-> **初高中物理可视化推演与 Agent 平台**
+> **Visualisierung und Schlussfolgerung für Physik Mittel- und Oberstufe sowie Agent-Plattform**
 
-PhysicsOS 不是传统意义上的 AI 搜题网站，也不是播放固定动画的虚拟实验平台。
+PhysicsOS ist keine herkömmliche KI-Aufgaben-Suchwebsite und auch keine virtuelle Experimentierplattform, die fixe Animationen abspielt.
 
-它希望解决物理学习过程中最本质的一类问题：
+Es soll die grundlegendste Problemklasse im Physiklernen lösen:
 
-> 很多物理概念不是学生“不会公式”，而是学生根本没有真正看见物理过程。
+> Viele physikalische Konzepte scheitern nicht daran, dass Schüler „die Formeln nicht können“, sondern daran, dass sie den physikalischen Prozess nie wirklich gesehen haben.
 
-例如：
+Beispielsweise:
 
-- 物体究竟受到哪些力；
-- 合力为什么指向这个方向；
-- 速度与加速度如何动态变化；
-- 平抛、圆周运动的轨迹如何形成；
-- 电场到底如何作用于带电粒子；
-- 洛伦兹力为什么只改变速度方向；
-- 粒子进入不同电场、磁场区域后轨迹如何切换；
-- 电磁感应中速度、电流、安培力之间如何互相影响；
-- 一道试卷上的静态示意图背后到底发生了什么。
+- Welche Kräfte wirken tatsächlich auf einen Körper?
+- Warum zeigt die resultierende Kraft in diese Richtung?
+- Wie verändern sich Geschwindigkeit und Beschleunigung dynamisch?
+- Wie entstehen die Bahnen von waagerechtem und schrägem Wurf sowie Kreisbewegungen?
+- Wie wirkt ein elektrisches Feld genau auf ein geladenes Teilchen?
+- Warum ändert die Lorentzkraft nur die Geschwindigkeitsrichtung?
+- Wie wechseln die Bahnen von Teilchen, die in unterschiedliche elektrische und magnetische Felder eintreten?
+- Wie beeinflussen sich bei der elektromagnetischen Induktion Geschwindigkeit, Strom und ampèresche Kraft gegenseitig?
+- Was passiert tatsächlich hinter einem statischen Schemabild auf einem Prüfungsbogen?
 
-过去这些内容大量依赖：
+Bisher hing das Verständnis dieser Inhalte weitgehend davon ab:
 
-> “大家自己想象一下。”
+> „Stellt euch das einfach alle vor.“
 
-PhysicsOS 的目标，就是把这些原本只能依靠空间想象、动态想象和抽象推理理解的过程，转化成：
+Das Ziel von PhysicsOS ist es, diese Prozesse, die bisher nur durch räumliches Vorstellungsvermögen, dynamische Vorstellungskraft und abstraktes Schließen verstanden werden konnten, in eine digitale Physikwelt zu verwandeln, die:
 
-- 可观察；
-- 可暂停；
-- 可拖动；
-- 可修改参数；
-- 可测量；
-- 可回放；
-- 可验证；
-- 可对话；
-- 可重新推演；
+- beobachtbar;
+- pausierbar;
+- ziehbar;
+- parameterveränderbar;
+- messbar;
+- wiederholbar;
+- prüfbar;
+- dialogfähig;
+- neu simulierbar;
 
-的数字物理世界。
-
----
-
-# 2. 产品愿景
-
-PhysicsOS 最终希望成为：
-
-> **面向初高中物理教学、学习、实验、试题和课堂演示的一套数字物理世界运行平台。**
-
-用户不只是“阅读物理”。
-
-而是：
-
-> **进入一个真正可以运行的物理世界。**
-
-在 PhysicsOS 中：
-
-- 题目可以变成物理世界；
-- 物理世界可以生成题目；
-- Agent 可以理解当前世界；
-- 学生可以直接操纵当前世界；
-- 老师可以创建自己的物理场景；
-- 原本不可见的力、场、速度、加速度、能量、轨迹都可以显现出来。
+ist.
 
 ---
 
-# 3. 产品核心理念
+# 2. Produktvision
 
-PhysicsOS 的核心不是 Chat，而是：
+PhysicsOS strebt an, zu werden:
+
+> **Eine digitale Physikwelt-Plattform für Lehre, Lernen, Experimentieren, Aufgaben und Klassenvorführungen in der Physik der Mittel- und Oberstufe.**
+
+Nutzer „lesen Physik“ nicht nur.
+
+Sondern:
+
+> **Sie betreten eine wirklich ausführbare Physikwelt.**
+
+In PhysicsOS:
+
+- Aufgaben werden zur Physikwelt;
+- die Physikwelt kann Aufgaben generieren;
+- Agents können die aktuelle Welt verstehen;
+- Schüler können die aktuelle Welt direkt manipulieren;
+- Lehrer können ihre eigenen physikalischen Szenen erstellen;
+- ursprünglich unsichtbare Größen wie Kraft, Feld, Geschwindigkeit, Beschleunigung, Energie, Bahn werden sichtbar.
+
+---
+
+# 3. Produkt-Kernprinzipien
+
+Der Kern von PhysicsOS ist nicht Chat, sondern:
 
 ```text
 PhysicsScene
@@ -97,347 +97,345 @@ Physics Skills
 Physics Agent
 ```
 
-其中：
+Dabei:
 
-- **LLM** 负责理解、规划、解释和选择动作；
-- **Physics Engine** 负责决定物理世界真实如何运行；
-- **PhysicsScene** 保存物理世界的真实状态；
-- **Observation Layer** 把不可见的物理量变成可见信息；
-- **Physics Skills** 描述领域知识、规则、教学方法和工具策略；
-- **DeepSeek Harness** 负责 Agent 生命周期、Session、Tools、Prompt、Context 等通用 Agent 基础设施。
+- **LLM** ist für Verstehen, Planen, Erklären und Aktionsauswahl zuständig;
+- **Physics Engine** entscheidet, wie die Physikwelt real läuft;
+- **PhysicsScene** speichert den realen Zustand der Physikwelt;
+- **Observation Layer** macht unsichtbare physikalische Größen zu sichtbaren Informationen;
+- **Physics Skills** beschreiben Fachwissen, Regeln, Lehrmethoden und Werkzeugstrategien;
+- **DeepSeek Harness** übernimmt Agent-Lebenszyklus, Session, Tools, Prompt, Context und weitere generische Agent-Infrastruktur.
 
-核心架构原则：
+Kernarchitekturprinzip:
 
-> **LLM 不决定物理结果，Physics Engine 决定。**
-
----
-
-# 4. 产品用户
-
-PhysicsOS 面向三个主要角色。
-
-## 4.1 学生
-
-主要需求：
-
-- 理解抽象物理过程；
-- 做实验；
-- 上传试题；
-- 上传试卷；
-- AI 分析；
-- 可视化理解；
-- 做变式题；
-- 管理错题；
-- 查看学习记录；
-- 发现知识薄弱点。
+> **LLM entscheidet nicht über das physikalische Ergebnis, die Physics Engine entscheidet.**
 
 ---
 
-## 4.2 教师
+# 4. Produktnutzer
 
-主要需求：
+PhysicsOS richtet sich an drei Hauptrollen.
 
-- 制作物理演示；
-- 创建实验场景；
-- AI 创建课堂场景；
-- 导入试题；
-- 创建变式题；
-- 课堂投屏；
-- 发布实验；
-- 布置作业；
-- 管理班级；
-- 查看学情。
+## 4.1 Schüler
 
----
+Hauptbedürfnisse:
 
-## 4.3 平台运营 / 内容人员
-
-主要需求：
-
-- 课程体系管理；
-- Skill 管理；
-- 实验模板管理；
-- 题库管理；
-- 内容审核；
-- 模型配置；
-- Agent 配置；
-- 数据分析；
-- 系统监控。
+- Abstrakte physikalische Prozesse verstehen;
+- Experimente durchführen;
+- Aufgaben hochladen;
+- Prüfungsbögen hochladen;
+- KI-Analyse;
+- Visualisiertes Verständnis;
+- Variantenaufgaben bearbeiten;
+- Fehleraufgaben verwalten;
+- Lernverlauf ansehen;
+- Wissenslücken entdecken.
 
 ---
 
-# 5. 产品核心入口
+## 4.2 Lehrer
 
-学生端只保留两个最高优先级入口：
+Hauptbedürfnisse:
+
+- Physikvorführungen erstellen;
+- Experimentszenen erstellen;
+- KI-erstellte Klassenszenen;
+- Aufgaben importieren;
+- Variantenaufgaben erstellen;
+- Klassenvorführung per Bildschirmübertragung;
+- Experimente veröffentlichen;
+- Hausaufgaben erteilen;
+- Lerngruppen verwalten;
+- Lernstand einsehen.
+
+---
+
+## 4.3 Plattformbetrieb / Content-Team
+
+Hauptbedürfnisse:
+
+- Kursystem-Management;
+- Skill-Management;
+- Experimentvorlagen-Management;
+- Aufgabensammlungs-Management;
+- Content-Prüfung;
+- Modellkonfiguration;
+- Agent-Konfiguration;
+- Datenanalyse;
+- Systemmonitoring.
+
+---
+
+# 5. Produkt-Kerngangpunkte
+
+Die Schüleransicht behält nur zwei höchstpriorisierte Einstiegspunkte:
 
 ```text
 PhysicsOS
 │
 ├── ① Physics Lab
-│      物理实验室
+│      Physiklabor
 │
 └── ② Question Space
-       试题空间
+       Aufgabenbereich
 ```
 
-不要把：
+Nicht aufsplitten in Erst-Einstiegspunkte:
 
-- 力学；
-- 电场；
-- 磁场；
-- 电路；
-- Agent；
-- 受力分析；
+- Mechanik;
+- Elektrisches Feld;
+- Magnetisches Feld;
+- Stromkreis;
+- Agent;
+- Kraftanalyse;
 
-拆成一级产品入口。
-
-它们只是 PhysicsOS 内部的物理领域。
+Das sind nur physikalische Domänen innerhalb von PhysicsOS.
 
 ---
 
-# 6. Physics Lab —— 物理实验室
+# 6. Physics Lab — Physiklabor
 
-Physics Lab 的核心目标是：
+Das Kernziel von Physics Lab ist:
 
-> **从物理模型和物理现象出发，探索一个真正能够运行的物理世界。**
+> **Ausgehend von physikalischen Modellen und Phänomenen eine wirklich ausführbare Physikwelt erkunden.**
 
-它不只是学校器材实验。
+Es ist nicht nur ein Schullabor mit Geräten.
 
-完整的 Physics Lab 包含三类实验。
-
----
-
-## 6.1 真实实验模拟
-
-例如：
-
-- 打点计时器；
-- 牛顿第二定律；
-- 验证机械能守恒；
-- 验证动量守恒；
-- 验证平行四边形定则；
-- 测摩擦系数；
-- 单摆；
-- 测电阻；
-- 测电源电动势与内阻；
-- 描绘小灯泡伏安特性；
-- 电表改装；
-- 光学实验；
-- 电磁感应实验。
+Das vollständige Physics Lab enthält drei Experimentkategorien.
 
 ---
 
-## 6.2 抽象物理实验
+## 6.1 Simulation realer Experimente
 
-这部分是 PhysicsOS 的重要差异化能力。
+Beispielsweise:
 
-例如现实中无法直接观察：
+- Punkttimer;
+- Newtons zweites Gesetz;
+- Überprüfung der Energieerhaltung in der Mechanik;
+- Überprüfung der Impulserhaltung;
+- Überprüfung des Parallelogramms der Kräfte;
+- Reibungskoeffizient messen;
+- Einfaches Pendel;
+- Widerstand messen;
+- Elektromotorische Kraft und Innenwiderstand einer Stromquelle messen;
+- Volt-Ampere-Kennlinie einer Glühlampe aufzeichnen;
+- Messgeräteumbau;
+- Optikversuche;
+- Elektromagnetische Induktionsversuche.
+
+---
+
+## 6.2 Abstrakte physikalische Experimente
+
+Dieser Teil ist eine wichtige differenzierende Fähigkeit von PhysicsOS.
+
+Beispielsweise in der Realität nicht direkt beobachtbar:
 
 ```text
-重力
-支持力
-摩擦力
-合力
-速度
-加速度
-动量
-电场
-电势
-洛伦兹力
-磁通量
-能量
-瞬时速度
+Schwerkraft
+Normalkraft
+Reibungskraft
+Resultierende Kraft
+Geschwindigkeit
+Beschleunigung
+Impuls
+Elektrisches Feld
+Elektrisches Potenzial
+Lorentzkraft
+Magnetischer Fluss
+Energie
+Momentangeschwindigkeit
 ```
 
-PhysicsOS 可以全部把它们显示出来。
+PhysicsOS kann all dies sichtbar machen.
 
-例如受力：
+Beispielsweise Kräfte:
 
 ```text
-           N
-           ↑
-           │
-     f ← [■] → F
-           │
-           ↓
-           mg
+            N
+            ↑
+            │
+      f ← [■] → F
+            │
+            ↓
+            mg
 ```
 
-这些矢量不是静态插图，而是随着场景实时变化。
+Diese Vektoren sind keine statischen Illustrationen, sondern ändern sich in Echtzeit mit der Szene.
 
 ---
 
-## 6.3 数字物理世界实验
+## 6.3 Digitale Physikwelt-Experimente
 
-例如：
+Beispielsweise:
 
-- 平抛；
-- 斜抛；
-- 圆周运动；
-- 带电粒子进入电场；
-- 带电粒子进入磁场；
-- 电磁复合场；
-- 速度选择器；
-- 质谱仪；
-- 回旋加速器；
-- 电磁感应；
-- 多区域磁场；
-- 连接体；
-- 导轨双棒。
+- Waagerechter Wurf;
+- Schräger Wurf;
+- Kreisbewegung;
+- Geladenes Teilchen tritt in elektrisches Feld ein;
+- Geladenes Teilchen tritt in magnetisches Feld ein;
+- Elektromagnetisches Kombinationsfeld;
+- Geschwindigkeitswähler;
+- Massenspektrometer;
+- Zyklotron;
+- Elektromagnetische Induktion;
+- Mehrere magnetische Feldbereiche;
+- Verbundkörper;
+- Doppelte Stab auf Schienen.
 
-用户可以修改：
+Der Nutzer kann modifizieren:
 
 ```text
-质量
-电荷
-初速度
-角度
-位置
-重力
-摩擦系数
-电场强度
-磁感应强度
-场方向
-电阻
-电源参数
-边界
+Masse
+Ladung
+Anfangsgeschwindigkeit
+Winkel
+Position
+Schwerkraft
+Reibungskoeffizient
+Elektrische Feldstärke
+Magnetische Flussdichte
+Feldrichtung
+Widerstand
+Stromquellenparameter
+Grenze
 ```
 
-Physics Engine 立即重新计算整个世界。
+Physics Engine berechnet die gesamte Welt sofort neu.
 
 ---
 
-# 7. Physics Lab 学科覆盖
+# 7. Physics Lab Fachabdeckung
 
-PhysicsOS 直接按照完整版覆盖初高中物理。
+PhysicsOS deckt die gesamte Physik der Mittel- und Oberstufe direkt in der Vollversion ab.
 
-## 7.1 力学 Mechanics
+## 7.1 Mechanik Mechanics
 
 ```text
-力学
+Mechanik
 │
-├── 运动学
-│   ├── 位移
-│   ├── 速度
-│   ├── 加速度
-│   ├── 匀速运动
-│   ├── 匀变速运动
-│   ├── 自由落体
-│   ├── 竖直上抛
-│   ├── 平抛
-│   └── 斜抛
+├── Kinematik
+│   ├── Verschiebung
+│   ├── Geschwindigkeit
+│   ├── Beschleunigung
+│   ├── Gleichförmige Bewegung
+│   ├── Gleichmäßig beschleunigte Bewegung
+│   ├── Freier Fall
+│   ├── Senkrechter Wurf
+│   ├── Waagerechter Wurf
+│   └── Schräger Wurf
 │
-├── 受力分析
-│   ├── 重力
-│   ├── 弹力
-│   ├── 摩擦力
-│   ├── 拉力
-│   ├── 支持力
-│   ├── 合力
-│   └── 力分解
+├── Kraftanalyse
+│   ├── Schwerkraft
+│   ├── Federkraft
+│   ├── Reibungskraft
+│   ├── Zugkraft
+│   ├── Stützkraft
+│   ├── Resultierende Kraft
+│   └── Kraftzerlegung
 │
-├── 牛顿运动定律
-├── 连接体
-├── 滑轮
-├── 弹簧
-├── 圆周运动
-├── 万有引力
-├── 功与能
-├── 动量
-├── 碰撞
-├── 振动
-└── 波
+├── Newtonsche Bewegungsgesetze
+├── Verbundene Körper
+├── Rollen
+├── Federn
+├── Kreisbewegung
+├── Gravitation
+├── Arbeit und Energie
+├── Impuls
+├── Stoß / Kollision
+├── Schwingung
+└── Welle
 ```
 
 ---
 
-## 7.2 电场 Electric Field
+## 7.2 Elektrisches Feld Electric Field
 
-支持：
+Unterstützt:
 
 ```text
-点电荷
-多个点电荷
-库仑力
-匀强电场
-电场叠加
-电场线
-场强
-电势
-等势面
-电势差
-电势能
-电场力
-电容器
-带电粒子运动
+Punktladung
+Mehrere Punktladungen
+Coulombkraft
+Homogenes elektrisches Feld
+Überlagerung elektrischer Felder
+Feldlinien (elektrisch)
+Feldstärke
+Elektrisches Potential
+Gleichpotentialfläche
+Potentialdifferenz
+Potentielle Energie (elektrisch)
+Elektrische Feldkraft
+Kondensator
+Bewegung geladener Teilchen
 ```
 
-可观察图层：
+Beobachtbare Layer:
 
 ```text
-电场线
-场强矢量
-等势线
-电势分布
-电场力
-速度
-加速度
-轨迹
-能量
-```
-
----
-
-## 7.3 磁场 Magnetic Field
-
-支持：
-
-```text
-磁感线
-安培力
-洛伦兹力
-带电粒子圆周运动
-边界磁场
-矩形磁场
-圆形磁场
-多区域磁场
-出入场问题
-临界问题
-磁场最小面积
-多粒子运动
+Feldlinien (elektrisch)
+Feldstärkevektoren
+Gleichpotentiallinien
+Potentialverteilung
+Elektrische Feldkraft
+Geschwindigkeit
+Beschleunigung
+Bahn / Trajektorie
+Energie
 ```
 
 ---
 
-## 7.4 复合场 EM Composite
+## 7.3 Magnetisches Feld Magnetic Field
 
-独立建立：
+Unterstützt:
+
+```text
+Feldlinien (magnetisch)
+Ampèresche Kraft
+Lorentzkraft
+Kreisbewegung geladener Teilchen
+Rand-Magnetfeld
+Rechteckiges Magnetfeld
+Kreisförmiges Magnetfeld
+Mehrzonen-Magnetfeld
+Ein- und Austrittsprobleme
+Kritische Probleme
+Minimalfläche des Magnetfelds
+Mehrteilchen-Bewegung
+```
+
+---
+
+## 7.4 Komposite Felder EM Composite
+
+Eigenständige Erstellung:
 
 ```text
 EM Composite Engine
 ```
 
-支持：
+Unterstützt:
 
 ```text
-电场 + 磁场
-电场 + 重力场
-磁场 + 重力场
-电场 + 磁场 + 重力场
+Elektrisches Feld + Magnetisches Feld
+Elektrisches Feld + Gravitationsfeld
+Magnetisches Feld + Gravitationsfeld
+Elektrisches Feld + Magnetisches Feld + Gravitationsfeld
 
-速度选择器
-质谱仪
-回旋加速器
-霍尔效应
-多场区粒子运动
-周期运动
+Geschwindigkeitswähler
+Massenspektrometer
+Zyklotron / Zyklotronbeschleuniger
+Halleffekt
+Teilchenbewegung in Mehrfeldzonen
+Periodische Bewegung
 ```
 
 ---
 
-## 7.5 电路 Circuit
+## 7.5 Stromkreis Circuit
 
-底层使用真正的 Circuit Graph，而不是动画。
+Die unterliegende Schicht nutzt einen echten Circuit Graph, keine Animation.
 
 ```text
 CircuitGraph
@@ -454,66 +452,66 @@ CircuitGraph
 └── Meter
 ```
 
-支持：
+Unterstützt:
 
 ```text
-直流电路
-串并联
-动态电路
-滑动变阻器
-电压表
-电流表
-闭合电路欧姆定律
-电源内阻
-电容器
-传感器
-实验电路
-电路故障
+Gleichstromkreis
+Reihen- und Parallelschaltung
+Dynamischer Stromkreis
+Schiefer Draht / Rheostat
+Voltmeter
+Amperemeter
+Ohmsches Gesetz für den geschlossenen Stromkreis
+Innenwiderstand der Stromquelle
+Kondensator
+Sensor
+Versuchsstromkreis
+Stromkreisfehler
 ```
 
-未来试题中的电路图可以直接转换成 CircuitGraph。
+Zukünftig können Stromkreisdiagramme in Prüfungsaufgaben direkt in einen CircuitGraph umgewandelt werden.
 
 ---
 
-## 7.6 电磁感应 Induction
+## 7.6 Elektromagnetische Induktion Induction
 
-支持：
-
-```text
-磁通量
-导体切割磁感线
-法拉第电磁感应
-楞次定律
-线框进入磁场
-线框离开磁场
-导轨问题
-双棒问题
-电磁阻尼
-自感
-互感
-交流电
-变压器
-```
-
-例如：
+Unterstützt:
 
 ```text
-速度下降
-   ↓
-感应电动势下降
-   ↓
-电流变化
-   ↓
-安培力变化
-   ↓
-加速度变化
+Magnetischer Fluss
+Leiter schneidet magnetische Feldlinien
+Faradaysches Induktionsgesetz
+Lenzsches Gesetz
+Drahtrahmen betritt Magnetfeld
+Drahtrahmen verlässt Magnetfeld
+Führungsbahn-Probleme
+Zweistab-Probleme
+Elektromagnetische Dämpfung
+Selbstinduktion
+Gegenseitige Induktion
+Wechselstrom
+Transformator
 ```
 
-全过程实时联动。
+Beispiel:
+
+```text
+Geschwindigkeit sinkt
+   ↓
+Induzierte Spannung sinkt
+   ↓
+Strom ändert sich
+   ↓
+Ampèresche Kraft ändert sich
+   ↓
+Beschleunigung ändert sich
+```
+
+Gesamter Prozess in Echtzeit gekoppelt.
 
 ---
 
-## 7.7 其他领域
+## 7.7 Weitere Bereiche
 
 ```text
 Physics Engine
@@ -533,49 +531,49 @@ Physics Engine
 └── ModernPhysics
 ```
 
-现代物理可进一步覆盖：
+Moderne Physik kann weiter abdecken:
 
-- 光电效应；
-- 原子模型；
-- 能级跃迁；
-- 核反应；
-- 衰变。
+- Photoelektrischer Effekt;
+- Atommodell;
+- Energieniveau-Übergang;
+- Kernreaktion;
+- Zerfall.
 
 ---
 
-# 8. Question Space —— 试题空间
+# 8. Question Space —— Aufgabenbereich
 
-Question Space 不定位为 AI 搜题。
+Question Space positioniert sich nicht als KI-Hausaufgabenlöser.
 
-它的核心目标是：
+Sein Kernziel ist:
 
-> **把一道静态试题转换成一个可以观察和操作的物理世界。**
+> **Eine statische Prüfungsaufgabe in eine beobachtbare und bedienbare Physikwelt umzuwandeln.**
 
-支持输入：
+Unterstützte Eingaben:
 
 ```text
-文本
-图片
-截图
-拍照
+Text
+Bild
+Screenshot
+Foto
 PDF
-扫描试卷
-整套试卷
-平台题库
-教师上传
+Gescanntes Prüfungsblatt
+Gesamtes Prüfungspapier
+Plattform-Aufgabensammlung
+Lehrer-Upload
 ```
 
 ---
 
-# 9. 试题处理完整链路
+# 9. Vollständige Verarbeitungskette für Aufgaben
 
 ```mermaid
 flowchart TD
 
-A[题目 / 图片 / PDF] --> B[Document Parser]
+A[Aufgabe / Bild / PDF] --> B[Document Parser]
 B --> C[OCR / VLM]
-C --> D[Question Segmentation]
-D --> E[Diagram Understanding]
+C --> D[Aufgaben-Segmentierung]
+D --> E[Diagramm-Verständnis]
 E --> F[Physics Semantic Parser]
 F --> G[Physics IR]
 G --> H[Scene Builder]
@@ -591,17 +589,17 @@ M --> N[Physics Tutor Agent]
 
 # 10. Physics IR
 
-题目绝不能：
+Eine Aufgabe darf keinesfalls:
 
 ```text
-自然语言
+Natürliche Sprache
    ↓
 LLM
    ↓
-直接画动画
+Direkt Animation zeichnen
 ```
 
-必须增加中间层：
+Es muss eine Zwischenschicht hinzugefügt werden:
 
 ```text
 Natural Language
@@ -611,7 +609,7 @@ Physics IR
 PhysicsScene
 ```
 
-例如：
+Beispiel:
 
 ```yaml
 question_type: charged_particle
@@ -641,33 +639,33 @@ targets:
   - exit_position
 ```
 
-Physics IR 是：
+Physics IR ist:
 
-> **自然语言世界与物理计算世界之间的桥梁。**
+> **Die Brücke zwischen der natürlichen Sprachwelt und der physikalischen Rechenwelt.**
 
 ---
 
 # 11. Diagram IR
 
-试题图像也不能只 OCR 成文字。
+Prüfungsaufgaben-Bilder dürfen nicht nur per OCR in Text umgewandelt werden.
 
-例如：
+Beispiel:
 
-- 斜面图；
-- 电路图；
-- 磁场区域；
-- 受力图；
-- 光路图；
-- v-t 图；
-- 坐标图；
+- Schrägenbild;
+- Schaltbild;
+- Magnetfeldbereich;
+- Kraftdiagramm / Freikörperdiagramm;
+- Strahlengang;
+- v-t-Diagramm;
+- Koordinatendiagramm;
 
-都应该转换成：
+Alles sollte umgewandelt werden in:
 
 ```text
 Diagram IR
 ```
 
-核心对象：
+Kernobjekte:
 
 ```text
 line
@@ -683,7 +681,7 @@ coordinate
 boundary
 ```
 
-之后再转换成：
+Anschließend wieder umwandeln in:
 
 ```text
 SVG
@@ -692,15 +690,15 @@ PhysicsScene
 CircuitGraph
 ```
 
-从而实现：
+Damit wird erreicht:
 
-> **把试卷中的死图重新变成活的对象。**
+> **Tote Bilder in Prüfungsbögen wieder in lebendige Objekte verwandeln.**
 
 ---
 
-# 12. 实验与试题不是两个系统
+# 12. Versuch und Aufgabe sind nicht zwei Systeme
 
-产品表面：
+Produktoberfläche:
 
 ```text
 Physics Lab
@@ -708,7 +706,7 @@ Physics Lab
 Question Space
 ```
 
-底层：
+Unter der Haube:
 
 ```mermaid
 flowchart TD
@@ -724,71 +722,71 @@ F --> G[Physics Canvas]
 G --> H[Physics Agent]
 ```
 
-因此：
+Daher:
 
 ## Question → Experiment
 
-试题页面可以：
+Die Aufgabenseite kann:
 
-> **在物理世界中打开**
+> **In der Physikwelt öffnen**
 
 ---
 
 ## Experiment → Question
 
-实验页面可以：
+Die Experimentseite kann:
 
-> **基于当前场景生成试题**
+> **Basierend auf der aktuellen Szene Aufgabe generieren**
 
-生成：
+Generieren:
 
-- 基础题；
-- 中档题；
-- 综合题；
-- 高考风格题；
-- 变式题。
+- Grundlagenaufgaben;
+- Mittelstufe-Aufgaben;
+- umfassende Aufgaben;
+- Gaokao-Stil-Aufgaben;
+- Variantenaufgaben.
 
 ---
 
 # 13. Dynamic Question
 
-PhysicsOS 不只拥有静态题库。
+PhysicsOS besitzt nicht nur eine statische Aufgabensammlung.
 
-可以建立：
+Es lässt sich aufbauen:
 
-> **动态试题系统。**
+> **Dynamisches Aufgabensystem.**
 
-例如：
+Beispiel:
 
 ```text
-原题
+Ursprungsaufgabe
  ↓
-改变质量
+Masse ändern
  ↓
-改变磁场
+Magnetfeld ändern
  ↓
-改变场区域
+Feldbereich ändern
  ↓
-改变入射角
+Einfallswinkel ändern
  ↓
-改变边界
+Rand ändern
  ↓
-重新推演
+Neu ableiten / neu simulieren
  ↓
-自动生成新题
+Automatisch neue Aufgabe generieren
 ```
 
-这能够形成：
+Daraus entsteht:
 
 > **Scene-driven Question Generation**
 
-即由物理世界生成试题，而不是单纯由 LLM 编题。
+D.h. Aufgaben werden aus der Physikwelt generiert, nicht bloß von LLM erfunden.
 
 ---
 
 # 14. Physics World Runtime
 
-Physics World 是整个系统真正的核心。
+Physics World ist der wahre Kern des gesamten Systems.
 
 ```mermaid
 flowchart TD
@@ -810,9 +808,9 @@ H --> I[Renderer]
 
 # 15. PhysicsScene
 
-PhysicsScene 是整个项目最重要的领域对象。
+PhysicsScene ist das wichtigste Domänenobjekt des gesamten Projekts.
 
-示意：
+Schema:
 
 ```json
 {
@@ -837,7 +835,7 @@ PhysicsScene 是整个项目最重要的领域对象。
 }
 ```
 
-标准领域对象：
+Standard-Domänenobjekte:
 
 ```text
 Body
@@ -855,7 +853,7 @@ Observable
 
 ---
 
-# 16. PhysicsScene 三层结构
+# 16. PhysicsScene Drei-Schichten-Struktur
 
 ```text
 PhysicsScene
@@ -867,19 +865,19 @@ PhysicsScene
 
 ## SceneGraph
 
-表示：
+Stellt dar:
 
-> 当前物理世界是什么样子。
+> Wie die physikalische Welt aktuell aussieht.
 
 ---
 
 ## EventStore
 
-记录：
+Protokolliert:
 
-> 这个世界发生过什么。
+> Was in dieser Welt geschehen ist.
 
-例如：
+Beispiel:
 
 ```text
 SceneCreated
@@ -900,86 +898,85 @@ ObservationEnabled
 ---
 
 ## SnapshotStore
-
-用于：
+Dient für:
 
 ```text
-暂停
-恢复
-Undo
-Redo
-时间回放
-快速跳转
-场景分支
+Pausieren
+Fortsetzen
+Rückgängig
+Wiederholen
+Zeitrücklauf
+Schnellzugriff
+Szenen-Verzweigung
 ```
 
 ---
 
 # 17. Physics Timeline
 
-PhysicsOS 原生支持：
+PhysicsOS unterstützt nativ:
 
-> **物理时间机器。**
+> **Physik-Zeitmaschine.**
 
-例如：
+Beispiel:
 
 ```text
 0s ───────── 1s ───────── 2s ───────── 3s
-                ▲
-              当前状态
+                 ▲
+               aktueller Zustand
 ```
 
-用户拖动时间轴到任意时刻，恢复：
+Der Benutzer zieht den Zeitstrahl zu einem beliebigen Zeitpunkt, stellt wieder her:
 
 ```text
-位置
-速度
-加速度
-受力
-轨迹
-电流
-场
-能量
-动量
+Position
+Geschwindigkeit
+Beschleunigung
+Kraft
+Trajektorie
+Strom
+Feld
+Energie
+Impuls
 ```
 
-Agent 可以直接执行：
+Der Agent kann direkt ausführen:
 
 ```text
 seek(entryTime)
 ```
 
-例如：
+Beispiel:
 
-> 回到粒子刚刚进入磁场的瞬间。
+> Zurück zum Moment, in dem das Teilchen gerade in das Magnetfeld eintritt.
 
 ---
 
 # 18. Physics Engine
 
-Physics Engine 必须完全独立于：
+Die Physics Engine muss vollständig unabhängig sein von:
 
 ```text
 React
 LLM
 DeepSeek
-数据库
+Datenbank
 UI
 ```
 
-输入：
+Eingabe:
 
 ```text
 PhysicsScene
 ```
 
-输出：
+Ausgabe:
 
 ```text
 SimulationResult
 ```
 
-基本结构：
+Grundstruktur:
 
 ```text
 physics-core
@@ -1002,7 +999,7 @@ physics-core
 
 # 19. Math Runtime
 
-Physics Engine 下层增加独立数学运行时：
+Der Physics Engine wird eine unabhängige mathematische Laufzeitumgebung als untere Schicht hinzugefügt:
 
 ```text
 Math Runtime
@@ -1016,15 +1013,15 @@ Math Runtime
 └── Unit System
 ```
 
-原则：
+Prinzip:
 
-> **LLM 不承担精确数学计算。**
+> **LLM übernimmt keine präzisen mathematischen Berechnungen.**
 
 ---
 
 # 20. Physics Verifier
 
-PhysicsOS 所有物理计算必须经过验证层。
+Alle physikalischen Berechnungen in PhysicsOS müssen durch die Verifikationsschicht gehen.
 
 ```text
 Physics Verifier
@@ -1039,30 +1036,30 @@ Physics Verifier
 └── Semantic Review
 ```
 
-优先：
+Priorität:
 
 ```text
-规则
-数学
-数值
-物理约束
+Regeln
+Mathematik
+Numerik
+Physikalische Constraints
 ```
 
-最后才使用 LLM 做语义检查。
+Erst zuletzt wird der LLM für die semantische Prüfung verwendet.
 
 ---
 
 # 21. Observation Layer
 
-Physics Engine 回答：
+Die Physics Engine beantwortet:
 
-> 世界发生了什么？
+> Was ist in der Welt passiert?
 
-Observation Layer 回答：
+Der Observation Layer beantwortet:
 
-> 用户能够看到什么？
+> Was kann der Benutzer sehen?
 
-架构：
+Architektur:
 
 ```text
 Observation Runtime
@@ -1091,7 +1088,7 @@ Observation Runtime
 
 # 22. Observable
 
-以下物理量统一定义成 Observable：
+Die folgenden physikalischen Größen werden einheitlich als Observable definiert:
 
 ```text
 Force
@@ -1109,28 +1106,28 @@ Trajectory
 Instant State
 ```
 
-用户可以自由：
+Der Benutzer kann frei:
 
 ```text
-显示
-隐藏
-锁定
-测量
-跟踪
-绘图
+Anzeigen
+Ausblenden
+Sperren
+Messen
+Verfolgen
+Zeichnen
 ```
 
-PhysicsOS 最大的产品哲学之一：
+Eine der wichtigsten Produktphilosophien von PhysicsOS:
 
-> **让不可观测的物理量变得可观测。**
+> **Unbeobachtbare physikalische Größen beobachtbar machen.**
 
 ---
 
 # 23. Rendering Architecture
 
-Physics Engine 不负责画界面。
+Die Physics Engine ist nicht für die Darstellung der Benutzeroberfläche zuständig.
 
-必须保持：
+Es muss gewahrt bleiben:
 
 ```text
 Physics Engine
@@ -1142,28 +1139,28 @@ Visual Scene Model
 Renderer
 ```
 
-这样同一个 PhysicsScene 可以拥有：
+Damit kann ein und dieselbe PhysicsScene Folgendes haben:
 
 ```text
-2D 模式
-3D 模式
-考试模式
-黑板模式
-课堂演示模式
-教学辅助模式
+2D-Modus
+3D-Modus
+Prüfungsmodus
+Tafelmodus
+Klassenraum-Demomodus
+Lehrunterstützungsmodus
 ```
 
 ---
 
-# 24. 2D / 3D 策略
+# 24. 2D / 3D Strategie
 
-PhysicsOS：
+PhysicsOS:
 
-> **2D 为主体，3D 为增强。**
+> **2D als Hauptbestandteil, 3D als Erweiterung.**
 
-中高考大部分题目本质上都是二维模型。
+Die meisten Aufgaben in Mittel- und Oberstufenabschlussprüfungen sind im Kern zweidimensionale Modelle.
 
-因此主要使用：
+Daher wird hauptsächlich verwendet:
 
 ```text
 SVG
@@ -1171,39 +1168,39 @@ Canvas
 WebGL
 ```
 
-复杂空间场景再使用：
+Für komplexe räumliche Szenen wird erst verwendet:
 
 ```text
 Three.js
 ```
 
-不要所有内容强制 3D。
+Nicht alle Inhalte erzwingen 3D.
 
 ---
 
 # 25. Physics Agent
 
-> 运行在 Harness 宿主上；PhysicsOS 不自建独立 Agent runtime（ADR-0002）。
+> Läuft auf dem Harness-Host; PhysicsOS baut keine eigene, unabhängige Agent-Runtime auf (ADR-0002).
 
-Physics Agent 不是一个普通聊天机器人。
+Der Physics Agent ist kein gewöhnlicher Chatbot.
 
-它必须：
+Er muss:
 
-- 看得懂题；
-- 看得懂 PhysicsScene；
-- 可以调用 Physics Tools；
-- 可以修改场景；
-- 可以调用 Physics Engine；
-- 可以观察物理结果；
-- 可以控制可视化；
-- 可以解释过程；
-- 可以根据学生能力决定教学方式。
+- Aufgaben verstehen;
+- PhysicsScene verstehen;
+- Physics Tools aufrufen können;
+- Die Szene modifizieren können;
+- Die Physics Engine aufrufen können;
+- Physikalische Ergebnisse beobachten können;
+- Die Visualisierung steuern können;
+- Den Prozess erklären können;
+- Die Lehrmethode basierend auf den Fähigkeiten des Schülers entscheiden können.
 
 ---
 
-# 26. Agent 逻辑角色
+# 26. Agent-Logikrollen
 
-完整版使用 7 个逻辑角色。
+Die Vollversion verwendet 7 Logikrollen.
 
 ```text
 Physics Orchestrator
@@ -1217,9 +1214,9 @@ Physics Orchestrator
 └── Diagnostic
 ```
 
-不代表同时运行 7 个 LLM。
+Das bedeutet nicht, dass 7 LLMs gleichzeitig laufen.
 
-而是：
+Stattdessen:
 
 ```text
 Role
@@ -1231,29 +1228,29 @@ Tool Scope
 Context
 ```
 
-动态切换。
+Dynamisches Umschalten.
 
 ---
 
 # 27. Orchestrator
 
-负责判断：
+Verantwortlich für die Entscheidung:
 
 ```text
-当前是什么任务？
-需要哪些 Skills？
-需要哪些 Tools？
-需要调用哪个模型？
-是否需要 Scene Builder？
-是否需要 Solver？
-是否需要 Tutor？
+Was ist die aktuelle Aufgabe?
+Welche Skills werden benötigt?
+Welche Tools werden benötigt?
+Welches Modell soll aufgerufen werden?
+Wird Scene Builder benötigt?
+Wird Solver benötigt?
+Wird Tutor benötigt?
 ```
 
 ---
 
 # 28. Question Parser Agent
 
-负责：
+Verantwortlich für:
 
 ```text
 Question
@@ -1261,22 +1258,22 @@ Question
 Physics IR
 ```
 
-识别：
+Erkennen:
 
-- 物理对象；
-- 已知条件；
-- 目标量；
-- 区域；
-- 图形；
-- 边界；
-- 约束；
-- 知识点。
+- physikalische Objekte;
+- bekannte Bedingungen;
+- Zielgrößen;
+- Bereiche;
+- Grafiken;
+- Grenzen;
+- Constraints;
+- Wissenspunkte.
 
 ---
 
 # 29. Scene Builder Agent
 
-负责：
+Verantwortlich für:
 
 ```text
 Physics IR
@@ -1284,73 +1281,73 @@ Physics IR
 PhysicsScene
 ```
 
-并通过 Physics Tool 创建：
+Und erstellen über Physics Tool:
 
-- Body；
-- Particle；
-- Field；
-- Boundary；
-- Force；
-- Circuit；
-- Constraint。
+- Body;
+- Particle;
+- Field;
+- Boundary;
+- Force;
+- Circuit;
+- Constraint.
 
 ---
 
 # 30. Solver Agent
 
-负责：
+Verantwortlich für:
 
-- 制定求解方案；
-- 调用数学工具；
-- 调用 Physics Engine；
-- 调用 Simulation；
-- 查询 Scene；
-- 执行推导。
+- Lösungsplan erstellen;
+- Mathematik-Tools aufrufen;
+- Physics Engine aufrufen;
+- Simulation aufrufen;
+- Scene abfragen;
+- Ableitung durchführen.
 
-Solver 不允许凭语言直接“模拟”。
+Solver darf nicht bloß per Sprache „simulieren“.
 
 ---
 
 # 31. Tutor Agent
 
-Tutor 和 Solver 必须分开。
+Tutor und Solver müssen getrennt sein.
 
-因为：
+Weil:
 
-> **会做题 ≠ 会教学生。**
+> **Aufgaben lösen können ≠ Schüler unterrichten können.**
 
-Tutor 负责：
+Tutor ist verantwortlich für:
 
 ```text
-提示
-引导
-提问
-分步讲解
-显示某个 Observable
-暂停某个关键时刻
-对比参数
-制造认知冲突
-总结规律
+Hinweise geben
+Anleiten
+Fragen stellen
+Schrittweise erklären
+Bestimmten Observable anzeigen
+An einem kritischen Moment pausieren
+Parameter vergleichen
+Kognitive Konflikte erzeugen
+Gesetzmäßigkeiten zusammenfassen
 ```
 
 ---
 
 # 32. Diagnostic Agent
 
-负责发现：
+Verantwortlich für das Erkennen von:
 
 ```text
-受力判断错误
-速度方向理解错误
-加速度方向理解错误
-场方向错误
-边界条件错误
-公式使用错误
-空间想象困难
-数学推导困难
+Fehler bei der Kraftanalyse
+Fehler beim Verständnis der Geschwindigkeitsrichtung
+Fehler beim Verständnis der Beschleunigungsrichtung
+Fehler bei der Feldrichtung
+Fehler bei den Randbedingungen
+Fehler bei der Formelanwendung
+Schwierigkeiten bei der räumlichen Vorstellung
+Schwierigkeiten bei der mathematischen Ableitung
 ```
 
-结果写入：
+Ergebnisse werden geschrieben in:
 
 ```text
 Learning Memory
@@ -1360,7 +1357,7 @@ Learning Memory
 
 # 33. Agent Harness
 
-PhysicsOS 不重新从零实现：
+PhysicsOS implementiert nicht neu von Grund auf:
 
 ```text
 Agent Loop
@@ -1373,13 +1370,13 @@ Storage
 Model Adapter
 ```
 
-这些通用基础能力交给：
+Diese allgemeinen Basisfähigkeiten werden übergeben an:
 
 > **DeepSeek Harness**
 
-但业务绝不能绑死 Harness。
+Aber die Fachlogik darf keinesfalls fest an den Harness gebunden sein.
 
-结构：
+Struktur:
 
 ```text
 PhysicsOS
@@ -1387,17 +1384,17 @@ PhysicsOS
 DeepSeek Harness
 ```
 
-> **已退役（ADR-0002，2026-09-27）**：图中曾出现的 `PhysicsAgentRuntime API` / `DSH Adapter` 两层，对应已删除的 `@physicsos/agent-runtime` / `@physicsos/agent-dsh-adapter`，见 `docs/adr/0002-agent-runtime-adapter-disposition.md`。**Harness 是 Agent 宿主；PhysicsOS 不自建独立 Agent runtime**——模型与 Harness 提供理解与操作，我们自己的 runtime 是物理世界 runtime（Scene → Engine → Verifier）。真实生产链路是 Harness 工具运行时 → `dsh-tool-physicsos` → `@physicsos/agent-tools` → 物理引擎 / verifier。
+> **Außer Dienst gestellt (ADR-0002, 2026-09-27)**: Die im Diagramm ehemals gezeigten zwei Schichten `PhysicsAgentRuntime API` / `DSH Adapter` entsprechen den gelöschten Paketen `@physicsos/agent-runtime` / `@physicsos/agent-dsh-adapter`, siehe `docs/adr/0002-agent-runtime-adapter-disposition.md`. **Harness ist der Agent-Host; PhysicsOS baut keine eigene unabhängige Agent-Runtime** — Modell und Harness liefern Verständnis und Operation, unsere eigene Runtime ist die Physikwelt-Runtime (Scene → Engine → Verifier). Die tatsächliche Produktionskette ist Harness-Tool-Runtime → `dsh-tool-physicsos` → `@physicsos/agent-tools` → Physik-Engine / Verifier.
 
-以后 DeepSeek Harness 接口变化，只影响我们的集成层（`dsh-tool-physicsos` / `@physicsos/agent-tools`），不外溢到物理域。
+Zukünftige Änderungen an der DeepSeek Harness-Schnittstelle betreffen nur unsere Integrationsschicht (`dsh-tool-physicsos` / `@physicsos/agent-tools`), nicht die Physikdomäne.
 
 ---
 
 # 34. Physics Profile
 
-PhysicsOS 不永久 Fork Harness。
+PhysicsOS forkt den Harness nicht dauerhaft.
 
-而是在 Harness 之上建立：
+Stattdessen wird auf dem Harness aufgebaut:
 
 ```text
 Physics Profile
@@ -1414,13 +1411,13 @@ Physics Profile
 
 ---
 
-# 35. Agent Loop 与 Physics Workflow
+# 35. Agent Loop und Physics Workflow
 
-必须明确分离两个状态机。
+Es müssen zwei Zustandsmaschinen klar getrennt werden.
 
 ## Agent Loop
 
-Harness 负责：
+Harness ist verantwortlich für:
 
 ```text
 Turn
@@ -1440,7 +1437,7 @@ Next Step
 
 ## Physics Workflow
 
-PhysicsOS 负责：
+PhysicsOS ist verantwortlich für:
 
 ```text
 INGEST
@@ -1470,38 +1467,38 @@ REFINE
 
 ---
 
-# 36. Physics State Machine
+# 36. Physics-Zustandsmaschine
 
 ```text
 IDLE
  ↓
-INPUT_RECEIVED
+EINGABE_ERHALTEN
  ↓
-CONTENT_PARSED
+INHALT_PARSED
  ↓
-PHYSICS_CLASSIFIED
+PHYSIK_KLASSIFIZIERT
  ↓
-SEMANTIC_MODEL_CREATED
+SEMANTISCHES_MODELL_ERSTELLT
  ↓
-SCENE_BUILDING
+SZENEN_AUFBAU
  ↓
-SCENE_VALIDATION
- ├── FAILED → REPAIR
+SZENEN_VALIDIERUNG
+ ├── FEHLGESCHLAGEN → REPARATUR
  ↓
-SOLVING
+LÖSUNG
  ↓
 SIMULATION
  ↓
-RESULT_VALIDATION
+ERGEBNIS_VALIDIERUNG
  ↓
-OBSERVATION_PLANNING
+BEOBACHTUNGSPLANUNG
  ↓
-READY
+BEREIT
  ↓
-INTERACTIVE
+INTERAKTIV
 ```
 
-交互态支持：
+Unterstützung für Interaktionszustände:
 
 ```text
 USER_CHANGE_PARAMETER
@@ -1514,7 +1511,7 @@ MODIFY_SCENE
 CHANGE_FIELD
 ```
 
-之后：
+Danach:
 
 ```text
 RECOMPUTE
@@ -1522,19 +1519,19 @@ RECOMPUTE
 
 ---
 
-# 37. Physics Tools
+# 37. Physik-Tools
 
-所有工具统一使用：
+Alle Tools verwenden einheitlich:
 
 ```text
 physics.*
 ```
 
-命名空间。
+Namensraum.
 
 ---
 
-## Scene Tools
+## Szenen-Tools
 
 ```text
 physics.scene.create
@@ -1548,7 +1545,7 @@ physics.scene.seek
 
 ---
 
-## Mechanics Tools
+## Mechanik-Tools
 
 ```text
 physics.mechanics.add_body
@@ -1561,7 +1558,7 @@ physics.mechanics.simulate
 
 ---
 
-## Kinematics Tools
+## Kinematik-Tools
 
 ```text
 physics.kinematics.trajectory
@@ -1572,7 +1569,7 @@ physics.kinematics.circular_motion
 
 ---
 
-## Electric Tools
+## Elektrik-Tools
 
 ```text
 physics.electric.field
@@ -1584,7 +1581,7 @@ physics.electric.particle_motion
 
 ---
 
-## Magnetic Tools
+## Magnetismus-Tools
 
 ```text
 physics.magnetic.field
@@ -1596,7 +1593,7 @@ physics.magnetic.particle_motion
 
 ---
 
-## Circuit Tools
+## Stromkreis-Tools
 
 ```text
 physics.circuit.create
@@ -1610,7 +1607,7 @@ physics.circuit.set_resistance
 
 ---
 
-## Observation Tools
+## Beobachtungs-Tools
 
 ```text
 physics.observe.force
@@ -1625,13 +1622,13 @@ physics.observe.geometry
 physics.observe.measurement
 ```
 
-例如：
+Beispiel:
 
 ```text
-“显示当前粒子的洛伦兹力”
+„Lorentzkraft des aktuellen Teilchen anzeigen“
 ```
 
-实际调用：
+Tatsächlicher Aufruf:
 
 ```json
 {
@@ -1643,11 +1640,11 @@ physics.observe.measurement
 
 ---
 
-# 38. Tool Guard
+# 38. Tool-Schutz
 
-LLM 不能直接修改 PhysicsScene。
+LLM kann PhysicsScene nicht direkt ändern.
 
-完整链路：
+Vollständige Kette:
 
 ```text
 Agent
@@ -1671,7 +1668,7 @@ Scene Event
 Scene Store
 ```
 
-禁止出现：
+Nicht zulässig:
 
 ```text
 mass = -10kg
@@ -1681,13 +1678,13 @@ charge = "很大"
 B.direction = "左上右下差不多"
 ```
 
-等非法状态。
+usw. illegale Zustände.
 
 ---
 
-# 39. Physics Skills
+# 39. Physik-Skills
 
-Skills 是 PhysicsOS 最重要的长期知识资产之一。
+Skills gehören zu den wichtigsten langfristigen Wissensressourcen von PhysicsOS.
 
 ```text
 skills/
@@ -1712,11 +1709,11 @@ skills/
 
 ---
 
-# 40. Skill 结构
+# 40. Skill-Struktur
 
-每个 Skill 不只是知识 Markdown。
+Jeder Skill ist nicht nur Wissen in Markdown.
 
-例如：
+Beispiel:
 
 ```text
 charged-particle-magnetic-field/
@@ -1734,34 +1731,34 @@ charged-particle-magnetic-field/
 └── examples/
 ```
 
-Skill 需要知道：
+Der Skill muss wissen:
 
 ```text
-物理规律
-前置知识
-公式
-成立条件
-常见模型
-边界情况
-验证规则
-推荐 Tools
-推荐 Observable
-常见错误
-教学策略
-变式方式
+Physikalische Gesetze
+Vorwissen
+Formeln
+Gültigkeitsbedingungen
+Gängige Modelle
+Randfälle
+Prüfregeln
+Empfohlene Tools
+Empfohlene Observables
+Häufige Fehler
+Lehrstrategien
+Variationsarten
 ```
 
 ---
 
-# 41. Prompt Architecture
+# 41. Prompt-Architektur
 
-禁止使用一个超大的：
+Die Verwendung eines einzigen übergroßen ist verboten:
 
 ```text
 system_prompt.txt
 ```
 
-应该动态组装：
+Stattdessen sollte dynamisch zusammengesetzt werden:
 
 ```text
 Prompt Assembly
@@ -1791,47 +1788,47 @@ Recent Context
 
 ---
 
-# 42. Agent Profile
+# 42. Agent-Profil
 
-主要两个 Profile。
+Hauptsächlich zwei Profile.
 
 ## physics-experiment
 
-偏重：
+Schwerpunkte:
 
 ```text
-观察
-探索
-实验
-变量
-控制变量
-比较
-假设
-验证
+Beobachtung
+Entdecken
+Versuch
+Variable
+Kontrollvariable
+Vergleich
+Hypothese
+Verifizierung
 ```
 
 ---
 
 ## physics-question
 
-偏重：
+Schwerpunkte:
 
 ```text
-读题
-条件提取
-建模
-过程分析
-求解
-验证
-可视化
-变式
+Aufgabentext lesen
+Bedingungen extrahieren
+Modellieren
+Prozessanalyse
+Lösen
+Verifizieren
+Visualisierung
+Variation
 ```
 
 ---
 
 # 43. Context Architecture
 
-完整上下文分层：
+Vollständige Kontext-Schichtung:
 
 ```text
 L0 Constitution
@@ -1847,38 +1844,38 @@ L6 Retrieval
 
 ## L0 Constitution
 
-永不压缩。
+Wird niemals komprimiert.
 
-保存产品和 Agent 的最高原则。
+Speichert die höchsten Prinzipien von Produkt und Agent.
 
 ---
 
 ## L1 Domain
 
-按当前 Skill 动态加载物理规则。
+Lädt physikalische Regeln dynamisch entsprechend dem aktuellen Skill.
 
 ---
 
 ## L2 User Learning State
 
-保存：
+Speichert:
 
 ```text
-年级
-知识掌握
-薄弱点
-常见误区
-学习历史
-教学偏好
+Jahrgangsstufe
+Wissensbeherrschung
+Schwächen
+häufige Missverständnisse
+Lernhistorie
+Unterrichtspräferenzen
 ```
 
 ---
 
 ## L3 PhysicsScene
 
-Scene 绝不能被普通自然语言 Summary 代替。
+Scene darf niemals durch eine gewöhnliche natürliche Sprach-Summary ersetzt werden.
 
-上下文只保存：
+Der Kontext speichert nur:
 
 ```text
 scene_id
@@ -1886,59 +1883,59 @@ revision
 snapshot_id
 ```
 
-真实状态继续存储在 Scene Runtime。
+Der tatsächliche Zustand wird weiterhin im Scene Runtime gespeichert.
 
 ---
 
 ## L4 Task Working Memory
 
-保存：
+Speichert:
 
 ```text
-当前任务
-当前阶段
-已经确认的结论
-未完成的问题
-关键推导
+Aktuelle Aufgabe
+Aktueller Phase
+Bereits bestätigte Schlussfolgerungen
+Offene Fragen
+Wesentliche Herleitungen
 ```
 
 ---
 
 ## L5 Recent Conversation
 
-保留近期对话。
+Behält den jüngsten Dialog bei.
 
-允许普通压缩。
+Erlaubt gewöhnliche Komprimierung.
 
 ---
 
 ## L6 Retrieval
 
-包括：
+Umfasst:
 
 ```text
-教材
+Lehrbuch
 Skill
-题库
-知识库
-课程资料
+Aufgabensammlung
+Wissensdatenbank
+Kursmaterialien
 ```
 
-按需重新检索。
+Wird bedarfsgesteuert neu abgerufen.
 
 ---
 
 # 44. Physics-aware Context Compression
 
-普通摘要：
+Gewöhnliche Zusammenfassung:
 
 ```text
-用户正在学习磁场。
+Benutzer lernt gerade Magnetfeld.
 ```
 
-远远不够。
+Bei weitem nicht ausreichend.
 
-PhysicsOS 应生成：
+PhysicsOS soll generieren:
 
 ```yaml
 task:
@@ -1972,7 +1969,7 @@ important_events:
   - event_80
 ```
 
-这样才能保证长时间 Agent 交互稳定。
+Nur so lässt sich langfristig stabile Agent-Interaktion gewährleisten.
 
 ---
 
@@ -1989,36 +1986,36 @@ Memory
 └── Preference Memory
 ```
 
-例如 Learning Memory：
+Beispiel Learning Memory:
 
 ```text
-经常混淆速度与加速度方向
-洛伦兹力方向判断薄弱
-平抛分运动掌握较好
-电势与电势能容易混淆
+Verwechselt häufig Geschwindigkeits- und Beschleunigungsrichtung
+Schwäche bei der Bestimmung der Lorentzkraft-Richtung
+Gutes Beherrschen der waagerechten Wurfbewegung
+Verwechselt leicht elektrisches Potential und potentielle Energie
 ```
 
-Tutor Agent 可以据此调整教学。
+Tutor Agent kann darauf basierend den Unterricht anpassen.
 
 ---
 
 # 46. Web First
 
-PhysicsOS 当前开发战略明确为：
+Die aktuelle Entwicklungsstrategie von PhysicsOS lautet eindeutig:
 
-> **Web First。**
+> **Web First.**
 
-第一主产品就是 Web。
+Das erste Hauptprodukt ist das Web.
 
-不是：
+Nicht:
 
 ```text
-Web 一套代码
+Web eine Codebasis
 +
-Windows 一套代码
+Windows eine Codebasis
 ```
 
-而是：
+Sondern:
 
 ```text
                       PhysicsOS
@@ -2032,9 +2029,9 @@ Windows 一套代码
           Web App               Windows EXE
 ```
 
-以后 Windows EXE 只增加桌面容器和桌面能力。
+Künftig fügt Windows EXE nur Desktop-Container und Desktop-Fähigkeiten hinzu.
 
-绝大部分：
+Der weitaus größte Teil:
 
 ```text
 UI
@@ -2047,13 +2044,13 @@ Observation
 Skills
 ```
 
-全部共用。
+wird komplett gemeinsam genutzt.
 
 ---
 
-# 47. Web 技术方向
+# 47. Web-Technische Ausrichtung
 
-推荐：
+Empfohlen:
 
 ```text
 React
@@ -2071,17 +2068,17 @@ ECharts
 KaTeX
 ```
 
-产品本质属于：
+Das Produkt ist im Kern ein:
 
 > **Browser-based Desktop Application**
 
-而不是普通营销网站。
+und keine gewöhnliche Marketing-Website.
 
 ---
 
-# 48. Desktop 预留
+# 48. Desktop-Vorbereitung
 
-未来：
+Zukunft:
 
 ```text
 React Web
@@ -2091,27 +2088,27 @@ Tauri 2
 PhysicsOS.exe
 ```
 
-桌面专属能力：
+Desktop-exklusive Fähigkeiten:
 
 ```text
 Native File Dialog
-本地文件系统
-系统通知
-拖拽文件
-Windows 菜单
-本地 Physics Runtime
-本地 Harness Sidecar
-自动更新
-离线模式
+Lokales Dateisystem
+Systembenachrichtigungen
+Datei-Drag-and-Drop
+Windows-Menü
+Lokales Physics Runtime
+Lokales Harness Sidecar
+Automatische Updates
+Offline-Modus
 ```
 
-通过：
+Über:
 
 ```text
 PlatformBridge
 ```
 
-隔离平台能力。
+Isoliert Plattformfähigkeiten.
 
 ```text
 PhysicsOS
@@ -2128,22 +2125,22 @@ Adapter       Adapter
 
 # 49. Physics Workspace
 
-产品最核心工作页面：
+Die Kernarbeitsseite des Produkts:
 
 ```text
 ┌───────────────────────────────────────────────────────────────┐
-│ PhysicsOS │ 场景名称 │ ▶ │ ⏸ │ 1x │ 保存 │ 分享            │
+│ PhysicsOS │ Szenenname │ ▶ │ ⏸ │ 1x │ Speichern │ Teilen            │
 ├────────────┬──────────────────────────────┬───────────────────┤
-│ 场景/对象  │                              │ 属性              │
+│ Szene/Objekt  │                              │ Eigenschaften              │
 │            │                              │                   │
-│ 图层       │       Physics Canvas         │ Observable        │
+│ Ebenen       │       Physics Canvas         │ Observable        │
 │            │                              │                   │
-│ 工具       │                              │ Physics Agent     │
+│ Werkzeuge       │                              │ Physics Agent     │
 │            │                              │                   │
 ├────────────┴──────────────────────────────┴───────────────────┤
 │ Timeline                                                      │
 ├───────────────────────────────────────────────────────────────┤
-│ 数据 │ 图像 │ 能量 │ 速度 │ 加速度 │ 轨迹 │ 推导 │ 测量     │
+│ Daten │ Bilder │ Energie │ Geschwindigkeit │ Beschleunigung │ Bahn │ Ableitung │ Messung     │
 └───────────────────────────────────────────────────────────────┘
 ```
 
@@ -2151,83 +2148,83 @@ Adapter       Adapter
 
 # 50. Teacher Studio
 
-学生端核心依然只有：
+Der Kern des Schüler-Clients besteht weiterhin nur aus:
 
 ```text
-实验
-试题
+Versuche
+Aufgaben
 ```
 
-教师端另外拥有：
+Der Lehrer-Client verfügt zusätzlich über:
 
 ```text
 Teacher Studio
 │
 ├── Scene Builder
-├── 实验制作
-├── 试题制作
-├── 课堂演示
-├── 课件生成
-├── 作业
-├── 班级
-├── 学情分析
-└── 内容发布
+├── Versuchserstellung
+├── Aufgabenerstellung
+├── Klassenvorführung
+├── Lehrmaterial-Generierung
+├── Aufgaben
+├── Lerngruppen
+├── Lernanalyse
+└── Inhaltsveröffentlichung
 ```
 
 ---
 
 # 51. Physics Scene Builder
 
-完整版需要一个：
+Die Vollversion benötigt einen:
 
 > **Figma / Unity-lite for Physics**
 
-用户可以拖入：
+Nutzer können hineinziehen:
 
 ```text
-物块
-小球
-斜面
-弹簧
-绳
-滑轮
-小车
+Blöcke
+Kugeln
+Schiefe Ebenen
+Federn
+Seile
+Rollen
+Wägen
 
-电荷
-电场
-磁场
+Ladungen
+Elektrische Felder
+Magnetfelder
 
-电源
-导线
-电阻
-电表
+Stromquellen
+Leitungen
+Widerstände
+Messgeräte
 
-透镜
-镜面
-光源
+Linsen
+Spiegel
+Lichtquellen
 ```
 
-并设置：
+Und einstellen:
 
 ```text
-属性
-约束
-参数
-位置
-初始状态
-场
-边界
+Eigenschaften
+Constraints
+Parameter
+Position
+Anfangszustand
+Felder
+Grenzen
 ```
 
 ---
 
-# 52. Agent 创建世界
+# 52. Agent erstellt Welten
 
-用户可以直接输入：
+Nutzer können direkt eingeben:
 
-> 做一个粒子经过电场加速后进入垂直磁场的实验。
+> Erstelle ein Experiment, bei dem ein Teilchen durch ein elektrisches Feld beschleunigt wird und dann in ein senkrechtes Magnetfeld eintritt.
 
-Agent 执行：
+Agent führt aus:
 
 ```text
 createScene
@@ -2241,13 +2238,13 @@ verifyScene
 simulate
 ```
 
-最终直接生成完整物理世界。
+Schließlich wird direkt eine vollständige Physikwelt generiert.
 
 ---
 
-# 53. 后端总体架构
+# 53. Backend-Gesamtarchitektur
 
-逻辑模块：
+Logische Module:
 
 ```text
 Backend
@@ -2267,15 +2264,15 @@ Backend
 └── Analytics
 ```
 
-不要求初期全部物理拆成独立微服务。
+Es wird nicht verlangt, dass die Physik-Module anfänglich alle in unabhängige Microservices aufgeteilt werden.
 
-但是：
+Aber:
 
-> **领域边界必须从第一天就明确。**
+> **Domänengrenzen müssen von Tag eins an klar definiert sein.**
 
 ---
 
-# 54. 数据存储
+# 54. Datenspeicherung
 
 ```text
 PostgreSQL
@@ -2315,13 +2312,13 @@ Vector Store
 
 ---
 
-# 55. 双 Event Stream
+# 55. Doppelter Event Stream
 
-PhysicsOS 有两条非常重要的事件时间线。
+PhysicsOS hat zwei sehr wichtige Ereignis-Zeitlinien.
 
 ## Agent Event Stream
 
-记录：
+Erfasst:
 
 ```text
 Prompt
@@ -2333,25 +2330,25 @@ Agent
 Context
 ```
 
-由 Harness Session 管理。
+Verwaltet von Harness Session.
 
 ---
 
 ## Physics Event Stream
 
-记录：
+Erfasst:
 
 ```text
-世界发生了什么
+Was in der Welt geschah
 ```
 
-由 PhysicsScene EventStore 管理。
+Verwaltet vom PhysicsScene EventStore.
 
 ---
 
-# 56. 双事件关联
+# 56. Verknüpfung der beiden Ereignisse
 
-通过：
+Über:
 
 ```text
 session_id
@@ -2362,17 +2359,17 @@ scene_revision
 physics_event_id
 ```
 
-关联。
+Verknüpft.
 
-从而可以完整追踪：
+Damit lässt sich vollständig nachverfolgen:
 
-> 哪一次 Agent Tool Call 导致了哪一次物理世界变化。
+> Welcher Agent Tool Call welche Veränderung in der Physikwelt verursacht hat.
 
 ---
 
 # 57. Observability
 
-开发者 / 教师高级模式可以完整看到：
+Entwickler / Lehrer-Expertenmodus können vollständig sehen:
 
 ```text
 User Message
@@ -2398,23 +2395,23 @@ Observation
 Assistant Response
 ```
 
-这对：
+Dies ermöglicht:
 
 ```text
 Debug
-回放
-错误分析
-Agent 调试
-物理模型验证
+Wiedergabe
+Fehleranalyse
+Agent-Debugging
+Physikmodell-Validierung
 ```
 
-非常重要。
+Sehr wichtig.
 
 ---
 
 # 58. Model Router
 
-PhysicsOS 不绑死某一个模型。
+PhysicsOS bindet sich nicht an ein einzelnes Modell.
 
 ```text
 Model Router
@@ -2427,15 +2424,15 @@ Model Router
 └── Optional Local Model
 ```
 
-DeepSeek Harness 是：
+DeepSeek Harness ist:
 
-> Agent Runtime 基础设施。
+> Agent-Runtime-Infrastruktur.
 
-不是 PhysicsOS 品牌本身。
+Nicht die Marke PhysicsOS selbst.
 
 ---
 
-# 59. 推荐代码仓库结构
+# 59. Empfohlene Code-Repository-Struktur
 
 ```text
 physics-os/
@@ -2514,13 +2511,13 @@ physics-os/
     └── visual/
 ```
 
-> **已退役（ADR-0002，2026-09-27）**：结构中原有的 `agent-runtime/` 与 `agent-dsh-adapter/` 两个设计稿包位已删除，见 `docs/adr/0002-agent-runtime-adapter-disposition.md`。Harness 是 Agent 宿主，PhysicsOS 不自建独立 Agent runtime；真实在线的是 `agent-tools/`（`@physicsos/agent-tools` → 物理引擎 / verifier）。
+> **Ausgemustert (ADR-0002, 2026-09-27)**: Die ursprünglich in der Struktur vorhandenen Design-Paketplätze `agent-runtime/` und `agent-dsh-adapter/` wurden entfernt, siehe `docs/adr/0002-agent-runtime-adapter-disposition.md`. Harness ist der Agent-Host; PhysicsOS baut keine eigene Agent-Runtime. Die tatsächliche Produktionskette ist Harness-Werkzeuglaufzeit → `dsh-tool-physicsos` → `@physicsos/agent-tools` → Physik-Engine / Verifier.
 
 ---
 
-# 60. UI / UX 设计方向
+# 60. UI / UX Designrichtung
 
-PhysicsOS 主攻：
+PhysicsOS fokussiert sich auf:
 
 ```text
 Web
@@ -2528,42 +2525,42 @@ Web
 Windows Desktop
 ```
 
-不采用传统教育后台风格，也不采用暗色赛博朋克风格。
+Es wird weder der klassische Bildungs-Backend-Stil noch der dunkle Cyberpunk-Stil verwendet.
 
-整体视觉方向：
+Gesamte visuelle Richtung:
 
 ```text
-暖白 / 雾白背景
-冰蓝透明层
-自然蓝作为核心品牌色
-少量青绿表示成功和实验状态
-极少量橙色表示警告与能量
-深灰文字
-柔和阴影
-大面积留白
-轻量液态玻璃
-高质量 3D 科学模型
+Warmweiß / nebelweißer Hintergrund
+Eisblaue transparente Ebene
+Naturblau als Kernmarkenfarbe
+Wenige Blaugrün für Erfolg und Versuchsstatus
+Sehr wenig Orange für Warnungen und Energie
+Dunkelgrauer Text
+Weiche Schatten
+Großzügiger Weißraum
+Leichtes Flüssigglas
+Hochwertige 3D-Wissenschaftsmodelle
 ```
 
-视觉关键词：
+Visuelle Schlüsselwörter:
 
-> **自然、明亮、克制、科学、高级、沉浸。**
+> **Natürlich, hell, zurückhaltend, wissenschaftlich, hochwertig, immersiv.**
 
-实验场景本身应该成为视觉主体。
+Die Versuchsszene selbst sollte zum visuellen Hauptthema werden.
 
-UI 只是容器。
+UI ist nur Container.
 
 ---
 
-# 61. 产品完整闭环
+# 61. Produktiver geschlossener Kreislauf
 
 ```mermaid
 flowchart TD
 
-A[学生 / 教师]
+A[Schüler / Lehrer]
 
-A --> B[Physics Lab]
-A --> C[Question Space]
+A --> B[Physiklabor]
+A --> C[Aufgabenbereich]
 
 C --> D[OCR / VLM]
 D --> E[Physics IR]
@@ -2571,15 +2568,15 @@ D --> E[Physics IR]
 B --> F[PhysicsScene]
 E --> F
 
-F --> G[Physics Engine]
+F --> G[Physik-Engine]
 G --> H[Math Runtime]
 G --> I[Verifier]
 
-I --> J[Observation Layer]
+I --> J[Beobachtungsebene]
 
-J --> K[Force / Field]
-J --> L[Trajectory / Energy]
-J --> M[Graph / Data]
+J --> K[Kraft / Feld]
+J --> L[Trajektorie / Energie]
+J --> M[Graph / Daten]
 
 K --> N[Physics Canvas]
 L --> N
@@ -2587,9 +2584,9 @@ M --> N
 
 N --> O[Physics Agent]
 
-O --> P[Tools]
+O --> P[Werkzeuge]
 O --> Q[Skills]
-O --> R[Context]
+O --> R[Kontext]
 
 P --> S[DeepSeek Harness]
 Q --> S
@@ -2598,174 +2595,174 @@ R --> S
 
 ---
 
-# 62. 六条最高架构原则
+# 62. Sechs höchste Architekturprinzipien
 
-## 原则一
+## Prinzip eins
 
-> **产品核心入口只有实验和试题。**
+> **Der einzige Produkteintritt sind Versuche und Aufgaben.**
 
-不要让内部技术复杂度污染产品入口。
-
----
-
-## 原则二
-
-> **实验和试题共享唯一 Physics World。**
-
-绝不能分别维护两套物理逻辑。
+Interne technische Komplexität darf den Produkteintritt nicht verunreinigen.
 
 ---
 
-## 原则三
+## Prinzip zwei
 
-> **LLM 不决定物理世界。Physics Engine 决定。**
+> **Versuche und Aufgaben teilen sich eine einzige Physikwelt.**
 
-AI 负责：
+Es dürfen niemals zwei separate physikalische Logiken gepflegt werden.
+
+---
+
+## Prinzip drei
+
+> **LLM bestimmt nicht die Physikwelt. Die Physik-Engine bestimmt.**
+
+KI ist verantwortlich für:
 
 ```text
-理解
-规划
-选择
-解释
-教学
+Verstehen
+Planen
+Auswählen
+Erklären
+Lehren
 ```
 
-Physics Engine 负责：
+Physik-Engine ist verantwortlich für:
 
 ```text
-计算
-推演
-验证
-世界状态
+Berechnen
+Ableiten / Simulieren
+Verifizieren
+Weltzustand
 ```
 
 ---
 
-## 原则四
+## Prinzip vier
 
-> **PhysicsScene 是物理事实源。**
+> **PhysicsScene ist die Quelle physikalischer Tatsachen.**
 
-Agent Context 不能代替 Scene。
+Agent-Kontext kann Scene nicht ersetzen.
 
 ---
 
-## 原则五
+## Prinzip fünf
 
-> **真正的技术壁垒不是聊天。**
+> **Die echte technologische Eintrittsbarriere ist nicht Chat.**
 
-PhysicsOS 的核心壁垒是：
+PhysicsOS' Kernbarriere ist:
 
 ```text
 PhysicsScene
 +
-Physics Engine
+Physik-Engine
 +
-Observation Layer
+Beobachtungsebene
 +
 Physics IR
 +
 Physics Skills
 +
-Scene-driven Question
+Szenengetriebene Aufgabe
 ```
 
 ---
 
-## 原则六
+## Prinzip sechs
 
-> **DeepSeek Harness 是基础设施，不是业务核心。**
+> **DeepSeek Harness ist Infrastruktur, nicht Geschäftskern.**
 
-通过：
+Durch:
 
 ```text
 DeepSeek Harness
 ```
 
-> **已退役（ADR-0002，2026-09-27）**：`PhysicsAgentRuntime API` / `DSH Adapter` 两层（对应已删除的 `@physicsos/agent-runtime` / `@physicsos/agent-dsh-adapter`）已退役，见 `docs/adr/0002-agent-runtime-adapter-disposition.md`。Harness 是 Agent 宿主；PhysicsOS 不自建独立 Agent runtime。真实生产链路是 Harness 工具运行时 → `dsh-tool-physicsos` → `@physicsos/agent-tools` → 物理引擎 / verifier。
+> **Ausgemustert (ADR-0002, 2026-09-27)**: Die zwei Schichten `PhysicsAgentRuntime API` / `DSH Adapter` (entsprechend den gelöschten `@physicsos/agent-runtime` / `@physicsos/agent-dsh-adapter`) sind ausgemustert, siehe `docs/adr/0002-agent-runtime-adapter-disposition.md`. Harness ist Agent-Host; PhysicsOS baut keine eigene Agent-Runtime. Die tatsächliche Produktionskette ist Harness-Werkzeuglaufzeit → `dsh-tool-physicsos` → `@physicsos/agent-tools` → Physik-Engine / Verifier.
 
-进行隔离。
+dient der Isolation.
 
-未来可以更换：
+Zukünftig austauschbar:
 
 ```text
 Harness
-Model
-LLM Provider
-Runtime
+Modell
+LLM-Anbieter
+Laufzeit
 ```
 
-而不会动 PhysicsOS 核心业务。
+Ohne dass der PhysicsOS-Kerngeschäftsbereich betroffen wird.
 
 ---
 
-# 63. 一句话最终目标
+# 63. Ein-Satz-Endziel
 
-> **打造一套面向初高中物理的数字物理世界与 AI Agent 平台，让试题、实验、力、场、轨迹、能量和动态变化从“只能想象”变成“真正可以被看见、操控和推演”。**
-
----
-
-# 64. 产品 Slogan
-
-主 Slogan：
-
-> **让看不见的物理过程被看见。**
-
-辅助表达：
-
-> **让每一道物理题，都能进入物理世界。**
-
-> **不只是给你答案，而是让你看到答案为什么发生。**
-
-> **从静态试题，到真正运行的物理世界。**
+> **Eine digitale Physikwelt und KI-Agenten-Plattform für die Physik der Mittel- und Oberstufe schaffen, die Aufgaben, Versuche, Kräfte, Felder, Bahnen, Energie und dynamische Veränderungen vom „nur Vorstellbaren“ in „wirklich Sichtbares, Steuerbares und Simulierbares“ verwandelt.**
 
 ---
 
-# 65. PhysicsOS 的最终形态
+# 64. Produkt-Slogan
 
-PhysicsOS 最终不是：
+Haupt-Slogan:
+
+> **Unsichtbare physikalische Prozesse sichtbar machen.**
+
+Unterstützende Aussagen:
+
+> **Jede Physikaufgabe in die Physikwelt eintreten lassen.**
+
+> **Nicht nur die Antwort geben, sondern zeigen, warum die Antwort zutrifft.**
+
+> **Von statischen Prüfungsaufgaben zur wirklich laufenden Physikwelt.**
+
+---
+
+# 65. PhysicsOS' finale Form
+
+PhysicsOS ist letztlich nicht:
 
 ```text
-AI 搜题工具
+KI-Aufgabenlöser
 ```
 
-也不是：
+Sondern auch nicht:
 
 ```text
-虚拟实验动画网站
+Website für virtuelle Experiment-Animationen
 ```
 
-而应该成为：
+Sondern es sollte werden:
 
-> **中学物理领域的可视化解释器、数字实验环境、物理推演引擎与 Agent 学习系统。**
+> **Visualisierender Interpretator, digitale Experimentierumgebung, Physik-Schlussfolgerungsmaschine und Agent-Lernsystem für die Sekundarphysik.**
 
-最终实现：
+Letztlich realisiert:
 
 ```text
-题目
+Aufgabe
  ↓
-理解
+Verständnis
  ↓
 Physics IR
  ↓
 PhysicsScene
  ↓
-真实物理推演
+Echte physikalische Simulation
  ↓
-可视化
+Visualisierung
  ↓
-Agent 教学
+Agent-Unterricht
  ↓
-用户交互
+Benutzerinteraktion
  ↓
-重新推演
+Neu-Simulation
  ↓
-理解规律
+Gesetzmäßigkeiten verstehen
 ```
 
-当学生面对过去老师只能说：
+Wenn Schüler mit Inhalten konfrontiert sind, zu denen Lehrer früher nur sagen konnten:
 
-> “大家在脑子里想象一下。”
+> „Stellt euch das alle im Kopf vor.“
 
-的内容时，PhysicsOS 的答案应该是：
+sollte PhysicsOS' Antwort lauten:
 
-> **不用想象，直接让它运行起来。**
+> **Nicht vorstellen, einfach laufen lassen.**

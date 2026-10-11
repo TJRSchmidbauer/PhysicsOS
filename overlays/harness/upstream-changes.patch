@@ -71,7 +71,7 @@ index f8bafcb699..02fe6e60fa 100644
      )
      await page.getByRole('button', { name: 'Start Preview' }).click()
 -    await page.getByText('Loading plugins…', { exact: true }).waitFor({ timeout: 10_000 })
-+    await page.getByText('正在准备物理世界…', { exact: true }).waitFor({ timeout: 10_000 })
++    await page.getByText('Physikwelt wird vorbereitet…', { exact: true }).waitFor({ timeout: 10_000 })
      const bootLine = await within(treeActive, BOOT_TIMEOUT_MS, `preview boot: the worker never reported "${TREE_ACTIVE}"`)
      // The activated tree ran bodies lowered against the contract this
      // checkout's packer emits; a dist built before a contract change would
@@ -145,7 +145,7 @@ index 14278995c4..59974e68d7 100644
      try {
        reload = page.reload({ waitUntil: 'domcontentloaded' })
 -      const loading = page.getByText('Loading plugins…', { exact: true })
-+      const loading = page.getByText('正在准备物理世界…', { exact: true })
++      const loading = page.getByText('Physikwelt wird vorbereitet…', { exact: true })
        await loading.waitFor({ timeout: 10_000 })
        const state = await loading.evaluate((element) => {
          const boot = element.parentElement?.parentElement
@@ -158,7 +158,7 @@ index 77acfed00a..781c3d8215 100644
      onTestFailed(() => saveFailureShot(page, 'w5-cold-start'))
      await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
 -    expect(await page.locator('text=Failed to load plugins').count()).toBe(0)
-+    expect(await page.locator('text=插件加载失败').count()).toBe(0)
++    expect(await page.locator('text=Plugins konnten nicht geladen werden').count()).toBe(0)
      const template = await page.locator('[class*="frame"]').evaluate(el => getComputedStyle(el).gridTemplateColumns)
      expect(template.split(' ').length).toBe(3)
      await screen(page, '01-cold-start')
@@ -184,10 +184,10 @@ index 6e6a1802d1..e2ec574e12 100644
 +/session-persistence-event-catalog/events/physics:
 +  en: 920c07dad521f561
 +  zh: 920c07dad521f561
-+/session-persistence-event-catalog/events/physics/physics-scene-log-only:
++/session-persistence-event-catalog/events/physics/physics-scene-nur-Protokoll:
 +  en: 305bf50c75a86fd6
 +  zh: 2cdd097dba597890
-+/session-persistence-event-catalog/events/physics/physics-solve-trace-log-only:
++/session-persistence-event-catalog/events/physics/physics-solve-trace-nur-Protokoll:
 +  en: b495c89cce6637b4
 +  zh: 1faf4b51ef20ce6b
  /session-persistence-event-catalog/events/plan:
@@ -650,38 +650,38 @@ index b9a4241eef..faf2fa175d 100644
 
 +### `physics/*`
 +
-+<a id="physicsscene--log-only"></a>
++<a id="physicsscene--nur-Protokoll"></a>
 +
-+#### `physics/scene` — log-only
++#### `physics/scene` — nur-Protokoll
 +
 +```ts persistence-catalog
 +/**
-+ * A scene the agent created, solved or edited through the physics tools,
-+ * at the revision the tool call left it. Whole-value per scene id; the
-+ * projection folds last-wins per id.
++ * Eine Szene, die der Agent über die Physik-Tools erstellt, gelöst oder bearbeitet hat,
++ * in der Revision, die der Tool-Aufruf hinterlassen hat. Komplettwert pro Szenen-ID; die
++ * Projektion übernimmt den letzten Gewinner pro ID.
 + */
 +'physics/scene': PhysicsSceneSnapshot
 +```
 +
-+Source: [`packages/physicsos/tool-physicsos/src/types.ts:123`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle: [`packages/physicsos/tool-physicsos/src/types.ts:123`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+<a id="physicssolve-trace--log-only"></a>
++<a id="physicssolve-trace--nur-Protokoll"></a>
 +
-+#### `physics/solve-trace` — log-only
++#### `physics/solve-trace` — nur-Protokoll
 +
 +```ts persistence-catalog
 +/**
-+ * One `physics_solve_question` run — solved OR rejected — appended after
-+ * the tool result so every attempt leaves run-level diagnostics in the
-+ * session log: pipeline state, engine verdict, answers, issues and the
-+ * retry guidance the model was handed. The `physicsScenes` mirror only
-+ * carries READY solves; this event is what makes rejected attempts
-+ * (parse failures, verification failures) visible after the fact.
++ * Ein Lauf von `physics_solve_question` — gelöst ODER abgelehnt — wird nach
++ * dem Tool-Ergebnis angehängt, sodass jeder Versuch Lauf-Level-Diagnosen im
++ * Sitzungsprotokoll hinterlässt: Pipeline-Status, Engine-Verlauf, Antworten, Probleme und die
++ * Wiederholungs-Hinweise, die dem Modell gegeben wurden. Der `physicsScenes`-Spiegel enthält nur
++ * READY-Lösungen; dieses Ereignis macht abgelehnte Versuche
++ * (Parserfehler, Verifikationsfehler) auch im Nachhinein sichtbar.
 + */
 +'physics/solve-trace': PhysicsSolveTrace
 +```
 +
-+Source: [`packages/physicsos/tool-physicsos/src/types.ts:132`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle: [`packages/physicsos/tool-physicsos/src/types.ts:132`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
  ### `plan/*`
 
@@ -974,21 +974,21 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `b9e668a5846564666573e10bccdad2ae413a61eca03a0740306950d028eeb58e`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:86`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:86`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `cause` | required | [`PhysicsSceneSnapshotCause`](#persistence-type-sha256-1a2eba80ed864f5c3ebef4a1a0b97cf992e944cd756b0df568a451bc84739f27) |
++| `cause` | erforderlich | [`PhysicsSceneSnapshotCause`](#persistence-type-sha256-1a2eba80ed864f5c3ebef4a1a0b97cf992e944cd756b0df568a451bc84739f27) |
 +| `commandType` | optional | `string` |
-+| `domain` | required | `string` |
-+| `engineId` | required | `string` |
++| `domain` | erforderlich | `string` |
++| `engineId` | erforderlich | `string` |
 +| `eventType` | optional | `string` |
-+| `revision` | required | `number` |
-+| `scene` | required | [`JsonValue`](#persistence-type-sha256-c592ce75aab73fcab19c1d7845684c72cf402b78d2e1f2833a58ecf9f3598ed6) |
-+| `sceneId` | required | `string` |
++| `revision` | erforderlich | `number` |
++| `scene` | erforderlich | [`JsonValue`](#persistence-type-sha256-c592ce75aab73fcab19c1d7845684c72cf402b78d2e1f2833a58ecf9f3598ed6) |
++| `sceneId` | erforderlich | `string` |
 +| `solve` | optional | [`PhysicsSceneSolveSummary`](#persistence-type-sha256-998c5982d166427d222ddcb6eb80c0b64a77c70eaa3f30179f54e21fbf23303f) |
 +| `sourceQuestionId` | optional | `string` |
-+| `title` | required | `string` |
++| `title` | erforderlich | `string` |
 +| `turn` | optional | `number` |
 +
 +<a id="persistence-type-sha256-1a2eba80ed864f5c3ebef4a1a0b97cf992e944cd756b0df568a451bc84739f27"></a>
@@ -1001,9 +1001,9 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `1a2eba80ed864f5c3ebef4a1a0b97cf992e944cd756b0df568a451bc84739f27`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:23`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:23`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+One of:
++Eines von:
 +
 +- `"command"`
 +- `"created"`
@@ -1019,16 +1019,16 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `998c5982d166427d222ddcb6eb80c0b64a77c70eaa3f30179f54e21fbf23303f`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:32`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:32`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `answers` | required | [`{ key, label, provenance, symbol, … }[]`](#persistence-type-sha256-d9129d78602cac2c325b0cacae1aacf6242b0d3c96e28dda3d739458bbe0cd16) |
++| `answers` | erforderlich | [`{ key, label, provenance, symbol, … }[]`](#persistence-type-sha256-d9129d78602cac2c325b0cacae1aacf6242b0d3c96e28dda3d739458bbe0cd16) |
 +| `goldenQuestionId` | optional | `string` |
-+| `issues` | required | [`{ code, message, severity }[]`](#persistence-type-sha256-bd18c9bb568037f67c2b07c192bb792541395339472bae94e9627414f8cee2a6) |
-+| `knowns` | required | [`{ key, label, symbol, unit, … }[]`](#persistence-type-sha256-9caa0278318fdf2add75cbadf78bfd09bab888a5c60c2e1b87a2b37d7ec98bb8) |
-+| `steps` | required | [`{ description, index, result?, substitution?, … }[]`](#persistence-type-sha256-1405a84e5b726a4bc174a52039d4c27a7f022e48ead2be39a6db5d4cc75a9047) |
-+| `targets` | required | [`string[]`](#persistence-type-sha256-93c33d9687613293f8c95d46c4d922fe9ceae83b84c384beff5c3315abe005f2) |
++| `issues` | erforderlich | [`{ code, message, severity }[]`](#persistence-type-sha256-bd18c9bb568037f67c2b07c192bb792541395339472bae94e9627414f8cee2a6) |
++| `knowns` | erforderlich | [`{ key, label, symbol, unit, … }[]`](#persistence-type-sha256-9caa0278318fdf2add75cbadf78bfd09bab888a5c60c2e1b87a2b37d7ec98bb8) |
++| `steps` | erforderlich | [`{ description, index, result?, substitution?, … }[]`](#persistence-type-sha256-1405a84e5b726a4bc174a52039d4c27a7f022e48ead2be39a6db5d4cc75a9047) |
++| `targets` | erforderlich | [`string[]`](#persistence-type-sha256-93c33d9687613293f8c95d46c4d922fe9ceae83b84c384beff5c3315abe005f2) |
 +| `verification` | optional | [`{ checks, status }`](#persistence-type-sha256-334278dcc39b017d15095ace2382c116163ddc65839f3a141db2126af63feda0) |
 +
 +<a id="persistence-type-sha256-e152e8a8fe169e8c9d6f317058d0b1806980d987ee9329daf969b98078d4bd0b"></a>
@@ -1041,24 +1041,24 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `e152e8a8fe169e8c9d6f317058d0b1806980d987ee9329daf969b98078d4bd0b`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:151`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:151`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `answers` | required | [`{ key, unit, value }[]`](#persistence-type-sha256-3220d37f3610d9ce6becb398ee6b57fca7bc332807d5a2909755a22cb1c377e5) |
++| `answers` | erforderlich | [`{ key, unit, value }[]`](#persistence-type-sha256-3220d37f3610d9ce6becb398ee6b57fca7bc332807d5a2909755a22cb1c377e5) |
 +| `attempt` | optional | `number` |
 +| `domain` | optional | `string` |
-+| `durationMs` | required | `number` |
++| `durationMs` | erforderlich | `number` |
 +| `goldenQuestionId` | optional | `string` |
-+| `issues` | required | [`{ code, severity }[]`](#persistence-type-sha256-b0fc58bfc3deafcf4963ba53097f169a897bcdfa418bac56d0146f646308ba2c) |
++| `issues` | erforderlich | [`{ code, severity }[]`](#persistence-type-sha256-b0fc58bfc3deafcf4963ba53097f169a897bcdfa418bac56d0146f646308ba2c) |
 +| `model` | optional | `string` |
-+| `retryGuidance` | required | [`{ code }[]`](#persistence-type-sha256-72d5006d43fab22dd42147f41f97cf5b836712a662e0ea53e8bb58083b19c032) |
++| `retryGuidance` | erforderlich | [`{ code }[]`](#persistence-type-sha256-72d5006d43fab22dd42147f41f97cf5b836712a662e0ea53e8bb58083b19c032) |
 +| `reusedScene` | optional | `boolean` |
 +| `sceneId` | optional | `string` |
-+| `status` | required | [`union (2 variants)`](#persistence-type-sha256-9dee7503e06d03fe11c5e20b359d2eb0b3e487c08ae829dfbefe98bf2603be05) |
++| `status` | erforderlich | [`union (2 variants)`](#persistence-type-sha256-9dee7503e06d03fe11c5e20b359d2eb0b3e487c08ae829dfbefe98bf2603be05) |
 +| `turn` | optional | `number` |
 +| `verification` | optional | [`{ failed, passed, status, total }`](#persistence-type-sha256-09729456adc5f1a66c71154ec84922443b8cd4a67ac87511d1b027581781235a) |
-+| `workflowState` | required | `string` |
++| `workflowState` | erforderlich | `string` |
 +
  <a id="persistence-type-sha256-b8fc636a2121df9d8423c242e03c9d23b7ab7c6fdce00e45746932c60b730f97"></a>
 
@@ -1073,7 +1073,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `838fe914b81b7fe6378147d0dc377571ed96303c90fb9c52a34866ad2bb3267b`
 +
-+One of:
++Eines von:
 +
 +- `"boundary"`
 +- `"conservation"`
@@ -1099,7 +1099,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `9dee7503e06d03fe11c5e20b359d2eb0b3e487c08ae829dfbefe98bf2603be05`
 +
-+One of:
++Eines von:
 +
 +- `"rejected"`
 +- `"solved"`
@@ -1110,7 +1110,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `d658728f82b9c41906cc81f471a69770d7317a9dce238fe30a1cc8a4706f0914`
 +
-+One of:
++Eines von:
 +
 +- [`{ engineId, engineVersion, evidence, sceneId, … }`](#persistence-type-sha256-1429a604d7f38aac4ba88bd2d4c269ab8e288ba4f046f7bdf682fc965b454504)
 +- `null`
@@ -1128,7 +1128,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `6810595440dcd2261c5f74fdb7ce0a2f6ecba9e07f065ee4cb333ef0e55a4c83`
 +
-+One of:
++Eines von:
 +
 +- `"CONSERVATION_VERIFIED"`
 +- `"ENGINE_COMPUTED"`
@@ -1151,12 +1151,12 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `334278dcc39b017d15095ace2382c116163ddc65839f3a141db2126af63feda0`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:66`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:66`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `checks` | required | [`{ id, message?, passed }[]`](#persistence-type-sha256-f3d6f292098b59472dabb937c7d6597e53a9075c40c9d51f531826818eb26f7f) |
-+| `status` | required | `string` |
++| `checks` | erforderlich | [`{ id, message?, passed }[]`](#persistence-type-sha256-f3d6f292098b59472dabb937c7d6597e53a9075c40c9d51f531826818eb26f7f) |
++| `status` | erforderlich | `string` |
 +
  <a id="persistence-type-sha256-0e10d7c096b47e61defe372a5fc8bd37d835199410eac44367f95c45082498bd"></a>
 
@@ -1171,11 +1171,11 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `7e96cdcb1e347ab0118fbbcfa836b60024338e2374e57cd4f562f5d105fe1d3a`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:177`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:177`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `code` | required | `string` |
++| `code` | erforderlich | `string` |
 +
 +<a id="persistence-type-sha256-72d5006d43fab22dd42147f41f97cf5b836712a662e0ea53e8bb58083b19c032"></a>
 +
@@ -1183,7 +1183,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `72d5006d43fab22dd42147f41f97cf5b836712a662e0ea53e8bb58083b19c032`
 +
-+Array of [`{ code }`](#persistence-type-sha256-7e96cdcb1e347ab0118fbbcfa836b60024338e2374e57cd4f562f5d105fe1d3a).
++Array aus [`{ code }`](#persistence-type-sha256-7e96cdcb1e347ab0118fbbcfa836b60024338e2374e57cd4f562f5d105fe1d3a).
 +
 +<a id="persistence-type-sha256-db92ee74f2710e3a1db32f138d8b291aebc1675ad582f70339130115049bfcb3"></a>
 +
@@ -1191,13 +1191,13 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `db92ee74f2710e3a1db32f138d8b291aebc1675ad582f70339130115049bfcb3`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:71`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:71`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `code` | required | `string` |
-+| `message` | required | `string` |
-+| `severity` | required | `string` |
++| `code` | erforderlich | `string` |
++| `message` | erforderlich | `string` |
++| `severity` | erforderlich | `string` |
 +
 +<a id="persistence-type-sha256-bd18c9bb568037f67c2b07c192bb792541395339472bae94e9627414f8cee2a6"></a>
 +
@@ -1205,7 +1205,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `bd18c9bb568037f67c2b07c192bb792541395339472bae94e9627414f8cee2a6`
 +
-+Array of [`{ code, message, severity }`](#persistence-type-sha256-db92ee74f2710e3a1db32f138d8b291aebc1675ad582f70339130115049bfcb3).
++Array aus [`{ code, message, severity }`](#persistence-type-sha256-db92ee74f2710e3a1db32f138d8b291aebc1675ad582f70339130115049bfcb3).
 +
  <a id="persistence-type-sha256-a81059ca06999da1e712414520c2c65e491d052fcf9640fae20aa38f0a5dc735"></a>
 
@@ -1220,12 +1220,12 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `d7a9f30bedffa8c67b668700ceda3f8da77adf6c765c557825965197f60f472b`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:175`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:175`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `code` | required | `string` |
-+| `severity` | required | `string` |
++| `code` | erforderlich | `string` |
++| `severity` | erforderlich | `string` |
 +
 +<a id="persistence-type-sha256-b0fc58bfc3deafcf4963ba53097f169a897bcdfa418bac56d0146f646308ba2c"></a>
 +
@@ -1233,7 +1233,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `b0fc58bfc3deafcf4963ba53097f169a897bcdfa418bac56d0146f646308ba2c`
 +
-+Array of [`{ code, severity }`](#persistence-type-sha256-d7a9f30bedffa8c67b668700ceda3f8da77adf6c765c557825965197f60f472b).
++Array aus [`{ code, severity }`](#persistence-type-sha256-d7a9f30bedffa8c67b668700ceda3f8da77adf6c765c557825965197f60f472b).
 +
  <a id="persistence-type-sha256-5b6fb1f226ff56402db08a6aae82af76100b14056271875f69ec526a1ae05d51"></a>
 
@@ -1248,15 +1248,15 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `9d4dd9f2c4f3df95fa87527f055104c79a9c13a8a8c213449675476e9407b5ae`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:59`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:59`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `description` | required | `string` |
-+| `index` | required | `number` |
++| `description` | erforderlich | `string` |
++| `index` | erforderlich | `number` |
 +| `result` | optional | `string` |
 +| `substitution` | optional | `string` |
-+| `title` | required | `string` |
++| `title` | erforderlich | `string` |
 +
 +<a id="persistence-type-sha256-1405a84e5b726a4bc174a52039d4c27a7f022e48ead2be39a6db5d4cc75a9047"></a>
 +
@@ -1264,7 +1264,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `1405a84e5b726a4bc174a52039d4c27a7f022e48ead2be39a6db5d4cc75a9047`
 +
-+Array of [`{ description, index, result?, substitution?, … }`](#persistence-type-sha256-9d4dd9f2c4f3df95fa87527f055104c79a9c13a8a8c213449675476e9407b5ae).
++Array aus [`{ description, index, result?, substitution?, … }`](#persistence-type-sha256-9d4dd9f2c4f3df95fa87527f055104c79a9c13a8a8c213449675476e9407b5ae).
 +
  <a id="persistence-type-sha256-83079c8a3f733ac3fa603eefa0fbb4737ca4d8b69e7e2e7298b60f9ac4098693"></a>
 
@@ -1279,16 +1279,16 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `1429a604d7f38aac4ba88bd2d4c269ab8e288ba4f046f7bdf682fc965b454504`
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `engineId` | required | `string` |
-+| `engineVersion` | required | `string` |
-+| `evidence` | required | [`{ id, message?, passed, type }[]`](#persistence-type-sha256-3b83ff38abf55e16693971deb8dc18d10bd08aa496801a93b967d19fdaa533a2) |
-+| `sceneId` | required | `string` |
-+| `sceneRevision` | required | `number` |
-+| `verificationLevel` | required | [`union (7 variants)`](#persistence-type-sha256-6810595440dcd2261c5f74fdb7ce0a2f6ecba9e07f065ee4cb333ef0e55a4c83) |
-+| `verifiedAt` | required | `number` |
-+| `verifierId` | required | `string` |
++| `engineId` | erforderlich | `string` |
++| `engineVersion` | erforderlich | `string` |
++| `evidence` | erforderlich | [`{ id, message?, passed, type }[]`](#persistence-type-sha256-3b83ff38abf55e16693971deb8dc18d10bd08aa496801a93b967d19fdaa533a2) |
++| `sceneId` | erforderlich | `string` |
++| `sceneRevision` | erforderlich | `number` |
++| `verificationLevel` | erforderlich | [`union (7 variants)`](#persistence-type-sha256-6810595440dcd2261c5f74fdb7ce0a2f6ecba9e07f065ee4cb333ef0e55a4c83) |
++| `verifiedAt` | erforderlich | `number` |
++| `verifierId` | erforderlich | `string` |
 +
  <a id="persistence-type-sha256-79650cfa10aa3c52440328d85e8a25f0ffadc8d7efd784e3c0819d8bb74a1985"></a>
 
@@ -1303,14 +1303,14 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `09729456adc5f1a66c71154ec84922443b8cd4a67ac87511d1b027581781235a`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:168`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:168`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `failed` | required | [`{ id, message? }[]`](#persistence-type-sha256-48e2825e3727733bbd9e58bc86573a7293ebc27210633fba5bc9415b7e7f9bb4) |
-+| `passed` | required | `number` |
-+| `status` | required | `string` |
-+| `total` | required | `number` |
++| `failed` | erforderlich | [`{ id, message? }[]`](#persistence-type-sha256-48e2825e3727733bbd9e58bc86573a7293ebc27210633fba5bc9415b7e7f9bb4) |
++| `passed` | erforderlich | `number` |
++| `status` | erforderlich | `string` |
++| `total` | erforderlich | `number` |
 +
  <a id="persistence-type-sha256-8e31bb958e9b015e6f8407eaade32217068159e816f3cc99c3ad76eb889732e0"></a>
 
@@ -1325,11 +1325,11 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `96d2074955969b3a42bc007973bcd22c33ecee504289c876bb88d4884d983b2b`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:172`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:172`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `id` | required | `string` |
++| `id` | erforderlich | `string` |
 +| `message` | optional | `string` |
 +
 +<a id="persistence-type-sha256-48e2825e3727733bbd9e58bc86573a7293ebc27210633fba5bc9415b7e7f9bb4"></a>
@@ -1338,7 +1338,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `48e2825e3727733bbd9e58bc86573a7293ebc27210633fba5bc9415b7e7f9bb4`
 +
-+Array of [`{ id, message? }`](#persistence-type-sha256-96d2074955969b3a42bc007973bcd22c33ecee504289c876bb88d4884d983b2b).
++Array aus [`{ id, message? }`](#persistence-type-sha256-96d2074955969b3a42bc007973bcd22c33ecee504289c876bb88d4884d983b2b).
 +
 +<a id="persistence-type-sha256-0ff93759173cc0985a86d030a39b409389f9102daf8dcda30600b9c32ff40945"></a>
 +
@@ -1346,13 +1346,13 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `0ff93759173cc0985a86d030a39b409389f9102daf8dcda30600b9c32ff40945`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:68`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:68`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `id` | required | `string` |
++| `id` | erforderlich | `string` |
 +| `message` | optional | `string` |
-+| `passed` | required | `boolean` |
++| `passed` | erforderlich | `boolean` |
 +
 +<a id="persistence-type-sha256-f3d6f292098b59472dabb937c7d6597e53a9075c40c9d51f531826818eb26f7f"></a>
 +
@@ -1360,7 +1360,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `f3d6f292098b59472dabb937c7d6597e53a9075c40c9d51f531826818eb26f7f`
 +
-+Array of [`{ id, message?, passed }`](#persistence-type-sha256-0ff93759173cc0985a86d030a39b409389f9102daf8dcda30600b9c32ff40945).
++Array aus [`{ id, message?, passed }`](#persistence-type-sha256-0ff93759173cc0985a86d030a39b409389f9102daf8dcda30600b9c32ff40945).
 +
 +<a id="persistence-type-sha256-1d917080777ac344c4e86d07672b92b00677f419f5391c231e827c09506d2931"></a>
 +
@@ -1368,12 +1368,12 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `1d917080777ac344c4e86d07672b92b00677f419f5391c231e827c09506d2931`
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `id` | required | `string` |
++| `id` | erforderlich | `string` |
 +| `message` | optional | `string` |
-+| `passed` | required | `boolean` |
-+| `type` | required | [`union (10 variants)`](#persistence-type-sha256-838fe914b81b7fe6378147d0dc377571ed96303c90fb9c52a34866ad2bb3267b) |
++| `passed` | erforderlich | `boolean` |
++| `type` | erforderlich | [`union (10 variants)`](#persistence-type-sha256-838fe914b81b7fe6378147d0dc377571ed96303c90fb9c52a34866ad2bb3267b) |
 +
 +<a id="persistence-type-sha256-3b83ff38abf55e16693971deb8dc18d10bd08aa496801a93b967d19fdaa533a2"></a>
 +
@@ -1381,7 +1381,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `3b83ff38abf55e16693971deb8dc18d10bd08aa496801a93b967d19fdaa533a2`
 +
-+Array of [`{ id, message?, passed, type }`](#persistence-type-sha256-1d917080777ac344c4e86d07672b92b00677f419f5391c231e827c09506d2931).
++Array aus [`{ id, message?, passed, type }`](#persistence-type-sha256-1d917080777ac344c4e86d07672b92b00677f419f5391c231e827c09506d2931).
 +
  <a id="persistence-type-sha256-93cbbc5a7fd0b1aa1ff1b9a6bb5ec52b073f48e5a5200365c45c0cd54059e1b9"></a>
 
@@ -1396,16 +1396,16 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `b8488d8cfb91a360420f3014c521aaac846147a0cd085a41301635169969fb0f`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:44`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:44`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `key` | required | `string` |
-+| `label` | required | `string` |
-+| `provenance` | required | [`union (2 variants)`](#persistence-type-sha256-d658728f82b9c41906cc81f471a69770d7317a9dce238fe30a1cc8a4706f0914) |
-+| `symbol` | required | `string` |
-+| `unit` | required | `string` |
-+| `value` | required | `string` |
++| `key` | erforderlich | `string` |
++| `label` | erforderlich | `string` |
++| `provenance` | erforderlich | [`union (2 variants)`](#persistence-type-sha256-d658728f82b9c41906cc81f471a69770d7317a9dce238fe30a1cc8a4706f0914) |
++| `symbol` | erforderlich | `string` |
++| `unit` | erforderlich | `string` |
++| `value` | erforderlich | `string` |
 +
 +<a id="persistence-type-sha256-d9129d78602cac2c325b0cacae1aacf6242b0d3c96e28dda3d739458bbe0cd16"></a>
 +
@@ -1413,7 +1413,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `d9129d78602cac2c325b0cacae1aacf6242b0d3c96e28dda3d739458bbe0cd16`
 +
-+Array of [`{ key, label, provenance, symbol, … }`](#persistence-type-sha256-b8488d8cfb91a360420f3014c521aaac846147a0cd085a41301635169969fb0f).
++Array aus [`{ key, label, provenance, symbol, … }`](#persistence-type-sha256-b8488d8cfb91a360420f3014c521aaac846147a0cd085a41301635169969fb0f).
 +
 +<a id="persistence-type-sha256-f8ef246f3e5968ba857a3b439cb362f404f8c06f829a8d1127e0818e71ab3e0e"></a>
 +
@@ -1421,15 +1421,15 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `f8ef246f3e5968ba857a3b439cb362f404f8c06f829a8d1127e0818e71ab3e0e`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:34`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:34`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `key` | required | `string` |
-+| `label` | required | `string` |
-+| `symbol` | required | `string` |
-+| `unit` | required | `string` |
-+| `value` | required | [`OptionalSessionSeq`](#persistence-type-sha256-3bd652ebfa8726b3ce3937a4f1bd2759e02f86b3a08a20f9e41a8513656fbc5f) |
++| `key` | erforderlich | `string` |
++| `label` | erforderlich | `string` |
++| `symbol` | erforderlich | `string` |
++| `unit` | erforderlich | `string` |
++| `value` | erforderlich | [`OptionalSessionSeq`](#persistence-type-sha256-3bd652ebfa8726b3ce3937a4f1bd2759e02f86b3a08a20f9e41a8513656fbc5f) |
 +
 +<a id="persistence-type-sha256-9caa0278318fdf2add75cbadf78bfd09bab888a5c60c2e1b87a2b37d7ec98bb8"></a>
 +
@@ -1437,7 +1437,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `9caa0278318fdf2add75cbadf78bfd09bab888a5c60c2e1b87a2b37d7ec98bb8`
 +
-+Array of [`{ key, label, symbol, unit, … }`](#persistence-type-sha256-f8ef246f3e5968ba857a3b439cb362f404f8c06f829a8d1127e0818e71ab3e0e).
++Array aus [`{ key, label, symbol, unit, … }`](#persistence-type-sha256-f8ef246f3e5968ba857a3b439cb362f404f8c06f829a8d1127e0818e71ab3e0e).
 +
 +<a id="persistence-type-sha256-876960018e64dbca355c74a838153b888b090492d16039b1295547fa7a9cbe0f"></a>
 +
@@ -1445,13 +1445,13 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `876960018e64dbca355c74a838153b888b090492d16039b1295547fa7a9cbe0f`
 +
-+Sources: [`packages/physicsos/tool-physicsos/src/types.ts:174`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quellen: [`packages/physicsos/tool-physicsos/src/types.ts:174`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `key` | required | `string` |
-+| `unit` | required | `string` |
-+| `value` | required | `string` |
++| `key` | erforderlich | `string` |
++| `unit` | erforderlich | `string` |
++| `value` | erforderlich | `string` |
 +
 +<a id="persistence-type-sha256-3220d37f3610d9ce6becb398ee6b57fca7bc332807d5a2909755a22cb1c377e5"></a>
 +
@@ -1459,7 +1459,7 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `3220d37f3610d9ce6becb398ee6b57fca7bc332807d5a2909755a22cb1c377e5`
 +
-+Array of [`{ key, unit, value }`](#persistence-type-sha256-876960018e64dbca355c74a838153b888b090492d16039b1295547fa7a9cbe0f).
++Array aus [`{ key, unit, value }`](#persistence-type-sha256-876960018e64dbca355c74a838153b888b090492d16039b1295547fa7a9cbe0f).
 +
  <a id="persistence-type-sha256-0a30c3be336cdd4f8f34e66543a3d46d611c43986edd9b3ce6cbb9b721d3b5d3"></a>
 
@@ -1476,13 +1476,13 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `f5249f4f911a9f4b31c24147cad439355a2972c61078f084eae46b7533d33603`
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `data` | required | [`PhysicsSceneSnapshot`](#persistence-type-sha256-b9e668a5846564666573e10bccdad2ae413a61eca03a0740306950d028eeb58e) |
++| `data` | erforderlich | [`PhysicsSceneSnapshot`](#persistence-type-sha256-b9e668a5846564666573e10bccdad2ae413a61eca03a0740306950d028eeb58e) |
 +| `ignorable` | optional | `true` |
-+| `seq` | required | `number` |
-+| `time` | required | `number` |
-+| `type` | required | `"physics/scene"` |
++| `seq` | erforderlich | `number` |
++| `time` | erforderlich | `number` |
++| `type` | erforderlich | `"physics/scene"` |
 +
 +<a id="persistence-type-sha256-4dd4629e3a8fb8ad08083add5bb2d1ec05f60ae24d29a84123ecc90ee40bc8db"></a>
 +
@@ -1492,13 +1492,13 @@ index b9a4241eef..faf2fa175d 100644
 +
 +SHA-256: `4dd4629e3a8fb8ad08083add5bb2d1ec05f60ae24d29a84123ecc90ee40bc8db`
 +
-+| Property | Presence | Type |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `data` | required | [`PhysicsSolveTrace`](#persistence-type-sha256-e152e8a8fe169e8c9d6f317058d0b1806980d987ee9329daf969b98078d4bd0b) |
++| `data` | erforderlich | [`PhysicsSolveTrace`](#persistence-type-sha256-e152e8a8fe169e8c9d6f317058d0b1806980d987ee9329daf969b98078d4bd0b) |
 +| `ignorable` | optional | `true` |
-+| `seq` | required | `number` |
-+| `time` | required | `number` |
-+| `type` | required | `"physics/solve-trace"` |
++| `seq` | erforderlich | `number` |
++| `time` | erforderlich | `number` |
++| `type` | erforderlich | `"physics/solve-trace"` |
 +
  <a id="persistence-type-sha256-a7cf43ce7c2a4c038feed1885cd7a00d5c6ee2d90a7e0d56b46f78a3e1ca327f"></a>
 
@@ -1522,38 +1522,38 @@ index 139a1fb20b..56f618512b 100644
 
 +### `physics/*`
 +
-+<a id="physicsscene--log-only"></a>
++<a id="physicsscene--nur-Protokoll"></a>
 +
-+#### `physics/scene` — log-only
++#### `physics/scene` — nur-Protokoll
 +
 +```ts persistence-catalog
 +/**
-+ * A scene the agent created, solved or edited through the physics tools,
-+ * at the revision the tool call left it. Whole-value per scene id; the
-+ * projection folds last-wins per id.
++ * Eine Szene, die der Agent über die Physik-Tools erstellt, gelöst oder bearbeitet hat,
++ * in der Revision, die der Tool-Aufruf hinterlassen hat. Komplettwert pro Szenen-ID; die
++ * Projektion übernimmt den letzten Gewinner pro ID.
 + */
 +'physics/scene': PhysicsSceneSnapshot
 +```
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:123`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:123`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+<a id="physicssolve-trace--log-only"></a>
++<a id="physicssolve-trace--nur-Protokoll"></a>
 +
-+#### `physics/solve-trace` — log-only
++#### `physics/solve-trace` — nur-Protokoll
 +
 +```ts persistence-catalog
 +/**
-+ * One `physics_solve_question` run — solved OR rejected — appended after
-+ * the tool result so every attempt leaves run-level diagnostics in the
-+ * session log: pipeline state, engine verdict, answers, issues and the
-+ * retry guidance the model was handed. The `physicsScenes` mirror only
-+ * carries READY solves; this event is what makes rejected attempts
-+ * (parse failures, verification failures) visible after the fact.
++ * Ein Lauf von `physics_solve_question` — gelöst ODER abgelehnt — wird nach
++ * dem Tool-Ergebnis angehängt, sodass jeder Versuch Lauf-Level-Diagnosen im
++ * Sitzungsprotokoll hinterlässt: Pipeline-Status, Engine-Verlauf, Antworten, Probleme und die
++ * Wiederholungs-Hinweise, die dem Modell gegeben wurden. Der `physicsScenes`-Spiegel enthält nur
++ * READY-Lösungen; dieses Ereignis macht abgelehnte Versuche
++ * (Parserfehler, Verifikationsfehler) auch im Nachhinein sichtbar.
 + */
 +'physics/solve-trace': PhysicsSolveTrace
 +```
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:132`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:132`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
  ### `plan/*`
 
@@ -1846,22 +1846,22 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `b9e668a5846564666573e10bccdad2ae413a61eca03a0740306950d028eeb58e`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:86`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:86`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `cause` | 必需 | [`PhysicsSceneSnapshotCause`](#persistence-type-sha256-1a2eba80ed864f5c3ebef4a1a0b97cf992e944cd756b0df568a451bc84739f27) |
-+| `commandType` | 可选 | `string` |
-+| `domain` | 必需 | `string` |
-+| `engineId` | 必需 | `string` |
-+| `eventType` | 可选 | `string` |
-+| `revision` | 必需 | `number` |
-+| `scene` | 必需 | [`JsonValue`](#persistence-type-sha256-c592ce75aab73fcab19c1d7845684c72cf402b78d2e1f2833a58ecf9f3598ed6) |
-+| `sceneId` | 必需 | `string` |
-+| `solve` | 可选 | [`PhysicsSceneSolveSummary`](#persistence-type-sha256-998c5982d166427d222ddcb6eb80c0b64a77c70eaa3f30179f54e21fbf23303f) |
-+| `sourceQuestionId` | 可选 | `string` |
-+| `title` | 必需 | `string` |
-+| `turn` | 可选 | `number` |
++| `cause` | erforderlich | [`PhysicsSceneSnapshotCause`](#persistence-type-sha256-1a2eba80ed864f5c3ebef4a1a0b97cf992e944cd756b0df568a451bc84739f27) |
++| `commandType` | optional | `string` |
++| `domain` | erforderlich | `string` |
++| `engineId` | erforderlich | `string` |
++| `eventType` | optional | `string` |
++| `revision` | erforderlich | `number` |
++| `scene` | erforderlich | [`JsonValue`](#persistence-type-sha256-c592ce75aab73fcab19c1d7845684c72cf402b78d2e1f2833a58ecf9f3598ed6) |
++| `sceneId` | erforderlich | `string` |
++| `solve` | optional | [`PhysicsSceneSolveSummary`](#persistence-type-sha256-998c5982d166427d222ddcb6eb80c0b64a77c70eaa3f30179f54e21fbf23303f) |
++| `sourceQuestionId` | optional | `string` |
++| `title` | erforderlich | `string` |
++| `turn` | optional | `number` |
 +
 +<a id="persistence-type-sha256-1a2eba80ed864f5c3ebef4a1a0b97cf992e944cd756b0df568a451bc84739f27"></a>
 +
@@ -1873,9 +1873,9 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `1a2eba80ed864f5c3ebef4a1a0b97cf992e944cd756b0df568a451bc84739f27`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:23`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:23`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+以下类型之一：
++Eines von:
 +
 +- `"command"`
 +- `"created"`
@@ -1891,17 +1891,17 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `998c5982d166427d222ddcb6eb80c0b64a77c70eaa3f30179f54e21fbf23303f`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:32`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:32`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `answers` | 必需 | [`{ key, label, provenance, symbol, … }[]`](#persistence-type-sha256-d9129d78602cac2c325b0cacae1aacf6242b0d3c96e28dda3d739458bbe0cd16) |
-+| `goldenQuestionId` | 可选 | `string` |
-+| `issues` | 必需 | [`{ code, message, severity }[]`](#persistence-type-sha256-bd18c9bb568037f67c2b07c192bb792541395339472bae94e9627414f8cee2a6) |
-+| `knowns` | 必需 | [`{ key, label, symbol, unit, … }[]`](#persistence-type-sha256-9caa0278318fdf2add75cbadf78bfd09bab888a5c60c2e1b87a2b37d7ec98bb8) |
-+| `steps` | 必需 | [`{ description, index, result?, substitution?, … }[]`](#persistence-type-sha256-1405a84e5b726a4bc174a52039d4c27a7f022e48ead2be39a6db5d4cc75a9047) |
-+| `targets` | 必需 | [`string[]`](#persistence-type-sha256-93c33d9687613293f8c95d46c4d922fe9ceae83b84c384beff5c3315abe005f2) |
-+| `verification` | 可选 | [`{ checks, status }`](#persistence-type-sha256-334278dcc39b017d15095ace2382c116163ddc65839f3a141db2126af63feda0) |
++| `answers` | erforderlich | [`{ key, label, provenance, symbol, … }[]`](#persistence-type-sha256-d9129d78602cac2c325b0cacae1aacf6242b0d3c96e28dda3d739458bbe0cd16) |
++| `goldenQuestionId` | optional | `string` |
++| `issues` | erforderlich | [`{ code, message, severity }[]`](#persistence-type-sha256-bd18c9bb568037f67c2b07c192bb792541395339472bae94e9627414f8cee2a6) |
++| `knowns` | erforderlich | [`{ key, label, symbol, unit, … }[]`](#persistence-type-sha256-9caa0278318fdf2add75cbadf78bfd09bab888a5c60c2e1b87a2b37d7ec98bb8) |
++| `steps` | erforderlich | [`{ description, index, result?, substitution?, … }[]`](#persistence-type-sha256-1405a84e5b726a4bc174a52039d4c27a7f022e48ead2be39a6db5d4cc75a9047) |
++| `targets` | erforderlich | [`string[]`](#persistence-type-sha256-93c33d9687613293f8c95d46c4d922fe9ceae83b84c384beff5c3315abe005f2) |
++| `verification` | optional | [`{ checks, status }`](#persistence-type-sha256-334278dcc39b017d15095ace2382c116163ddc65839f3a141db2126af63feda0) |
 +
 +<a id="persistence-type-sha256-e152e8a8fe169e8c9d6f317058d0b1806980d987ee9329daf969b98078d4bd0b"></a>
 +
@@ -1913,24 +1913,24 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `e152e8a8fe169e8c9d6f317058d0b1806980d987ee9329daf969b98078d4bd0b`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:151`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:151`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `answers` | 必需 | [`{ key, unit, value }[]`](#persistence-type-sha256-3220d37f3610d9ce6becb398ee6b57fca7bc332807d5a2909755a22cb1c377e5) |
-+| `attempt` | 可选 | `number` |
-+| `domain` | 可选 | `string` |
-+| `durationMs` | 必需 | `number` |
-+| `goldenQuestionId` | 可选 | `string` |
-+| `issues` | 必需 | [`{ code, severity }[]`](#persistence-type-sha256-b0fc58bfc3deafcf4963ba53097f169a897bcdfa418bac56d0146f646308ba2c) |
-+| `model` | 可选 | `string` |
-+| `retryGuidance` | 必需 | [`{ code }[]`](#persistence-type-sha256-72d5006d43fab22dd42147f41f97cf5b836712a662e0ea53e8bb58083b19c032) |
-+| `reusedScene` | 可选 | `boolean` |
-+| `sceneId` | 可选 | `string` |
-+| `status` | 必需 | [`union (2 variants)`](#persistence-type-sha256-9dee7503e06d03fe11c5e20b359d2eb0b3e487c08ae829dfbefe98bf2603be05) |
-+| `turn` | 可选 | `number` |
-+| `verification` | 可选 | [`{ failed, passed, status, total }`](#persistence-type-sha256-09729456adc5f1a66c71154ec84922443b8cd4a67ac87511d1b027581781235a) |
-+| `workflowState` | 必需 | `string` |
++| `answers` | erforderlich | [`{ key, unit, value }[]`](#persistence-type-sha256-3220d37f3610d9ce6becb398ee6b57fca7bc332807d5a2909755a22cb1c377e5) |
++| `attempt` | optional | `number` |
++| `domain` | optional | `string` |
++| `durationMs` | erforderlich | `number` |
++| `goldenQuestionId` | optional | `string` |
++| `issues` | erforderlich | [`{ code, severity }[]`](#persistence-type-sha256-b0fc58bfc3deafcf4963ba53097f169a897bcdfa418bac56d0146f646308ba2c) |
++| `model` | optional | `string` |
++| `retryGuidance` | erforderlich | [`{ code }[]`](#persistence-type-sha256-72d5006d43fab22dd42147f41f97cf5b836712a662e0ea53e8bb58083b19c032) |
++| `reusedScene` | optional | `boolean` |
++| `sceneId` | optional | `string` |
++| `status` | erforderlich | [`union (2 variants)`](#persistence-type-sha256-9dee7503e06d03fe11c5e20b359d2eb0b3e487c08ae829dfbefe98bf2603be05) |
++| `turn` | optional | `number` |
++| `verification` | optional | [`{ failed, passed, status, total }`](#persistence-type-sha256-09729456adc5f1a66c71154ec84922443b8cd4a67ac87511d1b027581781235a) |
++| `workflowState` | erforderlich | `string` |
 +
  <a id="persistence-type-sha256-b8fc636a2121df9d8423c242e03c9d23b7ab7c6fdce00e45746932c60b730f97"></a>
 
@@ -1945,7 +1945,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `838fe914b81b7fe6378147d0dc377571ed96303c90fb9c52a34866ad2bb3267b`
 +
-+以下类型之一：
++Eines von:
 +
 +- `"boundary"`
 +- `"conservation"`
@@ -1971,7 +1971,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `9dee7503e06d03fe11c5e20b359d2eb0b3e487c08ae829dfbefe98bf2603be05`
 +
-+以下类型之一：
++Eines von:
 +
 +- `"rejected"`
 +- `"solved"`
@@ -1982,7 +1982,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `d658728f82b9c41906cc81f471a69770d7317a9dce238fe30a1cc8a4706f0914`
 +
-+以下类型之一：
++Eines von:
 +
 +- [`{ engineId, engineVersion, evidence, sceneId, … }`](#persistence-type-sha256-1429a604d7f38aac4ba88bd2d4c269ab8e288ba4f046f7bdf682fc965b454504)
 +- `null`
@@ -2000,7 +2000,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `6810595440dcd2261c5f74fdb7ce0a2f6ecba9e07f065ee4cb333ef0e55a4c83`
 +
-+以下类型之一：
++Eines von:
 +
 +- `"CONSERVATION_VERIFIED"`
 +- `"ENGINE_COMPUTED"`
@@ -2023,12 +2023,12 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `334278dcc39b017d15095ace2382c116163ddc65839f3a141db2126af63feda0`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:66`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:66`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `checks` | 必需 | [`{ id, message?, passed }[]`](#persistence-type-sha256-f3d6f292098b59472dabb937c7d6597e53a9075c40c9d51f531826818eb26f7f) |
-+| `status` | 必需 | `string` |
++| `checks` | erforderlich | [`{ id, message?, passed }[]`](#persistence-type-sha256-f3d6f292098b59472dabb937c7d6597e53a9075c40c9d51f531826818eb26f7f) |
++| `status` | erforderlich | `string` |
 +
  <a id="persistence-type-sha256-0e10d7c096b47e61defe372a5fc8bd37d835199410eac44367f95c45082498bd"></a>
 
@@ -2043,11 +2043,11 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `7e96cdcb1e347ab0118fbbcfa836b60024338e2374e57cd4f562f5d105fe1d3a`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:177`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:177`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `code` | 必需 | `string` |
++| `code` | erforderlich | `string` |
 +
 +<a id="persistence-type-sha256-72d5006d43fab22dd42147f41f97cf5b836712a662e0ea53e8bb58083b19c032"></a>
 +
@@ -2055,7 +2055,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `72d5006d43fab22dd42147f41f97cf5b836712a662e0ea53e8bb58083b19c032`
 +
-+[`{ code }`](#persistence-type-sha256-7e96cdcb1e347ab0118fbbcfa836b60024338e2374e57cd4f562f5d105fe1d3a) 的数组。
++Array aus [`{ code }`](#persistence-type-sha256-7e96cdcb1e347ab0118fbbcfa836b60024338e2374e57cd4f562f5d105fe1d3a).
 +
 +<a id="persistence-type-sha256-db92ee74f2710e3a1db32f138d8b291aebc1675ad582f70339130115049bfcb3"></a>
 +
@@ -2063,13 +2063,13 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `db92ee74f2710e3a1db32f138d8b291aebc1675ad582f70339130115049bfcb3`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:71`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:71`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `code` | 必需 | `string` |
-+| `message` | 必需 | `string` |
-+| `severity` | 必需 | `string` |
++| `code` | erforderlich | `string` |
++| `message` | erforderlich | `string` |
++| `severity` | erforderlich | `string` |
 +
 +<a id="persistence-type-sha256-bd18c9bb568037f67c2b07c192bb792541395339472bae94e9627414f8cee2a6"></a>
 +
@@ -2077,7 +2077,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `bd18c9bb568037f67c2b07c192bb792541395339472bae94e9627414f8cee2a6`
 +
-+[`{ code, message, severity }`](#persistence-type-sha256-db92ee74f2710e3a1db32f138d8b291aebc1675ad582f70339130115049bfcb3) 的数组。
++Array aus [`{ code, message, severity }`](#persistence-type-sha256-db92ee74f2710e3a1db32f138d8b291aebc1675ad582f70339130115049bfcb3).
 +
  <a id="persistence-type-sha256-a81059ca06999da1e712414520c2c65e491d052fcf9640fae20aa38f0a5dc735"></a>
 
@@ -2092,12 +2092,12 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `d7a9f30bedffa8c67b668700ceda3f8da77adf6c765c557825965197f60f472b`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:175`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:175`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `code` | 必需 | `string` |
-+| `severity` | 必需 | `string` |
++| `code` | erforderlich | `string` |
++| `severity` | erforderlich | `string` |
 +
 +<a id="persistence-type-sha256-b0fc58bfc3deafcf4963ba53097f169a897bcdfa418bac56d0146f646308ba2c"></a>
 +
@@ -2105,7 +2105,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `b0fc58bfc3deafcf4963ba53097f169a897bcdfa418bac56d0146f646308ba2c`
 +
-+[`{ code, severity }`](#persistence-type-sha256-d7a9f30bedffa8c67b668700ceda3f8da77adf6c765c557825965197f60f472b) 的数组。
++Array aus [`{ code, severity }`](#persistence-type-sha256-d7a9f30bedffa8c67b668700ceda3f8da77adf6c765c557825965197f60f472b).
 +
  <a id="persistence-type-sha256-5b6fb1f226ff56402db08a6aae82af76100b14056271875f69ec526a1ae05d51"></a>
 
@@ -2120,15 +2120,15 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `9d4dd9f2c4f3df95fa87527f055104c79a9c13a8a8c213449675476e9407b5ae`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:59`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:59`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `description` | 必需 | `string` |
-+| `index` | 必需 | `number` |
-+| `result` | 可选 | `string` |
-+| `substitution` | 可选 | `string` |
-+| `title` | 必需 | `string` |
++| `description` | erforderlich | `string` |
++| `index` | erforderlich | `number` |
++| `result` | optional | `string` |
++| `substitution` | optional | `string` |
++| `title` | erforderlich | `string` |
 +
 +<a id="persistence-type-sha256-1405a84e5b726a4bc174a52039d4c27a7f022e48ead2be39a6db5d4cc75a9047"></a>
 +
@@ -2136,7 +2136,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `1405a84e5b726a4bc174a52039d4c27a7f022e48ead2be39a6db5d4cc75a9047`
 +
-+[`{ description, index, result?, substitution?, … }`](#persistence-type-sha256-9d4dd9f2c4f3df95fa87527f055104c79a9c13a8a8c213449675476e9407b5ae) 的数组。
++Array aus [`{ description, index, result?, substitution?, … }`](#persistence-type-sha256-9d4dd9f2c4f3df95fa87527f055104c79a9c13a8a8c213449675476e9407b5ae).
 +
  <a id="persistence-type-sha256-83079c8a3f733ac3fa603eefa0fbb4737ca4d8b69e7e2e7298b60f9ac4098693"></a>
 
@@ -2151,16 +2151,16 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `1429a604d7f38aac4ba88bd2d4c269ab8e288ba4f046f7bdf682fc965b454504`
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `engineId` | 必需 | `string` |
-+| `engineVersion` | 必需 | `string` |
-+| `evidence` | 必需 | [`{ id, message?, passed, type }[]`](#persistence-type-sha256-3b83ff38abf55e16693971deb8dc18d10bd08aa496801a93b967d19fdaa533a2) |
-+| `sceneId` | 必需 | `string` |
-+| `sceneRevision` | 必需 | `number` |
-+| `verificationLevel` | 必需 | [`union (7 variants)`](#persistence-type-sha256-6810595440dcd2261c5f74fdb7ce0a2f6ecba9e07f065ee4cb333ef0e55a4c83) |
-+| `verifiedAt` | 必需 | `number` |
-+| `verifierId` | 必需 | `string` |
++| `engineId` | erforderlich | `string` |
++| `engineVersion` | erforderlich | `string` |
++| `evidence` | erforderlich | [`{ id, message?, passed, type }[]`](#persistence-type-sha256-3b83ff38abf55e16693971deb8dc18d10bd08aa496801a93b967d19fdaa533a2) |
++| `sceneId` | erforderlich | `string` |
++| `sceneRevision` | erforderlich | `number` |
++| `verificationLevel` | erforderlich | [`union (7 variants)`](#persistence-type-sha256-6810595440dcd2261c5f74fdb7ce0a2f6ecba9e07f065ee4cb333ef0e55a4c83) |
++| `verifiedAt` | erforderlich | `number` |
++| `verifierId` | erforderlich | `string` |
 +
  <a id="persistence-type-sha256-79650cfa10aa3c52440328d85e8a25f0ffadc8d7efd784e3c0819d8bb74a1985"></a>
 
@@ -2175,14 +2175,14 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `09729456adc5f1a66c71154ec84922443b8cd4a67ac87511d1b027581781235a`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:168`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:168`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `failed` | 必需 | [`{ id, message? }[]`](#persistence-type-sha256-48e2825e3727733bbd9e58bc86573a7293ebc27210633fba5bc9415b7e7f9bb4) |
-+| `passed` | 必需 | `number` |
-+| `status` | 必需 | `string` |
-+| `total` | 必需 | `number` |
++| `failed` | erforderlich | [`{ id, message? }[]`](#persistence-type-sha256-48e2825e3727733bbd9e58bc86573a7293ebc27210633fba5bc9415b7e7f9bb4) |
++| `passed` | erforderlich | `number` |
++| `status` | erforderlich | `string` |
++| `total` | erforderlich | `number` |
 +
  <a id="persistence-type-sha256-8e31bb958e9b015e6f8407eaade32217068159e816f3cc99c3ad76eb889732e0"></a>
 
@@ -2197,12 +2197,12 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `96d2074955969b3a42bc007973bcd22c33ecee504289c876bb88d4884d983b2b`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:172`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:172`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `id` | 必需 | `string` |
-+| `message` | 可选 | `string` |
++| `id` | erforderlich | `string` |
++| `message` | optional | `string` |
 +
 +<a id="persistence-type-sha256-48e2825e3727733bbd9e58bc86573a7293ebc27210633fba5bc9415b7e7f9bb4"></a>
 +
@@ -2210,7 +2210,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `48e2825e3727733bbd9e58bc86573a7293ebc27210633fba5bc9415b7e7f9bb4`
 +
-+[`{ id, message? }`](#persistence-type-sha256-96d2074955969b3a42bc007973bcd22c33ecee504289c876bb88d4884d983b2b) 的数组。
++Array aus [`{ id, message? }`](#persistence-type-sha256-96d2074955969b3a42bc007973bcd22c33ecee504289c876bb88d4884d983b2b).
 +
 +<a id="persistence-type-sha256-0ff93759173cc0985a86d030a39b409389f9102daf8dcda30600b9c32ff40945"></a>
 +
@@ -2218,13 +2218,13 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `0ff93759173cc0985a86d030a39b409389f9102daf8dcda30600b9c32ff40945`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:68`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:68`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `id` | 必需 | `string` |
-+| `message` | 可选 | `string` |
-+| `passed` | 必需 | `boolean` |
++| `id` | erforderlich | `string` |
++| `message` | optional | `string` |
++| `passed` | erforderlich | `boolean` |
 +
 +<a id="persistence-type-sha256-f3d6f292098b59472dabb937c7d6597e53a9075c40c9d51f531826818eb26f7f"></a>
 +
@@ -2232,7 +2232,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `f3d6f292098b59472dabb937c7d6597e53a9075c40c9d51f531826818eb26f7f`
 +
-+[`{ id, message?, passed }`](#persistence-type-sha256-0ff93759173cc0985a86d030a39b409389f9102daf8dcda30600b9c32ff40945) 的数组。
++Array aus [`{ id, message?, passed }`](#persistence-type-sha256-0ff93759173cc0985a86d030a39b409389f9102daf8dcda30600b9c32ff40945).
 +
 +<a id="persistence-type-sha256-1d917080777ac344c4e86d07672b92b00677f419f5391c231e827c09506d2931"></a>
 +
@@ -2240,12 +2240,12 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `1d917080777ac344c4e86d07672b92b00677f419f5391c231e827c09506d2931`
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `id` | 必需 | `string` |
-+| `message` | 可选 | `string` |
-+| `passed` | 必需 | `boolean` |
-+| `type` | 必需 | [`union (10 variants)`](#persistence-type-sha256-838fe914b81b7fe6378147d0dc377571ed96303c90fb9c52a34866ad2bb3267b) |
++| `id` | erforderlich | `string` |
++| `message` | optional | `string` |
++| `passed` | erforderlich | `boolean` |
++| `type` | erforderlich | [`union (10 variants)`](#persistence-type-sha256-838fe914b81b7fe6378147d0dc377571ed96303c90fb9c52a34866ad2bb3267b) |
 +
 +<a id="persistence-type-sha256-3b83ff38abf55e16693971deb8dc18d10bd08aa496801a93b967d19fdaa533a2"></a>
 +
@@ -2253,7 +2253,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `3b83ff38abf55e16693971deb8dc18d10bd08aa496801a93b967d19fdaa533a2`
 +
-+[`{ id, message?, passed, type }`](#persistence-type-sha256-1d917080777ac344c4e86d07672b92b00677f419f5391c231e827c09506d2931) 的数组。
++Array aus [`{ id, message?, passed, type }`](#persistence-type-sha256-1d917080777ac344c4e86d07672b92b00677f419f5391c231e827c09506d2931).
 +
  <a id="persistence-type-sha256-93cbbc5a7fd0b1aa1ff1b9a6bb5ec52b073f48e5a5200365c45c0cd54059e1b9"></a>
 
@@ -2268,16 +2268,16 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `b8488d8cfb91a360420f3014c521aaac846147a0cd085a41301635169969fb0f`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:44`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:44`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `key` | 必需 | `string` |
-+| `label` | 必需 | `string` |
-+| `provenance` | 必需 | [`union (2 variants)`](#persistence-type-sha256-d658728f82b9c41906cc81f471a69770d7317a9dce238fe30a1cc8a4706f0914) |
-+| `symbol` | 必需 | `string` |
-+| `unit` | 必需 | `string` |
-+| `value` | 必需 | `string` |
++| `key` | erforderlich | `string` |
++| `label` | erforderlich | `string` |
++| `provenance` | erforderlich | [`union (2 variants)`](#persistence-type-sha256-d658728f82b9c41906cc81f471a69770d7317a9dce238fe30a1cc8a4706f0914) |
++| `symbol` | erforderlich | `string` |
++| `unit` | erforderlich | `string` |
++| `value` | erforderlich | `string` |
 +
 +<a id="persistence-type-sha256-d9129d78602cac2c325b0cacae1aacf6242b0d3c96e28dda3d739458bbe0cd16"></a>
 +
@@ -2285,7 +2285,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `d9129d78602cac2c325b0cacae1aacf6242b0d3c96e28dda3d739458bbe0cd16`
 +
-+[`{ key, label, provenance, symbol, … }`](#persistence-type-sha256-b8488d8cfb91a360420f3014c521aaac846147a0cd085a41301635169969fb0f) 的数组。
++Array aus [`{ key, label, provenance, symbol, … }`](#persistence-type-sha256-b8488d8cfb91a360420f3014c521aaac846147a0cd085a41301635169969fb0f).
 +
 +<a id="persistence-type-sha256-f8ef246f3e5968ba857a3b439cb362f404f8c06f829a8d1127e0818e71ab3e0e"></a>
 +
@@ -2293,15 +2293,15 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `f8ef246f3e5968ba857a3b439cb362f404f8c06f829a8d1127e0818e71ab3e0e`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:34`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:34`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `key` | 必需 | `string` |
-+| `label` | 必需 | `string` |
-+| `symbol` | 必需 | `string` |
-+| `unit` | 必需 | `string` |
-+| `value` | 必需 | [`OptionalSessionSeq`](#persistence-type-sha256-3bd652ebfa8726b3ce3937a4f1bd2759e02f86b3a08a20f9e41a8513656fbc5f) |
++| `key` | erforderlich | `string` |
++| `label` | erforderlich | `string` |
++| `symbol` | erforderlich | `string` |
++| `unit` | erforderlich | `string` |
++| `value` | erforderlich | [`OptionalSessionSeq`](#persistence-type-sha256-3bd652ebfa8726b3ce3937a4f1bd2759e02f86b3a08a20f9e41a8513656fbc5f) |
 +
 +<a id="persistence-type-sha256-9caa0278318fdf2add75cbadf78bfd09bab888a5c60c2e1b87a2b37d7ec98bb8"></a>
 +
@@ -2309,7 +2309,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `9caa0278318fdf2add75cbadf78bfd09bab888a5c60c2e1b87a2b37d7ec98bb8`
 +
-+[`{ key, label, symbol, unit, … }`](#persistence-type-sha256-f8ef246f3e5968ba857a3b439cb362f404f8c06f829a8d1127e0818e71ab3e0e) 的数组。
++Array aus [`{ key, label, symbol, unit, … }`](#persistence-type-sha256-f8ef246f3e5968ba857a3b439cb362f404f8c06f829a8d1127e0818e71ab3e0e).
 +
 +<a id="persistence-type-sha256-876960018e64dbca355c74a838153b888b090492d16039b1295547fa7a9cbe0f"></a>
 +
@@ -2317,13 +2317,13 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `876960018e64dbca355c74a838153b888b090492d16039b1295547fa7a9cbe0f`
 +
-+来源：[`packages/physicsos/tool-physicsos/src/types.ts:174`](../packages/physicsos/tool-physicsos/src/types.ts)
++Quelle:[`packages/physicsos/tool-physicsos/src/types.ts:174`](../packages/physicsos/tool-physicsos/src/types.ts)
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `key` | 必需 | `string` |
-+| `unit` | 必需 | `string` |
-+| `value` | 必需 | `string` |
++| `key` | erforderlich | `string` |
++| `unit` | erforderlich | `string` |
++| `value` | erforderlich | `string` |
 +
 +<a id="persistence-type-sha256-3220d37f3610d9ce6becb398ee6b57fca7bc332807d5a2909755a22cb1c377e5"></a>
 +
@@ -2331,7 +2331,7 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `3220d37f3610d9ce6becb398ee6b57fca7bc332807d5a2909755a22cb1c377e5`
 +
-+[`{ key, unit, value }`](#persistence-type-sha256-876960018e64dbca355c74a838153b888b090492d16039b1295547fa7a9cbe0f) 的数组。
++Array aus [`{ key, unit, value }`](#persistence-type-sha256-876960018e64dbca355c74a838153b888b090492d16039b1295547fa7a9cbe0f).
 +
  <a id="persistence-type-sha256-0a30c3be336cdd4f8f34e66543a3d46d611c43986edd9b3ce6cbb9b721d3b5d3"></a>
 
@@ -2348,13 +2348,13 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `f5249f4f911a9f4b31c24147cad439355a2972c61078f084eae46b7533d33603`
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `data` | 必需 | [`PhysicsSceneSnapshot`](#persistence-type-sha256-b9e668a5846564666573e10bccdad2ae413a61eca03a0740306950d028eeb58e) |
-+| `ignorable` | 可选 | `true` |
-+| `seq` | 必需 | `number` |
-+| `time` | 必需 | `number` |
-+| `type` | 必需 | `"physics/scene"` |
++| `data` | erforderlich | [`PhysicsSceneSnapshot`](#persistence-type-sha256-b9e668a5846564666573e10bccdad2ae413a61eca03a0740306950d028eeb58e) |
++| `ignorable` | optional | `true` |
++| `seq` | erforderlich | `number` |
++| `time` | erforderlich | `number` |
++| `type` | erforderlich | `"physics/scene"` |
 +
 +<a id="persistence-type-sha256-4dd4629e3a8fb8ad08083add5bb2d1ec05f60ae24d29a84123ecc90ee40bc8db"></a>
 +
@@ -2364,13 +2364,13 @@ index 139a1fb20b..56f618512b 100644
 +
 +SHA-256: `4dd4629e3a8fb8ad08083add5bb2d1ec05f60ae24d29a84123ecc90ee40bc8db`
 +
-+| 属性 | 存在性 | 类型 |
++| Eigenschaft | Vorhandensein | Typ |
 +|---|---|---|
-+| `data` | 必需 | [`PhysicsSolveTrace`](#persistence-type-sha256-e152e8a8fe169e8c9d6f317058d0b1806980d987ee9329daf969b98078d4bd0b) |
-+| `ignorable` | 可选 | `true` |
-+| `seq` | 必需 | `number` |
-+| `time` | 必需 | `number` |
-+| `type` | 必需 | `"physics/solve-trace"` |
++| `data` | erforderlich | [`PhysicsSolveTrace`](#persistence-type-sha256-e152e8a8fe169e8c9d6f317058d0b1806980d987ee9329daf969b98078d4bd0b) |
++| `ignorable` | optional | `true` |
++| `seq` | erforderlich | `number` |
++| `time` | erforderlich | `number` |
++| `type` | erforderlich | `"physics/solve-trace"` |
 +
  <a id="persistence-type-sha256-a7cf43ce7c2a4c038feed1885cd7a00d5c6ee2d90a7e0d56b46f78a3e1ca327f"></a>
 
@@ -12167,17 +12167,17 @@ index 0b23517921..16ed0902e5 100644
    @Remote({ mode: 'stream' })
    follow(signal: AbortSignal): AsyncIterable<WorkspaceFollowFrame> {
 -    return this.feed.follow(signal)
-+    /* PhysicsOS tenancy seam: the stock feed streams the whole registry —
-+       every account's Workspace titles included. A Peer carrying workspace
-+       admission sees only its own rows; absent admission keeps the stock
-+       behaviour (single-operator installs, in-process carriers). */
++    /* Mandanten-Naht von PhysicsOS: Der Standard-Feed streamt die gesamte Registry —
++       inklusive der Workspace-Titel jedes Kontos. Ein Peer mit Workspace-
++       Zulassung sieht nur seine eigenen Zeilen; fehlt sie, bleibt das Standard-
++       verhalten (Single-Operator-Installationen, In-Process-Carrier). */
 +    const admission = workspaceAdmissionOf(this.ctx)
 +    const source = this.feed.follow(signal)
 +    return admission === undefined ? source : scopeWorkspaceFrames(source, admission)
 +  }
 +}
 +
-+/** Resource scoping the carrier threads onto the invoking Peer. */
++/** Ressourcen-Abgrenzung, die der Carrier an den aufrufenden Peer durchreicht. */
 +interface WorkspaceAdmission {
 +  ownsWorkspace(workspaceId: string): boolean
 +  ownsSession(sessionId: string): boolean
@@ -12219,7 +12219,7 @@ index 0b23517921..16ed0902e5 100644
 +        break
 +      }
 +      case 'remove': {
-+        /* A row this Peer never received needs no removal echo. */
++        /* Eine Zeile, die dieser Peer nie erhielt, braucht kein Entfernungs-Echo. */
 +        if (admission.ownsWorkspace(frame.workspaceId)) yield frame
 +        break
 +      }
@@ -12318,8 +12318,8 @@ index c98289bc3e..171f5d6b54 100644
      path: ':memory:'
      openAt: never
 
-+# PhysicsOS stores sessions under its deployment data volume. Multi-replica
-+# deployments must point this at shared storage before adding replicas.
++# PhysicsOS legt Sessions unter seinem Deployment-Datenvolumen ab. Multi-Replica-
++# Deployments müssen dies auf gemeinsamen Speicher zeigen lassen, bevor Replicas hinzukommen.
 +- id: session-persistence-jsonl
 +  config:
 +    root: !!js process.env.PHYSICSOS_SESSIONS_ROOT ?? dshHomePath('sessions')
@@ -12331,7 +12331,7 @@ index c98289bc3e..171f5d6b54 100644
      - id: subagent-model-selection-settings
        name: '@deepseek-ai/dsh-tool-subagent/model-selection-settings'
 
-+    # PostgreSQL storage backend for the production storage-domain contract.
++    # PostgreSQL-Speicher-Backend für den Produktions-Vertrag der Storage-Domain.
 +    - id: storage-postgres
 +      name: '@deepseek-ai/dsh-storage-postgres'
 +      disabled: !!js process.env.PHYSICSOS_STORAGE_BACKEND !== 'postgres'
@@ -12340,7 +12340,7 @@ index c98289bc3e..171f5d6b54 100644
 +        schema: !!js process.env.PHYSICSOS_STORAGE_SCHEMA ?? 'physicsos'
 +        ssl: !!js process.env.PHYSICSOS_DATABASE_SSL === 'true'
 +
-+    # Account-scoped shared-state backend for rate limits and one-time claims.
++    # Kontogebundenes Shared-State-Backend für Rate-Limits und Einmal-Ansprüche.
 +    - id: shared-state-host
 +      name: '@deepseek-ai/dsh-shared-state-host'
 +      config:
@@ -12349,7 +12349,7 @@ index c98289bc3e..171f5d6b54 100644
 +        redis:
 +          url: !!js process.env.REDIS_URL ?? 'redis://127.0.0.1:6379/0'
 +
-+    # PhysicsOS product hosts and tools.
++    # PhysicsOS-Produkt-Hosts und -Tools.
 +    - id: model-pool-host
 +      name: '@deepseek-ai/dsh-model-pool-host'
 +      config:
@@ -12368,15 +12368,15 @@ index c98289bc3e..171f5d6b54 100644
 +      config:
 +        trustedProxies: !!js "process.env.PHYSICOS_TRUSTED_PROXIES ? process.env.PHYSICOS_TRUSTED_PROXIES.split(',').map(value => value.trim()).filter(Boolean) : []"
 +        registrationMode: !!js process.env.PHYSICSOS_REGISTRATION_MODE ?? 'open'
-+        bootstrapAdmins: !!js "process.env.PHYSICSOS_ADMIN_PASSWORD ? [{ schoolId: 'PHYSICSOS-OPEN', username: 'admin', password: process.env.PHYSICSOS_ADMIN_PASSWORD, displayName: '平台管理员', role: 'SUPER_ADMIN' }] : []"
++        bootstrapAdmins: !!js "process.env.PHYSICSOS_ADMIN_PASSWORD ? [{ schoolId: 'PHYSICSOS-OPEN', username: 'admin', password: process.env.PHYSICSOS_ADMIN_PASSWORD, displayName: 'Plattform-Administrator', role: 'SUPER_ADMIN' }] : []"
 +
 +    - id: paper-host
 +      name: '@deepseek-ai/dsh-paper-host'
 +      config:
-+        # 号池路由（llm-pi-ai 的 physicsos-pool，与 agent 聊天同一条模型层）。
-+        # 早期写成 luckyg——一个从未注册过适配器的 provider id，AI 起草在
-+        # 线上必然 NO_ADAPTER；生产已由数据卷 profile patch 热修，这里改对
-+        # 默认值，让全新部署也直接可用。
++        # Pool-Routing (physicsos-pool von llm-pi-ai, dieselbe Modellschicht wie im Agent-Chat).
++        # Früher als luckyg geschrieben – eine Provider-ID, für die nie ein Adapter registriert wurde; der AI-Entwurf hätte
++        # online zwingend NO_ADAPTER ergeben; in der Produktion bereits per Datenvolumen-Profil-Patch heißgefixt, hier wird
++        # der Standardwert korrigiert, damit auch ein frisches Deployment sofort funktioniert.
 +        provider: physicsos-pool
 +        model: deepseek-v4.1-flash
 +        solveDelayMs: 9000
@@ -12509,24 +12509,24 @@ index 1065dfe876..e5f5995c26 100644
  }
 +
 +/**
-+ * Whether the request's Host is an authority this deployment DECLARES it is
-+ * reached by (`trustedHosts`) rather than the loopback origin.
++ * Ob der Host der Anfrage eine Autorität ist, die dieses Deployment als
++ * Zugriffsweg DEKLARIERT (`trustedHosts`), statt der Loopback-Ursprung.
 + *
-+ * PhysicsOS server-deployment seam, consumed by
-+ * {@link HostConnectionService.authorizeIndex}. The stock Web composition
-+ * protects the document with the per-process launch token, which a browser
-+ * exchanges for an authority-bound signed cookie — workable for the loopback
-+ * server `dsh web` starts, unusable for a public origin behind a reverse
-+ * proxy: the token is fresh on every restart and the cookie is bound to
-+ * whatever authority minted it, so an operator cannot provision it for
-+ * ordinary visitors. A deployment that names its public authorities here
-+ * serves its own document to them. The account boundary is unchanged — every
-+ * `/api` call still passes `apiPolicy`, which requires a live product session
-+ * — and an invocation that declares nothing keeps the stock token flow.
-+ * @param request - request headers carrying Host.
-+ * @param trustedHosts - authorities this deployment declares it is reached by.
-+ * @returns true only when at least one authority is declared and the Host
-+ *   matches one; loopback alone and an undeclared Host never qualify.
++ * Server-Deployment-Naht von PhysicsOS, konsumiert von
++ * {@link HostConnectionService.authorizeIndex}. Die Standard-Web-Komposition
++ * schützt das Dokument mit dem pro Prozess gültigen Launch-Token, den ein Browser
++ * gegen ein autoritätsgebundenes signiertes Cookie tauscht — machbar für den Loopback-
++ * Server, den `dsh web` startet, unbrauchbar für einen öffentlichen Ursprung hinter einem
++ * Reverse-Proxy: Das Token ist bei jedem Neustart frisch, und das Cookie ist an
++ * die Autorität gebunden, die es ausgestellt hat, sodass ein Betreiber es nicht für
++ * gewöhnliche Besucher bereitstellen kann. Ein Deployment, das seine öffentlichen Autoritäten hier nennt,
++ * liefert ihnen sein eigenes Dokument aus. Die Kontogrenze bleibt unverändert — jeder
++ * `/api`-Aufruf durchläuft weiterhin `apiPolicy`, die eine lebende Produkt-Session verlangt
++ * — und ein Aufruf, der nichts deklariert, behält den Standard-Token-Flow.
++ * @param request - Anfrage-Header mit Host.
++ * @param trustedHosts - Autoritäten, die dieses Deployment als Zugriffsweg deklariert.
++ * @returns true nur, wenn mindestens eine Autorität deklariert ist und der Host
++ *   zu einer passt; Loopback allein und ein nicht deklarierter Host qualifizieren nie.
 + */
 +export function isDeclaredDeploymentAuthority(
 +  request: ConnectionTrustRequest,
@@ -12548,7 +12548,7 @@ index 5691180d96..9ad3d3cdab 100644
  const DAY_MILLISECONDS = 24 * 60 * 60 * 1000
  const SECRET_BYTES = 32
 -const TOKEN_QUERY = 'token'
-+/** The one query parameter the launch token travels in; also read by the rpc-host index seam. */
++/** Der eine Query-Parameter, in dem das Launch-Token übertragen wird; auch von der rpc-host-Index-Naht gelesen. */
 +export const TOKEN_QUERY = 'token'
  const COOKIE_PREFIX = 'dsh-auth-'
  const COOKIE_PAYLOAD_VERSION = 1
@@ -12615,9 +12615,9 @@ index 0f98bc1f19..bbe50fc200 100644
 +    )
 +    if (admission === null) return { rejection: 403 }
 +    if (admission === undefined) return { peer: this.operator }
-+    /* PhysicsOS tenancy seam: the policy answers either the stock event
-+       predicate or a face that also carries per-resource stream scoping;
-+       both thread onto the peer the gateway hands to Remote services. */
++    /* Mandanten-Naht von PhysicsOS: die Policy liefert entweder das Standard-Ereignis-
++       Prädikat oder eine Facette, die zusätzlich Ressourcen-Stream-Scoping trägt;
++       beide werden an den Peer durchgereicht, den das Gateway an Remote-Dienste übergibt. */
 +    const eventAdmission = typeof admission === 'function'
 +      ? admission
 +      : admission.remoteEventAdmission
@@ -12636,14 +12636,14 @@ index 0f98bc1f19..bbe50fc200 100644
 
    /** Authenticate an index request through the process-token exchange or cookie. */
    authorizeIndex(request: ConnectionIndexRequest, response: ConnectionIndexResponse): boolean {
-+    /* PhysicsOS server-deployment seam: an authority this deployment declares
-+       (`trustedHosts`, the same list the /api fence trusts) is its own public
-+       origin, so a token-less document request there is served without the
-+       launch token. The token is per-process and the cookie it mints is bound
-+       to the minting authority, so a proxy deployment cannot provision either
-+       for an ordinary visitor. A request that DOES carry the token keeps the
-+       stock exchange (and loopback and undeclared Hosts keep the stock gate);
-+       the /api account boundary is untouched. */
++    /* Server-Deployment-Naht von PhysicsOS: eine Autorität, die dieses Deployment deklariert
++       (`trustedHosts`, dieselbe Liste, der auch der /api-Fence vertraut), ist sein eigener öffentlicher
++       Ursprung, sodass eine tokenlose Dokumentanfrage dort ohne das
++       Launch-Token beantwortet wird. Das Token gilt pro Prozess, und das davon ausgestellte Cookie ist an
++       die ausstellende Autorität gebunden, sodass ein Proxy-Deployment beides nicht für
++       einen gewöhnlichen Besucher bereitstellen kann. Eine Anfrage, die das Token MITBRINGT, behält den
++       Standard-Austausch (und Loopback sowie nicht deklarierte Hosts behalten das Standard-Gate);
++       die /api-Kontogrenze bleibt unangetastet. */
 +    const url = new URL(request.url ?? '/', 'http://dsh.invalid')
 +    if (url.searchParams.getAll(TOKEN_QUERY).length === 0
 +      && isDeclaredDeploymentAuthority(request, this.trustedHosts)) return true
@@ -12719,18 +12719,18 @@ index 61f7d8ff8b..167bfd5102 100644
      'conversation.input.overlay': { kind: 'list'; scope: 'session' }
      /** Ambient entries below the composer card. */
      'conversation.composer.dock': { kind: 'list'; scope: 'session' }
-+    /* Page-level product entries rendered ABOVE the composer card, outside it.
-+       `conversation.input.dock` is `session`-scoped and therefore absent until a
-+       Session (and its workspace) exists; a product front page has to render its
-+       own head before that, so it needs a seat that binds to no Session either.
-+       `session-maybe`, mirroring `conversation.composer.below`. */
++    /* Produkt-Einträge auf Seitenebene, ÜBER der Composer-Karte gerendert, außerhalb von ihr.
++       `conversation.input.dock` ist `session`-gebunden und daher abwesend, bis eine
++       Session (und ihr Workspace) existiert; eine Produkt-Startseite muss ihren
++       eigenen Kopf davor rendern, braucht also einen Platz, der ebenfalls an keine Session bindet.
++       `session-maybe`, analog zu `conversation.composer.below`. */
 +    'conversation.composer.above': { kind: 'list'; scope: 'session-maybe' }
-+    /* Page-level product entries rendered below the composer card, outside it.
-+       Distinct from `conversation.composer.dock`, which is ambient shell chrome
-+       (token stats, queue hints): this seat belongs to a business page that
-+       owns the whole blank-Session surface and needs its own content under its
-+       own composer. `session-maybe`, not `session`: the front page must render
-+       at a cold start too, where no Session exists yet to bind a scope to. */
++    /* Produkt-Einträge auf Seitenebene, unter der Composer-Karte gerendert, außerhalb von ihr.
++       Anders als `conversation.composer.dock`, das Ambient-Shell-Chrome ist
++       (Token-Statistiken, Queue-Hinweise): Dieser Platz gehört zu einer Geschäftsseite, die
++       die gesamte Blank-Session-Oberfläche besitzt und eigenen Inhalt unter ihrem
++       eigenen Composer braucht. `session-maybe`, nicht `session`: Die Startseite muss auch
++       beim Kaltstart rendern, wo noch keine Session existiert, an die sich ein Scope binden ließe. */
 +    'conversation.composer.below': { kind: 'list'; scope: 'session-maybe' }
      /** Compact controls at the left of the composer tool row. */
      'conversation.input.left': { kind: 'list'; scope: 'session' }
@@ -12773,10 +12773,10 @@ index 4f450df3c9..fb6379f981 100644
    display: flex;
    flex-direction: column;
    overflow: hidden;
-+  /* The column is the positioning context for a business panel that fills it.
-+     Without this a panel's `inset: 0` resolves against the frame root instead,
-+     so the panel covers the sidebar column as well and the user loses the nav
-+     while it is open. */
++  /* Die Spalte ist der Positionierungskontext für ein Geschäfts-Panel, das sie füllt.
++     Ohne dies löst sich `inset: 0` eines Panels stattdessen gegen die Frame-Wurzel auf,
++     sodass das Panel auch die Sidebar-Spalte überdeckt und der Benutzer die Navigation verliert,
++     solange es geöffnet ist. */
 +  position: relative;
  }
 
@@ -12790,12 +12790,12 @@ index 183ed40fae..5ec855666c 100644
      && (pkg.installed || pkg.optional || pkg.error !== undefined))
    const mine = listed.filter(pkg => pkg.installed || !pkg.optional)
 -  const official = listed.filter(pkg => pkg.optional && !pkg.installed)
-+  /* PhysicsOS overlay: upstream's experimental bundles stay out of the Official
-+     group. The product builds its own equivalent for any of those features it
-+     wants, so offering upstream's half-product alongside ours would be two
-+     competing versions of one thing. The packages are still listed once an
-+     operator switches one on deliberately (they then appear under Installed),
-+     so this hides the offer, never the control. */
++  /* PhysicsOS-Overlay: Die experimentellen Bundles des Upstream bleiben außerhalb der Gruppe
++     „Offiziell". Das Produkt baut für jede gewünschte dieser Funktionen ein eigenes
++     Äquivalent, sodass das Anbieten des halbfertigen Upstream-Produkts neben unserem zwei
++     konkurrierende Versionen einer Sache wäre. Die Pakete werden weiterhin gelistet, sobald ein
++     Betreiber eines bewusst einschaltet (dann erscheinen sie unter „Installiert"),
++     dies verbirgt also das Angebot, nie die Steuerung. */
 +  const official = listed.filter(pkg => pkg.optional && !pkg.installed
 +    && !pkg.name.startsWith('@deepseek-ai/dsh-experimental-'))
    const loaded = state.status === 'ready' || state.status === 'error'
@@ -12864,8 +12864,8 @@ index ac1116f04c..2a8c72bf36 100644
    align-items: center;
    gap: 8px;
 -  height: 24px;
-+  /* min-height, not height: the occupant may be a two-line wordmark (product
-+     over tenant), and a fixed box would clip its second line. */
++  /* min-height, nicht height: Der Inhalt kann eine zweizeilige Wortmarke sein (Produkt
++     über Mandant), und eine feste Box würde ihre zweite Zeile abschneiden. */
 +  min-height: 24px;
    min-width: 0;
  }
@@ -12901,11 +12901,11 @@ index c6ba475fec..5e32c0114d 100644
       */
      'sidebar.panellist': { kind: 'list'; scope: 'root'; owner: SidebarPanelIconOwnerProps }
 +    /**
-+     * A business product's own navigation column, above the global panel rows.
-+     * `sidebar.panellist` renders one icon row per registered main panel and
-+     * owns their labels; a product that groups its surfaces (sections, a Home
-+     * entry that is not a panel) renders that structure here instead, and keeps
-+     * the panel rows for anything it does not present itself.
++     * Die eigene Navigationsspalte eines Geschäftsprodukts, oberhalb der globalen Panel-Zeilen.
++     * `sidebar.panellist` rendert eine Icon-Zeile pro registriertem Haupt-Panel und
++     * besitzt deren Labels; ein Produkt, das seine Oberflächen gruppiert (Abschnitte, einen
++     * Home-Eintrag, der kein Panel ist), rendert diese Struktur stattdessen hier und behält
++     * die Panel-Zeilen für alles, was es nicht selbst darstellt.
 +     */
 +    'sidebar.nav': { kind: 'single'; scope: 'root'; owner: SidebarNavOwnerProps }
      /**
@@ -12915,9 +12915,9 @@ index c6ba475fec..5e32c0114d 100644
    active: boolean
  }
 
-+/** Owner share of the product navigation column. */
++/** Owner-Anteil der Produkt-Navigationsspalte. */
 +export interface SidebarNavOwnerProps {
-+  /** Shell fold-state output: wide renders labels, rail renders icons only. */
++  /** Ausgabe des Shell-Faltzustands: wide rendert Labels, rail rendert nur Icons. */
 +  wide: boolean
 +}
 +
@@ -12953,13 +12953,13 @@ index 23b27ad4bc..05cbf1dc1b 100644
      this.root.dataset.dshBoot = ''
      this.card = div(css.card)
 -    this.wordmark = div(css.wordmark, 'HARNESS')
-+    /* PhysicsOS overlay: the splash is the product's first frame, so it carries
-+       the product's name and voice rather than the vendored kernel's. */
++    /* PhysicsOS-Overlay: Der Splash ist der erste Frame des Produkts und trägt daher
++       den Namen und die Stimme des Produkts statt die des vendorten Kerns. */
 +    this.wordmark = div(css.wordmark, 'PhysicsOS')
      this.spinner = div(css.spinner)
      this.spinner.dataset.dshBootSpinner = ''
 -    this.hint = div(css.hint, 'Loading plugins…')
-+    this.hint = div(css.hint, '正在准备物理世界…')
++    this.hint = div(css.hint, 'Physikwelt wird vorbereitet…')
      this.card.append(this.wordmark, this.spinner, this.hint)
      this.root.append(this.card)
      container.append(this.root)
@@ -12968,7 +12968,7 @@ index 23b27ad4bc..05cbf1dc1b 100644
      }
      const report = div(css.failed)
 -    report.append(div(css.failedTitle, 'Failed to load plugins'))
-+    report.append(div(css.failedTitle, '插件加载失败'))
++    report.append(div(css.failedTitle, 'Plugins konnten nicht geladen werden'))
      for (const id of failed) report.append(div(css.failedItem, id))
      if (this.failure !== undefined) report.append(div(css.failedItem, this.failure))
      this.card.replaceChildren(this.wordmark, report)
@@ -12983,7 +12983,7 @@ index 33612e8a47..ca2b91d44d 100644
 -    expect(el.textContent).toContain('HARNESS')
 -    expect(el.textContent).toContain('Loading plugins…')
 +    expect(el.textContent).toContain('PhysicsOS')
-+    expect(el.textContent).toContain('正在准备物理世界…')
++    expect(el.textContent).toContain('Physikwelt wird vorbereitet…')
    })
 
    it('keeps loading while entries are active or loading', () => {
@@ -12993,8 +12993,8 @@ index 33612e8a47..ca2b91d44d 100644
      expect(spinner?.style.getPropertyValue('--dsh-boot-arc')).toBe('288deg')
 -    expect(el.textContent).toContain('Loading plugins…')
 -    expect(el.textContent).not.toContain('Failed to load plugins')
-+    expect(el.textContent).toContain('正在准备物理世界…')
-+    expect(el.textContent).not.toContain('插件加载失败')
++    expect(el.textContent).toContain('Physikwelt wird vorbereitet…')
++    expect(el.textContent).not.toContain('Plugins konnten nicht geladen werden')
    })
 
    it('lists failed entries', () => {
@@ -13003,7 +13003,7 @@ index 33612e8a47..ca2b91d44d 100644
      expect(el.textContent).toContain('@deepseek-ai/dsh-client-ui-tool')
      expect(el.textContent).not.toContain('ok')
 -    expect(el.textContent).not.toContain('Loading plugins…')
-+    expect(el.textContent).not.toContain('正在准备物理世界…')
++    expect(el.textContent).not.toContain('Physikwelt wird vorbereitet…')
    })
 
    it('shows the complete sweep report', () => {
@@ -13012,7 +13012,7 @@ index 33612e8a47..ca2b91d44d 100644
      page.setState('a', 'active')
      expect(el.textContent).toContain(report)
 -    expect(el.textContent).not.toContain('Loading plugins…')
-+    expect(el.textContent).not.toContain('正在准备物理世界…')
++    expect(el.textContent).not.toContain('Physikwelt wird vorbereitet…')
    })
 
    it('detaches on disposal', () => {
@@ -13026,8 +13026,8 @@ index e5e632941a..d41ddf47c8 100644
      expect(failure).toHaveBeenCalledWith(new Error('web boot: window.__ModuleLoader__ bootstrap facade is missing'))
 -    expect(container.textContent).toContain('Loading plugins')
 -    expect(container.textContent).not.toContain('Failed to load plugins')
-+    expect(container.textContent).toContain('正在准备物理世界')
-+    expect(container.textContent).not.toContain('插件加载失败')
++    expect(container.textContent).toContain('Physikwelt wird vorbereitet')
++    expect(container.textContent).not.toContain('Plugins konnten nicht geladen werden')
      expect(container.querySelector('[data-dsh-boot-spinner]')).not.toBeNull()
      await entry.dispose()
    })
@@ -13036,11 +13036,11 @@ index e5e632941a..d41ddf47c8 100644
          expect(String(report.mock.calls[0]![0])).toContain('broken')
          expect(container.querySelector('[data-dsh-boot-spinner]')).not.toBeNull()
 -        expect(container.textContent).not.toContain('Failed to load plugins')
-+        expect(container.textContent).not.toContain('插件加载失败')
++        expect(container.textContent).not.toContain('Plugins konnten nicht geladen werden')
        } else {
          expect(report).not.toHaveBeenCalled()
 -        expect(container.textContent).toContain('Failed to load plugins')
-+        expect(container.textContent).toContain('插件加载失败')
++        expect(container.textContent).toContain('Plugins konnten nicht geladen werden')
          expect(container.textContent).toContain('broken')
        }
      } finally {
@@ -13118,18 +13118,18 @@ index ec2a88c4f9..f2ce9a7c66 100644
    readonly id: PeerId
    readonly ctx: Context
 +  /**
-+   * Optional application policy for forwarded Remote events on this Peer.
-+   * Absent allows every event; a false result withholds that event.
++   * Optionale Anwendungs-Policy für weitergeleitete Remote-Ereignisse auf diesem Peer.
++   * Fehlt sie, sind alle Ereignisse erlaubt; ein false-Ergebnis hält jenes Ereignis zurück.
 +   */
 +  readonly remoteEventAdmission?: (
 +    event: string,
 +    args: readonly unknown[],
 +  ) => boolean
 +  /**
-+   * Optional application policy for stream-carried Workspace frames on this
-+   * Peer. Absent streams the stock registry view; a scoped Peer receives only
-+   * baseline and increment frames for Workspaces — and their archived or
-+   * pinned Sessions — the admission owns.
++   * Optionale Anwendungs-Policy für stream-getragene Workspace-Frames auf diesem
++   * Peer. Fehlt sie, wird die Standard-Registry-Ansicht gestreamt; ein abgegrenzter Peer erhält nur
++   * Baseline- und Increment-Frames für Workspaces — und ihre archivierten oder
++   * angehefteten Sessions —, die die Zulassung besitzt.
 +   */
 +  readonly workspaceAdmission?: {
 +    ownsWorkspace(workspaceId: string): boolean
@@ -15988,16 +15988,16 @@ index 4782ad5bdb..8a5d4be415 100644
    'extract-zip>yauzl': '3.4.0'
    '@deepseek-ai/cosmokit': 'link:vendor/cosmokit'
    '@deepseek-ai/schemastery': 'link:vendor/schemastery'
-+  # Security floors carried by the PhysicsOS overlay.
++  # Sicherheits-Untergrenzen, die das PhysicsOS-Overlay mitführt.
 +  'brace-expansion@>=5.0.0 <5.0.9': '5.0.9'
 +  'js-yaml@>=4.0.0 <4.3.2': '4.3.2'
 +  'fast-uri@>=3.0.0 <3.1.8': '3.1.8'
 +  'postcss@<=8.5.22': '8.5.23'
 +  'undici@>=7.0.0 <7.29.1': '7.29.1'
 +  'undici@>=8.0.0 <8.10.2': '8.10.2'
-+  # One micromark-util-types across the closure: a 2.0.2/2.0.3 split makes the
-+  # Exiter/TokenizeContext structs mutually incompatible under
-+  # exactOptionalPropertyTypes and fails the ui-primitives markdown build.
++  # Ein einheitliches micromark-util-types im gesamten Closure: Eine 2.0.2/2.0.3-Aufspaltung macht die
++  # Exiter/TokenizeContext-Structs unter exactOptionalPropertyTypes gegenseitig inkompatibel
++  # und lässt den Markdown-Build von ui-primitives fehlschlagen.
 +  'micromark-util-types': '2.0.3'
 +  'ip-address@<=10.3.0': '10.3.1'
 +  'hono@<4.13.5': '4.13.5'

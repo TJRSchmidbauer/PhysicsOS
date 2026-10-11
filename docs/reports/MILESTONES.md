@@ -1,833 +1,811 @@
-# PhysicsOS Milestones
+# PhysicsOS Meilensteine
 
-> 文件：`docs/reports/MILESTONES.md`
-> 只记录已验收的里程碑与当前进行中的阶段。每条给出验收依据的位置。
+> Datei: `docs/reports/MILESTONES.md`
+> Nur bereits abgenommene Meilensteine und aktuell laufende Phasen werden aufgezeichnet. Für jeden Eintrag wird die Position der Abnahmegrundlage angegeben.
 
 ---
 
-## 已完成
+## Abgeschlossen
 
 ### MAGNETIC_RUNTIME_VERTICAL_SLICE_COMPLETE
 
-匀强磁场中带电粒子圆周运动：Scene → SceneCommand/revision → MagneticEngine →
-Verifier → Observation → Canvas 全链路打通，Inspector 可编辑 `q / m / v₀ / B` 与
-磁场方向，派生量（R / T / ω / F）由引擎给出。
+Kreisbewegung geladener Teilchen im homogenen Magnetfeld: Scene → SceneCommand/Revision → MagneticEngine →
+Verifier → Observation → Canvas vollständig integriert, Inspector kann `q / m / v₀ / B` und
+Magnetfeldrichtung bearbeiten, abgeleitete Größen (R / T / ω / F) werden von der Engine geliefert.
 
-依据：`docs/reports/PHASE-01-FOUNDATION-REPORT.md`、
+Abnahmegrundlage: `docs/reports/PHASE-01-FOUNDATION-REPORT.md`,
 `vendor/deepseek-harness/packages/client/ui-physicsos/tests/physics-runtime-bridge.client.spec.tsx`
 
 ### QUESTION_SPACE_MAGNETIC_VERTICAL_SLICE_COMPLETE
 
-题面文本 → Semantic IR → Scene → Engine → Verifier → 结构化解答，
-并支持「在物理世界中打开」把同一个 Scene revision 交给实验室。
+Aufgabentext → Semantic IR → Scene → Engine → Verifier → strukturierte Lösung,
+mit Unterstützung von „In der Physikwelt öffnen“ zum Übergeben derselben Szenenrevision an das Physiklabor.
 
-依据：`docs/reports/QUESTION-SPACE-MAGNETIC-VERTICAL-SLICE-REPORT.md`
+Abnahmegrundlage: `docs/reports/QUESTION-SPACE-MAGNETIC-VERTICAL-SLICE-REPORT.md`
 
 ### MECHANICS_RUNTIME_PACK_V1_COMPLETE
 
-5 个力学模型（匀速 / 匀变速 / 抛体 / 牛顿第二定律 / 斜面）+ 统一
-`PhysicsWorkspace` 外壳 + Renderer Registry + 可编辑 Inspector +
-自由体图（mg / N / f / ΣF / a 与力的分解）+ 时间轴事件标记 + 数据面板 +
-Question 力学 UI（已知量点击高亮、结构化推导、具名验证）+
-**Question → Lab 实验分支**（题目事实不可被实验污染）+
-**Runtime-aware Agent**（视图工具与域命令严格分离）。
+5 Mechanikmodelle (konstantgeschwindig / gleichmäßig beschleunigt / Wurf / Newtons zweites Gesetz / schiefe Ebene) + einheitliche
+`PhysicsWorkspace`-Shell + Renderer Registry + editierbarer Inspector +
+Freikörperdiagramm (mg / N / f / ΣF / a und Kraftzerlegung) + Zeitleisten-Ereignismarker + Datenpanel +
+Mechanik-UI für Aufgaben (Klicken auf bekannte Größen hebt hervor, strukturierte Herleitung, benannte Validierung) +
+**Question → Lab-Experimentzweig** (Aufgabenfakten dürfen nicht durch Experimente verfälscht werden) +
+**Runtime-aware Agent** (View-Tools und Domänenbefehle sind streng getrennt).
 
-依据：`docs/reports/MECHANICS-RUNTIME-PACK-V1-REPORT.md`
-（§19–§37，含 8 个浏览器 Case、regression gates A–H、最终截图集）
+Abnahmegrundlage: `docs/reports/MECHANICS-RUNTIME-PACK-V1-REPORT.md`
+(§19–§37, inklusive 8 Browser-Cases, Regressionsgates A–H, abschließender Screenshot-Satz)
 
-验收数据：root typecheck / root tests / harness build 通过；
-`ui-physicsos` 11 文件 83 测试通过；harness `test:gui` 283 文件 3842 测试通过；
-浏览器验收 52 项全通过，五项门禁计数器全为 0。
+Abnahmedaten: Root-Typecheck / Root-Tests / Harness-Build erfolgreich;
+`ui-physicsos` 11 Dateien 83 Tests erfolgreich; Harness `test:gui` 283 Dateien 3842 Tests erfolgreich;
+Browser-Abnahme 52 Punkte vollständig bestanden, alle fünf Gate-Zähler bei 0.
 
 ### ELECTRIC_FIELD_RUNTIME_PACK_V1_COMPLETE
 
-点电荷静电场的第一个垂直切片：Domain Core → Scene → Engine → Verifier →
-Observation → Question 预览 → Lab → Agent 高亮全链路打通。
-点电荷域契约 `physics-electric-core`（E = kq/r²、F = qE、方向、叠加、
-牛顿第三定律、r = 0 显式失败）；`createPointChargeScene` +
-`PointChargeField` + probe particle；`point-charge-model` 的 `canHandle` /
-`simulate` / derivedQuantities（E 向量与大小、F = qE、方向）；
-`observeElectricScene` 扩展 `electric_field_vector` 与 `charge_sign`；
-`ElectricPointChargeRenderer`（+q / −q 红蓝玻璃球 + 等距蓝色电场线箭头 +
-探针 + E / F 向量）；3 道 Golden Question（求 E、求 F = qE、正负方向判断）
-共享带试探电荷的场景；**Question → Lab 实验分支**同样覆盖点电荷
-（`ElectricWorkspaceRuntime` 支持 `forkExperimentalScene` / `restoreOrigin`）；
-**Agent 电学意图**（电场强度引用 1/r² 校验、电场力引用 F = qE 校验、
-正负方向判断），高亮 E / F 向量为纯视图操作。
-**不做**：电势面、电容、电磁感应（留待后续切片）；Lab 新建菜单加电场模板
-（仅走 Question → Lab）。
+Erster vertikaler Ausschnitt des elektrostatischen Felds von Punktladungen: Domain Core → Scene → Engine → Verifier →
+Observation → Aufgaben-Vorschau → Lab → Agent-Hervorhebung vollständig integriert.
+Domänenvertrag für Punktladungen `physics-electric-core` (E = kq/r², F = qE, Richtung, Superposition,
+Newtons drittes Gesetz, expliziter Fehler bei r = 0); `createPointChargeScene` +
+`PointChargeField` + Probe-Teilchen; `point-charge-model` mit `canHandle` /
+`simulate` / derivedQuantities (E-Vektor und Betrag, F = qE, Richtung);
+`observeElectricScene` erweitert um `electric_field_vector` und `charge_sign`;
+`ElectricPointChargeRenderer` (+q / −q rote/blaue Glaskugeln + äquidistante blaue Feldlinienpfeile +
+Probe + E- und F-Vektoren); 3 Gold-Aufgaben (E berechnen, F = qE berechnen, Vorzeichen/Richtung bestimmen),
+gemeinsame Szene mit Testladung; **Question → Lab-Experimentzweig** ebenso für Punktladungen
+(`ElectricWorkspaceRuntime` unterstützt `forkExperimentalScene` / `restoreOrigin`);
+**Agent-Intentionen für Elektrizität** (E-Betrag verweist auf 1/r²-Prüfung, F = qE verweist auf F=qE-Prüfung,
+Vorzeichen/Richtungsbestimmung), Hervorhebung von E/F-Vektoren ist reine View-Operation.
+**Nicht durchgeführt:** Äquipotentialflächen, Kondensator, elektromagnetische Induktion (spätere Ausschnitte); Lab-Neu-Menü ergänzt um elektrisches Feld-Template
+(nur Question → Lab).
 
-依据：`docs/reports/ELECTRIC-FIELD-RUNTIME-PACK-V1-REPORT.md`
-（含 5 个浏览器 Case E–I、5 项门禁计数器、最终截图集）
+Abnahmegrundlage: `docs/reports/ELECTRIC-FIELD-RUNTIME-PACK-V1-REPORT.md`
+(inklusive 5 Browser-Cases E–I, 5 Gate-Zähler, abschließender Screenshot-Satz)
 
-验收数据：root typecheck 通过；`test:core` 全绿（含 question-core 点电荷题
-全链路、physics-electric-core、verifier）；`test:web` 97 测试全绿（含
-`physics-agent.client.spec.tsx` 电学意图与 `electric.client.spec.tsx`）；
-浏览器验收 `electric-acceptance.mjs` 5 Case 全 PASS、5 门禁计数器为 0；
-回归 `mechanics-acceptance.mjs` 未回归。
+Abnahmedaten: Root-Typecheck erfolgreich; `test:core` vollständig grün (inkl. question-core Punktladungsaufgaben-End-to-End,
+physics-electric-core, Verifier); `test:web` 97 Tests vollständig grün (inkl.
+`physics-agent.client.spec.tsx` elektrische Intentionen und `electric.client.spec.tsx`);
+Browser-Abnahme `electric-acceptance.mjs` 5 Cases alle PASS, 5 Gate-Zähler bei 0;
+Regression `mechanics-acceptance.mjs` ohne Rückfälle.
 
 ### ELECTRIC_FIELD_RUNTIME_PACK_V2_COMPLETE
 
-多源点电荷纵深 + 等势线可视化 + R1 修复 + Agent 多源解释。
-多源在 Scene/Engine/Verifier/Observation/Renderer 全链路自 V1 已就绪
-（`createPointChargeScene` 接受 `charges[]`、`fieldAt` 叠加、
-`electric_field_superposition` 校验、`traceStreamline` 沿合场积分、
-`pointChargeSources` 数组、Inspector 按 `sources.map` 展开）——V2 只打通
-多源 Question 解析、补齐等势线、扩展 Agent。
+Vertiefung für Mehrquellen-Punktladungen + Äquipotentiallinien-Visualisierung + R1-Fix + Agent-Erklärung für Mehrquellen.
+Mehrquellen waren bereits in V1 in Scene/Engine/Verifier/Observation/Renderer vollständig integriert
+(`createPointChargeScene` akzeptiert `charges[]`, `fieldAt` führt Superposition durch,
+`electric_field_superposition`-Prüfung, `traceStreamline` integriert entlang Gesamtfeld,
+`pointChargeSources`-Array, Inspector entfaltet nach `sources.map`) — V2 schließt nur
+Mehrquellen-Aufgabenparsing, Äquipotentiallinien und Agent-Erweiterung ab.
 
-**A. 多源 Question 解析**：`PhysicsSemanticIR` 增 `sourceCharges`/`samplePosition`；
-parser 新增 `MULTI_SOURCE_SIGNAL`（q1/q2、等量同种/异种、电偶极子）、
-`parseMultiSource`（两源 ±separation/2、中点为场点）、`extractSourceCharges`
-（matchAll 提取 q1/q2 与 电荷A/B）；scene builder 多源分支；3 道 Golden
-Question（等量异种中点 E≈3.6e6、等量同种中点 E=0、电偶极子中点 E≈7.19e6）；
-`buildSolution` 多源叠加公式与方向说明。
+**A. Mehrquellen-Aufgabenparsing:** `PhysicsSemanticIR` erweitert um `sourceCharges`/`samplePosition`;
+Parser ergänzt `MULTI_SOURCE_SIGNAL` (q1/q2, gleichnamig/ungleichnamig, elektrisches Dipol),
+`parseMultiSource` (zwei Quellen ±separation/2, Mittelpunkt als Feldpunkt), `extractSourceCharges`
+(matchAll extrahiert q1/q2 und Ladung A/B); Szenen-Builder mit Mehrquellen-Zweig; 3 Gold-Aufgaben
+(gleichnamige ungleichnamige Ladungen Mittelpunkt E≈3.6e6, gleichnamig Mittelpunkt E=0, Dipol-Mittelpunkt E≈7.19e6);
+`buildSolution` mit Superpositionsformel und Richtungsangabe.
 
-**B. 等势线可视化**：`samplePotentialGrid`（Float64Array 网格 V、NaN 跳过奇点）；
-`EquipotentialVisual`（level + 多边形 + closed）；marching squares 提取等高线
-（16 case + saddle、贪心链接为 polyline）；多源场景默认显示等势线（annotation
-observable），单源默认关；renderer 渲染虚线等势路径。等势线作场拓扑示意，
-不进 Observation/Verifier 契约（精确 V 在 derived `potential`）。
+**B. Äquipotentiallinien-Visualisierung:** `samplePotentialGrid` (Float64Array-Raster V, NaN überspringt Singularitäten);
+`EquipotentialVisual` (level + Polygone + geschlossen); Marching Squares zur Isohypsenextraktion
+(16 Cases + Sattel, Greedy-Verknüpfung zu Polylinien); Mehrquellen-Szenen zeigen standardmäßig Äquipotentiallinien (Annotation observable),
+Einzelquelle standardmäßig aus; Renderer zeichnet gestrichelte Äquipotentialpfade. Äquipotentiallinien dienen als Topologiehinweis,
+werden nicht in Observation/Verifier-Vertrag aufgenommen (exaktes V in abgeleitetem `potential`).
 
-**C. R1 修复 + Agent 多源解释**：`QuestionWorkspace` probeId 从硬编码 `source-1`
-改为 `probeParticleOf`（排除所有声明 source，多源纯场题返回 undefined）；
-`PhysicsAgentContext` 增 `chargeSigns`（多源 sign 数组）；新 Intent
-`electric-field-line-origin`（电场线从正电荷出来，引用 `chargeSigns` + 方向
-校验，多源不谎称单值方向）与 `electric-superposition`（合场叠加，引用
-`electric_field_superposition` 校验）；`matchIntent` 规则；`resolveHighlightTarget`
-支持 `*` 前缀通配（`field-line` → `source-*`，renderer 按 sourceId 高亮 stream）。
+**C. R1-Fix + Agent-Erklärung für Mehrquellen:** `QuestionWorkspace` ändert probeId von hartcodiert `source-1` zu `probeParticleOf`
+(ausschließt alle deklarierten Quellen, gibt für reine Feldaufgaben ohne Probe undefined zurück);
+`PhysicsAgentContext` erweitert um `chargeSigns` (Signatur-Array für Mehrquellen); neue Intention
+`electric-field-line-origin` (Feldlinien beginnen an positiven Ladungen, verweist auf `chargeSigns` + Richtungskontrolle,
+behauptet keine Einheitsrichtung bei Mehrquellen) und `electric-superposition` (Gesamtfeld-Superposition, verweist auf
+`electric_field_superposition`-Prüfung); `matchIntent`-Regeln; `resolveHighlightTarget` unterstützt
+`*`-Wildcard-Präfix (`field-line` → `source-*`, Renderer hebt Stream nach sourceId hervor).
 
-依据：`docs/reports/ELECTRIC-FIELD-RUNTIME-PACK-V2-REPORT.md`
-（含 4 个浏览器 Case J–M、5 项门禁计数器、最终截图集）
+Abnahmegrundlage: `docs/reports/ELECTRIC-FIELD-RUNTIME-PACK-V2-REPORT.md`
+(inklusive 4 Browser-Cases J–M, 5 Gate-Zähler, abschließender Screenshot-Satz)
 
-验收数据：`test:core` 387 全绿（含 question-core 多源题全链路、engine-electric
-`samplePotentialGrid`）；`test:web` ui-physicsos 107 全绿（含等势线 visual、
-Agent 多源意图 27 测试）；typecheck:core/web 全绿；浏览器验收
-`electric-acceptance-v2.mjs` 4 Case 全 PASS、5 门禁为 0；回归
-`electric-acceptance.mjs` 与 `mechanics-acceptance.mjs` 未回归。
+Abnahmedaten: `test:core` 387 Tests vollständig grün (inkl. question-core Mehrquellen-End-to-End, engine-electric
+`samplePotentialGrid`); `test:web` ui-physicsos 107 Tests vollständig grün (inkl. Äquipotentiallinien-Visual,
+Agent-Mehrquellen-Intentionen 27 Tests); typecheck:core/web vollständig grün; Browser-Abnahme
+`electric-acceptance-v2.mjs` 4 Cases alle PASS, 5 Gates bei 0; Regression
+`electric-acceptance.mjs` und `mechanics-acceptance.mjs` ohne Rückfälle.
 
-**不做**（明确边界）：匀强电场完善 / 平行板电容器 / 带电粒子轨迹积分（V3）；
-Timeline 事件标记（backlog）；Agent 接真实模型（backlog）；等势线数值断言
-（仅拓扑示意）；Lab 新建菜单加多源模板（仅 Question → Lab）。
+**Nicht durchgeführt** (klare Abgrenzung): Homogenes elektrisches Feld verfeinern / Plattenkondensator / Teilchentrajektorienintegration (V3);
+Zeitleisten-Ereignismarker (Backlog); Agent-Anbindung an echtes Modell (Backlog); numerische Äquipotentiallinien-Assertionen
+(nur topologischer Hinweis); Lab-Neu-Menü um Mehrquellen-Template erweitern (nur Question → Lab).
 
 ### ELECTRIC_AGENT_DYNAMIC_INTENTS_COMPLETE
 
-匀强电场动力学（自 V1 已完整实现）补 Agent 动力学意图 + 复杂空间解析 +
-浏览器验收。纯增量、低风险，不扩展引擎 / 题型。
+Homogenes elektrisches Feld - Dynamik (bereits in V1 vollständig implementiert): Ergänzung um Agent-Dynamikintentionen + komplexe räumliche Parsing +
+Browser-Abnahme. Reiner Zusatz, geringes Risiko, keine Erweiterung von Engine/Fragetypen.
 
-**A. 修复 Agent 匀强场文案**：`isUniformElectricField(context)` helper（基于
-`electric_kinematic_consistency` check 判别）；`electric-field-magnitude` 按场景
-分支（匀强场说"E 是给定恒定值"引用 `electric_force_consistency`，不再谎称库仑
-定律）；`electric-force-magnitude` 用 `electric_force_qE ??
-electric_force_consistency` 回退。
+**A. Agent-Text für homogenes Feld korrigiert:** `isUniformElectricField(context)`-Helper (Unterscheidung basierend auf
+`electric_kinematic_consistency`-Prüfung); `electric-field-magnitude` verzweigt nach Szenentyp
+(homogenes Feld: "E ist gegebener konstanter Wert", verweist auf `electric_force_consistency`, behauptet nicht Coulombsches Gesetz);
+`electric-force-magnitude` fällt auf `electric_force_qE ?? electric_force_consistency` zurück.
 
-**B. 4 个动力学意图**：`electric-acceleration-constant`、
-`electric-trajectory-shape`、`electric-work-energy`、`electric-velocity-evolution`，
-各引用对应匀强场 check + derived，`available` 用 `isUniformElectricField` 闸门。
-`matchIntent` 规则置于宽泛规则前。`DERIVED_LABELS` 补齐匀强场动力学中文
-label（位移/电势变化/电势能变化/电场力做功/动能变化）。
+**B. 4 Dynamikintentionen:** `electric-acceleration-constant`,
+`electric-trajectory-shape`, `electric-work-energy`, `electric-velocity-evolution`,
+jeweils mit Verweis auf zugehörige homogene-Feld-Prüfung + abgeleitete Größen, `available` über `isUniformElectricField`-Schranke.
+`matchIntent`-Regeln vor allgemeineren Regeln platziert. `DERIVED_LABELS` um deutsche Bezeichnungen für Dynamik des homogenen Felds ergänzt
+(Verschiebung/Potenzialänderung/Änderung potentielle Energie/Arbeit der elektrischen Kraft/Änderung kinetische Energie).
 
-**C. 复杂空间解析**：`PhysicsSemanticIR` 增 `sampleOffset`；parser 新增
-`directionalDistance` 模式（"距其左侧 15 cm"），优先于裸距离；scene builder
-单源 probe 按 axis/sign 放置；Golden Question `electric-09-off-axis-field`。
+**C. Komplexes räumliches Parsing:** `PhysicsSemanticIR` erweitert um `sampleOffset`; Parser ergänzt
+`directionalDistance`-Muster ("15 cm links davon"), hat Vorrang vor nacktem Abstand; Szenen-Builder platziert
+Einzelquellen-Probe nach Achse/Vorzeichen; Gold-Aufgabe `electric-09-off-axis-field`.
 
-**D. 验收**：Case N（匀强场类平抛试题→Lab 轨迹）、Case O（Agent 抛物线轨迹
-解释，引用 `electric_kinematic_consistency`、不引库仑、revision 不变）。
+**D. Abnahme:** Case N (homogenes-Feld-Wurfaufgabe → Lab-Trajektorie), Case O (Agent-Erklärung parabelförmiger Trajektorie,
+verweist auf `electric_kinematic_consistency`, nicht auf Coulombsches Gesetz, Revision unverändert).
 
-**关键 bug 修复**：`verificationOf` 对匀强场 `checks.slice(0, 8)` 截断了四个
-动力学 check（V1 遗留，此前无动力学意图故未触发）→ 改为两模型都显示全部。
+**Kritischer Bugfix:** `verificationOf` schnitt bei homogenem Feld mit `checks.slice(0, 8)` vier Dynamikprüfungen ab
+(V1-Rückstand, zuvor nie durch Dynamikintentionen ausgelöst) → für beide Modelle werden jetzt alle Prüfungen angezeigt.
 
-依据：`docs/reports/ELECTRIC-AGENT-DYNAMIC-INTENTS-REPORT.md`
-（含 Case J–O、5 项门禁计数器、最终截图集）
+Abnahmegrundlage: `docs/reports/ELECTRIC-AGENT-DYNAMIC-INTENTS-REPORT.md`
+(inklusive Case J–O, 5 Gate-Zähler, abschließender Screenshot-Satz)
 
-验收数据：`test:core` 全绿（question-core 108）；`test:web` ui-physicsos 117
-全绿（含匀强场动力学 intent 10 测试）；typecheck:core/web 全绿；bundle 重建；
-浏览器验收 `electric-acceptance-v2.mjs` Case J–O 全 PASS、5 门禁为 0；回归
-`electric-acceptance.mjs` 与 `mechanics-acceptance.mjs` 未回归。
+Abnahmedaten: `test:core` vollständig grün (question-core 108); `test:web` ui-physicsos 117 vollständig grün
+(inkl. 10 Tests für Dynamikintentionen homogenes Feld); typecheck:core/web vollständig grün; Bundle neu gebaut;
+Browser-Abnahme `electric-acceptance-v2.mjs` Case J–O alle PASS, 5 Gates bei 0; Regression
+`electric-acceptance.mjs` und `mechanics-acceptance.mjs` ohne Rückfälle.
 
-**不做**（明确边界）：平行板有界电场（引擎分段解析，风险中等，留待后续）；
-点电荷 1/r² 动力学（自适应步长积分，backlog）；Timeline 事件标记（backlog）；
-Lab 新建菜单加匀强电场模板（与 V1 一致，仅 Question → Lab）；复杂空间解析只
-支持点电荷单源方向性距离（多源已有 `samplePosition`）。
+**Nicht durchgeführt** (klare Abgrenzung): Begrenztes homogenes Feld zwischen Platten (Engine-segmentiertes Parsing, mittleres Risiko, später);
+Dynamik für Punktladungen 1/r² (adaptiver Zeitschritt-Integrationsaufwand, Backlog); Zeitleisten-Ereignismarker (Backlog);
+Lab-Neu-Menü um homogenes Feld-Template erweitern (wie V1, nur Question → Lab); komplexes räumliches Parsing nur für
+Einzelquellen-Punktladung mit direktionalem Abstand (Mehrquellen bereits `samplePosition`).
 
 ---
 
 ## ELECTRIC_BOUNDARY_RUNTIME_COMPLETE / PHYSICSOS_PHASE4_COMPLETE
 
-**日期**：2026-08-23
+**Datum:** 2026-08-23
 
-**范围**：平行板电容器中带电粒子的偏转 —— 高中电场部分的核心考点，此前完全缺失。
-V1/V2/Phase 3 覆盖的是无界匀强场与点电荷静电场，都没有"场只存在于某区域内"的
-概念，因此也没有进出场区、打到极板这些离散事件。
+**Umfang:** Ablenkung geladener Teilchen im Plattenkondensator - zentraler Prüfungsstoff im elektrischen Feld der Oberstufe, zuvor vollständig fehlend.
+V1/V2/Phase 3 deckten nur unbegrenztes homogenes Feld und elektrostatisches Feld von Punktladungen ab, ohne das Konzept eines Felds, das nur in einem bestimmten Bereich existiert,
+und ohne diskrete Ereignisse wie Eintreten/Austreten aus dem Feldbereich oder Auftreffen auf Platten.
 
-**A. 新引擎**：`@physicsos/engine-electric-region`，实现同一个
-`PhysicsEngine<PhysicsScene, PhysicsEventLike>` 接口（与 magnetic/mechanics 同构，
-**不是第二套 Runtime**）。分段解析：场外 a = 0 匀速直线，场内 a = qE/m 类平抛，
-出场恢复匀速或打板停止。产出 `EnterField` / `ExitField` / `HitPlate` 三类
-`PhysicsEventLike`、14 个派生量（含 `deflection` / `exit_velocity` / `hit_velocity`）、
-5 项校验。与 `engine-electric` 通过 `canHandle` **互斥**（前者要求 region 绑定，
-后者拒绝任何 regions/boundaries）。
+**A. Neue Engine:** `@physicsos/engine-electric-region` implementiert dieselbe
+`PhysicsEngine<PhysicsScene, PhysicsEventLike>`-Schnittstelle (isomorph zu magnetic/mechanics,
+**keine zweite Runtime**). Segmentierte Berechnung: außerhalb des Felds a=0 gleichförmige Bewegung, innerhalb a=qE/m parabelförmig,
+nach Verlassen entweder gleichförmige Bewegung oder Anhalten beim Auftreffen auf Platte. Erzeugt drei
+`PhysicsEventLike`-Typen: `EnterField` / `ExitField` / `HitPlate`, 14 abgeleitete Größen (inkl. `deflection` / `exit_velocity` / `hit_velocity`),
+5 Prüfungen. Gegenseitiger Ausschluss mit `engine-electric` über `canHandle` (erstere erfordert gebundene Region,
+letztere lehnt regions/boundaries ab).
 
-**B. 全链路**：Scene factory（`createParallelPlateScene`）→ IR
-（`charged_particle_bounded_electric_field` + 板几何字段）→ Parser
-（`parseParallelPlate` + 10 道 Golden Question）→ Runtime（events 映射 + 平行板
-tree/inspector/editParameter）→ Renderer（`ElectricRegionRenderer`：金属极板 +
-clipPath 裁剪的有界场格）→ Agent（10 个有界场教学意图）。
+**B. Gesamte Kette:** Szenen-Fabrik (`createParallelPlateScene`) → IR
+(`charged_particle_bounded_electric_field` + Plattengeometrie) → Parser
+(`parseParallelPlate` + 10 Gold-Aufgaben) → Runtime (Ereignisabbildung + Plattenbaum/
+Inspector/editParameter) → Renderer (`ElectricRegionRenderer`: Metallplatten + durch clipPath
+beschnittener begrenzter Feldgitter) → Agent (10 Lehrintentionen für begrenztes Feld).
 
-**C. 验收**：`electric-region-acceptance.mjs` Case A–F 全 PASS、5 门禁为 0。
-回归保护写进断言 —— Case A 断言点电荷帧 `plates === 0`，Case B 断言无界场帧
-既无极板也无区域事件。
+**C. Abnahme:** `electric-region-acceptance.mjs` Case A–F alle PASS, 5 Gates bei 0.
+Regressionsschutz in Assertions: Case A prüft Punktladungs-Frame `plates === 0`, Case B prüft unbegrenztes Feld-Frame
+hat weder Platten noch Gebietsereignisse.
 
-**关闭 backlog**：`ELECTRIC_TIMELINE_EVENT_MARKERS_BACKLOG`。其"UI 侧零改动"的
-预判成立 —— `TimelineMarkers` 的 class 是动态拼的，新 kind 自动生效，只补了三条
-CSS 与 runtime 的 `eventsOf`。
+**Backlog geschlossen:** `ELECTRIC_TIMELINE_EVENT_MARKERS_BACKLOG`. Vorhersage "null Änderung an UI" traf zu -
+`TimelineMarkers`-Klassen werden dynamisch zusammengesetzt, neue Arten wirken automatisch, nur drei CSS-Regeln und
+`eventsOf` in Runtime ergänzt.
 
-**浏览器验收暴露的五个单元测试无法捕获的缺陷**（详见报告）：
+**Fünf Mängel, die bei Browser-Abnahme aufgedeckt wurden, aber von Unit-Tests nicht erfasst** (siehe Bericht):
 
-1. 试题空间白屏 —— `useQuestionFrames` 仍调旧引擎，render 期间抛
-   `EngineUnsupportedError`，React 卸载整棵树。core/lab/bridge 三处都改对了，
-   唯独试题预览漏了。
-2. 极板不可见 —— `extentOf` 的米级硬编码下限（12/7 场景单位）把厘米级装置放大
-   113 倍。`plates === 2` 断言当时是通过的（DOM 存在、视觉不可见），只能靠截图发现。
-3. 场方向画错 —— 方向取自当前帧观察量，而板外 E 严格为零，退化到水平 fallback，
-   极板极性也标反。改为从场景的场定义取。
-4. Inspector 与画布矛盾 —— 引擎在 `endTime` 算派生量（粒子已出场，E/F/a 全零），
-   学生 seek 进板间时画布显示 2000 V/m 而 Inspector 显示 0.00。改读当前帧。
-5. 事件时间读作「0.00 秒」—— `toFixed(2)` 对纳秒级时间四舍五入成零，屏幕阅读器
-   报错时刻。测试断言把实现的格式化复制了进去，因此镜像实现、捕获不到。
+1. Aufgabenraum zeigt weißen Bildschirm - `useQuestionFrames` rief noch die alte Engine auf, warf während Render
+   `EngineUnsupportedError`, React entlud den gesamten Baum. Core/Lab/Bridge an drei Stellen korrigiert,
+   nur die Aufgaben-Vorschau übersehen.
+2. Platten unsichtbar - Meter-basierter hartcodierter Mindestwert in `extentOf` (12/7 Szeneneinheiten) vergrößerte
+   cm-Gerät um Faktor 113. Assertion `plates === 2` bestand damals (DOM vorhanden, visuell unsichtbar), nur durch Screenshot entdeckt.
+3. Feldrichtung falsch gezeichnet - Richtung aus aktuellen Frame-Beobachtungen genommen, außerhalb der Platten E strikt 0 → fallback
+   auf horizontal, Plattenpolarität auch vertauscht. Korrektur: aus Felddefinition der Szene lesen.
+4. Widerspruch zwischen Inspector und Canvas - Engine berechnete abgeleitete Größen bei `endTime` (Teilchen bereits ausgetreten,
+   E/F/a alle 0), beim Seek zwischen Platten zeigte Canvas 2000 V/m, Inspector 0.00. Korrektur: aktuellen Frame lesen.
+5. Ereigniszeit als "0.00 s" angezeigt - `toFixed(2)` rundete Nanosekunden auf 0, Screenreader meldete falschen Zeitpunkt.
+   Test-Assertion kopierte die Formatierung des Implementierers, wodurch die Spiegelimplementierung nicht erfasst wurde.
 
-**回归**：`electric-acceptance.mjs`、`electric-acceptance-v2.mjs`、
-`mechanics-acceptance.mjs` 三份旧 acceptance 全部 PASS、门禁为 0。
-`HitPlate` 路径另在浏览器验过 `electric-13`（进入电场 1.00e-9 秒 + 打到极板
-5.77e-9 秒，无「离开电场」）。
+**Regression:** `electric-acceptance.mjs`, `electric-acceptance-v2.mjs`,
+`mechanics-acceptance.mjs` - alle drei bisherigen Acceptance-Suiten bestanden vollständig, Gate-Zähler bei 0.
+`HitPlate`-Pfad zusätzlich im Browser mit `electric-13` verifiziert (Eintritt in Feld bei 1.00e-9 s + Auftreffen auf Platte
+bei 5.77e-9 s, kein "Austritt aus Feld").
 
-依据：`docs/reports/ELECTRIC-BOUNDARY-RUNTIME-REPORT.md`
+Abnahmegrundlage: `docs/reports/ELECTRIC-BOUNDARY-RUNTIME-REPORT.md`
 
-验收数据：`test:core` 445 全绿、`test:web` 163 全绿、`typecheck:core/web` 零错误、
-bundle 重建、浏览器验收 Case A–F 全 PASS + 5 门禁为 0。
+Abnahmedaten: `test:core` 445 Tests vollständig grün, `test:web` 163 Tests vollständig grün, `typecheck:core/web` null Fehler,
+Bundle neu gebaut, Browser-Abnahme Case A–F alle PASS + 5 Gates bei 0.
 
-**不做**（明确边界）：电容/充放电电路（属电路域）；极板几何的 PhysicsEvent
-（需往冻结命令集加 `SetPlateSeparation`/`SetPlateLength`，spec 变更）；
-Question Space 视觉打磨（无设计需求，无视觉验证手段时改 CSS 是投机）；
-不改共用的 `extentOf`（region 用独立 frame，避免影响已验收的旧场景取景）。
+**Nicht durchgeführt** (klare Abgrenzung): Kondensator/Entlade-/Ladekreise (gehören zur Schaltungsdomäne); PhysicsEvent für Plattengeometrie
+(erfordert Ergänzung des eingefrorenen Befehlssatzes um `SetPlateSeparation`/`SetPlateLength`, Spec-Änderung);
+visuelle Feinheiten im Aufgabenraum (kein Designbedarf, CSS-Änderungen ohne visuelle Validierungsmittel spekulativ);
+gemeinsames `extentOf` nicht ändern (Regionen verwenden eigenen Frame, um bereits abgenommene alte Szenen nicht zu beeinflussen).
 
 ---
 
 ## COMPOSITE_FIELD_RUNTIME_V1_COMPLETE
 
-**日期**：2026-08-24
+**Datum:** 2026-08-24
 
-**范围**：实验中心 + 复合场产品集成。解决 UI / Product Exposure Gap ——
-五套 Runtime 已就绪，但实验室几乎只暴露磁场一个实验。本轮不扩引擎，把
+**Umfang:** Experimentzentrum + Produktintegration des Kompositfelds. Behebung von UI/Produkt-Exposure-Gap —
+fünf Runtime-Sätze waren einsatzbereit, aber das Physiklabor bot fast nur ein Magnetfeld-Experiment an. Diese Runde erweitert keine Engines, sondern verbindet
 Scene → WorkspaceRuntime → Observation → Renderer → Lab → Question → Agent
-对 composite 域接完整，并建立正式的实验入口。
+vollständig mit der Composite-Domäne und schafft einen offiziellen Experimentzugang.
 
-**A. Experiment Library**：`ExperimentTemplateRegistry`（16 个可创建模板，
-力学 6 / 电场 4 / 磁场 1 / 复合场 5，每个 `createScene()` 都是真 Scene Factory，
-SceneId 时间戳 + 序号唯一）+ 统一 `ExperimentPicker`（搜索 / 分类 Tabs /
-快速开始 / 最近使用）。Sidebar 新建、首页快捷入口、实验室空态三个入口共用一份
-模板列表；「物理实验室」无 active scene 时进实验库，不再自动加载磁场 demo；
-工具栏场景名可切换实验且当前实验可恢复；最近空间记录真实 PhysicsScene
-（类型徽标 实验/题目，点击恢复）。回旋加速器因无时变场诚实标记「即将支持」。
+**A. Experimentbibliothek:** `ExperimentTemplateRegistry` (16 erstellbare Templates,
+Mechanik 6 / Elektrisches Feld 4 / Magnetfeld 1 / Kompositfeld 5, jede `createScene()` ist echte Scene Factory,
+SceneId aus Zeitstempel + Sequenz eindeutig) + einheitlicher `ExperimentPicker` (Suche / Kategorietabs /
+Schnellstart / Zuletzt verwendet). Drei Zugänge (Sidebar "Neu", Startseite-Schnellzugriff, leerer Zustand des Labors) teilen dieselbe
+Vorlagenliste; "Physiklabor" wechselt zur Experimentbibliothek, wenn keine aktive Szene existiert, lädt nicht mehr automatisch Magnetfeld-Demo;
+Toolbar-Szenenname erlaubt Wechsel des Experiments, aktuelles Experiment kann wiederhergestellt werden; "Zuletzt verwendet" speichert echte PhysicsScene
+(Typ-Badge Experiment/Aufgabe, Klick stellt wieder her). Zyklotron wird ehrlich als "demnächst verfügbar" markiert (fehlendes zeitabhängiges Feld).
 
-**B. Composite 全链路**：`CompositeWorkspaceRuntime`（同一 WorkspaceRuntime
-契约、真实 SceneCommand、当前帧派生量、实验分支、EnterRegion/ExitRegion →
-Timeline markers）+ `CompositeRenderer` 进 RENDERERS（复用 primitive：区域
-矩形 + clipPath 场格、⊙/× glyph、Vectors、轨迹、粒子光晕）+ 速度选择器 /
-质谱仪三区 / E+B / E+B+g / 多场区五个实验；21 道 Composite Golden Questions
-（8 选择器 + 6 质谱仪 + 3 E+B + 3 E+B+g + 1 回旋加速器拒识）+ 五步结构化
-Solution（数值全部来自 Runtime）；Agent 13 个复合场意图，引用
-`velocity_selection_condition` 具名校验，一次回答多目标高亮取并集。
+**B. Kompositfeld-Gesamtkette:** `CompositeWorkspaceRuntime` (identischer WorkspaceRuntime-Vertrag, echte SceneCommands,
+abgeleitete Größen des aktuellen Frames, Experimentzweig, EnterRegion/ExitRegion → Timeline-Marker) +
+`CompositeRenderer` in RENDERERS integriert (wiederverwendet Primitive: Bereichsrechteck + clipPath-Feldgitter,
+⊙/×-Glyphen, Vektoren, Trajektorie, Partikelglühen) + Geschwindigkeitsselektor /
+Massenspektrometer (drei Bereiche) / E+B / E+B+g / Mehrfeldbereiche - fünf Experimente;
+21 Komposit-Gold-Aufgaben (8 Selektor + 6 Massenspektrometer + 3 E+B + 3 E+B+g + 1 Zyklotron ablehnend) +
+fünfstufige strukturierte Lösung (alle Zahlen stammen aus Runtime); Agent mit 13 Kompositfeld-Intentionen, verweist auf
+benannte Prüfung `velocity_selection_condition`, bei einer Antwort werden hervorgehobene Ziele vereinigt.
 
-**C. 收口修复**（浏览器/门禁暴露）：① 三个复合场模板显式 `into_page` 覆盖
-工厂正确默认，qE 与 qv×B 同向、选择器筛掉一切粒子 → 改 out_of_page；
-② Agent 逐个 setHighlight 相互覆盖 → Drawer 聚合并集；③ `trajectory` 别名
-缺 `composite-trajectory`；④ AgentDrawer 高亮标签表副本缺 composite 条目 →
-改用共享 `highlightLabel`；⑤ electric-visual-bridge `?? 0 < 0` 优先级隐性
-bug（fallback 把任何非零电荷判负）→ lint 门禁抓出加括号；⑥ 旧 E2E 适配
-实验库入口 + 题目点击收敛到 questions 面板作用域（最近空间出现同名按钮）。
+**C. Abschlusskorrekturen** (durch Browser/Gate-Abnahme aufgedeckt): ① Drei Kompositfeld-Templates überschreiben explizit `into_page`,
+korrekte Factory-Defaults, qE und qv×B gleichgerichtet, Selektor filtert alle Teilchen → auf `out_of_page` korrigiert;
+② Agent setzte Highlights nacheinander (überschrieben) → Drawer aggregiert Vereinigung; ③ `trajectory`-Alias fehlte `composite-trajectory`;
+④ Kopie der Highlight-Label-Tabelle im AgentDrawer fehlte Composite-Eintrag → Nutzung gemeinsamer `highlightLabel`;
+⑤ impliziter Prioritätsfehler in `electric-visual-bridge` `?? 0 < 0` (Fallback bewertete jede nicht-null Ladung als
+negativ) → Lint-Gate deckte auf, Klammern ergänzt;
+⑥ alte E2E angepasst an Experimentbibliothek-Eingang + Aufgaben-Klick auf Questions-Panel-Bereich beschränkt (verhindert doppelten Button im "Zuletzt verwendet").
 
-依据：`docs/reports/COMPOSITE-FIELD-RUNTIME-V1-REPORT.md`
+Abnahmegrundlage: `docs/reports/COMPOSITE-FIELD-RUNTIME-V1-REPORT.md`
 
-验收数据：`test:core` 全绿（engine-composite 26、physics-composite-core 48、
-question-core 220 含 21 道 composite golden）；`test:web` 190 全绿；
-`typecheck` 与 `lint`（core+web）零错误（顺带清掉 24+ 处历史 oxlint 违规）；
-Harness build 通过；`test:gui` 3948/3950（1 个上游 code-block flake 单跑
-15/15）；浏览器验收 `composite-acceptance.mjs` CASE A–I + E+B+g + 响应式全
-PASS、5 门禁为 0；回归 mechanics / electric / electric-v2 / electric-region
-四份 acceptance 与 home/lab 截图脚本全 PASS；overlay 已回写。
+Abnahmedaten: `test:core` vollständig grün (engine-composite 26, physics-composite-core 48,
+question-core 220 inkl. 21 Komposit-Gold-Aufgaben); `test:web` 190 Tests grün;
+`typecheck` und `lint` (core+web) null Fehler (inkl. Bereinigung von 24+ historischen oxlint-Verstößen);
+Harness-Build erfolgreich; `test:gui` 3948/3950 (1 Upstream code-block-Flake, einzeln 15/15);
+Browser-Abnahme `composite-acceptance.mjs` CASE A–I + E+B+g + Responsiv alle PASS, 5 Gates bei 0;
+Regression der vier Acceptance-Suiten (mechanics/electric/electric-v2/electric-region) und Home/Lab-Screenshot-Skripte bestanden;
+Overlay zurückgeschrieben.
 
-**不做**（明确边界）：回旋加速器（需时变场）；最近空间恢复运行时编辑
-（revision 归 Runtime 所有，恢复=初始条件）；磁偏转区 D 形盒外观；
-Agent 模型化回答（backlog 不变）。
+**Nicht durchgeführt** (klare Abgrenzung): Zyklotron (benötigt zeitabhängiges Feld); Wiederherstellung aus "Zuletzt verwendet" mit Runtime-Bearbeitung
+(Revision gehört Runtime, Wiederherstellung = Anfangsbedingungen); D-förmige Magnetfeldbox-Grafik für Magnetablenkbereich;
+modellgestützte Agent-Antworten (Backlog unverändert).
 
 ---
 
 ## PHYSICSOS_LEARNING_RUNTIME_V1_COMPLETE
 
-**日期**：2026-08-24
+**Datum:** 2026-08-24
 
-**范围**：智能教学层（Learning Experience V1）。复合场 V1 之后物理能力已完整，
-本轮不扩物理（不加实验/引擎/公式），把「可验证的物理模拟器」变成「学生
-使用闭环」：Tutor Mode、错误诊断自测、学习记录、知识图谱、实验报告。
+**Umfang:** Intelligente Didaktikebene (Learning Experience V1). Nach Kompositfeld V1 ist Physik-Fähigkeit komplett;
+diese Runde erweitert keine Physik (keine neuen Experimente/Engines/Formeln), sondern wandelt "verifizierbaren Physiksimulator"
+in "Studenten-Nutzungszyklus": Tutor-Modus, Fehlerdiagnose-Selbsttest, Lernverlauf, Wissensgraph, Experimentbericht.
 
-**A. 教学内容层（question-core）**：知识图谱 20 节点（力学/电磁学课程树）+
-56 道 Golden Questions 的手工审计映射 `QUESTION_KNOWLEDGE`；自测题库
-`QUESTION_SELF_CHECKS` 19 个概念探针 / 55 选项 / 36 个已分类错误选项
-（概念/方向/建模三类，每个错误选项必须带解释 + 建议复习 + 可选 Verifier
-证据 check id）。全部是显式数据表，`learning-content.test.ts` 断言 56 题
-全覆盖且只引用已声明节点——题目不会静默漂移到错误知识点。
+**A. Didaktikinhaltsebene (question-core):** Wissensgraph mit 20 Knoten (Mechanik/Elektromagnetik-Lehrbaum) +
+manuell geprüfte Zuordnung `QUESTION_KNOWLEDGE` für 56 Gold-Aufgaben; Selbsttest-Fragebank
+`QUESTION_SELF_CHECKS` mit 19 Konzeptsonden / 55 Optionen / 36 klassifizierten Distraktoren
+(Kategorien: Konzept/Richtung/Modellierung, jeder Distraktor mit Erklärung + Wiederholungsvorschlag + optionaler Verifier-Beweis-check-id).
+Alles explizite Datentabellen; `learning-content.test.ts` prüft vollständige Abdeckung aller 56 Aufgaben und dass nur
+deklarierte Knoten referenziert werden - Aufgaben driftet nicht stillschweigend zu falschen Wissenspunkten.
 
-**B. Tutor Mode**：AI 助教抽屉新增 问答/引导 双 tab；`physics-tutor.ts`
-10 种课程（选择器平衡/偏转、质谱仪、三场、E+B、磁场圆周、平抛、斜面、
-电场力、力与运动），结构固定为 观察（当前帧派生量真实数字）→ 引导问题 →
-提示阶梯（逐级揭示，揭示即通过共享工具路径高亮画布，revision 不变）→
-答案（引用 Verifier 具名校验 chips）。课程按 runtime 事实分派并在事实
-变化时自动重置（v ≠ E/B 时课程实时翻为「为什么偏转」）。
+**B. Tutor-Modus:** AI-Assistent-Drawer um zwei Tabs erweitert (Fragen/Leitfaden); `physics-tutor.ts`
+mit 10 Kursen (Selektor-Gleichgewicht/Ablenkung, Massenspektrometer, Drei-Felder, E+B, Kreisbahn im Magnetfeld, waagerechter Wurf, schiefe Ebene,
+elektrische Kraft, Kraft und Bewegung). Struktur: Beobachtung (echte Zahlen aus aktuellen Frame-Ableitungen) → Leitfrage →
+Hinweisstufen (schrittweises Aufdecken, Aufdecken hebt Canvas über gemeinsamen Toolpfad hervor, Revision unverändert) →
+Antwort (verweist auf benannte Verifier-Prüfchips). Kurse werden nach Runtime-Fakten ausgewählt und bei Faktenänderung automatisch zurückgesetzt
+(z. B. wenn v != E/B ändert sich Kurs sofort zu "Warum Ablenkung?").
 
-**C. 错误诊断 + 学习记录**：Question Space 新增「错误诊断 · 自测」
-（答错 → 错误类型徽标 + 解释 + `magnetic_force_does_no_work` 一类活证据 +
-建议复习；答对 → takeaway）与「知识总结」chips；每次作答写入
-localStorage 学习记录。学习记录成为正式 surface（Sidebar 入口激活）：
-自测次数/正确率/错题数、三类错误分布、最近错题（含你的回答）、按知识
-节点的掌握度进度条，每条错题「重新练习」深链回同一道题。store 只计数，
-不算物理。
+**C. Fehlerdiagnose + Lernverlauf:** Aufgabenraum um "Fehlerdiagnose · Selbsttest" erweitert
+(falsch beantwortet → Fehlertyp-Badge + Erklärung + lebender Beweis wie `magnetic_force_does_no_work` +
+Wiederholungsvorschlag; richtig beantwortet → Takeaway) sowie "Wissenszusammenfassung"-Chips; jede
+Antwort wird im localStorage-Lernverlauf gespeichert. Lernverlauf ist nun offizieller Bereich (Sidebar-Eingang aktiviert):
+Anzahl Selbsttests/Quote/Richtig-Falsch, Verteilung der drei Fehlertypen, kürzlich falsch beantwortete Aufgaben
+(inkl. eigene Antwort), Kompetenzfortschritt pro Wissensknoten (Progressbar), pro Fehleraufgabe
+"Erneut üben"-Deep-Link zurück zur gleichen Aufgabe. Store zählt nur - keine physikalische Berechnung.
 
-**D. 实验报告**：工具栏「报告」→ `buildExperimentReport(snapshot)` 投影
-当前帧为 参数/引擎派生量/区域事件/物理验证/结论，对话框展示 +
-Markdown 导出；时间用自适应 `formatClock`（纳秒级指数格式），结论由
-验证通过率生成。
+**D. Experimentbericht:** Toolbar "Bericht" → `buildExperimentReport(snapshot)` projiziert
+aktuellen Frame auf Parameter/Engine-Ableitungen/Gebietsereignisse/physikalische Verifikation/Fazit, Anzeige im Dialog +
+Markdown-Export; Zeitangabe via adaptives `formatClock` (exponentielles Format für Nanosekunden), Fazit aus Verifikationsquote generiert.
 
-依据：`docs/reports/LEARNING-RUNTIME-V1-REPORT.md`
+Abnahmegrundlage: `docs/reports/LEARNING-RUNTIME-V1-REPORT.md`
 
-验收数据：`typecheck` 与 `lint`（core+web）零错误；`test:core` 全绿
-（question-core 228 含 learning-content 8 项）；`test:web` 205/16 文件全绿
-（含 `learning.client.spec.tsx` 15 项）；bundle 重建；浏览器验收
-`learning-acceptance.mjs` CASE A–F 全 PASS、5 门禁为 0；回归 mechanics /
-electric / electric-v2 / electric-region / composite 五份 acceptance 全
-PASS；overlay 已回写；截图 QA 五张人工读图确认。
+Abnahmedaten: `typecheck` und `lint` (core+web) null Fehler; `test:core` vollständig grün
+(question-core 228 inkl. learning-content 8 Tests); `test:web` 205/16 Dateien vollständig grün
+(inkl. `learning.client.spec.tsx` 15 Tests); Bundle neu gebaut; Browser-Abnahme
+`learning-acceptance.mjs` CASE A–F alle PASS, 5 Gates bei 0; Regression der fünf Acceptance-Suiten
+(mechanics/electric/electric-v2/electric-region/composite) alle bestanden;
+Overlay zurückgeschrieben; QA der fünf Screenshots manuell geprüft.
 
-**不做**（明确边界）：模型驱动的 Tutor/Agent 答案（backlog 不变，接入时只
-替换意图匹配层）；图片/PDF 识别（backlog 不变）；跨设备学习记录（仅
-localStorage，账号与服务端存储属 Data Storage 阶段）；主观题语义批改；
-3D Renderer。
+**Nicht durchgeführt** (klare Abgrenzung): modellgestützte Tutor/Agent-Antworten (Backlog unverändert, bei Anbindung nur
+Intent-Matching-Schicht ersetzen); Bild-/PDF-Erkennung (Backlog unverändert); geräteübergreifender Lernverlauf (nur
+localStorage, Accounts/Server-Storage gehört zu Data Storage-Phase); semantische Korrektur subjektiver Aufgaben;
+3D-Renderer.
 
 ### EXPERIMENT_LIBRARY_HOME_V1_COMPLETE
 
-实验库首页精修（Apple 学习中心风格），规划中「UI/UX 打磨」的第一项。
-同一个 `ExperimentPicker`（Sidebar 新建 / 首页快捷入口 / 实验室空态共用）
-升格为学习中心式首页，数据全部来自既有真实 store，不新增任何伪状态：
+Überarbeitung der Experimentbibliothek-Startseite (im Stil des Apple Learning Centers), erster Punkt der geplanten "UI/UX-Politur".
+Gleicher `ExperimentPicker` (Sidebar "Neu", Startseiten-Schnellzugriff, leerer Zustand des Labors) wird
+zur Lernzentrum-Startseite aufgewertet; alle Daten aus bestehenden echten Stores, keine neuen Pseudostate.
 
-**A. 大标题**：hero 区「实验中心」30px/700 紧字距 + 一句话副标题；
-面板加宽至 1000px。
+**A. Haupttitel:** Hero-Bereich "Experimentzentrum" 30px/700 mit enger Buchstabenabstand + einzeiliger Untertitel;
+Panel auf 1000px verbreitert.
 
-**B. 继续上次实验**：单张全宽 continue 卡，两种来源一个优先级——
-chooser 盖在运行中实验上（切换实验）时显示「返回当前实验 · 正在运行」，
-点击原地恢复（revision 不变）；否则读取持久化 `recent-scenes` 的最新一条
-显示「继续上次实验」，元数据为 学科 · 实验/题目 · 相对时间，点击把存储的
-PhysicsScene 原样交还实验室（同 sceneId，整页刷新后依然可还原）。
+**B. Letztes Experiment fortsetzen:** Einzelne vollbreite "Weiter"-Karte mit Prioritätslogik —
+wenn Chooser über laufendem Experiment liegt (Experimentwechsel), Anzeige "Zurück zum aktuellen Experiment · Läuft",
+Klick stellt an Ort und Stelle wieder her (Revision unverändert); sonst liest aus persistiertem `recent-scenes` den neuesten Eintrag
+"Letztes Experiment fortsetzen", Metadaten: Fach · Experiment/Aufgabe · relative Zeit, Klick gibt gespeicherte PhysicsScene unverändert ans Labor zurück
+(gleiche sceneId, nach vollständigem Reload wiederherstellbar).
 
-**C. 为你推荐**：新纯函数模块 `experiment-recommendations.ts`——
-`recommendExperiments({attempts, excludeClassicIds, limit=3})`：
-先按学习记录聚合薄弱知识点（错次多 → 正确率低排序），经手工审核的
-`KNOWLEDGE_EXPERIMENT` 表（知识节点 → 训练该节点的实验，无诚实映射的
-节点如「单位与数量级」刻意缺席）产出「针对薄弱点 · 节点名」卡；
-经典池（力/电/磁/复合各一）补足，经典补位排除最近使用，薄弱点复练
-不排除。卡片理由即选中它的规则，无模型调用。取代原「快速开始」。
+**C. Empfehlungen für dich:** neue Pure-Function-Module `experiment-recommendations.ts` —
+`recommendExperiments({attempts, excludeClassicIds, limit=3})`:
+aggregiert Schwachstellen aus Lernverlauf (mehr Fehler → geringere Quote, absteigend sortiert), aus manuell geprüfter
+`KNOWLEDGE_EXPERIMENT`-Tabelle (Wissensknoten → passendes Experiment, ehrliche Lücken wie "Einheiten/Größenordnung" absichtlich nicht abgedeckt)
+werden Karten "Für Schwachstelle · Knotename" erzeugt;
+klassische Sammlung (je eines für Mechanik/Elektrizität/Magnetismus/Komposit) füllt auf, klassische Nachbesetzung
+schließt zuletzt verwendete aus, Wiederholung von Schwachstellen schließt nicht aus.
+Begründung der Karte = Regel, die sie ausgewählt hat, kein Modellaufruf. Ersetzt bisherigen "Schnellstart".
 
-**D. 学科颜色**：`chrome.ts` 新增 subjects 语义组
-`--physics-subject-{mechanics,electric,magnetic,composite}`（绿/蓝/紫/橙）
+**D. Fachfarben:** `chrome.ts` neue semantische Subjects-Gruppe
+`--physics-subject-{mechanics,electric,magnetic,composite}` (grün/blau/violett/orange)
 
-- 同名 `-tint` 浅底色，注释明确「只着色 UI chrome，不着色画布物理」；
-  CSS Modules 用 `subject-*` 修饰类注入 `--subject/--subject-tint` 两个
-  自定义属性，推荐卡底色、continue 卡图标块与 CTA、分类 Tab 彩点、
-  网格图标块、领域标签 chip 全部消费同一组变量。
+- gleichnamiges `-tint` für helle Hintergründe, Kommentar: "nur UI-Chrome einfärben, nicht Canvas-Physik";
+  CSS Modules injizieren über `subject-*`-Modifier zwei Custom Properties `--subject/--subject-tint`;
+  Hintergründe von Empfehlungskarten, Symbolblock + CTA der Weiter-Karte, Farbpunkt in Kategorietabs,
+  Symbolblöcke im Raster, Domain-Label-Chips konsumieren dieselbe Variablengruppe.
 
-依据：`apps/web/e2e/library-home-acceptance.mjs`（CASE A–D + 5 门禁）、
-截图 `experiment-library-home / -continue / -weakness -1600x900.png`
+Abnahmegrundlage: `apps/web/e2e/library-home-acceptance.mjs` (CASE A–D + 5 Gates),
+Screenshots `experiment-library-home / -continue / -weakness -1600x900.png`
 
-验收数据：`typecheck` 与 `lint`（core+web）零错误；`test:web` 214/17 文件
-全绿（新增 `experiment-recommendations.spec.ts` 7 项 + picker 继续/推荐
-组件用例 2 项）；`test:core` 全绿；bundle 重建；浏览器验收
-`library-home-acceptance.mjs` 26 项全 PASS、5 门禁为 0（含大标题 ≥28px、
-三学科浅底色两两不同、四 Tab 彩点两两不同、刷新后精确还原、错题 →
-薄弱点推荐深链）；回归 mechanics / electric / electric-v2 /
-electric-region / composite / learning 六份 acceptance 全 PASS
-（composite CASE A 的「快速开始」检查更新为推荐栏检查）；overlay 已回写；
-截图 QA 三张人工读图确认。
+Abnahmedaten: `typecheck` und `lint` (core+web) null Fehler; `test:web` 214/17 Dateien vollständig grün
+(inkl. neuer `experiment-recommendations.spec.ts` 7 Tests + Picker "Weiter"/Empfehlungen 2 Component-Tests); `test:core` vollständig grün; Bundle neu gebaut; Browser-Abnahme
+`library-home-acceptance.mjs` 26 Punkte alle PASS, 5 Gates bei 0 (inkl. Haupttitel ≥28px,
+drei Fach-Tint-Farben paarweise verschieden, vier Tab-Farbpunkte paarweise verschieden, exakte Wiederherstellung nach Refresh, falsch beantwortete Aufgabe →
+Empfehlung für Schwachstelle mit Deep-Link); Regression der sechs Acceptance-Suiten
+(mechanics/electric/electric-v2/electric-region/composite/learning) alle bestanden
+(Composite CASE A: "Schnellstart"-Prüfung auf Empfehlungsleiste umgestellt); Overlay zurückgeschrieben;
+drei Screenshots manuell in QA geprüft.
 
-**不做**（明确边界）：首页 Hero（`conversation.hero`）与 Canvas 氛围精修
-（规划中的独立条目）；推荐算法不引入模型/遥测（规则即理由）；
-不新增实验模板。
+**Nicht durchgeführt** (klare Abgrenzung): Hero der Startseite (`conversation.hero`) und Canvas-Atmosphäre (separates geplantes Item);
+Empfehlungsalgorithmus ohne Modell/Telemetrie (Regel = Begründung);
+keine neuen Experiment-Templates.
 
 ### CIRCUIT_RUNTIME_PACK_V1_COMPLETE
 
-**日期**：2026-08-26
+**Datum:** 2026-08-26
 
-**范围**：Roadmap Phase 13 — Circuit Engine，第三条系统级验收链「动态电路」
-的实验室切片。第一个非空间坐标系领域：画布是抽象原理图网格，播放是
-准静态滑片扫描，骨架仍是同一条 Scene → Engine → Verifier →
-WorkspaceRuntime → Renderer 链。
+**Umfang:** Roadmap Phase 13 — Circuit Engine, erster Lab-Ausschnitt der dritten systemweiten Abnahmekette "Dynamische Schaltungen".
+Erste Domäne ohne räumliches Koordinatensystem: Canvas ist abstraktes Schaltschema-Raster, Wiedergabe ist
+quasistatischer Schleifer-Scan, Gerüst bleibt dieselbe Kette: Scene → Engine → Verifier →
+WorkspaceRuntime → Renderer.
 
-**A. Domain Core**：`createCircuitScene` netlist 工厂（端子按 net 声明、
-union-find 拓扑、`metadata.layout` 仅供呈现）+ 五个模板工厂（串联/并联/
-混联/滑变/测 EMF 内阻）；冻结命令集 +5（`SetComponentResistance` /
+**A. Domain Core:** `createCircuitScene` Netlist-Factory (Terminals nach Net deklariert,
+Union-Find-Topologie, `metadata.layout` nur für Darstellung) + fünf Template-Factories (Reihenschaltung/Parallelschaltung/
+gemischt/Schiebewiderstand/EMF mit Innenwiderstand messen); eingefrorener Befehlssatz +5 (`SetComponentResistance` /
 `SetSourceVoltage` / `SetSourceInternalResistance` / `SetSwitchState` /
-`SetSliderPosition`）；`@physicsos/engine-circuit` MNA 直流引擎——
-每连通岛独立接地（断路不悬浮）、理想表高阻/串0建模、奇异系统显式失败；
-`stateAt(t)` 沿滑片重解工作点，8 项派生量带公式，五类校验
-（scene_valid / KCL / 功率守恒 / U = E − I·r / 理想表不干扰）；
-Golden Case 24 项先行。
+`SetSliderPosition`); `@physicsos/engine-circuit` MNA-Gleichstrom-Engine —
+jedes zusammenhängende Gebiet unabhängig geerdet (Unterbrechung schwebt nicht), ideale Messgeräte hochohmig/Serienwiderstand 0 modelliert, singuläres System führt zu explizitem Fehler;
+`stateAt(t)` löst Arbeitspunkt neu bei Schieberbewegung, 8 abgeleitete Größen mit Formeln, fünf Prüfarten
+(scene_valid / KCL / Energieerhaltung/Leistungsvergleich / U = E − I·r / ideale Messgeräte nicht störend);
+24 Golden Cases vorab definiert.
 
-**B. UI Runtime Pack**：实验库 16 → 21 模板、新「电路」分类与学科色
-`--physics-subject-circuit`；`CircuitWorkspaceRuntime`（编辑走真实
-SceneCommand、参数变更扫描归零、题目场景 fork 语义一致）；
-`circuit-visual-bridge` 把 verified 工作点投影为原理图（符号/走线/结点/
-电流箭头/表读数，<1e-9 A 显示 0 不冒充精度）；`CircuitRenderer` 真实
-SVG 符号（电源/电阻/滑变/开关/电表）；I-t / U-t / P-t 图表与数据表。
+**B. UI Runtime Pack:** Experimentbibliothek 16 → 21 Templates, neue Kategorie "Schaltungen" mit Fachfarbe
+`--physics-subject-circuit`; `CircuitWorkspaceRuntime` (Bearbeitung über echte SceneCommands, Parameteränderung setzt Scan auf Null, Fork-Semantik für Aufgabenszenen konsistent);
+`circuit-visual-bridge` projiziert verifizierten Arbeitspunkt auf Schaltschema (Symbole/Verbindungen/Knoten/Strompfeile/Messwertanzeige, <1e-9 A wird als 0 angezeigt ohne falsche Präzision); `CircuitRenderer` echte SVG-Symbole
+(Spannungsquelle/Widerstand/Schiebewiderstand/Schalter/Messgerät); I-t/U-t/P-t-Diagramme und Datentabelle.
 
-**C. 验收与回归**：`circuit-acceptance.mjs` CASE A–F + 响应式 + 5 门禁
-全 PASS（串联 0.2 A/4 V、EMF 联动 revision +1、断路全零、8 秒滑变扫描、
-U = E − I·r 与断路直读 EMF）；七套老 acceptance 全 PASS——唯一适配是
-library-home「领域彩点」检查由四色更新为五色（产品演进）；截图回写。
+**C. Abnahme und Regression:** `circuit-acceptance.mjs` CASE A–F + Responsiv + 5 Gates
+alle PASS (Reihenschaltung 0.2 A/4 V, EMF-Ankopplung Revision +1, offene Schaltung alles Null, 8s Schieber-Scan,
+U = E − I·r und offene Schaltung zeigt EMF direkt); sieben alte Acceptance-Suiten alle PASS — einzige Anpassung:
+Library-Home "Farbpunkte" von 4 auf 5 Farben (Produktentwicklung); Screenshots zurückgeschrieben.
 
-依据：`docs/reports/CIRCUIT-RUNTIME-PACK-V1-REPORT.md`
+Abnahmegrundlage: `docs/reports/CIRCUIT-RUNTIME-PACK-V1-REPORT.md`
 
-验收数据：`typecheck` / `lint`（core+web）零错误；`test:core` 20 包 655
-全绿（engine-circuit 24、physics-scene 50）；`test:web` 235/19 文件全绿
-（circuit.client.spec 10 项）；`build:web` 通过；八套浏览器验收全 PASS、
-门禁计数器全 0；overlay 已回写（补录 vendor lockfile 的 engine-circuit /
-physics-units workspace link）。
+Abnahmedaten: `typecheck` / `lint` (core+web) null Fehler; `test:core` 20 Pakete 655 Tests vollständig grün
+(engine-circuit 24, physics-scene 50); `test:web` 235/19 Dateien vollständig grün
+(circuit.client.spec 10 Tests); `build:web` erfolgreich; acht Browser-Acceptance-Suiten alle PASS,
+alle Gate-Zähler bei 0; Overlay zurückgeschrieben (ergänzt engine-circuit und physics-units Workspace-Link im Vendor-Lockfile).
 
-**不做**（明确边界）：交流/瞬态与电容电感（canHandle 显式拒识）；
-多电源网络（当前锁单源，Induction 需要时解锁）；Question Space 电路题
-与 Agent 电路意图（下一切片）；自由搭建电路编辑器；Phase 14 电磁感应
-导轨（依赖本轮，下一阶段）。
+**Nicht durchgeführt** (klare Abgrenzung): Wechselstrom/Transienten sowie Kondensatoren/Spulen (`canHandle` lehnt explizit ab);
+Netzwerke mit mehreren Quellen (derzeit auf eine Quelle beschränkt, Induction bei Bedarf entsperrbar); Schaltungsaufgaben im Aufgabenraum
+und Schaltungsintentionen für Agent (nächster Ausschnitt); freier Schaltungseditor; Phase 14 - Induktionsschienen (abhängig von dieser Runde, nächste Phase).
 
 ---
 
 ### WAVE_RUNTIME_PACK_V1_COMPLETE
 
-**日期**：2026-09-02
+**Datum:** 2026-09-02
 
-**范围**：Roadmap Phase 33「Remaining Physics Domains」的第一个领域 —— 机械波。三个闭式
-实验台（绳上的简谐横波 / 双源干涉 / 两端固定的弦驻波）走同一条 Scene → Engine →
-Verifier → Observation → WorkspaceRuntime → Renderer → Lab → 教学层 → Question 链。
+**Umfang:** Roadmap Phase 33 "Remaining Physics Domains" - erstes Domäne: Mechanische Wellen. Drei geschlossene
+Experimentierstationen (harmonische Transversalwelle auf Seil / Zweiquellen-Interferenz / stehende Welle auf beidseitig fest eingespanntem Seil) folgen derselben Kette:
+Scene → Engine → Verifier → Observation → WorkspaceRuntime → Renderer → Lab → Didaktikebene → Question.
 
-**A. 契约与引擎**：`WaveBench` 三类子模型 + 六条冻结命令（`SetWaveAmplitude / Frequency /
-Speed / PathDifference / StringLength / Harmonic`），命令语义为「介质定波速、波源定频率」
-（绳波 / 干涉改 f 或 v 都重推 λ = v/f，驻波改 v / L / n 重推 f_n = n·v/2L），
-|r₂ − r₁| > d 在命令层拒绝；规格接受 v 替代 λ、f_n 替代 v。`@physicsos/engine-wave`
-发布绳形采样（每波长 16 点自适应）、标记质点、波源与 P 点三角定位、Δ/λ 判定
-（interference_type ±1/0）、波节 / 波腹，11 项引擎内置校验；减弱点合振幅精确归零。
-`physics-observation` 四类波动观察量。
+**A. Vertrag und Engine:** `WaveBench` mit drei Submodellen + sechs eingefrorenen Befehlen (`SetWaveAmplitude / Frequency /
+Speed / PathDifference / StringLength / Harmonic`), Befehlssemantik "Medium bestimmt Wellengeschwindigkeit, Quelle bestimmt Frequenz"
+(Seilwelle/Interferenz: Änderung von f oder v führt zu Neuberechnung λ=v/f; stehende Welle: Änderung von v/L/n führt zu f_n = n·v/2L),
+|r₂ − r₁| > d wird auf Befehls-Ebene abgelehnt; Spezifikation akzeptiert v statt λ, f_n statt v. `@physicsos/engine-wave`
+liefert Seil-Sampling (16 Punkte pro Wellenlänge adaptiv), markiert Teilchen, Triangulation von Quellen und Beobachtungspunkt P, Bestimmung Δ/λ
+(interference_type ±1/0), Knoten/Bäuche, 11 eingebaute Engine-Prüfungen; destruktive Interferenz ergibt exakte Amplitudensumme 0.
+`physics-observation` mit vier Wellenbeobachtungsgrößen.
 
-**B. 实验室与教学层**：实验中心新增「机械波」分类与三个模板（共 38 个可创建），分类 Tab 与
-学科色改由 `EXPERIMENT_TEMPLATE_GROUPS` 派生（浮力 / 热学 / 电磁感应此前缺 Tab，随之
-出现；浮力色与电路去重）；`WaveWorkspaceRuntime` + `wave-visual-bridge`（纵向放大倍数一次
-声明并写进坐标轴与读数，数值保持真实值）+ `WaveRenderer`；Tutor 三课、自测三套（知识图谱
-「机械波」根 + 4 节点、六个探针）、Agent 高亮、实验分支策略纳入六条命令。
+**B. Labor und Didaktikebene:** Experimentzentrum um Kategorie "Mechanische Wellen" und drei Templates erweitert (insgesamt 38 erstellbar), Kategorietabs und
+Fachfarben werden nun von `EXPERIMENT_TEMPLATE_GROUPS` abgeleitet (Auftrieb/Wärmelehre/elektromagnetische Induktion hatten zuvor keine Tabs, jetzt vorhanden;
+Auftriebsfarbe von Schaltungfarbe unterschieden); `WaveWorkspaceRuntime` + `wave-visual-bridge` (vertikaler Skalierungsfaktor einmal deklariert,
+in Achsen und Anzeigen geschrieben, Werte bleiben real); `WaveRenderer`; Tutor mit drei Lektionen, Selbsttest drei Sets (Wissensgraph Wurzel "Mechanische Wellen" + 4 Knoten, sechs Sonden), Agent-Hervorhebung,
+Experimentzweig-Strategie berücksichtigt sechs Befehle.
 
-**C. 题库**：`deterministic-wave-parser`（排除光的干涉 / 双缝 / 电磁波 / 回声）、
-`validateWaveIR`、`wave-scene-builder`（写入 `sourceQuestionId`）、runtime wave 分派与题解；
-6 道黄金题（波长频率求波速周期、波速频率求波长、Δ = 2λ 加强、Δ = 1.5λ 减弱、三次谐波、
-缺频率拒识），Question Space 74 → 80 题；QuestionWorkspace 以 `stateAt(t)` 绘制题目画布。
+**C. Aufgabensammlung:** `deterministic-wave-parser` (schließt Lichtinterferenz/Doppelschlitz/elektromagnetische Wellen/Echo aus),
+`validateWaveIR`, `wave-scene-builder` (schreibt `sourceQuestionId`), Runtime-Wellenzuordnung und Aufgabenlösung;
+6 Gold-Aufgaben (λ,f → v,T; v,f → λ; Δ=2λ konstruktiv; Δ=1.5λ destruktiv; 3. Harmonische; fehlende f führt zu Ablehnung),
+Aufgabenraum 74 → 80 Aufgaben; QuestionWorkspace zeichnet Aufgaben-Canvas mittels `stateAt(t)`.
 
-依据：`docs/reports/WAVE-RUNTIME-PACK-V1-REPORT.md`
-（含 CASE A–G + 响应式、5 项门禁计数器、截图清单）
+Abnahmegrundlage: `docs/reports/WAVE-RUNTIME-PACK-V1-REPORT.md`
+(inkl. CASE A–G + Responsiv, 5 Gate-Zähler, Screenshot-Liste)
 
-验收数据：`typecheck`（core + web）零错误；`test:core` 全绿（physics-scene 80、engine-wave 27、
-physics-observation 24、question-core 399）；`test:web` 26 文件 347 用例全绿（`wave.client.spec`
-20 项）；浏览器验收 `wave-acceptance.mjs` 全 PASS、5 门禁为 0；回归八套 acceptance 全 PASS
-（library-home「五色彩点」→ 十一色、circuit「5 个实验」→ 7 个 两处过时断言随产品演进更新）；
-overlay 已回写。
+Abnahmedaten: `typecheck` (core + web) null Fehler; `test:core` vollständig grün (physics-scene 80, engine-wave 27,
+physics-observation 24, question-core 399); `test:web` 26 Dateien 347 Tests vollständig grün (`wave.client.spec` 20 Tests);
+Browser-Abnahme `wave-acceptance.mjs` alle PASS, 5 Gates bei 0; Regression aller acht Acceptance-Suiten bestanden
+(library-home Farbpunkte 5→11, circuit Experimente 5→7 - zwei veraltete Assertions entsprechend Produktentwicklung aktualisiert);
+Overlay zurückgeschrieben.
 
-**不做**（明确边界）：纵波 / 反射 / 折射 / 衍射 / 多普勒（需新子模型）；干涉全平面强度分布
-（只判定并绘制一个观察点，波前示意）；阻尼；Agent 波动问答意图（backlog 不变）；波形图识别
-（backlog 不变）。
+**Nicht durchgeführt** (klare Abgrenzung): Longitudinalwellen/Reflexion/Brechung/Beugung/Doppler (benötigen neue Submodelle); vollständige Interferenz-Intensitätsverteilung in Ebene
+(nur ein Beobachtungspunkt wird bewertet und gezeichnet, Wellenfront nur schematisch); Dämpfung; Agent-Wellenfrageintentionen (Backlog unverändert); Wellenform-Erkennung (Backlog unverändert).
 
 ---
 
 ## AGENT_TOOL_RUNTIME_V1_COMPLETE
 
-**日期**：2026-09-07
+**Datum:** 2026-09-07
 
-**范围**：docs/14 §19 Phase 16 Tool Runtime —— 让 Harness 会话里的模型真正调用物理引擎，并把模型改动的场景镜像到学生画布。宿主侧接线（工具注册 / `physics-student` 预设 / 端到端门禁）已在上半完成并验收，见下方依据；本收口补上运行时本体与「场景推送（Streaming / `SceneRevisionChanged`）」。
+**Umfang:** docs/14 §19 Phase 16 Tool Runtime — ermöglicht, dass Modelle in Harness-Sitzungen tatsächlich die Physik-Engine aufrufen und von Modellen geänderte Szenen auf die Studentencanvas gespiegelt werden. Host-seitige Verkabelung (Tool-Registrierung / `physics-student`-Preset / End-to-End-Gates) war bereits im ersten Teil abgeschlossen und abgenommen (siehe unten); dieser Abschluss ergänzt Runtime-Kern und "Szenen-Push (Streaming / `SceneRevisionChanged`)".
 
-**A. 运行时本体**：`PhysicsToolRuntime.sceneSnapshot` —— 当前修订的无损深拷贝，供宿主把场景推出进程（拷贝不能绕过 SceneRuntime 命令闸门）；顺带修掉上一半报告的严格可选属性隐患（`domain: ir?.domain` 直赋 `undefined` 改为条件展开，恢复 `exactOptionalPropertyTypes` 兼容）。
+**A. Runtime-Kern:** `PhysicsToolRuntime.sceneSnapshot` — verlustfreie Tiefenkopie der aktuellen Revision, damit Host Szene aus Prozess herausführen kann (Kopie kann Kommando-Schranke von SceneRuntime nicht umgehen); gleichzeitig Fix für strikte optionale Eigenschaften aus erstem Bericht (`domain: ir?.domain` direkte Zuweisung `undefined` durch bedingte Erweiterung ersetzt, Kompatibilität mit `exactOptionalPropertyTypes` wiederhergestellt).
 
-**B. 场景镜像（docs/04 §92）**：三件事接成一条链。
+**B. Szenenspiegelung (docs/04 §92):** drei Schritte bilden eine Kette.
 
-- **发布**：tool-physicsos 每次 `physics_create_experiment` / `physics_solve_question` / 被接受的 `physics_scene_command` 之后，向调用 agent 的会话日志 append 一条 `physics/scene` 快照 —— 内嵌完整 `physics-scene/1.0` 场景的无损 JSON，附 revision / cause / commandType / eventType / sourceQuestionId。被运行时拒绝的命令不发（场景未变）；无 agent 的调用方（测试、Code Mode）不发。类型与 SessionEvent 声明收敛在 `src/types.ts` 单点，`./types` 与 `./client` 两个命名空间零内容重复。
-- **折叠**：`physicsScenes` session projection（按 scene id last-wins，`latest` 跟随最新），仅在 `sessionProjections` seam 组合时注册（headless 无 seam 的装配不受影响）。
-- **镜像**：ui-physicsos `physics/agent-scene-sync.ts` 把 projection 折成 Lab 导航 —— 每个会话的首个值是基线（静默 adopt，reload / 切会话不打断学生当前面），后续修订 live 打开 Lab；shape 校验严格（表头与内嵌 scene 的 id / revision / schema 任一不符即拒挂载，挂载前再过场景校验器）。接线在 `ui-physicsos/src/client/index.ts`：订阅 session 列表行、读 `projectionValues['physicsScenes']` 喂 sync，`surface.open` 作为 adopt / show 两个面动作。另加 `tool-physicsos-invariant` 伴生不变量：到达 durable log 的每条 `physics/scene` 在写前校验表头与内嵌 scene 一致。
+- **Veröffentlichung:** tool-physicsos hängt nach jedem erfolgreichen `physics_create_experiment` / `physics_solve_question` / akzeptierten `physics_scene_command` einen `physics/scene`-Snapshot an das Sitzungsprotokoll des aufrufenden Agents — enthält verlustfrei vollständige `physics-scene/1.0`-Szene mit revision/cause/commandType/eventType/sourceQuestionId. Von Runtime abgelehnte Befehle werden nicht gesendet (Szene unverändert); Aufrufer ohne Agent (Tests/Code Mode) senden nicht. Typen in `src/types.ts` zentralisiert, Namensräume `./types` und `./client` ohne Duplikate.
+- **Zusammenfassung:** `physicsScenes`-Session-Projektion (last-wins pro scene-id, `latest` folgt neuestem), nur im `sessionProjections`-Seam registriert (Headless ohne Seam nicht betroffen).
+- **Spiegelung:** ui-physicsos `physics/agent-scene-sync.ts` wandelt Projektion in Labor-Navigation — erster Wert pro Sitzung ist Baseline (still adopt, Reload/Sitzungswechsel unterbricht aktuellen Studentenbereich nicht), nachfolgende Revisionen öffnen Labor live; strenge Shape-Prüfung (Header und eingebettete Szene müssen id/revision/schema übereinstimmen, vor Mount Szenenvalidator durchlaufen). Verkabelung in `ui-physicsos/src/client/index.ts`: Session-Listenzeilen abonnieren, `projectionValues['physicsScenes']` an Sync übergeben, `surface.open` als adopt/show-Aktionen. Zusätzlich `tool-physicsos-invariant`: jede `physics/scene` vor Schreiben ins dauerhafte Log prüft Header-Konsistenz mit eingebetteter Szene.
 
-**C. 档位映射**：`ui-physicsos/profiles.ts` 学生档（探索 / 解题 / 引导）`runtimePreset` 从 `standard` 改为 `physics-student` —— 学生会话新建即进「物理学习模式」（物理工具 + 提问工具、无编码工具），不再落回编码 Agent；教师档保留 `standard`。断言随映射更新（`overlay.client.spec`）。
+**C. Profilzuordnung:** `ui-physicsos/profiles.ts` - Studentenprofile (Entdecken / Lösen / Geführt) `runtimePreset` von `standard` auf `physics-student` geändert — neue Studentensitzung startet direkt im "Physik-Lernmodus" (Physik-Tools + Frage-Tools, keine Coding-Tools), fällt nicht mehr auf Coding-Agent zurück; Lehrerprofil behält `standard` bei. Assertions entsprechend aktualisiert (`overlay.client.spec`).
 
-**D. 验收数据**：`typecheck` / `lint`（core + web + agent）零错误；`test:agent` 22 全绿（含 5 条 scene mirroring：发布 / 拒发不发 / 解题发布 / agent-less 不发 / 折叠 last-wins 且不改状态）；`test:web` 28 文件 360 全绿（含 `agent-scene-sync.client.spec` 5 条镜像导航语义与 `overlay.client.spec` 档位断言）；agent-tools 32 全绿；端到端 `tests/agent/headless-physics-acceptance.mjs` 在真实 `dsh` 进程 + mock LLM 下 **16 项门禁全 PASS** —— 新增三条：解题后会话日志出现恰一条 `physics/scene`（cause `solved`）、内嵌 scene 与所登记 scene 同 id/revision 且 schema 为 `physics-scene/1.0`、本轮无多余发布。overlay 已同步 vendor。
+**D. Abnahmedaten:** `typecheck` / `lint` (core + web + agent) null Fehler; `test:agent` 22 Tests vollständig grün (inkl. 5 Szenen-Spiegelungstests: Veröffentlichung, abgelehnte Befehle werden nicht veröffentlicht, Veröffentlichung nach Lösen, ohne Agent keine Veröffentlichung, last-wins ohne Statusänderung); `test:web` 28 Dateien 360 Tests vollständig grün (inkl. `agent-scene-sync.client.spec` 5 Spiegelungs-Navigationssemantiken und `overlay.client.spec` Profil-Assertions); agent-tools 32 Tests grün; End-to-End `tests/agent/headless-physics-acceptance.mjs` mit echtem `dsh`-Prozess + Mock-LLM - **16 Gates alle PASS** (drei neue: nach Lösen genau ein `physics/scene` im Sitzungslog mit cause `solved`, eingebettete Szene entspricht registrierter Szene mit id/revision/schema `physics-scene/1.0`, keine überzähligen Veröffentlichungen). Overlay mit Vendor synchronisiert.
 
-**不做**（明确边界）：浏览器画布「模型改场景实时跟随」的 GUI 端到端脚本 —— 与真实模型联调同受本机中继无 V4 通道限制（见报告），先由真实 dsh 进程的会话日志断言承载 publish，客户端镜像由 composition + 纯函数 spec 覆盖，`physicsScenes` 已随 session 行投影到 Web；Timeline 逐刻 streaming（快照按工具调用粒度发布，非每帧）；教师侧专用预设。
+**Nicht durchgeführt** (klare Abgrenzung): GUI End-to-End-Skript für "Canvas folgt Modelländerungen in Echtzeit" — durch lokale Relay-Beschränkung bei echter Modellintegration (siehe Bericht) zurückgestellt; Veröffentlichung wird durch Sitzungslog-Assertions des echten dsh-Prozesses geprüft, Client-Spiegelung durch Komposition + Pure-Function-Specs abgedeckt; `physicsScenes` bereits in Sessionzeilen ins Web projiziert; Timeline-Streaming pro Zeiteinheit (Snapshots werden pro Toolaufruf publiziert, nicht pro Frame); spezielles Lehrer-Preset.
 
-依据：`docs/reports/AGENT-TOOL-RUNTIME-V1-REPORT.md`
+Abnahmegrundlage: `docs/reports/AGENT-TOOL-RUNTIME-V1-REPORT.md`
 
 ---
 
 ## PHYSICSOS_PERF_OPT_V1_COMPLETE
 
-**日期**：2026-09-08
+**Datum:** 2026-09-08
 
-**范围**：按 docs/01 §84–86 与 docs/02 §26/#123/#124/#125/#150 的性能约束做全局优化 —— 渲染/React 解耦、轨迹存储有界与采样率分离、O(n²) 消除、Worker 消息契约。物理数值结果与公共契约不变，默认行为零变化。
+**Umfang:** Globale Performance-Optimierung entsprechend docs/01 §84–86 und docs/02 §26/#123/#124/#125/#150 — Entkopplung Rendering/React, begrenzte Trajektorienspeicherung und getrennte Samplingraten, Eliminierung von O(n²), Worker-Nachrichtenvertrag. Physikalische Ergebnisse und öffentliche Verträge unverändert, Standardverhalten ohne Änderung.
 
-**A. 渲染/React 解耦（#123）**：新 `ui-physicsos physics/frame-source.ts`（`createFrameSource` / `useFrameSource`，`useSyncExternalStore` 外部 store）。`PhysicsWorkspace` 动画时钟每帧发布到 FrameSource，只有画布订阅 → 每帧只重渲染画布；React 壳按 250ms 摘要节流刷新，Status / sceneRevision / running 变化即时刷新，交互动作（seek / highlight / 切场景）`commit` 双写保证面板与画布一致。`QuestionWorkspace` 播放时钟与逐帧视觉计算下沉到画布子树，drawn-id Selection 以 set 相等守卫向上汇报，父级 rails 不随帧重渲染。新增 `frame-source.client.spec`（4）与 `renderer-decoupling.client.spec.tsx`（2，浏览器级验证逐帧只更新画布读数）。
+**A. Rendering/React-Entkopplung (#123):** Neu `ui-physicsos physics/frame-source.ts` (`createFrameSource` / `useFrameSource`, externer Store via `useSyncExternalStore`). `PhysicsWorkspace`-Animationsuhr publiziert jeden Frame an FrameSource, nur Canvas abonniert → nur Canvas rendert pro Frame neu; React-Shell aktualisiert mit 250ms-Übersichts-Throttling, Status/sceneRevision/running sofort, Interaktionen (seek/highlight/Szenenwechsel) nutzen `commit`-Doppelschreibweise für Konsistenz zwischen Panel und Canvas. `QuestionWorkspace`: Abspieluhr und frameweise visuelle Berechnungen in Canvas-Unterbaum verschoben, drawn-id-Selection meldet nur bei Mengenänderung nach oben, übergeordnete Rails rendern nicht pro Frame neu. Neu `frame-source.client.spec` (4) und `renderer-decoupling.client.spec.tsx` (2, Browser-Level-Validierung: nur Canvas-Anzeige ändert sich pro Frame).
 
-**B. 轨迹采样/抽稀/分块（#85/#124）**：新 `physics-scene trajectory-sampling.ts` —— 存储上界 1024、渲染预算 512、`outputSampleRate` 钩子（钳制 [2,1024]，缺省 fallback 与原分段常量一致）、保首尾抽稀 + `protect` 索引集、chunk 分块原语。6 个引擎（mechanics/magnetic/electric/wave/induction/composite）接入钩子；4 个观察层轨迹构建器抽稀到 512，composite 把 phase-boundary 时刻收集进 `protect`（区域穿越拐点不丢）。新 14 个用例。
+**B. Trajektorien-Sampling/Reduktion/Chunking (#85/#124):** Neu `physics-scene trajectory-sampling.ts` — Speicherobergrenze 1024, Renderbudget 512, `outputSampleRate`-Hook (geklammert auf [2,1024], Fallback entspricht ursprünglichen Segmentierungskonstanten), Reduktion unter Beibehaltung von Anfang/Ende + `protect`-Indexmenge, Chunking-Primitiv. 6 Engines (mechanics/magnetic/electric/wave/induction/composite) angebunden; 4 Observation-Layer-Trajektorienbuilder auf 512 reduziert, Composite sammelt Phasengrenzzeiten in `protect` (kritische Wendepunkte bleiben erhalten). 14 neue Tests.
 
-**C. 计算路径 O(n²) 消除（#150/#26）**：`summarizeVerification` O(E×C)→O(E+C)；composite `phaseAt` 线性扫描→二分（O(states×phases)→O(states×log phases)，语义逐分支等价）；`fieldAt` 融合单遍累加消除中间分配；electric-verifier 每状态派生量 Map 索引化；magnetic `assumptionsFromResult` O(A²)→O(A)。
+**C. Eliminierung von O(n²)-Pfaden (#150/#26):** `summarizeVerification` O(E×C)→O(E+C); Composite `phaseAt` lineare Suche → Binärsuche (O(states×phases)→O(states×log phases), semantisch äquivalent); `fieldAt` ein einziger Durchlauf zur Akkumulation ohne Zwischenzuweisungen; Electric-Verifier indiziert abgeleitete Größen pro Zustand via Map; Magnetic `assumptionsFromResult` O(A²)→O(A).
 
-**D. Worker 契约（#125）**：`SimulationWorkerMessage` 判别联合 + `SimulationProgress` / `SimulationError` + `parseSimulationWorkerMessage` 结构校验器（schema `simulation-worker/1.0`），纯增量导出，供未来 Worker 化直接复用（生产实现为登记跟进项）。
+**D. Worker-Vertrag (#125):** `SimulationWorkerMessage` als diskriminiertes Union + `SimulationProgress` / `SimulationError` + `parseSimulationWorkerMessage` Strukturvalidator (Schema `simulation-worker/1.0`), rein inkrementell exportiert, zur direkten Wiederverwendung bei zukünftiger Worker-Implementierung (Produktionsimplementierung als Folgepunkt erfasst).
 
-**E. 收口修复**：web lint 对新增文件暴露 7 处问题已全部修复（eol-last ×3、`FrameSource` 接口方法 `this: void` ×3、`no-unsafe-return` 经中间变量对齐既有写法），lint 归零。
+**E. Abschlusskorrekturen:** Web-Lint deckte 7 Probleme in neuen Dateien auf, alle behoben (eol-last ×3, `FrameSource`-Interface-Methoden `this: void` ×3, `no-unsafe-return` durch Zwischenvariable an bestehende Schreibweise angepasst), Lint vollständig null Fehler.
 
-依据：`docs/reports/PERF-OPT-RUNTIME-V1-REPORT.md`
+Abnahmegrundlage: `docs/reports/PERF-OPT-RUNTIME-V1-REPORT.md`
 
-验收数据：`typecheck`（core + web + agent）零错误；`lint`（core + web + agent）零错误；`test:core` 27 包 1090 用例全绿（physics-scene 99 含新 14、physics-core 33 含新 5 Worker 契约用例、question-core 402）；`test:web` 30 文件 366 全绿（含新 2 文件 6 用例）；`test:agent` 22 全绿；agent-tools 32 全绿；端到端 headless-physics-acceptance 16/16（R/T 与基线一致）。
+Abnahmedaten: `typecheck` (core + web + agent) null Fehler; `lint` (core + web + agent) null Fehler; `test:core` 27 Pakete 1090 Tests vollständig grün (physics-scene 99 inkl. 14 neue, physics-core 33 inkl. 5 neue Worker-Vertragstests, question-core 402); `test:web` 30 Dateien 366 Tests vollständig grün (inkl. 2 neue Dateien 6 Tests); `test:agent` 22 Tests grün; agent-tools 32 Tests grün; End-to-End headless-physics-acceptance 16/16 (R/T konsistent mit Baseline).
 
-**不做**（明确边界）：生产 Worker 实现（契约已备，composite phase 分解与点电荷格点采样为候选）；#86 Lazy Loading；chart 独立采样率；chunk 懒加载消费；剩余有界引擎 `outputSampleRate` 统一；不改 `apps/web`（`APPS_WEB_STANDALONE_RETIREMENT_BACKLOG` 不变）。
+**Nicht durchgeführt** (klare Abgrenzung): Produktions-Worker-Implementierung (Vertrag vorbereitet, Composite-Phasenzerlegung und Punktladungs-Rastersampling als Kandidaten); #86 Lazy Loading; separate Samplingrate für Charts; Chunk-Lazy-Loading-Verbrauch; Vereinheitlichung von `outputSampleRate` in verbleibenden begrenzten Engines; keine Änderungen an `apps/web` (`APPS_WEB_STANDALONE_RETIREMENT_BACKLOG` unverändert).
 
 ---
 
 ## CIRCUIT_QUESTION_AGENT_SLICE_COMPLETE
 
-**日期**：2026-09-08
+**Datum:** 2026-09-08
 
-**范围**：`CIRCUIT_RUNTIME_PACK_V1` 报告「不做」清单点名的下一切片 —— Question Space 电路题全链路核实 + Agent 电路意图补齐。电路引擎 / 场景 / 模板 / 可视化 / 实验室此前已验收，本轮不重复。
+**Umfang:** Schließt gemäß CIRCUIT_RUNTIME_PACK_V1 "Nicht durchgeführt"-Liste den nächsten Ausschnitt ab — vollständige Prüfung der Schaltungsaufgaben im Aufgabenraum + Ergänzung der Agent-Schaltungsintentionen. Circuit Engine/Szenen/Templates/Visualisierung/Labor bereits abgenommen, keine Wiederholung.
 
-**A. 现状核实**：Question Space 电路题已就位 —— `deterministic-circuit-parser`（电路信号 + 电动势/内阻/电阻/电流/电压/功率提取 + 拓扑判定）、`circuit-scene-builder`、`question-runtime` 电路分派（优先于电学判定）、`engine-selector` 路由 `CircuitEngine`、6 道黄金题（串联电流 / 并联总电阻 / 滑变电流 / 总功率与外功率 / 电流与路端电压 / 内阻题），QuestionWorkspace 经 `resolveCircuitOperatingPoint` + `circuitSceneVisualAt` 渲染可验证原理图（question-core 402 用例覆盖）。缺口只在 Agent 侧。
+**A. Ist-Stand geprüft:** Schaltungsaufgaben im Aufgabenraum vorhanden — `deterministic-circuit-parser` (Schaltungssignale + EMK/Innenwiderstand/Widerstand/Strom/Spannung/Leistung + Topologie), `circuit-scene-builder`, `question-runtime` Schaltungszuordnung (Vorrang vor reiner Elektrizitätszuordnung), `engine-selector` leitet zu `CircuitEngine` weiter, 6 Gold-Aufgaben (Serienstrom, Parallelgesamtwiderstand, Schieberstrom, Gesamt-/Nutzleistung, Strom/Klemmenspannung, Innenwiderstand), QuestionWorkspace rendert verifizierbares Schaltschema via `resolveCircuitOperatingPoint` + `circuitSceneVisualAt` (question-core 402 Tests abdecken). Lücke nur bei Agent.
 
-**B. Agent 电路意图**：`physics-agent-answers.ts` 新增 8 个意图 —— `circuit-ohm-current`（I = E/(R外+r)）、`circuit-terminal-voltage`（U = E − I·r）、`circuit-internal-resistance`（r > 0 闸门，P内 = I²·r）、`circuit-series-loop`（junctionCount = 0）、`circuit-parallel-split`（junctionCount > 0，反比分流）、`circuit-rheostat-sweep`（hasSlider，R滑 = p·R全）、`circuit-power-balance`（P总 = P外 + P内）、`circuit-meters-ideal`（画布有电表符号）。每个意图只引用引擎派生量（干路电流 I / 路端电压 U / 电源总功率 / 输出功率 / 内阻耗散功率 / 接入电阻 R滑）与具名校验（`kcl_current_conservation` / `power_balance` / `terminal_voltage_law:<id>`（按前缀匹配）/ `ideal_meters_non_intrusive`）；拓扑分派读 `CircuitAgentFacts`（内阻 / 滑变 / 结点数），高亮目标动态取画布真实绘制的组件 id（优先电源，`resolveHighlightTarget` 兜底）；`matchIntent` 电路规则以 `domain === 'circuit'` 收口，不截胡力学 / 电场 / 电磁感应的电流电压问题。
+**B. Agent-Schaltungsintentionen:** `physics-agent-answers.ts` um 8 Intentionen ergänzt — `circuit-ohm-current` (I = E/(R_außen+r)), `circuit-terminal-voltage` (U = E − I·r), `circuit-internal-resistance` (r>0, P_intern = I²·r), `circuit-series-loop` (junctionCount==0), `circuit-parallel-split` (junctionCount>0, umgekehrter Teilungsverhältnis), `circuit-rheostat-sweep` (hasSlider, R_Schieber = p·R_ges), `circuit-power-balance` (P_ges = P_außen + P_intern), `circuit-meters-ideal` (Messgeräte auf Canvas). Jede Intention verweist nur auf Engine-Ableitungen (Hauptstrom I, Klemmenspannung U, Gesamtleistung Quelle, Nutzleistung, Verlustleistung Innenwiderstand, zugeschalteter Schieberwiderstand) und benannte Prüfungen (`kcl_current_conservation` / `power_balance` / `terminal_voltage_law:<id>` Präfixmatch / `ideal_meters_non_intrusive`); Topologiezuordnung liest `CircuitAgentFacts` (Innenwiderstand/Schieber/Knotenzahl), Highlight-Ziel dynamisch aus tatsächlich gezeichneten Komponenten-IDs (Vorrang Quelle, Fallback `resolveHighlightTarget`); `matchIntent`-Regeln für Schaltungen mit `domain === 'circuit'` abgegrenzt, fangen keine Strom/Spannungsfragen aus Mechanik/Elektrischem Feld/Elektromagnetischer Induktion ab.
 
-**C. 验收数据**：`typecheck:web` 零错误；`lint:web` 零错误；`test:web` 30 文件 376 全绿（`physics-agent.client.spec.tsx` 62 用例，+10 电路：事实发布 / 拓扑分派 / 具名校验引用 / 学生问法路由 / 四帧全部可用意图高亮可解析 / 高亮为视图态 / 域隔离）；`test:core` 全绿（question-core 402 含电路黄金题全链路）。
+**C. Abnahmedaten:** `typecheck:web` null Fehler; `lint:web` null Fehler; `test:web` 30 Dateien 376 Tests vollständig grün (`physics-agent.client.spec.tsx` 62 Tests, +10 Schaltungstests: Faktenveröffentlichung, Topologiezuordnung, Referenz benannter Prüfungen, Routing studentischer Formulierungen, alle vier Frames: verfügbare Intentionen mit auflösbaren Highlights, Highlights sind View-State, Domänentrennung); `test:core` vollständig grün (question-core 402 inkl. Schaltungs-Goldaufgaben-End-to-End).
 
-依据：`docs/reports/CIRCUIT-QUESTION-AGENT-SLICE-REPORT.md`
+Abnahmegrundlage: `docs/reports/CIRCUIT-QUESTION-AGENT-SLICE-REPORT.md`
 
-**不做**（明确边界）：Question Space 电路题本体（已交付，仅核实）；模型化 Agent 回答（`AGENT_MODEL_BACKED_ANSWERS_BACKLOG` 不变，接真实模型仍只替换 `matchIntent`）；电路引擎 / 校验 / 模板扩展（交流瞬态、电容电感、多电源仍由 `canHandle` 拒识）；不触 `packages/` 与 Harness 上游。
+**Nicht durchgeführt** (klare Abgrenzung): Kern der Schaltungsaufgaben im Aufgabenraum (bereits geliefert, nur geprüft); modellgestützte Agent-Antworten (`AGENT_MODEL_BACKED_ANSWERS_BACKLOG` unverändert, bei echter Modellanbindung nur `matchIntent` ersetzen); Erweiterung Circuit Engine/Prüfungen/Templates (AC/Transienten/Kondensatoren/Spulen/mehrere Quellen weiterhin von `canHandle` abgelehnt); keine Änderungen an `packages/` und Harness-Upstream.
 
 ---
 
 ### AUTH_TENANT_V1_COMPLETE / ADMIN_CONSOLE_V1_COMPLETE
 
-**日期**：2026-09-18 → 09-21
+**Datum:** 2026-09-18 → 09-21
 
-**范围**：账户体系与管理后台。产品从"实验工具"进入"学生学习平台"——
-学校成为身份体系里的一级租户，而非登录后的普通资料字段。
+**Umfang:** Kontosystem und Admin-Konsole. Produkt entwickelt sich von "Experimentwerkzeug" zu "Schüler-Lernplattform" —
+Schule wird zu erstem Tenant in der Identitätsstruktur, nicht nur zu einem einfachen Profilfeld nach Anmeldung.
 
-**A. 账户体系**（`@deepseek-ai/dsh-auth-host`）：复用 paper-host 已验证的模式
-（cordis host 插件 + `ctx.webServer` 前缀路由 + `ctx.storageDomain` KV 域），
-同源同端口使 HttpOnly cookie 天然生效，不新开进程、不接 Supabase。
+**A. Kontosystem** (`@deepseek-ai/dsh-auth-host`): Wiederverwendung des bewährten paper-host-Musters
+(Cordis Host-Plugin + `ctx.webServer` Präfix-Routing + `ctx.storageDomain` KV-Domain),
+gleicher Origin/gleicher Port → HttpOnly-Cookies funktionieren natürlich, kein neuer Prozess, keine Supabase-Anbindung.
 
-- `users` key = `schoolId:username` → 跨校同号结构性共存
-- `sessions` key = `sha256(token)` → token 不落盘、可吊销
-- argon2id（`node:crypto`，PHC 自描述串，零新依赖）；不存在账号走 dummy verify
-  拉平计时
-- IP + 账号双桶限流；CSRF（json content-type + Origin/Sec-Fetch-Site）；
-  body ≤ 16KB；注册强制 `role:'STUDENT'`
-- 注册接受**自由文本校名**，按 name/shortName 解析到活跃租户；同名多校返回
-  `SCHOOL_AMBIGUOUS` + 带地区标签的候选；未命中即 `SCHOOL_NOT_FOUND`——
-  **不静默建租户、不伪造学校**
+- `users` Key = `schoolId:username` → strukturelles Nebeneinander gleicher Benutzernamen an verschiedenen Schulen
+- `sessions` Key = `sha256(token)` → Token nicht auf Platte, widerrufbar
+- argon2id (`node:crypto`, PHC selbstbeschreibender String, keine neuen Abhängigkeiten); bei nicht existierendem Account Dummy-Verify zur Angleichung der Antwortzeit
+- IP + Account dualer Token-Bucket für Rate-Limiting; CSRF (JSON content-type + Origin/Sec-Fetch-Site);
+  Body ≤ 16KB; Registrierung erzwingt `role:'STUDENT'`
+- Registrierung akzeptiert **freien Schulnamen-Text**, Mapping zu aktivem Tenant über name/shortName; bei mehreren Schulen gleichen Namens Rückgabe
+  `SCHOOL_AMBIGUOUS` + Kandidaten mit Regionslabel; kein Treffer → `SCHOOL_NOT_FOUND` —
+  **kein stillschweigendes Anlegen von Tenants, keine fingierten Schulen**
 
-**B. 管理后台**（`/physicsos/admin`，路由级 `requireRole` + `requireSchoolScope`）：
-学校申请审批/驳回、建校、启停校、用户列表/建教师/禁用/重置密码/吊销会话、
-审计日志。`SCHOOL_ADMIN` 的 schoolId 强制取自 session（请求体同名字段忽略）；
-写操作进 append-only `admin_audit`；用户响应 zod 白名单**绝不含 `passwordHash`**；
-API 面**永远无法**创建或修改 `SUPER_ADMIN`（仅来自部署种子 `bootstrapAdmins`）。
+**B. Admin-Konsole** (`/physicsos/admin`, Routing-Level `requireRole` + `requireSchoolScope`):
+Schulanträge genehmigen/ablehnen, Schule anlegen, Schule aktivieren/deaktivieren, Benutzerliste/Lehrer anlegen/entsperren/deaktivieren/Passwort zurücksetzen/Sitzungen widerrufen,
+Audit-Log. Für `SCHOOL_ADMIN` wird schoolId zwingend aus Session übernommen (gleichnamiges Feld im Request-Body ignoriert);
+Schreiboperationen gehen in append-only `admin_audit`; Benutzerantworten über Zod-Whitelist **enthalten niemals `passwordHash`**;
+API erlaubt **niemals** Erstellen/Ändern von `SUPER_ADMIN` (nur über Deploy-Seed `bootstrapAdmins`).
 
-**C. 期间修掉的一个真 bug（假阳性门禁）**：`ARGON2_AVAILABLE` 原判据是
-`typeof argon2Sync === 'function'`，而**有的构建暴露入口但底层 OpenSSL 没有
-argon2id**（本机一个 vendored Node 24.18.1 即如此）。后果是插件照常激活、
-然后在 bootstrap 种子里炸出 `ERR_CRYPTO_ARGON2_NOT_SUPPORTED` 堆栈。现改为
-模块加载时用最低合法参数真跑一次 argon2id，`apply()` 报错带上原因与实际
-`process.version`。
+**C. Echter Bug behoben (falsch positives Gate):** Ursprüngliches Kriterium für `ARGON2_AVAILABLE` war
+`typeof argon2Sync === 'function'`, aber **manche Builds exportieren den Eintrag obwohl OpenSSL kein argon2id unterstützt**
+(z. B. vendored Node 24.18.1 auf diesem System). Folge: Plugin aktivierte sich normal, schlug dann beim Bootstrap-Seed mit
+`ERR_CRYPTO_ARGON2_NOT_SUPPORTED` fehl. Jetzt wird beim Modul-Load mit minimal gültigen Parametern ein echter argon2id-Aufruf versucht;
+`apply()` gibt bei Fehler Grund und tatsächliche `process.version` aus.
 
-**D. 数据**：贵州 9 市州中学名录（官方招生计划/教育局名录汇编，按市州标注）。
-2026-09-21 抓官方高中名录逐条比对后补 15 所，现 **1581 行**。
+**D. Daten:** Schulverzeichnis der 9 Präfekturen/Städte in Guizhou (aus offiziellen Einschreibungsplänen/Bildungsamtsverzeichnissen kompiliert, nach Präfektur markiert).
+Am 2026-09-21 wurde offizielles Gymnasialverzeichnis zeilenweise abgeglichen und 15 Schulen ergänzt; aktuell **1581 Zeilen**.
 
-> 这里有过一次**误判并已更正**：先前用口语短名（`凯里一中`）去 grep 官方
-> 全称名录（`贵州省凯里市第一中学`），得出"15 所旗舰校缺失"的错误结论。
-> 逐条复核后，贵阳一中/实验三中/六中/九中/清华中学、安顺一中、铜仁一中、
-> 毕节一中、凯里一中、都匀一中**全部在册**——黔东南州 48 所官方普通高中里
-> 46 所本就在册。真实缺口只剩兴义市公办高中与遵义市第四中学等，见
-> `GUIZHOU_SCHOOL_ROSTER_HIGH_SCHOOL_GAP`（该条已重写并记录方法论教训）。
+> **Korrektur einer Fehleinschätzung:** Zuvor wurden umgangssprachliche Kurzformen (`Kaili Nr. 1`) gegen offizielle Vollnamen (`Mittelschule Nr. 1 Kaili, Provinz Guizhou`) abgeglichen,
+> was fälschlich "15 führende Schulen fehlen" ergab. Nach zeilenweiser Überprüfung waren Guiyang Nr. 1 / Exp. Nr. 3 / Nr. 6 / Nr. 9 / Tsinghua Mittelschule,
+> Anshun Nr. 1, Tongren Nr. 1, Bijie Nr. 1, Kaili Nr. 1, Duyun Nr. 1 **alle bereits enthalten** — von 48 offiziell anerkannten Gymnasien in Qiandongnan waren 46 bereits im Verzeichnis.
+> Tatsächliche Lücken beschränken sich u. a. auf öffentliche Gymnasien in Xingyi und Zunyi Nr. 4; siehe `GUIZHOU_SCHOOL_ROSTER_HIGH_SCHOOL_GAP` (mit Methodik-Lektion).
 
-依据：`docs/HANDOVER.md` §2.1.1 / §2.5、`tests/acceptance/auth-acceptance.mjs`。
+Abnahmegrundlage: `docs/HANDOVER.md` §2.1.1 / §2.5, `tests/acceptance/auth-acceptance.mjs`.
 
-验收数据（2026-09-21 复跑）：`auth-acceptance.mjs` **8 CASE / 22 断言 +
-5 项浏览器门禁全 PASS**——含未登录门（两个文本框实测同列 610/380）、自由文本
-校名注册进入应用、STUDENT 无管理后台入口、登出后旧会话 401、同名多校消歧候选
-带地区标签、SUPER_ADMIN 控制台 tab、以及**申请→审批→建校→建教师→教师登录→
-禁用→401** 全链（另加 TEACHER 打管理 API 403、审计台账落行）。
-`test:agent` 7 文件 93 测试全绿；`typecheck` / `lint` 全绿。
+Abnahmedaten (erneut ausgeführt 2026-09-21): `auth-acceptance.mjs` **8 CASE / 22 Assertions +
+5 Browser-Gates alle PASS** — inkl. nicht-eingeloggtes Login-Gate (zwei Textfelder in derselben Spalte, 610/380 gemessen), Registrierung mit freiem Schulnamen führt ins App,
+STUDENT hat keinen Admin-Konsole-Zugriff, nach Logout alte Session 401, Disambiguierung bei mehreren Schulen gleichen Namens mit Regionslabel,
+SUPER_ADMIN hat Konsolen-Tab, sowie vollständige Kette **Antrag→Genehmigung→Schule anlegen→Lehrer anlegen→Lehrer-Login→Deaktivierung→401**
+(zusätzlich TEACHER erhält 403 bei Admin-API-Aufruf, Audit-Eintrag geschrieben).
+`test:agent` 7 Dateien 93 Tests vollständig grün; `typecheck` / `lint` vollständig grün.
 
 ---
 
 ### RESOURCE_LIBRARY_V1_COMPLETE
 
-**日期**：2026-09-18 → 09-19
+**Datum:** 2026-09-18 → 09-19
 
-**范围**：资源库从"重复的实验入口"改成真正的学习资料面。产品边界由用户明确
-划定：**实验室拥有实验，资源库只放真题、练习题、书籍与视频**。
+**Umfang:** Ressourcenbibliothek von "wiederholter Experimentzugang" zu echter Lernmaterialansicht umgebaut. Produktgrenze klar festgelegt:
+**Labor enthält Experimente, Ressourcenbibliothek enthält nur echte Prüfungen/Übungsaufgaben/Bücher/Videos**.
 
-- 章节面板按人教版教材章节挂载国家课/精品课/知识点微课/课件/配套练习卷五类，
-  kind chip 分区渲染，链接全部真实 ID —— 从 281 课时扩到 **926 项**官方配套
-  资源（国家中小学智慧教育平台 `prepare_lesson` 目录）
-- 真题卷库：学段/卷类型/地区筛选、含金量置顶排序、展开题清单（题号/题型/
-  分值/完整题干/考点/能力）
-- `scripts/refresh-smartedu-catalog.mjs --check` 与平台一致（926 条）
+- Kapitelpanel zeigt nach Lehrplan der chinesischen Pflichtschulbücher (People's Education Edition) fünf Kategorien: nationale Lektionen/Qualitätslektionen/Wissens-Mikrolektionen/Unterrichtsmaterialien/zugehörige Übungstests,
+  gerendert nach Art (Kind-Chip), alle Links mit echten IDs — von 281 Lektionen auf **926 offizielle begleitende Ressourcen** erweitert (Smart Education Platform `prepare_lesson`-Katalog)
+- Prüfungsarchiv: Filter nach Schulstufe/Prüfungstyp/Region, Sortierung nach Relevanz, erweiterbare Aufgabenliste (Aufgabennr./Typ/Punktzahl/vollständiger Aufgabentext/Schwerpunkte/Fähigkeiten)
+- `scripts/refresh-smartedu-catalog.mjs --check` stimmt mit Plattform überein (926 Einträge)
 
-**如实说明**：高中 6 册平台确无课件条目，如实为空；`knowledge_micro_lesson_package`
-与 `examinationpapers` 走官方 SPA 路由（SPA 对 curl 403 是 WAF，浏览器点击实测可开）。
+**Ehrliche Feststellung:** Für die 6 Bände der Oberstufe enthält Plattform tatsächlich keine Unterrichtsmaterial-Einträge (korrekt leer); `knowledge_micro_lesson_package` und `examinationpapers` nutzen offizielle SPA-Routen
+(SPA gibt curl 403 wegen WAF, im Browser klicken funktioniert wie erwartet).
 
-依据：会话 `discovered-pirate` 收口报告；`library-home-acceptance.mjs`、
-`library-curriculum.client.spec.ts`（17 项）。
+Abnahmegrundlage: Session `discovered-pirate` Abschlussbericht; `library-home-acceptance.mjs`,
+`library-curriculum.client.spec.ts` (17 Tests).
 
 ---
 
 ### PAPER_STUDIO_BANK_V1_COMPLETE
 
-**日期**：2026-09-14 → 09-20
+**Datum:** 2026-09-14 → 09-20
 
-**范围**：贵州本土出卷专区 —— 只出卷 + 答案解析，交付标准可打印 A4。
+**Umfang:** Regionale Prüfungsgestaltung Guizhou — nur Prüfungserstellung + Antwortanalyse, Lieferstandard druckbar A4.
 
-流程：真题考点表 → 双向细目表 → AI 起草 → 自动检查 + 独立解题 → 教师逐题审核
-→ 锁版本 → DOCX/PDF 四件套。
+Ablauf: Prüfungsschwerpunkte-Tabelle → Zweiweg-Spezifikation → AI-Entwurf → automatische Prüfung + unabhängige Lösung → Lehrer prüft jede Aufgabe → Version sperren → DOCX/PDF-Vierersatz.
 
-- 新包 `@physicsos/question-paper`（纯域模型 + 纯函数，零 cordis 依赖）与
-  host 插件 `paper-host`（`/physicsos/paper`，全路由见其 README）
-- 组卷四级供给：`verbatim`（≥0.85 原题直落）/ `adapt`（0.55–0.85 骨架改写）/
-  `generate`（无候选过线）/ `gap`（诚实留空）；打分 =
-  知识点 0.45 + 难度 0.25 + 能力 0.15 + 来源 0.15，含新鲜度闸
-- **provenance 不可伪造**：`generated` 题统一盖 `{mode:'generated'}` 刷掉模型
-  可能注入的假 `bankItemId`；台账按**实际上卷题目的 provenance** 记账，
-  降级不误记
-- 批准绑定内容哈希，任何 `commitDocument` 都作废 approval——换题无法绕过
+- Neues Paket `@physicsos/question-paper` (reines Domänenmodell + Pure Functions, keine cordis-Abhängigkeit) und Host-Plugin `paper-host` (`/physicsos/paper`, alle Routen in dessen README)
+- Vier Versorgungsstufen bei der Zusammenstellung: `verbatim` (≥0.85 Originalaufgabe direkt)/`adapt` (0.55–0.85 überarbeitetes Gerüst)/
+  `generate` (kein Kandidat über Schwelle)/`gap` (ehrliche Lücke); Bewertung =
+  Wissenspunkt 0.45 + Schwierigkeit 0.25 + Fähigkeit 0.15 + Quelle 0.15, mit Aktualitätsschranke
+- **Provenienz nicht fälschbar:** `generated`-Aufgaben erhalten einheitlich `{mode:'generated'}` und überschreiben mögliche injizierte falsche `bankItemId`; Ledger bucht nach **tatsächlicher Provenienz der aufgenommenen Aufgaben**, Herabstufung wird falsch gebucht
+- Genehmigung an Inhaltshash gebunden, jede `commitDocument`-Änderung macht Approval ungültig — Aufgabenwechsel kann dies nicht umgehen
 
-**真实缺陷修复（本轮审计发现）**：
+**Behobene echte Mängel (bei dieser Runde Audit gefunden):**
 
-- `PATCH /bank/items/:id` 可注入 `id` / `enteredBy` → `bankItemPatchWire.omit`
-- PATCH 改 stem 不查重 → 补 `DUPLICATE_ITEM`
-- `GET /bank/items?status=` 用 `as never ?? undefined` 硬转，**任何拼错的状态都
-  静默返回未过滤全集** → 改白名单校验，非法值 400
-- `recordCheckResults` 里 `status: hasErrors ? 'review' : 'review'`（两支相同的
-  死三元，`sonarjs` 抓到）→ 删除死变量并注明"检查后一律进教师审核"的物理理由
+- `PATCH /bank/items/:id` konnte `id` / `enteredBy` injizieren → `bankItemPatchWire.omit`
+- PATCH-Änderung von stem ohne Duplikatprüfung → `DUPLICATE_ITEM` ergänzt
+- `GET /bank/items?status=` nutzte `as never ?? undefined` hart, **jeder falsch geschriebene Status lieferte still die ungefilterte Gesamtheit** → Whitelist-Validierung, ungültige Werte 400
+- `recordCheckResults` mit `status: hasErrors ? 'review' : 'review'` (zwei identische Ternäre, `sonarjs` erkannt) → tote Variable entfernt und physikalische Begründung "nach Prüfung immer in Lehrerprüfung" ergänzt
 
-依据：`overlays/harness/files/packages/physicsos/paper-host/README.md`、
-`paper-host/tests/routes.spec.ts`、`question-paper` 42 项测试。
+Abnahmegrundlage: `overlays/harness/files/packages/physicsos/paper-host/README.md`,
+`paper-host/tests/routes.spec.ts`, `question-paper` 42 Tests.
 
 ---
 
 ### GATES_ALL_GREEN_AND_OVERLAY_RECOVERY
 
-**日期**：2026-09-21
+**Datum:** 2026-09-21
 
-**范围**：工程收口。本轮不新增产品能力，把"代码是健康的、但工程状态不可交付"
-这件事修掉。
+**Umfang:** Engineering-Abschluss. Diese Runde fügt keine Produktfähigkeiten hinzu, sondern behebt, dass "Code gesund, aber Engineering-Zustand nicht lieferbar" ist.
 
-**A. 一周成果零提交（最严重的风险）**：09-12 之后的全部工作只存在于工作区
-（335 个文件、+16724/−5747 行）。已按主题补成 13 个提交：
-引擎/域修正 → `question-paper` → `auth-host` → `tool-physicsos` →
-ui-physicsos → 资产 → 脚本与验收 → 文档 → 仓库卫生 → 门禁 → overlay 修复 →
-lint 清偿 → 浏览器验收。
+**A. Eine Woche Arbeit ohne Commit (schwerstes Risiko):** Alle Arbeiten nach 09-12 existierten nur im Arbeitsbereich
+(335 Dateien, +16724/−5747 Zeilen). Nach Themen in 13 Commits aufgeteilt:
+Engine/Domänen-Korrekturen → `question-paper` → `auth-host` → `tool-physicsos` →
+ui-physicsos → Assets → Skripte und Abnahmen → Dokumentation → Repository-Hygiene → Gates → Overlay-Fix →
+Lint-Abrechnung → Browser-Abnahme.
 
-**B. `paper-host` 只活在 vendor 里（数据丢失风险）**：出卷专区整个后端
-（13 个文件）在 submodule 里是未跟踪状态、不在 overlay、父仓库也看不到。
-HANDOVER 那条"新机器上手"走完它**根本不存在**。已补进 overlay 并验证
-`apply` 能逐字节重建。同时核对 submodule 内全部 6 条未跟踪路径，其余 5 条
-均已覆盖——`paper-host` 是唯一缺口。
+**B. `paper-host` existierte nur in Vendor (Datenverlustrisiko):** Das gesamte Backend des Prüfungsstudios
+(13 Dateien) war im Submodule untracked, nicht im Overlay und im Parent-Repo unsichtbar.
+HANDOVER-Abschnitt "Neue Maschine einrichten" hätte es **gar nicht vorhanden**. Nun ins Overlay aufgenommen und verifiziert,
+dass `apply` byteweise wiederherstellt. Ebenso alle 6 untracked Pfade im Submodule geprüft, restliche 5
+waren abgedeckt — `paper-host` war die einzige Lücke.
 
-**C. 门禁断档**：根 `pnpm test` 的 `test:agent` **只跑 `tool-physicsos`**，
-`auth-host`（4 spec）与 `paper-host`（1 spec）不在任何日常门禁里。
-现 `typecheck:agent` / `lint:agent` / `test:agent` 覆盖三个包
-（93 测试，原 20）。接线当场暴露 141 项从未检查过的 lint 错误，已全部清偿
-（含 40 处非空断言换成真实收窄、`parse<T>` 的 T 只用一次、动态 delete 等）。
+**C. Gate-Lücke:** Root-`pnpm test` `test:agent` **führte nur `tool-physicsos` aus**,
+`auth-host` (4 Specs) und `paper-host` (1 Spec) waren in keiner täglichen Gate.
+Jetzt deckt `typecheck:agent` / `lint:agent` / `test:agent` drei Pakete ab
+(93 Tests, ursprünglich 20). Die Verkabelung deckte sofort 141 nie geprüfte Lint-Fehler auf, alle abgearbeitet
+(inkl. 40 Non-Null-Assertions durch echte Narrowing ersetzt, `parse<T>` wobei T nur einmal verwendet wird, dynamisches delete usw.).
 
-**D. `pnpm lint` 全绿**（三条门禁首次同时为 0）。四处红分别清偿：
+**D. `pnpm lint` vollständig grün** (drei Gates erstmals gleichzeitig bei 0). Vier rote Stellen abgearbeitet:
 
-- **ui-physicsos 171 文件 461 项报错 → 0**。逐条看过去全部落在本周新增的面上
-  （PaperWorkspace 225、fluid-renderer 121、LearningRecordWorkspace 65、
-  AdminWorkspace 18、AuthGate 14），并非 HANDOVER 所记的"上游既有问题"。
-  清偿过程修掉 autofix 自身造成的 47 处格式损伤（`e =>{  setX(); }` 形状）
-- **`packages/question-paper` 4 项**：试卷 markdown 模板里 7 个 `U+3000`
-  （全角空格，中文排版分隔用）触发 `no-irregular-whitespace`，改用 `\u3000`
-  转义——输出字节不变、意图可见
-- **`packages/engine-composite` 3 项**：`repro-ms.test.ts` 是排查用脚手架
-  （1 个 `it`、**0 个 `expect`**、3 处 `as any`），既不会失败也证明不了什么，
-  删除；该域真实覆盖在 `composite-engine.test.ts`（26 项 / 51 断言）
-- **三个 host 插件 141 项**（见 C）
+- **ui-physicsos 171 Dateien 461 Fehler → 0**. Alle stammen aus dieser Woche neu hinzugefügten Bereichen
+  (PaperWorkspace 225, fluid-renderer 121, LearningRecordWorkspace 65,
+  AdminWorkspace 18, AuthGate 14), nicht aus "bestehenden Upstream-Problemen" wie in HANDOVER notiert.
+  Abarbeitung behob außerdem 47 durch Autofix verursachte Formatbeschädigungen (`e =>{ setX(); }`-Form)
+- **`packages/question-paper` 4 Fehler:** 7 `U+3000` (Vollbreiten-Leerzeichen zur chinesischen Satztrennung) im Markdown-Prüfungsvorlage lösten `no-irregular-whitespace` aus, auf `\u3000` umgestellt — Ausgabebytes unverändert, Absicht sichtbar
+- **`packages/engine-composite` 3 Fehler:** `repro-ms.test.ts` war Debug-Gerüst
+  (1 `it`, **0 `expect`**, 3 `as any`), kann nicht fehlschlagen und beweist nichts,
+  gelöscht; echte Abdeckung in `composite-engine.test.ts` (26 Tests / 51 Assertions)
+- **Drei Host-Plugins 141 Fehler** (siehe C)
 
-**E. 浏览器验收补上身份面**：新增 `auth-acceptance.mjs`（见上）。
-顺带修好一处会让**所有**验收套件误报的门禁缺陷——应用每次启动调
-`/physicsos/auth/me`，游客拿 401 是契约，但浏览器把它记为 console error、
-support 又把它计入 `errorResponses`，于是任何套件都会在跑第一个 CASE 前挂掉。
-现两个闸共用同一判据，只放过这一个端点。
+**E. Browser-Abnahme um Identität erweitert:** Neu `auth-acceptance.mjs` (siehe oben).
+Nebenbei Gate-Defekt behoben, der **alle** Abnahme-Suites fälschlich rot färbte — App ruft bei jedem Start
+`/physicsos/auth/me` auf, 401 für Gast ist Vertrag, aber Browser wertete es als Console-Error,
+Support zählte es in `errorResponses`, jede Suite scheiterte vor dem ersten CASE.
+Jetzt teilen beide Schranken dieselbe Bedingung, nur dieser eine Endpunkt wird toleriert.
 
-**F. 审计遗留清除**：`mechanics-templates.ts` 死文件删除（核实其引用的 locale
-键均被活文件使用，不产生孤儿文案）；实验中心徽标 43 vs 网格 44 的口径改为
-"可用实验"；磁场台补 `derivation`（与验证器同名公式）与 `trajectoryTimes`
-（按画布同样的 join 规则），并新增 5 项测试钉住配对契约；`paper-host` 补 README。
+**F. Audit-Altlasten entfernt:** `mechanics-templates.ts` gelöscht (geprüft, dass referenzierte Locale-Schlüssel
+von aktiven Dateien benutzt werden, keine verwaisten Texte); Experimentzentrum-Badge 43 vs. Raster 44 auf
+"verfügbare Experimente" vereinheitlicht; Magnetfeld-Station um `derivation` (gleiche Formel wie Verifier) und `trajectoryTimes`
+(nach denselben join-Regeln wie Canvas) ergänzt, dazu 5 Tests zur Festigung des Paarungsvertrags; `paper-host` README ergänzt.
 
-**验证**（三条命令实测 exit code = 0）：
+**Verifikation** (drei Befehle, gemessener exit code = 0):
 
-| 命令             | 覆盖                                                              | 结果          |
+| Befehl           | Abdeckung                                                         | Ergebnis      |
 | ---------------- | ----------------------------------------------------------------- | ------------- |
-| `pnpm typecheck` | core + web + 三个 host 插件                                       | 0 错          |
-| `pnpm lint`      | core（eslint）+ web（oxlint 171 文件）+ 三个 host 插件（30 文件） | **0 错 0 警** |
-| `pnpm test`      | core 全绿 + web 44 文件 **686 测试** + agent 7 文件 **93 测试**   | 全绿          |
+| `pnpm typecheck` | core + web + drei Host-Plugins                                    | 0 Fehler      |
+| `pnpm lint`      | core (eslint) + web (oxlint 171 Dateien) + drei Host-Plugins (30 Dateien) | **0 Fehler 0 Warnungen** |
+| `pnpm test`      | core vollständig grün + web 44 Dateien **686 Tests** + agent 7 Dateien **93 Tests** | vollständig grün |
 
-`auth-acceptance.mjs` 8 CASE / 22 断言 + 5 项浏览器门禁全 PASS。
+`auth-acceptance.mjs` 8 CASE / 22 Assertions + 5 Browser-Gates alle PASS.
 
-**不做**：名录补全与 credentials 偏差两种都是环境/数据治理，分别登记为
-`GUIZHOU_SCHOOL_ROSTER_HIGH_SCHOOL_GAP`、`DSH_CREDENTIALS_SCHEMA_SKEW`；
-`paper-host` 的 REAL-composition 测试登记为 `PAPER_HOST_COMPOSITION_TEST_GAP`。
+**Nicht durchgeführt:** Verzeichnisvervollständigung und Credentials-Abweichungen sind Umgebungs-/Datenpflege, registriert als
+`GUIZHOU_SCHOOL_ROSTER_HIGH_SCHOOL_GAP`, `DSH_CREDENTIALS_SCHEMA_SKEW`;
+`paper-host` REAL-Composition-Test als `PAPER_HOST_COMPOSITION_TEST_GAP`.
 
 ---
 
 ### QUESTION_BANK_DATA_V1
 
-**日期**：2026-09-21
+**Datum:** 2026-09-21
 
-**范围**：题库从"机制验证用样本"变成"有真实可用数据"。
+**Umfang:** Die Aufgabensammlung wird von "Mustern zur Mechanismusprüfung" zu "echten nutzbaren Daten".
 
-此前 `bank_items` 只有 4 条（前几轮为验证组卷链路手工录入的样本），
-组卷算法实际上无米下锅。本轮灌入 **388 条真实公开题目**（4 → 392）。
+Bislang enthielt `bank_items` nur 4 Einträge (in den Vorrunden manuell zur Prüfung der Papiergestaltungskette eingegebene Muster),
+der Papiergestaltungsalgorithmus hatte faktisch nichts zum Arbeiten. Diese Runde lädt **388 echte öffentliche Aufgaben** (4 → 392).
 
-**数据源**：C-Eval `ceval/ceval-exam` 的 `middle_school_physics` 与
-`high_school_physics` 全部 401 道单选题（CC BY-NC-SA 4.0，与本仓库
-PolyForm Noncommercial 兼容，署名见 `NOTICE.md`）。这是本环境下唯一
-**有明确许可、且机器可读**的中国中学物理题源——商业题库（学科网/百度文库/
-道客巴巴）都付费且有版权，省级考试院不公开整卷。
+**Datenquelle:** C-Eval `ceval/ceval-exam`, `middle_school_physics` und
+`high_school_physics` mit insgesamt 401 Multiple-Choice-Aufgaben (CC BY-NC-SA 4.0, mit dem
+PolyForm Noncommercial dieses Repos kompatibel, Namensnennung siehe `NOTICE.md`). Dies ist in dieser Umgebung die einzige
+**eindeutig lizenzierte und maschinenlesbare** Quelle chinesischer Schulphysikaufgaben — kommerzielle Aufgabenbanken (Xuekewang/Baidu Wenku/
+Daokebb) sind kostenpflichtig und urheberrechtlich geschützt, Provinzprüfungsämter veröffentlichen keine vollständigen Bögen.
 
-**映射**（`scripts/ingest-ceval-physics.mjs`，可重复执行、幂等去重）：
+**Mapping** (`scripts/ingest-ceval-physics.mjs`, wiederholbar ausführbar, idempotente Deduplizierung):
 
-- 逐条落 `sourceLabel` / `sourceUrl` / `answerTier: web-public`
-- **`reuseModes: ['adapt']`，不含 `verbatim`** —— 组卷只能当改写骨架，
-  不会把未经核验的题原样印成试卷
-- 全部 `status: pending`，需教师逐条核验后才参与组卷
-- 考点由题干+选项按脚本内**公开的关键词表**机器推得，标记
-  `knowledge-derived-from-stem`；难度/能力/分值该源没有，用具名默认值，
-  一并登记进 `anomalies`（审核界面直接可见）
-- 13 条因题干重复被服务端 `DUPLICATE_ITEM` 挡下——去重是有效的
+- Jede Aufgabe erhält `sourceLabel` / `sourceUrl` / `answerTier: web-public`
+- **`reuseModes: ['adapt']`, ohne `verbatim`** — die Papiergestaltung darf sie nur als Überarbeitungsgerüst nutzen,
+  druckt ungeprüfte Aufgaben nicht unverändert ab
+- Alle `status: pending`, nehmen erst nach einzelner Lehrerprüfung an Papiergestaltung teil
+- Wissenspunkte werden aus Aufgabentext und Optionen gemäß **öffentlicher Stichwortliste** im Skript maschinell abgeleitet, Kennzeichnung
+  `knowledge-derived-from-stem`; Schwierigkeit/Fähigkeit/Punktzahl sind in der Quelle nicht vorhanden, benannte Standardwerte,
+  zusammen in `anomalies` registriert (in Prüfansicht direkt sichtbar)
+- 13 Einträge wurden wegen doppelten Aufgabentexts vom Server mit `DUPLICATE_ITEM` abgewiesen — Deduplizierung wirkt
 
-**如实说明**：这批题**不是贵州真题**，也未与任何试卷核对过。它们解决的是
-"组卷算法没有真实题目可跑"，不是"卷库有内容了"——**卷库仍是 4 张卷**，
-因为 C-Eval 不含卷级元数据，凭空补卷名就是编。见
-`BACKLOG.md` 的 `PAPER_STUDIO_DATA_STATE`。
+**Ehrliche Erklärung:** Diese Aufgaben sind **keine echten Prüfungsaufgaben aus Guizhou** und wurden mit keinem Prüfungsbogen abgeglichen. Sie lösen
+"der Papiergestaltungsalgorithmus hat keine echten Aufgaben", nicht "die Prüfungsbank hat Inhalte" — **die Prüfungsbank hat weiterhin nur 4 Bögen**,
+da C-Eval keine bogenbezogenen Metadaten enthält und das Hinzuerfinden von Bogennamen reine Fiktion wäre. Siehe
+`PAPER_STUDIO_DATA_STATE` in `BACKLOG.md`.
 
-**B. 批量核验（`POST /physicsos/paper/bank/items/review-batch`）**：批量导入一次
-落下几百条 `pending`，而组卷只读 `verified`——没有批量路径，导入的数据就是**死的**
-（388 张卡逐张点不是教师的工作流）。新增批量核验路由 + 服务方法 + 客户端 +
-出卷专区「待核验」区的批量条（带范围筛选、命中计数、以及**明说"接受该来源不
-等于逐题校对"**的二次确认）。上限 500 条/请求；不存在的 id **回报而不静默跳过**。
+**B. Massenprüfung (`POST /physicsos/paper/bank/items/review-batch`):** Ein Massenimport legt mehrere hundert `pending` an,
+während die Papiergestaltung nur `verified` liest — ohne Massenpfad wären die importierten Daten **tot**
+(388 Karten einzeln durchzuklicken ist kein Lehrer-Workflow). Neue Massenprüfungsroute + Servicemethode + Client +
+Massenleiste im Bereich "Zu prüfen" des Papierstudios (mit Bereichsfilter, Trefferzahl und **expliziter Bestätigung
+"Quelle akzeptieren heißt nicht, jede Aufgabe einzeln zu prüfen"**). Obergrenze 500 pro Anfrage; nicht vorhandene IDs werden **gemeldet, nicht still übersprungen**.
 
-已核验的内容**不可静默改写**：`PUT /bank/items/:id` 对 `status: 'verified'`
-返回 409 `FROZEN`。本轮实测撞到这条守卫——重新打标时 18 条已核验的被正确拒绝。
+Geprüfte Inhalte **dürfen nicht still verändert werden**: `PUT /bank/items/:id` liefert für `status: 'verified'`
+409 `FROZEN`. In dieser Runde stieß man praktisch auf diese Sperre — beim erneuten Tagging wurden 18 bereits verifizierte korrekt abgelehnt.
 
-**C. 考点粒度是量出来的，不是拍的**（两轮实测纠正）：
+**C. Wissenspunkt-Granularität wird gemessen, nicht geraten** (zwei Messdurchläufe zur Korrektur):
 
-1. 第一版只匹配题干 → **135/401（34%）落进"物理综合"**；改题干+选项后降到 4%
-2. 但真正致命的是**粒度**：第一版emit 13 个章节级桶（`声现象`、`光与光学`）。
-   组卷按考点**子串**匹配、权重 0.45，而细目表的考点来自**已核验标注**，是
-   教研组自己的细粒度说法（`流体压强与流速`、`凸透镜成像规律`、`安培力`）。
-   实测一份真实卷的计划：**15 行全是 generate/gap，候选 0**——数据是死的。
-   重写为**细粒度词表**（49 条规则、先具体后宽泛）后输出 **44 个不同考点**。
+1. Erste Version prüfte nur den Aufgabentext → **135/401 (34 %) fielen in "Physik gesamt"**; nach Einbezug von Text+Optionen sank es auf 4 %
+2. Wirklich fatal war aber die **Granularität**: Version eins erzeugte 13 kapitelweite Eimer (`Schallphänomene`, `Licht und Optik`).
+   Die Papiergestaltung vergleicht Wissenspunkte per **Teilstring**, Gewicht 0.45, die Wissenspunkte der Tabelle stammen aus **verifizierten Annotationen** mit
+   feingranularer Formulierung der Fachgruppe (`Strömungsdruck und Strömungsgeschwindigkeit`, `Bildentstehung bei Konvexlinse`, `Amperekraft`).
+   Messung an einem echten Plan: **15 Zeilen alle generate/gap, 0 Kandidaten** — Daten tot.
+   Nach Umschreibung auf **feingranulare Stichwortliste** (49 Regeln, konkret vor allgemein) Ausgabe **44 verschiedene Wissenspunkte**.
 
-3. **别名是关键杠杆**。`knowledgeScore` 对 `item.knowledge` 是**集合精确匹配**
-   （不是子串）：`knowledge[0]` 命中给 0.6，另有 `0.4 × 命中数 / 需求数`。
-   于是**任一**别名命中就能拿到 0.4 → 加上难度/能力/来源 ≈ 0.685，越过 0.55
-   改编线。据此把词表从"单标签"改为**别名数组**（首项为主标签），
-   388 条的标签数从 44 升到 **108 个不同标签、平均 2.6 个/条**。
+3. **Aliase sind der entscheidende Hebel.** `knowledgeScore` prüft `item.knowledge` per **exakter Mengenübereinstimmung**
+   (nicht Teilstring): Treffer von `knowledge[0]` gibt 0.6, zudem `0.4 × Trefferzahl / Bedarfszahl`.
+   Somit reicht **ein beliebiger** Alias-Treffer für 0.4 → plus Schwierigkeit/Fähigkeit/Quelle ≈ 0.685, über der 0.55
+   Adaptionsschwelle. Daher wurde die Wortliste von "Einzeltag" auf **Alias-Array** umgestellt (erster Eintrag ist Haupttag);
+   Tagzahl der 388 Einträge stieg von 44 auf **108 verschiedene Tags, durchschnittlich 2.6 pro Eintrag**.
 
-**端到端实测**（同一份真实细目表，隔离探针，事后已全部还原为 pending）：
+**End-to-End-Messung** (dieselbe echte Detailtabelle, isolierte Sonde, danach alles wieder auf pending zurückgesetzt):
 
-|                                   | 计划结果                                            |
+|                                   | Planergebnis                                            |
 | --------------------------------- | --------------------------------------------------- |
-| C-Eval 全 pending（教师尚未核验） | **15 行全 `gap`**                                   |
-| 388 条核验后                      | **`adapt` 1 + `generate` 4 + `gap` 10**，5 行有候选 |
+| C-Eval alle pending (Lehrer noch nicht geprüft) | **15 Zeilen alle `gap`**                                   |
+| nach Prüfung von 388 Einträgen                      | **`adapt` 1 + `generate` 4 + `gap` 10**, 5 Zeilen mit Kandidaten |
 
-`Q1` 拿到 **195 个候选**并判 `adapt`——组卷真的用上了导入的数据；`Q2–Q5`
-各有 194 个候选但分数未过线，诚实落 `generate`；`Q6–Q15` 是填空/作图/简答/
-实验/综合，`gap` 是对的——**C-Eval 全是单选，这类槽位本来就服务不了**。
-即：能对上的就选，对不上的不假装，题型不符的直接 gap。
+`Q1` erhielt **195 Kandidaten** und wurde als `adapt` bewertet — die Papiergestaltung nutzte die importierten Daten tatsächlich; `Q2–Q5`
+hatten je 194 Kandidaten, aber die Punktzahl lag unter der Schwelle, ehrlich als `generate` eingestuft; `Q6–Q15` sind Lückentext/Zeichnung/Kurzantwort/
+Experiment/übergreifend, `gap` ist korrekt — **C-Eval enthält nur Multiple-Choice, solche Slots können damit nicht bedient werden**.
+Also: was passt, wird gewählt; was nicht passt, wird nicht vorgetäuscht; falscher Aufgabentyp führt direkt zu gap.
 
-**D. 重打标模式**：`--retag` 只 PUT `knowledge`，**不碰** `status` /
-`reuseModes` / `verifiedBy` / 审计字段——核验者的记录必须原样保留。
+**D. Retag-Modus**: `--retag` setzt nur `knowledge` per PUT, **rührt** `status` /
+`reuseModes` / `verifiedBy` / Auditfelder nicht an — die Aufzeichnung des Prüfers muss unverändert bleiben.
 
-**验证**：`GET /physicsos/paper/bank/items` 返回 392 条
-（4 verified + 388 pending，C-Eval 条目全部 pending）；
-`paper-host` 11 测试（含 2 条批量）；`pnpm typecheck` / `pnpm lint` /
-`pnpm test` 全绿（web 686 + agent 95）。
+**Verifikation**: `GET /physicsos/paper/bank/items` liefert 392 Einträge
+(4 verified + 388 pending, C-Eval-Einträge alle pending);
+`paper-host` 11 Tests (inkl. 2 Batch); `pnpm typecheck` / `pnpm lint` /
+`pnpm test` vollständig grün (web 686 + agent 95).
 
 ---
 
 ### LAB_SEARCH_RECALL_V1
 
-**日期**：2026-09-21
+**Datum:** 2026-09-21
 
-**范围**：实验中心的**可发现性**。不新增实验、不动物理，只回答一个问题——
-学生用他知道的说法去搜，能不能找到那个实验。
+**Umfang:** **Auffindbarkeit** des Experimentzentrums. Keine neuen Experimente, keine Physikänderung, nur die eine Frage —
+findet ein Schüler das Experiment, wenn er mit seiner eigenen Formulierung sucht.
 
-**A. 先修好审计工具**：`audit-all-domains.mjs` 写在 auth 之前，只会导航到 `/`
-找"稍后配置"，加了登录门之后它**永远到不了实验中心**（会报 0 个模板却看着像通过）。
-现在它自带隔离服务 + 共享的 `registerStudent()` 助手。同时把它的 guest-401
-误报收敛掉（`isExpectedGuest401` 从 support 导出，控制台闸与响应闸共用一条判据）。
+**A. Zuerst das Audit-Werkzeug repariert**: `audit-all-domains.mjs` war vor auth geschrieben, navigierte nur zu `/`
+und suchte "später konfigurieren"; nach Einführung des Anmeldegates **erreichte es nie das Experimentzentrum** (meldete 0 Templates, sah aber wie bestanden aus).
+Jetzt bringt es einen isolierten Dienst + gemeinsamen `registerStudent()`-Helfer mit. Zugleich wird seine guest-401-
+Fehlmeldung beseitigt (`isExpectedGuest401` aus support exportiert, Console-Gate und Response-Gate teilen dieselbe Bedingung).
 
-**B. 全量走查**：54 个模板 → **53 个全部打开/运行/暂停/开检查器读数页无报错**，
-1 个（回旋加速器）按设计 `comingSoon` 跳过。实验部分功能面是健康的，
-所以优化点转到质量面。
+**B. Vollständige Durchsicht**: 54 Templates → **53 ließen sich alle ohne Fehler öffnen/ausführen/pausieren und Inspector-Messwertseite öffnen**,
+1 (Zyklotron) wird designgemäß als `comingSoon` übersprungen. Die Funktionsseite der Experimente ist gesund,
+daher verlagerte sich die Optimierung auf die Qualitätsebene.
 
-**C. 搜索召回实测**：51 个口语词里 **26 个零命中**。
-其中 12 个模板补了诚实别名（`光的反射`、`折射`、`凝固`、`物态变化`、`浮沉`、
-`自由落体运动`、`串并联`、`滑变`、`发电机`、`声音`…），**26 → 18**；
-余下 18 个是**真模板缺口**，见 `BACKLOG.md` 的 `LAB_CURRICULUM_TEMPLATE_GAPS`。
+**C. Messung der Suchtrefferquote**: Von 51 umgangssprachlichen Wörtern **26 ohne Treffer**.
+Für 12 Templates wurden ehrliche Aliase ergänzt (`Reflexion des Lichts`, `Brechung`, `Erstarren`, `Zustandsänderung`, `Schweben/Sinken`,
+`freier Fall`, `Reihen-/Parallelschaltung`, `Schiebewiderstand`, `Generator`, `Schall` …), **26 → 18**;
+die restlichen 18 sind **echte Template-Lücken**, siehe `LAB_CURRICULUM_TEMPLATE_GAPS` in `BACKLOG.md`.
 
-> 探针第一版统计了整个面板的卡片，而推荐栏那 3 张在任何输入下都在，
-> 于是"零命中"被看成"3 命中"——**差点把 7 个真实缺口当成通过**。
-> 只统计 `[data-physicsos-shelf]` 才对。
+> Die erste Sondenversion zählte alle Karten des Panels, und die drei Karten der Empfehlungsleiste waren bei jeder Eingabe sichtbar,
+> so dass "keine Treffer" als "3 Treffer" gelesen wurde — **hätte fast 7 echte Lücken als bestanden gewertet**.
+> Nur `[data-physicsos-shelf]` zu zählen ist korrekt.
 
-**D. 跨面可发现性：31/126 → 70/126**。第二个探针问的是产品自己的承诺——
-"刚做完这道题，想动手看看"：拿**题库考点表 + 已核验标注**里的 126 个考点去搜
-实验中心。结果是**只有 31 个能搜到（25%）**。逐条分类后：
+**D. Auffindbarkeit über Oberflächen hinweg: 31/126 → 70/126**. Die zweite Sonde prüfte das eigene Produktversprechen —
+"gerade diese Aufgabe gelöst, möchte es praktisch sehen": 126 Wissenspunkte aus **Aufgabenbank-Wissenspunkttabelle + verifizierten Annotationen** werden im
+Experimentzentrum gesucht. Ergebnis: **nur 31 waren auffindbar (25 %)**. Nach Klassifikation:
 
-- 有实验、只是词不认（补别名）：`光的折射规律`、`探究凸透镜成像`、`透镜及其应用`、
-  `平面镜成像特点`、`光的反射定律`、`熔化与凝固`、`杠杆平衡条件`、`滑动摩擦力`、
-  `二力平衡`/`平衡力`/`受力分析`/`惯性`、`测电源电动势和内阻`、`闭合电路欧姆定律`、
-  `串联电路计算`、`焦耳定律`、`运动的描述`、`速度的计算`、`波长与频率`、`声现象`、
-  `声的利用`、`超声波与次声波`、`电磁感应现象`、`电场强度`、`动态电路分析`、
-  `带电粒子偏转`、`带电粒子在电场/复合场中的运动` …
-- 确实没有实验（保持为零，登记进 BACKLOG）：`压强`/`大气压`/`液体压强`、
-  `电磁铁`/`通电螺线管`/`电生磁`、`机械能`/`动能`/`能量守恒`、`密度`、
-  `家庭电路`/`安全用电`、`内能`/`热机`、`电磁波`/`信息的传递`、`核能`、
-  `气体实验定律`、`波粒二象性`、`理想变压器`、`光的色散`/`干涉` …
-  **这些不加别名**——把学生送到一个不教他所搜内容的实验室，比诚实的空结果更糟。
+- Experiment vorhanden, nur Wort nicht erkannt (Alias ergänzt): `Brechungsgesetz des Lichts`, `Bildentstehung bei Konvexlinse untersuchen`, `Linsen und ihre Anwendung`,
+  `Eigenschaften der Bildentstehung am ebenen Spiegel`, `Reflexionsgesetz des Lichts`, `Schmelzen und Erstarren`, `Hebelgesetz`, `Gleitreibung`,
+  `Kräftegleichgewicht`/`Gleichgewichtskraft`/`Kraftanalyse`/`Trägheit`, `EMK und Innenwiderstand der Quelle messen`, `Ohmsches Gesetz im geschlossenen Stromkreis`,
+  `Berechnung in Reihenschaltung`, `Joulesches Gesetz`, `Beschreibung von Bewegung`, `Berechnung der Geschwindigkeit`, `Wellenlänge und Frequenz`, `Schallphänomene`,
+  `Nutzung von Schall`, `Ultraschall und Infraschall`, `Elektromagnetische Induktion`, `Elektrische Feldstärke`, `Analyse dynamischer Schaltungen`,
+  `Ablenkung geladener Teilchen`, `Bewegung geladener Teilchen im elektrischen/Kompositfeld` …
+- Tatsächlich kein Experiment vorhanden (bleibt null, in BACKLOG registriert): `Druck`/`Luftdruck`/`Flüssigkeitsdruck`,
+  `Elektromagnet`/`stromdurchflossene Spule`/`Magnetismus durch Strom`, `Mechanische Energie`/`Kinetische Energie`/`Energieerhaltung`, `Dichte`,
+  `Haushaltsstromkreis`/`Elektrische Sicherheit`, `Innere Energie`/`Wärmekraftmaschine`, `Elektromagnetische Wellen`/`Informationsübertragung`, `Kernenergie`,
+  `Gasgesetze`, `Welle-Teilchen-Dualismus`, `idealer Transformator`, `Dispersion`/`Interferenz des Lichts` …
+  **Für diese werden keine Aliase ergänzt** — einen Schüler in ein Labor zu schicken, das seinen Suchbegriff nicht behandelt, ist schlimmer als ein ehrliches leeres Ergebnis.
 
-**E. 变成常驻门禁**：`tests/acceptance/lab-search-recall.mjs` 是双向棘轮——
-**94 个词必须可搜到，20 个已知缺口必须仍搜不到**；补上实验的那天测试会失败并
-提示把词移到 `FINDABLE`，清单不会烂。
+**E. Als dauerhafte Gate etabliert**: `tests/acceptance/lab-search-recall.mjs` ist eine bidirektionale Ratsche —
+**94 Wörter müssen auffindbar sein, 20 bekannte Lücken dürfen weiterhin nicht auffindbar sein**; an dem Tag, an dem das Experiment ergänzt wird, schlägt der Test fehl
+und weist darauf hin, das Wort nach `FINDABLE` zu verschieben, so dass die Liste nicht verrottet.
 
-**验证**：`lab-search-recall.mjs` → 可搜到 94/94、已知缺口 20/20、ALL CHECKS PASSED；
-跨面探针 → 70/126；`audit-all-domains.mjs` → 53 打开 / 1 跳过 / 0 问题；
-`experiment-summaries` parity 7/7。
+**Verifikation**: `lab-search-recall.mjs` → auffindbar 94/94, bekannte Lücken 20/20, ALL CHECKS PASSED;
+Oberflächenübergreifende Sonde → 70/126; `audit-all-domains.mjs` → 53 geöffnet / 1 übersprungen / 0 Probleme;
+`experiment-summaries`-Parität 7/7.
 
-**不做**：补那 18 个缺失实验——每组都要先补引擎模型，属独立切片，
-按 Contract First + Golden First 走，已登记开始条件。
+**Nicht durchgeführt**: die 18 fehlenden Experimente ergänzen — für jedes muss zuerst das Engine-Modell ergänzt werden, ein eigenständiger Ausschnitt,
+nach Contract First + Golden First, Startbedingung bereits registriert.
 
 ---
 
-## 明确延后
+## Ausdrücklich zurückgestellt
 
-见 `docs/reports/BACKLOG.md`：
+Siehe `docs/reports/BACKLOG.md`:
 
-- `AGENT_MODEL_BACKED_ANSWERS_BACKLOG`（契约已就位，替换 `matchIntent` 即可）
+- `AGENT_MODEL_BACKED_ANSWERS_BACKLOG` (Vertrag liegt vor, nur `matchIntent` ersetzen)
 - `QUESTION_IMAGE_PDF_INGEST_BACKLOG`
 - `APPS_WEB_STANDALONE_RETIREMENT_BACKLOG`
 - `HARNESS_WINDOWS_REPLAY_GATE_DEFERRED`
-- `UPSTREAM_PARALLEL_TEST_FLAKE`（上游并行负载 flake，10/10 单独通过）
-- Canvas Camera V1：暂不做。viewBox 跟随容器 + 等比 fit 已解决线宽放大与极端场景取景；
-  真正需要平移/缩放的是星体运动、大范围电磁场区域、复杂电路拓扑
+- `UPSTREAM_PARALLEL_TEST_FLAKE` (Upstream-Parallel-Load-Flake, 10/10 einzeln erfolgreich)
+- Canvas Camera V1: derzeit nicht geplant. viewBox folgt Container + aspect-ratio fit löst Linienbreitenvergrößerung und extreme Szenenausschnitte;
+  echtes Pan/Zoom wird erst bei Himmelsmechanik, großräumigen elektromagnetischen Feldern, komplexer Schaltungstopologie benötigt

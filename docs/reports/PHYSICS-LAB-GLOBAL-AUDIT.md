@@ -1,139 +1,139 @@
-# PhysicsOS 物理实验室 · 全量审计报告
+# PhysicsOS Physiklabor · Vollständiger Auditbericht
 
-> 日期：2026-09-28
-> 状态：`PHYSICS_LAB_AUDIT_COMPLETE`（只读审计，未改任何代码）
-> 审计基线：worktree `codex/harness-sync-ui-plugins`，commit `60bd660b386e41449849b698c84a21c53de71b5c`
-> 范围：`overlays/harness/files/packages/client/ui-physicsos/src/client/**`、`packages/physics-scene/**`、
-> `packages/engine-*/**`、`packages/physics-{core,verifier,observation,units}/**`、
-> `packages/agent-tools/src/{experiment-catalog,physics-tool-runtime}.ts`。
-> 方法：全部结论来自文件读取与 grep（file:line 见正文）；未能从代码确认的一律标 `未验证`。
-> 触发技能：`code-audit`（审计类 must；按 CLAUDE.md §3「审计/review 不被只读误挡」）。
+> Datum: 2026-09-28
+> Status: `PHYSICS_LAB_AUDIT_COMPLETE` (Schreibgeschützter Audit, kein Code geändert)
+> Audit-Baseline: worktree `codex/harness-sync-ui-plugins`, commit `60bd660b386e41449849b698c84a21c53de71b5c`
+> Umfang: `overlays/harness/files/packages/client/ui-physicsos/src/client/**`, `packages/physics-scene/**`,
+> `packages/engine-*/**`, `packages/physics-{core,verifier,observation,units}/**`,
+> `packages/agent-tools/src/{experiment-catalog,physics-tool-runtime}.ts`.
+> Methode: Alle Schlussfolgerungen stammen aus Dateilesen und grep (file:line siehe Text); was nicht aus Code bestätigt werden konnte, wird durchgehend als `unverifiziert` markiert.
+> Ausgelöste Skill: `code-audit` (Audit-Klasse muss; gemäß CLAUDE.md §3 „Audit/review nicht durch Read-only fälschlich blockieren").
 
 ---
 
-## 0. 扫描范围（读了什么）
+## 0. Scan-Umfang (Was wurde gelesen)
 
-| 区域 | 关键文件 |
+| Bereich | Schlüsseldateien |
 | --- | --- |
-| 实验模板/清单 | `physics/experiment-templates.ts`(1815 行)、`packages/agent-tools/src/experiment-catalog.ts`(502 行) |
-| 外壳与播放 | `PhysicsWorkspace.tsx`(1121 行)、`LabWorkspace.tsx`(412 行)、`TimelineScrubber.tsx`、`animation-clock.ts`、`frame-source.ts` |
-| 运行时 | `physics/workspace-runtime.ts` + 21 个 `*-workspace-runtime.ts`、`physics-runtime-bridge.ts`、`mechanics-runtime-bridge.ts`、`collision-runtime-bridge.ts` |
-| 渲染 | `physics/renderer-registry.tsx`(≈1400 行)、`physics/scene-visual-model.ts`(1890 行)、`physics/PhysicsCanvas.tsx`、24 个 `*-renderer.tsx`、`vector-label-layout.ts` |
-| 桥/视图 | 21 个 `*-visual-bridge.ts`、`mechanics-view-builders.ts` |
-| 场景层 | `packages/physics-scene/src/**`（scene.ts / scene-runtime.ts / 各 scene-factory） |
-| 引擎层 | 15 个 `packages/engine-*`（含 `engine-lever` 全读） |
-| 验证/溯源 | `packages/physics-core/src/provenance.ts`、`packages/physics-verifier/src/**`、UI `verified-result.ts`、`verification-presentation.ts`、`VerifiedResult.tsx` |
-| 观测层 | `packages/physics-observation/src/**`（7 个 observation 模块） |
-| 教学元数据 | `experiment-summaries.ts`(1082 行)、`experiment-self-checks.ts`、`experiment-artwork.tsx`(1728 行) |
+| Experimentvorlagen/Verzeichnis | `physics/experiment-templates.ts`(1815 Zeilen), `packages/agent-tools/src/experiment-catalog.ts`(502 Zeilen) |
+| Hülle & Wiedergabe | `PhysicsWorkspace.tsx`(1121 Zeilen), `LabWorkspace.tsx`(412 Zeilen), `TimelineScrubber.tsx`, `animation-clock.ts`, `frame-source.ts` |
+| Laufzeit | `physics/workspace-runtime.ts` + 21 `*-workspace-runtime.ts`, `physics-runtime-bridge.ts`, `mechanics-runtime-bridge.ts`, `collision-runtime-bridge.ts` |
+| Rendering | `physics/renderer-registry.tsx`(≈1400 Zeilen), `physics/scene-visual-model.ts`(1890 Zeilen), `physics/PhysicsCanvas.tsx`, 24 `*-renderer.tsx`, `vector-label-layout.ts` |
+| Bridge/Views | 21 `*-visual-bridge.ts`, `mechanics-view-builders.ts` |
+| Szene-Layer | `packages/physics-scene/src/**` (scene.ts / scene-runtime.ts / diverse scene-factory) |
+| Engine-Layer | 15 `packages/engine-*` (inkl. `engine-lever` komplett gelesen) |
+| Verifizierung/Nachweisbarkeit | `packages/physics-core/src/provenance.ts`, `packages/physics-verifier/src/**`, UI `verified-result.ts`, `verification-presentation.ts`, `VerifiedResult.tsx` |
+| Beobachtungs-Layer | `packages/physics-observation/src/**` (7 Observation-Module) |
+| Lehr-Metadaten | `experiment-summaries.ts`(1082 Zeilen), `experiment-self-checks.ts`, `experiment-artwork.tsx`(1728 Zeilen) |
 
-未跑测试、未启动应用；本报告为**静态代码审计**（owner 明确要求「先扫描，暂不改」）。
+Keine Tests ausgeführt, keine App gestartet; dieser Bericht ist ein **statischer Code-Audit** (Owner verlangte explizit "zuerst scannen, vorerst nicht ändern").
 
 ---
 
-## 1. 完整实验清单（76 个，全量枚举）
+## 1. Vollständiges Experimentverzeichnis (76, vollständig enumeriert)
 
-枚举来源：以 `experiment-templates.ts` 的 `EXPERIMENT_TEMPLATE_GROUPS` 为准（12 域 76 模板），
-与 `experiment-catalog.ts`（服务端 agent 侧 33 条）交叉核对。**76 个模板每个都有对应 Scene Factory，
-无「有模板无工厂」的情况。** 每个模板 `createScene` 调用的工厂见下表；工厂均返回**真实 `PhysicsScene`**
-（`packages/physics-scene/src/scene.ts:1144`）。
+Enumerationsquelle: Basierend auf `experiment-templates.ts` `EXPERIMENT_TEMPLATE_GROUPS` (12 Domänen, 76 Vorlagen),
+kreuzverifiziert mit `experiment-catalog.ts` (Serverseite Agent-Seite 33 Einträge). **Alle 76 Vorlagen haben eine entsprechende Scene Factory,
+kein Fall von "Vorlage ohne Factory". **Jede Vorlage ruft `createScene` mit der Factory auf, siehe Tabelle unten; alle Factories geben echte `PhysicsScene` zurück**
+( `packages/physics-scene/src/scene.ts:1144` ).
 
-| # | id | 域 | 学段 | Scene Factory |
+| # | id | Domäne | Lernstufe | Scene Factory |
 | --- | --- | --- | --- | --- |
-| 1 | uniform-linear | mechanics | junior | createMechanicsScene |
-| 2 | average-speed | mechanics | junior | createMechanicsScene |
-| 3 | uniform-acceleration | mechanics | senior | createMechanicsScene |
-| 4 | projectile-horizontal | mechanics | senior | createMechanicsScene |
-| 5 | projectile-oblique | mechanics | senior | createMechanicsScene |
-| 6 | newton-second-law | mechanics | senior | createMechanicsScene |
-| 7 | incline | mechanics | senior | createMechanicsScene |
-| 8 | mechanical-energy | mechanics | junior | createMechanicalEnergyScene |
-| 9 | ramp-friction | mechanics | junior | createRampFrictionScene |
-| 10 | lever-balance | mechanics | junior | createLeverBalanceScene |
-| 11 | collision-elastic | mechanics | senior | createCollisionScene |
-| 12 | collision-inelastic | mechanics | senior | createCollisionScene |
-| 13 | collision-perfectly-inelastic | mechanics | senior | createCollisionScene |
-| 14 | vt-area | mechanics | senior | createMechanicsScene |
-| 15 | force-composition | mechanics | senior | createMechanicsScene |
-| 16 | concurrent-equilibrium | mechanics | senior | createMechanicsScene |
-| 17 | apparent-weight | mechanics | senior | createMechanicsScene |
-| 18 | chase-meeting | mechanics | senior | createCollisionScene |
-| 19 | hooke-law | mechanics | junior | createMechanicsScene |
-| 20 | spring-oscillator | mechanics | senior | createMechanicsScene |
-| 21 | circular-orbit | mechanics | senior | createMechanicsScene |
-| 22 | simple-pendulum | mechanics | senior | createMechanicsScene |
-| 23 | friction-static | mechanics | junior | createMechanicsScene |
-| 24 | friction-mu | mechanics | junior | createMechanicsScene |
-| 25 | point-charge | electric | senior | createPointChargeScene |
-| 26 | multi-point-charge | electric | senior | createPointChargeScene |
-| 27 | uniform-electric | electric | senior | createElectricScene |
-| 28 | parallel-plate | electric | senior | createParallelPlateScene |
-| 29 | straight-wire-field | magnetic | junior | createStraightWireFieldScene |
-| 30 | solenoid-field | magnetic | junior | createSolenoidFieldScene |
-| 31 | electromagnet | magnetic | junior | createElectromagnetScene |
-| 32 | motor | magnetic | junior | createMotorScene |
-| 33 | magnetic-circular | magnetic | senior | createMagneticScene |
-| 34 | series-circuit | circuit | junior | createSeriesCircuitScene |
-| 35 | parallel-circuit | circuit | junior | createParallelCircuitScene |
-| 36 | mixed-circuit | circuit | junior | createMixedCircuitScene |
-| 37 | short-circuit | circuit | junior | createShortCircuitScene |
-| 38 | rheostat-circuit | circuit | junior | createRheostatCircuitScene |
-| 39 | va-resistance | circuit | junior | createRheostatCircuitScene |
-| 40 | bulb-power | circuit | junior | createRheostatCircuitScene |
-| 41 | emf-measurement | circuit | senior | createEmfMeasurementScene |
-| 42 | pinhole | optics | junior | createPinholeScene |
-| 43 | total-reflection | optics | junior | createTotalReflectionScene |
-| 44 | plane-mirror | optics | junior | createPlaneMirrorScene |
-| 45 | convex-lens | optics | junior | createConvexLensScene |
-| 46 | concave-mirror | optics | junior | createConcaveMirrorScene |
-| 47 | convex-mirror | optics | junior | createConvexMirrorScene |
-| 48 | echo-ranging | acoustics | junior | createEchoRangingScene |
-| 49 | buoyancy | fluid | junior | createArchimedesScene |
-| 50 | solid-pressure | fluid | junior | createSolidPressureScene |
-| 51 | liquid-pressure | fluid | junior | createLiquidPressureScene |
-| 52 | atmospheric-pressure | fluid | junior | createAtmosphericPressureScene |
-| 53 | thermometer | thermal | junior | createThermometerCalibrationScene |
-| 54 | noise | acoustics | junior | createNoiseBarrierScene |
-| 55 | crystal-melting | thermal | junior | createCrystalMeltingScene |
-| 56 | boiling-water | thermal | junior | createBoilingWaterScene |
-| 57 | heat-capacity-comparison | thermal | junior | createHeatCapacityComparisonScene |
-| 58 | velocity-selector | composite | senior | createVelocitySelectorScene |
-| 59 | mass-spectrometer | composite | senior | createMassSpectrometerScene |
-| 60 | composite-eb | composite | senior | createCompositeFieldScene |
-| 61 | composite-ebg | composite | senior | createCompositeFieldScene |
-| 62 | multi-region-field | composite | senior | createMultiRegionFieldScene |
-| 63 | cyclotron | composite | senior | createCyclotronScene |
-| 64 | induction-bar-motion | induction | senior | createBarMotionScene |
-| 65 | transformer | induction | senior | createTransformerBenchScene |
-| 66 | induction-double-bar-momentum | induction | senior | createDoubleBarRailScene |
-| 67 | induction-double-bar-force | induction | senior | createDoubleBarRailScene |
-| 68 | induction-flux-change | induction | senior | createFluxChangeScene |
-| 69 | wave-travelling | wave | junior | createTravellingWaveScene |
-| 70 | wave-interference | wave | senior | createWaveInterferenceScene |
-| 71 | wave-standing | wave | senior | createStandingWaveScene |
-| 72 | wave-longitudinal | wave | senior | createLongitudinalWaveScene |
-| 73 | wave-reflection-refraction | wave | senior | createReflectionRefractionScene |
-| 74 | wave-diffraction | wave | senior | createDiffractionScene |
-| 75 | wave-doppler | wave | senior | createDopplerScene |
-| 76 | photoelectric-effect | modern | senior | createPhotoelectricEffectScene |
+| 1 | uniform-linear | Mechanik | Mittelstufe | createMechanicsScene |
+| 2 | average-speed | Mechanik | Mittelstufe | createMechanicsScene |
+| 3 | uniform-acceleration | Mechanik | Oberstufe | createMechanicsScene |
+| 4 | projectile-horizontal | Mechanik | Oberstufe | createMechanicsScene |
+| 5 | projectile-oblique | Mechanik | Oberstufe | createMechanicsScene |
+| 6 | newton-second-law | Mechanik | Oberstufe | createMechanicsScene |
+| 7 | incline | Mechanik | Oberstufe | createMechanicsScene |
+| 8 | mechanical-energy | Mechanik | Mittelstufe | createMechanicalEnergyScene |
+| 9 | ramp-friction | Mechanik | Mittelstufe | createRampFrictionScene |
+| 10 | lever-balance | Mechanik | Mittelstufe | createLeverBalanceScene |
+| 11 | collision-elastic | Mechanik | Oberstufe | createCollisionScene |
+| 12 | collision-inelastic | Mechanik | Oberstufe | createCollisionScene |
+| 13 | collision-perfectly-inelastic | Mechanik | Oberstufe | createCollisionScene |
+| 14 | vt-area | Mechanik | Oberstufe | createMechanicsScene |
+| 15 | force-composition | Mechanik | Oberstufe | createMechanicsScene |
+| 16 | concurrent-equilibrium | Mechanik | Oberstufe | createMechanicsScene |
+| 17 | apparent-weight | Mechanik | Oberstufe | createMechanicsScene |
+| 18 | chase-meeting | Mechanik | Oberstufe | createCollisionScene |
+| 19 | hooke-law | Mechanik | Mittelstufe | createMechanicsScene |
+| 20 | spring-oscillator | Mechanik | Oberstufe | createMechanicsScene |
+| 21 | circular-orbit | Mechanik | Oberstufe | createMechanicsScene |
+| 22 | simple-pendulum | Mechanik | Oberstufe | createMechanicsScene |
+| 23 | friction-static | Mechanik | Mittelstufe | createMechanicsScene |
+| 24 | friction-mu | Mechanik | Mittelstufe | createMechanicsScene |
+| 25 | point-charge | Elektrik | Oberstufe | createPointChargeScene |
+| 26 | multi-point-charge | Elektrik | Oberstufe | createPointChargeScene |
+| 27 | uniform-electric | Elektrik | Oberstufe | createElectricScene |
+| 28 | parallel-plate | Elektrik | Oberstufe | createParallelPlateScene |
+| 29 | straight-wire-field | Magnetik | Mittelstufe | createStraightWireFieldScene |
+| 30 | solenoid-field | Magnetik | Mittelstufe | createSolenoidFieldScene |
+| 31 | electromagnet | Magnetik | Mittelstufe | createElectromagnetScene |
+| 32 | motor | Magnetik | Mittelstufe | createMotorScene |
+| 33 | magnetic-circular | Magnetik | Oberstufe | createMagneticScene |
+| 34 | series-circuit | Schaltkreis | Mittelstufe | createSeriesCircuitScene |
+| 35 | parallel-circuit | Schaltkreis | Mittelstufe | createParallelCircuitScene |
+| 36 | mixed-circuit | Schaltkreis | Mittelstufe | createMixedCircuitScene |
+| 37 | short-circuit | Schaltkreis | Mittelstufe | createShortCircuitScene |
+| 38 | rheostat-circuit | Schaltkreis | Mittelstufe | createRheostatCircuitScene |
+| 39 | va-resistance | Schaltkreis | Mittelstufe | createRheostatCircuitScene |
+| 40 | bulb-power | Schaltkreis | Mittelstufe | createRheostatCircuitScene |
+| 41 | emf-measurement | Schaltkreis | Oberstufe | createEmfMeasurementScene |
+| 42 | pinhole | Optik | Mittelstufe | createPinholeScene |
+| 43 | total-reflection | Optik | Mittelstufe | createTotalReflectionScene |
+| 44 | plane-mirror | Optik | Mittelstufe | createPlaneMirrorScene |
+| 45 | convex-lens | Optik | Mittelstufe | createConvexLensScene |
+| 46 | concave-mirror | Optik | Mittelstufe | createConcaveMirrorScene |
+| 47 | convex-mirror | Optik | Mittelstufe | createConvexMirrorScene |
+| 48 | echo-ranging | Akustik | Mittelstufe | createEchoRangingScene |
+| 49 | buoyancy | Fluid | Mittelstufe | createArchimedesScene |
+| 50 | solid-pressure | Fluid | Mittelstufe | createSolidPressureScene |
+| 51 | liquid-pressure | Fluid | Mittelstufe | createLiquidPressureScene |
+| 52 | atmospheric-pressure | Fluid | Mittelstufe | createAtmosphericPressureScene |
+| 53 | thermometer | Thermodynamik | Mittelstufe | createThermometerCalibrationScene |
+| 54 | noise | Akustik | Mittelstufe | createNoiseBarrierScene |
+| 55 | crystal-melting | Thermodynamik | Mittelstufe | createCrystalMeltingScene |
+| 56 | boiling-water | Thermodynamik | Mittelstufe | createBoilingWaterScene |
+| 57 | heat-capacity-comparison | Thermodynamik | Mittelstufe | createHeatCapacityComparisonScene |
+| 58 | velocity-selector | Kombiniert | Oberstufe | createVelocitySelectorScene |
+| 59 | mass-spectrometer | Kombiniert | Oberstufe | createMassSpectrometerScene |
+| 60 | composite-eb | Kombiniert | Oberstufe | createCompositeFieldScene |
+| 61 | composite-ebg | Kombiniert | Oberstufe | createCompositeFieldScene |
+| 62 | multi-region-field | Kombiniert | Oberstufe | createMultiRegionFieldScene |
+| 63 | cyclotron | Kombiniert | Oberstufe | createCyclotronScene |
+| 64 | induction-bar-motion | Induktion | Oberstufe | createBarMotionScene |
+| 65 | transformer | Induktion | Oberstufe | createTransformerBenchScene |
+| 66 | induction-double-bar-momentum | Induktion | Oberstufe | createDoubleBarRailScene |
+| 67 | induction-double-bar-force | Induktion | Oberstufe | createDoubleBarRailScene |
+| 68 | induction-flux-change | Induktion | Oberstufe | createFluxChangeScene |
+| 69 | wave-travelling | Welle | Mittelstufe | createTravellingWaveScene |
+| 70 | wave-interference | Welle | Oberstufe | createWaveInterferenceScene |
+| 71 | wave-standing | Welle | Oberstufe | createStandingWaveScene |
+| 72 | wave-longitudinal | Welle | Oberstufe | createLongitudinalWaveScene |
+| 73 | wave-reflection-refraction | Welle | Oberstufe | createReflectionRefractionScene |
+| 74 | wave-diffraction | Welle | Oberstufe | createDiffractionScene |
+| 75 | wave-doppler | Welle | Oberstufe | createDopplerScene |
+| 76 | photoelectric-effect | Moderne Physik | Oberstufe | createPhotoelectricEffectScene |
 
-`comingSoon`：模板接口声明了 `comingSoon?: true`（`experiment-templates.ts:114`），但**当前 76 个模板无一置位**，
-`SELECTABLE_TEMPLATE_COUNT` = 76（`experiment-templates.ts:1790`）。**无「即将上线」占位实验。**
+`comingSoon`: Das Vorlagen-Interface deklariert `comingSoon?: true` (`experiment-templates.ts:114`), aber **aktuell ist keines der 76 Modelle gesetzt**,
+`SELECTABLE_TEMPLATE_COUNT` = 76 (`experiment-templates.ts:1790`). **Keine "demnächst online" Platzhalter-Experimente.**
 
 ---
 
-## 2. 每实验能力矩阵
+## 2. Fähigkeitenmatrix pro Experiment
 
-图例：`E`=走域引擎 · `V`=Verifier（引擎 `simulate()` 内自校验并回传 checks）· `O`=Observation 层参与 ·
-`R`=渲染来自注册表 `RENDERERS`（`renderer-registry.tsx:1236`）· `TL`=有场景时间线（`clock.total>0`）·
-`Ev`=有物理事件 · `Ed`=参数编辑→重算 · `Sk`=seek 可精确重建 · `Br`=可分支 · `Mo`=模型完备度等级。
-所有行 `Scene=✔`（模板均产出真实 PhysicsScene）。
+Legende: `E`=Domänen-Engine · `V`=Verifier (Engine-intern `simulate()` Selbstprüfung mit Rückgabe checks) · `O`=Observation-Layer-Beteiligung ·
+`R`=Rendering aus Registry `RENDERERS` (`renderer-registry.tsx:1236`) · `TL`=hat Szenario-Zeitlinie (`clock.total>0`) ·
+`Ev`=hat physikalische Events · `Ed`=Parameterbearbeitung→Neuberechnung · `Sk`=seek exakt reproduzierbar · `Br`=verzweigbar · `Mo`=Modellvollständigkeitsgrad.
+Alle Zeilen `Scene=✔` (alle Vorlagen produzieren echte PhysicsScene).
 
-> 说明：`TL=–` 表示该 Runtime 明确以 `total: 0` 关闭时间线（多为稳态/静态模型，见 §3 STATIC 类），
-> 不是「参数不更新」——这些实验 `Ed=✔`，改参数会重算并重绘。
+> Hinweis: `TL=–` bedeutet, dass die Runtime die Zeitlinie explizit mit `total: 0` deaktiviert (meistens Stationär-/Statische Modelle, siehe §3 STATIC-Klasse),
+> nicht "Parameter aktualisieren nicht" — diese Experimente haben `Ed=✔`, Parameteränderung löst Neuberechnung und Neuzeichnung aus.
 
-### 2.1 mechanics 域（24 个）
+### 2.1 Mechanik-Domäne (24)
 
-| 实验 | E | V | O | R | TL | Ev | Ed | Sk | Br | Mo |
+| Experiment | E | V | O | R | TL | Ev | Ed | Sk | Br | Mo |
 | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | --- |
 | uniform-linear | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
 | average-speed | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
@@ -142,90 +142,90 @@
 | projectile-oblique | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL |
 | newton-second-law | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
 | incline | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
-| mechanical-energy | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | QUASI_STATIC（能量账本） |
-| ramp-friction | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | QUASI_STATIC（能量账本） |
-| lever-balance | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | QUASI_STATIC（见 §5） |
-| collision-elastic | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔(采样) | ✔ | **FULL_DYNAMIC** |
-| collision-inelastic | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔(采样) | ✔ | **FULL_DYNAMIC** |
-| collision-perfectly-inelastic | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔(采样) | ✔ | **FULL_DYNAMIC** |
+| mechanical-energy | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | QUASI_STATIC (Energiebilanz) |
+| ramp-friction | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | QUASI_STATIC (Energiebilanz) |
+| lever-balance | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | QUASI_STATIC (siehe §5) |
+| collision-elastic | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔(Sampling) | ✔ | **FULL_DYNAMIC** |
+| collision-inelastic | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔(Sampling) | ✔ | **FULL_DYNAMIC** |
+| collision-perfectly-inelastic | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔(Sampling) | ✔ | **FULL_DYNAMIC** |
 | vt-area | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
-| force-composition | ✔ | ✔ | ✔ | ✔ | ? | – | ✔ | ✔ | ✔ | ANALYTICAL/STATIC（未验证） |
-| concurrent-equilibrium | ✔ | ✔ | ✔ | ✔ | ? | – | ✔ | ✔ | ✔ | STATIC（未验证） |
+| force-composition | ✔ | ✔ | ✔ | ✔ | ? | – | ✔ | ✔ | ✔ | ANALYTICAL/STATIC (unverifiziert) |
+| concurrent-equilibrium | ✔ | ✔ | ✔ | ✔ | ? | – | ✔ | ✔ | ✔ | STATIC (unverifiziert) |
 | apparent-weight | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
-| chase-meeting | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔(采样) | ✔ | **FULL_DYNAMIC** |
-| hooke-law | ✔ | ✔ | ✔ | ✔ | – | – | ✔ | – | ✔ | STATIC（弹簧静平衡） |
+| chase-meeting | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔(Sampling) | ✔ | **FULL_DYNAMIC** |
+| hooke-law | ✔ | ✔ | ✔ | ✔ | – | – | ✔ | – | ✔ | STATIC (Feder-Gleichgewicht) |
 | spring-oscillator | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
 | circular-orbit | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
 | simple-pendulum | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
 | friction-static | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
 | friction-mu | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
 
-mechanics 经 `MechanicsRuntimeBridge`（`mechanics-runtime-bridge.ts`）跑 `engine-mechanics`；
-collision 经 `CollisionRuntimeBridge` 跑 `engine-collision`；energy/lever 各自 Runtime。
-observation 由 `mechanics-view-builders.ts` + `physics-observation` 提供（本域是 Observation 接线最完整的域）。
+mechanics läuft über `MechanicsRuntimeBridge` (`mechanics-runtime-bridge.ts`) mit `engine-mechanics`;
+collision läuft über `CollisionRuntimeBridge` mit `engine-collision`; energy/lever jeweils eigene Runtime.
+observation wird von `mechanics-view-builders.ts` + `physics-observation` bereitgestellt (diese Domäne hat die vollständigste Observation-Anbindung).
 
-### 2.2 electric / magnetic 域（9 个）
+### 2.2 Elektrik/Magnetik-Domäne (9)
 
-| 实验 | E | V | O | R | TL | Ev | Ed | Sk | Br | Mo |
+| Experiment | E | V | O | R | TL | Ev | Ed | Sk | Br | Mo |
 | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | --- |
-| point-charge | ✔ | ✔ | ✔ | ✔ | – | – | ✔ | – | ✔ | STATIC（库仑场图，引擎拒绝 1/r² 运动） |
+| point-charge | ✔ | ✔ | ✔ | ✔ | – | – | ✔ | – | ✔ | STATIC (Coulomb-Felddarstellung, Engine lehnt 1/r²-Bewegung ab) |
 | multi-point-charge | ✔ | ✔ | ✔ | ✔ | – | – | ✔ | – | ✔ | STATIC |
-| uniform-electric | ✔ | ✔ | ✔ | ✔ | ? | – | ✔ | ? | ✔ | ANALYTICAL/STATIC（未验证） |
+| uniform-electric | ✔ | ✔ | ✔ | ✔ | ? | – | ✔ | ? | ✔ | ANALYTICAL/STATIC (unverifiziert) |
 | parallel-plate | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
-| straight-wire-field | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC（稳恒磁场） |
+| straight-wire-field | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC (stationäres Magnetfeld) |
 | solenoid-field | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC |
 | electromagnet | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC |
 | motor | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC |
-| magnetic-circular | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | – | ANALYTICAL（解析圆周） |
+| magnetic-circular | ✔ | ✔ | ✔ | ✔ | ✔ | – | ✔ | ✔ | – | ANALYTICAL (analytischer Kreis) |
 
-electric 经 `electric-workspace-runtime`（`engine-electric` + `engine-electric-region`）；
-current 四个经 `current-workspace-runtime`（`engine-magnetic` 的 CurrentFieldEngine，`total:0`）；
-magnetic-circular 经 `physics-runtime-bridge.ts`（`engine-magnetic` MagneticEngine）。
-`magnetic-circular`**无分支**（`branch=0`，`magnetic-workspace-runtime.ts` 未接 `forkExperimentalScene`）。
+electric läuft über `electric-workspace-runtime` (`engine-electric` + `engine-electric-region`);
+die vier current-Experimente laufen über `current-workspace-runtime` (`engine-magnetic` CurrentFieldEngine, `total:0`);
+magnetic-circular läuft über `physics-runtime-bridge.ts` (`engine-magnetic` MagneticEngine).
+`magnetic-circular` **kein Branching** (`branch=0`, `magnetic-workspace-runtime.ts` bindet `forkExperimentalScene` nicht ein).
 
-### 2.3 circuit / optics / acoustics / fluid（17 个）
+### 2.3 Schaltkreis/Optik/Akustik/Fluid (17)
 
-| 实验 | E | V | O | R | TL | Ev | Ed | Sk | Br | Mo |
+| Experiment | E | V | O | R | TL | Ev | Ed | Sk | Br | Mo |
 | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | --- |
-| series-circuit | ✔ | ✔ | – | ✔ | ~ | – | ✔ | ✔ | ✔ | QUASI_STATIC（DC 工作点） |
+| series-circuit | ✔ | ✔ | – | ✔ | ~ | – | ✔ | ✔ | ✔ | QUASI_STATIC (DC-Arbeitspunkt) |
 | parallel-circuit | ✔ | ✔ | – | ✔ | ~ | – | ✔ | ✔ | ✔ | QUASI_STATIC |
 | mixed-circuit | ✔ | ✔ | – | ✔ | ~ | – | ✔ | ✔ | ✔ | QUASI_STATIC |
 | short-circuit | ✔ | ✔ | – | ✔ | ~ | – | ✔ | ✔ | ✔ | QUASI_STATIC |
-| rheostat-circuit | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | QUASI_STATIC（滑变扫描） |
+| rheostat-circuit | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | QUASI_STATIC (Schiefer-Draht-Scan) |
 | va-resistance | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | QUASI_STATIC |
 | bulb-power | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | QUASI_STATIC |
 | emf-measurement | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | QUASI_STATIC |
-| pinhole | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC（几何光学） |
+| pinhole | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC (geometrische Optik) |
 | total-reflection | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC |
 | plane-mirror | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC |
 | convex-lens | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC |
 | concave-mirror | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC |
 | convex-mirror | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC |
-| echo-ranging | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL（往返运动学） |
-| buoyancy | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL（下沉/浮定） |
-| noise | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC（声级对数式） |
+| echo-ranging | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL（Hin-und-Rück-Kinematik） |
+| buoyancy | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL（Sinken/Schwimmen） |
+| noise | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC（Schallpegel-Logarithmus） |
 
-`TL=~`：circuit 的时间线是**滑变电阻扫描**（`circuit-workspace-runtime.ts:10-11,412`），
-无滑变电阻的电路 `endTime` 可能为 0 → 传输控件被禁用（未逐电路验证，标 `未验证`）。
-circuit/optics/acoustics(noise) 均**未接 Observation** 层。
+`TL=~`: circuit-Zeitlinie ist **Schleifwiderstand-Scan** (`circuit-workspace-runtime.ts:10-11,412`),
+Ohne Schleifwiderstand kann `endTime` der Schaltung 0 sein → Transportsteuerelemente werden deaktiviert (nicht pro Schaltung verifiziert, markiert `nicht verifiziert`).
+circuit/optics/acoustics(noise) sind alle **nicht an Observation** Layer angebunden.
 
-### 2.4 thermal / composite / induction / wave / modern（26 个）
+### 2.4 thermal / composite / induction / wave / modern（26 Stück）
 
-| 实验 | E | V | O | R | TL | Ev | Ed | Sk | Br | Mo |
+| Experiment | E | V | O | R | TL | Ev | Ed | Sk | Br | Mo |
 | --- | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | :-: | --- |
-| thermometer | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC（标定） |
-| crystal-melting | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL（分段加热曲线） |
+| thermometer | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC（Kalibrierung） |
+| crystal-melting | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL（Stückweise Heizkurve） |
 | boiling-water | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL |
 | heat-capacity-comparison | ✔ | ✔ | – | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL |
 | velocity-selector | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL |
 | mass-spectrometer | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL |
 | composite-eb | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL |
 | composite-ebg | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL |
-| multi-region-field | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL（分段运动学） |
-| cyclotron | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL（理想脉冲隙模型） |
+| multi-region-field | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL（Stückweise Kinematik） |
+| cyclotron | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ANALYTICAL（Ideales Beschleunigungslücken-Modell） |
 | induction-bar-motion | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL（E=BLv） |
-| transformer | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC（匝比） |
-| induction-double-bar-momentum | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL（指数 e^{−t/τ}） |
+| transformer | ✔ | ✔ | – | ✔ | – | – | ✔ | – | ✔ | STATIC（Windungsverhältnis） |
+| induction-double-bar-momentum | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL（Exponential e^{−t/τ}） |
 | induction-double-bar-force | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
 | induction-flux-change | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL（E=−dΦ/dt） |
 | wave-travelling | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL（y=A·sin(2π(x/λ−ft))） |
@@ -235,323 +235,323 @@ circuit/optics/acoustics(noise) 均**未接 Observation** 层。
 | wave-reflection-refraction | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
 | wave-diffraction | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
 | wave-doppler | ✔ | ✔ | – | ✔ | ✔ | – | ✔ | ✔ | ✔ | ANALYTICAL |
-| photoelectric-effect | ✔ | ✔ | – | ✔ | – | – | ✔ | – | – | ANALYTICAL（单光子方程，静态曲线） |
+| photoelectric-effect | ✔ | ✔ | – | ✔ | – | – | ✔ | – | – | ANALYTICAL（Ein-Photon-Gleichung, statische Kurve） |
 
-composite 是观测层接线最完整的高阶域；wave/induction/thermal/modern 均未接 Observation。
-`photoelectric-effect`**无分支**（`branch=0`）。
+composite ist der hochrangigste Domain mit der vollständigsten Observation-Verkabelung; wave/induction/thermal/modern sind alle nicht an Observation angebunden.
+`photoelectric-effect` **keine Zweige** (`branch=0`).
 
-### 2.5 能力汇总
+### 2.5 Fähigkeitenübersicht
 
-- **有场景时间线（`total>0`，Run 可用）**：约 **46** 个（mechanics 运动类 14 + collision 4 + lever 1 +
+- **Mit Szenario-Zeitlinie (`total>0`, Run verfügbar)**: ca. **46** (mechanics Bewegungsart 14 + collision 4 + lever 1 +
   parallel-plate 1 + magnetic-circular 1 + circuit 4~8 + echo 1 + buoyancy 1 + thermal 3 + composite 6 +
-  induction 4 + wave 7）。
-- **无时间线（`total=0`，稳态/静态，Run 禁用）**：约 **25** 个（见 §3 STATIC 列表）。
-- **有物理事件**：projectile(2)、collision(1 组)、lever、echo、buoyancy、thermal(3)、composite(6)。其余 `events: []`。
-- **观测层参与**：mechanics、electric、composite、magnetic（4/12 域）。circuit/optics/wave/induction/thermal/fluid/acoustics/modern 未接。
-- **分支**：除 `magnetic-circular`、`photoelectric-effect` 外，各 Runtime 经 `forkExperimentalScene`（`experimental-branch.ts`）支持。
+  induction 4 + wave 7).
+- **Ohne Zeitlinie (`total=0`, stationär/statisch, Run deaktiviert)**: ca. **25** (siehe §3 STATIC-Liste).
+- **Mit Physik-Ereignissen**: projectile(2), collision(1 Gruppe), lever, echo, buoyancy, thermal(3), composite(6). Übrige `events: []`.
+- **Observation-Layer-Beteiligung**: mechanics, electric, composite, magnetic (4/12 Domänen). circuit/optics/wave/induction/thermal/fluid/acoustics/modern nicht angebunden.
+- **Zweige**: Außer `magnetic-circular`, `photoelectric-effect` unterstützen alle Runtimes via `forkExperimentalScene` (`experimental-branch.ts`).
 
 ---
 
-## 3. 缺陷分类（含 file:line）
+## 3. Fehlerklassifikation (inkl. file:line)
 
-### 3.1 `STATIC_DEMO`（几何画了，参数不更新）—— **0 个**
+### 3.1 `STATIC_DEMO` (Geometrie gezeichnet, Parameter aktualisieren nicht) — **0 Stück**
 
-全量核对：21 个 Runtime 全部实现 `editParameter → sceneCommand → recompute → getSnapshot`
-（`lever-workspace-runtime.ts:420`、`circuit-workspace-runtime.ts:582`、`electric-workspace-runtime.ts:604` …）。
-`total=0` 的实验**不是** STATIC_DEMO——改参数会走真实命令重算并重绘，只是模型本身与时间无关。
-**未发现「画了不更新」的实验。**
+Vollprüfung: Alle 21 Runtimes implementieren `editParameter → sceneCommand → recompute → getSnapshot`
+(`lever-workspace-runtime.ts:420`, `circuit-workspace-runtime.ts:582`, `electric-workspace-runtime.ts:604` …).
+`total=0` Experimente sind **kein** STATIC_DEMO — Parameteränderung geht durch echte Befehle, neu berechnen und neu zeichnen, nur das Modell selbst ist zeitunabhängig.
+**Keine „gezeichnet aber nicht aktualisiert“ Experimente gefunden.**
 
-### 3.2 `VISUAL_ONLY_ANIMATION`（CSS/RAF/本地状态驱动、背后无引擎态）—— **1 个（物理冒充）**
+### 3.2 `VISUAL_ONLY_ANIMATION` (CSS/RAF/lokaler Status getrieben, dahinter kein Engine-Zustand) — **1 (Physik-Vortäuschung)**
 
-- **lever-balance**：倾斜角不是动力学解，而是引擎内的**线性显示斜坡**
-  `tilt = sign · MAX_TILT_RADIANS · min(t/TIP_DURATION, 1)`（`packages/engine-lever/src/statics.ts:78-79`），
-  文件顶部自述「no moment of inertia and no angular acceleration — junior statics, not a rigid-body integrator」
-  （`statics.ts:8-9`）。UI 让「运行」播放这段斜坡，视觉上**冒充**转动动力学。详见 §5。
+- **lever-balance**: Neigungswinkel ist keine Dynamik-Lösung, sondern **lineare Anzeige-Rampe** im Engine-Inneren
+  `tilt = sign · MAX_TILT_RADIANS · min(t/TIP_DURATION, 1)` (`packages/engine-lever/src/statics.ts:78-79`),
+  Datei-Kopf selbstbeschreibend: „no moment of inertia and no angular acceleration — junior statics, not a rigid-body integrator"
+  (`statics.ts:8-9`). UI lässt „Run“ diese Rampe abspielen, visuell **vortäuschend** Rotationsdynamik. Siehe §5.
 
-其余用 `time` 的渲染均为**装饰性**、且相位锁定场景时间，不冒充物理：
-- 电流流向虚线动画（`circuit-renderer.tsx:887`、`induction-renderer.tsx:365`）；
-- 加热器标签相位闪烁 `(time??0)*7.1`（`thermal-renderer.tsx:45`）。
-这三处属可接受的视觉 chrome；建议在报告中单列，不计入缺陷。
+Übrige `time`-Verwendungen in Renderern sind rein **dekorativ** und phasengesperrt an Szenariozeit, keine Physik-Vortäuschung:
+- Stromrichtungs-Punktstrich-Animation (`circuit-renderer.tsx:887`, `induction-renderer.tsx:365`);
+- Heizgerät-Label-Phasenblinken `(time??0)*7.1` (`thermal-renderer.tsx:45`).
+Diese drei Stellen sind akzeptables visuelles Chrome; Empfehlung: im Bericht einzeln aufführen, nicht als Fehler zählen.
 
-### 3.3 `HARDCODED_PHYSICS`—— **0 个「隐藏结果」；3 处需关注**
+### 3.3 `HARDCODED_PHYSICS` — **0 „versteckte Ergebnisse“; 3 Stellen beachten**
 
-判据：区分「合法常数 / 模型参数 / UI 偷算物理结果」。全仓 grep（`9.8 / 9.81 / 1.6e-19 / 6.67e-11 / 340 / 343`）结论：
+Kriterium: Unterscheidung „legitime Konstanten / Modellparameter / UI schummelt Physik-Ergebnisse“. Ganzes Repo grep (`9.8 / 9.81 / 1.6e-19 / 6.67e-11 / 340 / 343`) Ergebnis:
 
-| 位置 | 值 | 判定 |
+| Position | Wert | Urteil |
 | --- | --- | --- |
-| `packages/engine-modern/src/photoelectric-model.ts:5-7` | h、c、e | **合法 CODATA-2019 精确常数** |
-| `packages/engine-magnetic/src/current.ts:23` | μ₀=4π×10⁻⁷ | **合法 SI 定义常数** |
-| `packages/engine-mechanics/src/orbit.ts:17` | GM=3.986004418e14 | **合法（地球 GM）** |
-| `packages/engine-mechanics/src/models/model-resolvers.ts:26` | `vec3(0,−9.8,0)` 兜底 | **模型参数（静默默认）**：仅当场景缺 `uniform_gravity` 场时生效 |
-| `experiment-templates.ts:127` `const g=9.8`；`:919/1411/1440/1467/1489/1515` `charge:1.6e-19` | 9.8 / e | **模型参数/合法常数**（作为场景种子喂给引擎） |
-| `physics-runtime-bridge.ts` / `prototype/magnetic-scene.ts` | `1.6e-19 / 1.67e-27` | **合法常数**（电子电荷、质子质量，种子值） |
-| `mechanics-view-builders.ts:255` | `: 9.8`（无重力场时的 g 兜底） | **UI 侧模型参数兜底**（次要；仅显示用，改回引擎） |
-| `mechanics-view-builders.ts:758` | `const gravity = Math.hypot(m.gravity.x,m.gravity.y) || 9.8; const apexTime = vy0/gravity` | **UI 在算物理**：视图构建器自行推算「最高点」事件时刻，引擎并未输出该事件 |
-| `experiment-summaries.ts:332` | 文案内写死「9.8 N 突降为 5.88 N」 | **教学文案里的硬编码结果**（文档常数，需防与默认场景漂移） |
+| `packages/engine-modern/src/photoelectric-model.ts:5-7` | h、c、e | **legitime CODATA-2019 exakte Konstanten** |
+| `packages/engine-magnetic/src/current.ts:23` | μ₀=4π×10⁻⁷ | **legitime SI-definierte Konstante** |
+| `packages/engine-mechanics/src/orbit.ts:17` | GM=3.986004418e14 | **legitim (Erde GM)** |
+| `packages/engine-mechanics/src/models/model-resolvers.ts:26` | `vec3(0,−9.8,0)` Fallback | **Modellparameter (stillschweigender Default)**: nur wirksam, wenn Szene `uniform_gravity` Feld fehlt |
+| `experiment-templates.ts:127` `const g=9.8`；`:919/1411/1440/1467/1489/1515` `charge:1.6e-19` | 9.8 / e | **Modellparameter/legitime Konstanten** (als Szenen-Seed an Engine übergeben) |
+| `physics-runtime-bridge.ts` / `prototype/magnetic-scene.ts` | `1.6e-19 / 1.67e-27` | **legitime Konstanten** (Elektronenladung, Protonenmasse, Seed-Werte) |
+| `mechanics-view-builders.ts:255` | `: 9.8` (Fallback g ohne Gravitationsfeld) | **UI-seitiger Modellparameter-Default** (sekundär; nur Anzeige, zurück zur Engine) |
+| `mechanics-view-builders.ts:758` | `const gravity = Math.hypot(m.gravity.x,m.gravity.y) || 9.8; const apexTime = vy0/gravity` | **UI rechnet Physik**: View-Builder berechnet selbst „Höchstpunkt“-Ereigniszeitpunkt, Engine gibt kein solches Event aus |
+| `experiment-summaries.ts:332` | Text fest „9.8 N fällt auf 5.88 N“ | **Hardcoded Result in Lehrtext** (Dokumentationskonstante, Drift gegen Default-Szene verhindern) |
 
-**「UI 偷算物理」命中 1 处**：`mechanics-view-builders.ts:758`（apex 时刻）。
-**「隐藏硬编码结果」命中 0 处**——引擎里没有藏结果，验证器会独立重算（如 `lever-engine.ts:152-153,172-177`）。
+**„UI schummelt Physik“ trifft 1 Stelle**: `mechanics-view-builders.ts:758` (Apex-Zeitpunkt).
+**„Versteckte hardcoded Ergebnisse“ trifft 0 Stellen** — Engine versteckt keine Ergebnisse, Verifizierer rechnet unabhängig neu (z. B. `lever-engine.ts:152-153,172-177`).
 
-### 3.4 `FAKE_VERIFIED`—— **未发现可复现的硬编码假徽章；存在 1 条架构风险（P1）**
+### 3.4 `FAKE_VERIFIED` — **Keine reproduzierbaren hardcoded Fake-Badges gefunden; 1 Architekturrisiko vorhanden (P1)**
 
-- **溯源契约真实存在且正确**：`packages/physics-core/src/provenance.ts` 定义 `VerifiedQuantity` + 证据派生
-  `deriveVerificationLevel`（`:134-156`，证据为空→`ENGINE_COMPUTED`，**永不默认「已验证」**），
-  以及门禁 `assertVerifiedPhysicsOutput`（`:376-386`，默认门槛 `ENGINE_COMPUTED`，未过则抛 `UnverifiedPhysicsOutputError`）。
-- **门禁只接在 agent 工具边界，未接渲染路径**：全仓调用点仅
-  `packages/agent-tools/src/physics-tool-runtime.ts:305`（经 `:593/:774/:874`）与测试；
-  **UI 覆盖层 `ui-physicsos/**` 无任何调用**。
-- **UI 的验证判定来自字符串，不回推证据**：`physics/verified-result.ts:67-70` 的 `LEVEL_BY_STATUS` 把
-  `'passed'/'passed_with_warnings'` 直接映射为 `'physics-verified'`，**不查 checks / revision / 证据**；
-  `PhysicsWorkspace.tsx:377-382` 的状态标签同样取 `snapshot.status`（= `simulation.verification.status` 字符串）。
-  该文件自述是 canonical 契约的占位（`verified-result.ts:1-14`）。
-- **风险路径**：引擎 `validate()/canHandle` 会返回 `{status:'passed', checks:[]}`
-  （如 `engine-acoustics/src/acoustics-engine.ts:269`、`engine-noise:319`、`engine-fluid:329` 等），
-  `summarizeVerification`（`packages/physics-core/src/verification.ts:94-97`）会把「空 checks」判成 `'passed'`。
-  若该 status 抵达 UI 状态缝，徽章会显示「引擎已验证」而**零条 checks**。
-  现状：`simulate()` 会覆盖这些占位（如 `engine-electric.ts:465→477`），**未确认可达**，故列为风险而非确诊。
-- **结论**：`FAKE_VERIFIED`（确诊）= **0**；**架构风险 = 1**（P1，见 P0/P1 列表）。
-  另：`VerifiedResult.tsx` 仅用于会话 `SceneChatCard`，与 Lab 同一判定模式。
+- **Provenienz-Vertrag existiert real und ist korrekt**: `packages/physics-core/src/provenance.ts` definiert `VerifiedQuantity` + Evidenz-Ableitung
+  `deriveVerificationLevel` (`:134-156`, Evidenz leer → `ENGINE_COMPUTED`, **niemals Default „verifiziert"**),
+  sowie Gate `assertVerifiedPhysicsOutput` (`:376-386`, Default-Schwelle `ENGINE_COMPUTED`, wirft bei Nichterfüllung `UnverifiedPhysicsOutputError`).
+- **Gate nur an Agent-Tool-Grenze angebunden, nicht an Render-Pfad**: Ganze Repo Aufrufstellen nur
+  `packages/agent-tools/src/physics-tool-runtime.ts:305` (via `:593/:774/:874`) sowie Tests;
+  **UI-Overlay `ui-physicsos/**` ohne jeglichen Aufruf**.
+- **UI-Verifizierungsurteil kommt aus String, nicht Rückschluss auf Evidenz**: `physics/verified-result.ts:67-70` `LEVEL_BY_STATUS` mappt
+  `'passed'/'passed_with_warnings'` direkt auf `'physics-verified'`, **prüft nicht checks / revision / Evidenz**;
+  `PhysicsWorkspace.tsx:377-382` Status-Label gleichermaßen aus `snapshot.status` (= `simulation.verification.status` String).
+  Datei selbst bezeichnet sich als Platzhalter für kanonischen Vertrag (`verified-result.ts:1-14`).
+- **Risikopfad**: Engine `validate()/canHandle` gibt `{status:'passed', checks:[]}` zurück
+  (z. B. `engine-acoustics/src/acoustics-engine.ts:269`, `engine-noise:319`, `engine-fluid:329` etc.),
+  `summarizeVerification` (`packages/physics-core/src/verification.ts:94-97`) wertet „leere checks“ als `'passed'`.
+  Falls dieser Status die UI-Status-Naht erreicht, zeigt Badge „Engine verifiziert“ bei **null checks**.
+  Ist-Zustand: `simulate()` überschreibt diese Platzhalter (z. B. `engine-electric.ts:465→477`), **Erreichbarkeit nicht bestätigt**, daher als Risiko gelistet, nicht als Diagnose.
+- **Fazit**: `FAKE_VERIFIED` (diagnostiziert) = **0**; **Architekturrisiko = 1** (P1, siehe P0/P1 Liste).
+  Außerdem: `VerifiedResult.tsx` nur für Session `SceneChatCard`, gleiche Urteil-Mode wie Lab.
 
-### 3.5 `FAKE_RUNTIME`（新类别）—— **确诊 0；临近 2 类**
+### 3.5 `FAKE_RUNTIME` (neue Kategorie) — **Diagnostiziert 0; angrenzend 2 Typen**
 
-判据：Run 可点但只播 CSS/本地状态、Timeline 非场景时间、Seek 不能重建物理态。
+Kriterium: Run klickbar aber spielt nur CSS/lokalen Status, Timeline nicht Szenariozeit, Seek kann Physikzustand nicht rekonstruieren.
 
-- **确诊 0**：外壳对 `clock.total<=0` 的实验把播放/暂停/单步/复位/时间线全部 `disabled`
-  （`PhysicsWorkspace.tsx:620,633,643,654,880`），**没有**「可点但空转」的运行器。
-- **临近 A（模型冒充动力学，1 个）**：`lever-balance` 的「运行」播放的是显示斜坡而非 `τ=Iα`，见 §3.2/§5。
-  归为 `VISUAL_ONLY_ANIMATION`+`MODEL_COMPLETENESS` 缺陷更准确。
-- **临近 B（同一工具栏但半数列控件禁用，系统性 ≈25 个）**：外壳**无条件渲染**整套 transport + timeline
-  （`PhysicsWorkspace.tsx:616-662` 与 `:875-938`），`total=0` 的实验整行控件可见但灰。
-  owner 的「所有实验长着同一个工具栏，一半按钮没用」——**这就是证据**（属 UI 诚实性缺陷，P1）。
-- **可 seek 精确重建**：magnetic/mechanics/lever/electric-region/composite/induction/thermal/wave/circuit/acoustics/fluid
-  走**闭式重算**（`physics-runtime-bridge.ts:1028,1130`、`lever-workspace-runtime.ts:225`），seek 精确；
-  collision 走**采样最近邻**（`trajectoryTimes` + `nearestTimedStateIndex`，`animation-clock.ts:45`），近似重建。
-  静态域 `seek` 为 no-op（`optics-workspace-runtime.ts:580`、`modern:178`）。
+- **Diagnostiziert 0**: Shell setzt für `clock.total<=0` Experimente Play/Pause/Schritt/Reset/Zeitlinie alle auf `disabled`
+  (`PhysicsWorkspace.tsx:620,633,643,654,880`), **kein** „klickbar aber leerlaufender“ Runner.
+- **Angrenzend A (Modell vortäuscht Dynamik, 1)**: `lever-balance` „Run“ spielt Anzeige-Rampe, nicht `τ=Iα`, siehe §3.2/§5.
+  Einordnung als `VISUAL_ONLY_ANIMATION`+`MODEL_COMPLETENESS` Fehler ist präziser.
+- **Angrenzend B (gleiche Toolbar aber halbe Controls deaktiviert, systemisch ≈25)**: Shell rendert **bedingungslos** komplettes Transport + Timeline
+  (`PhysicsWorkspace.tsx:616-662` und `:875-938`), `total=0` Experimente ganze Control-Zeile sichtbar aber grau.
+  Owner: „Alle Experimente haben gleiche Toolbar, halbe Buttons nutzlos“ — **das ist der Beweis** (zählt als UI-Ehrlichkeitsfehler, P1).
+- **Seek präzise rekonstruierbar**: magnetic/mechanics/lever/electric-region/composite/induction/thermal/wave/circuit/acoustics/fluid
+  nutzen **geschlossene Neuberechnung** (`physics-runtime-bridge.ts:1028,1130`, `lever-workspace-runtime.ts:225`), seek präzise;
+  collision nutzt **Sampling Nearest Neighbor** (`trajectoryTimes` + `nearestTimedStateIndex`, `animation-clock.ts:45`), approximative Rekonstruktion.
+  Statische Domänen `seek` ist no-op (`optics-workspace-runtime.ts:580`, `modern:178`).
 
-### 3.6 `MODEL_COMPLETENESS`（新维度）—— 逐实验等级（矩阵 `Mo` 列）
+### 3.6 `MODEL_COMPLETENESS` (neue Dimension) — Pro-Experiment-Level (Matrix `Mo` Spalte)
 
-- **FULL_DYNAMIC_MODEL（唯一真积分器）**：`engine-collision` 用半隐式欧拉 `v+=g·dt; x+=v·dt` +
-  冲量接触（`collision-solver.ts:171-175,128-152`，`DEFAULT_DT=1/120`）。
-  命中 **4** 个：collision-elastic / collision-inelastic / collision-perfectly-inelastic / chase-meeting。
-- **ANALYTICAL_MODEL（闭式真物理，按 t 求解）**：mechanics 运动类、parallel-plate、magnetic-circular、
-  composite(6)、induction(4)、wave(7)、echo、buoyancy、thermal 加热(3)、photoelectric。**≈ 46**。
-- **QUASI_STATIC_MODEL**：lever-balance（力矩平衡 + 显示斜坡）、circuit(8)（DC 工作点 + 滑变扫描）、
-  mechanical-energy / ramp-friction（能量账本）。**≈ 11**。
-- **STATIC_EQUILIBRIUM_MODEL**（与时间无关的稳态/静态）：point-charge / multi-point-charge、
-  current(4)、optics(4)+light(2)、pressure(3)、thermometer、transformer、noise。**≈ 15**。
-- **VISUAL_DEMO_ONLY**：**0**（每个实验都至少经一个真实引擎）。
+- **FULL_DYNAMIC_MODEL (einziger echter Integrator)**: `engine-collision` nutzt halbbimpliziten Euler `v+=g·dt; x+=v·dt` +
+  Impulskontakt (`collision-solver.ts:171-175,128-152`, `DEFAULT_DT=1/120`).
+  Trifft **4**: collision-elastic / collision-inelastic / collision-perfectly-inelastic / chase-meeting.
+- **ANALYTICAL_MODEL (geschlossene echte Physik, nach t lösend)**: mechanics Bewegungsart, parallel-plate, magnetic-circular,
+  composite(6), induction(4), wave(7), echo, buoyancy, thermal Heizung(3), photoelectric. **≈ 46**.
+- **QUASI_STATIC_MODEL**: lever-balance (Drehmomentgleichgewicht + Anzeige-Rampe), circuit(8) (DC-Arbeitspunkt + Schleifwiderstand-Scan),
+  mechanical-energy / ramp-friction (Energiebilanz). **≈ 11**.
+- **STATIC_EQUILIBRIUM_MODEL** (zeitunabhängige stationäre/statische): point-charge / multi-point-charge,
+  current(4), optics(4)+light(2), pressure(3), thermometer, transformer, noise. **≈ 15**.
+- **VISUAL_DEMO_ONLY**: **0** (jedes Experiment geht durch mindestens eine echte Engine).
 
-**UI 诚实性**：静/准静态实验大多**诚实地关了时间线并在代码注释里说明原因**
-（`current-workspace-runtime.ts:11`、`energy-workspace-runtime.ts:11`、`light:10`、`noise:10`、
-`pressure:11`、`thermometer:10`、`transformer:10`）——这点做得对。
-**唯一不诚实的是 lever**：模型是 `STATIC_EQUILIBRIUM`，但前端播放一段**冒充转动动力学**的旋转。
-
----
-
-## 4. 架构结论（逐条作答）
-
-目标链路：`PhysicsScene → Scene Runtime → Engine → Verifier → Observation → SceneVisualModel → Renderer`
-
-1. **统一 `PhysicsWorkspace`/`WorkspaceRuntime`？**
-   **外壳统一、运行时 21 份、无共享基类。** 单一外壳 `PhysicsWorkspace.tsx`（自述「the one physics workspace」）
-   + 单一画布 `PhysicsCanvas.tsx` + 单一调度器 `LabWorkspace.tsx:337 buildWorkspaceRuntime`。
-   但**没有**统一的 `WorkspaceRuntime` 实现：`workspace-runtime.ts:63` 只是**接口**，
-   21 个 `*-workspace-runtime.ts` 各自 `implements`、各自重复 `command<T>()` 与 `seek/step/advance`
-   （无 `extends`）。`LabWorkspace.tsx:337-412` 用一个大 `switch` 按域+bench 分发。
-   → **结论：不是「一个 Runtime」，是「一个接口 + 21 份实现」。** 未发现更细的 per-experiment workspace 页（这点 owner 的担忧不成立）。
-
-2. **Renderer 注册表 + `canRender/buildVisualModel/render` 契约？**
-   **有注册表，但契约不是那三个方法。** `RENDERERS`（`renderer-registry.tsx:1236`）以
-   `SceneVisualModel['domain']` 为键注册 **11** 个 React 组件；契约是 `RendererProps`
-   （`:113`：`{view, projection, time?, ...}`）。`canRender/buildVisualModel/render` 三个名字**全仓不存在**。
-   `PhysicsCanvas.tsx:332` 用 `RENDERERS[view.domain]` 取渲染器。多 bench 域在注册表内**再分流**
-   （magnetic→current、mechanics→lever/energy、optics→light、thermal→thermometer、induction→transformer 等）。
-   → **有注册表，但入口契约是「React 组件消费 IR」，而非 owner 设想的三个方法。**
-
-3. **有 `SceneVisualModel` 中间层？**
-   **有，且是真实 IR。** `scene-visual-model.ts`（1890 行）自述「renderer 消费的唯一输入，永不 import 引擎」；
-   `SceneVisualModel`（`:1515-1720`）= 域 + 视口 + 共享图元数组（bodies/particles/vectors/trajectories…）
-   + ~60 个可选 per-bench 字段（circuitComponents/opticalRays/leverBeam…）。
-   **所有 renderer 只吃 `SceneVisualModel`，无一直接吃引擎/运行时输出**（仅 `circuit-renderer.tsx:17`
-   import 了纯几何辅助 `circuitTerminalPoint`）。→ **不存在 `PhysicsScene → SVG/JSX` 直连。**
-
-4. **有 `SimulationClock`（play/pause/step/seek/reset/speed）？**
-   **无 `SimulationClock` 类。** 时钟 = `PlaybackClock` **数据接口**（`scene-visual-model.ts:1846`：
-   time/total/running/rate）+ rAF 驱动 `useAnimationClock`（`animation-clock.ts:69`）+ 各 Runtime 的私有
-   `currentTime/running/rate` 字段。传输控件在外壳（play/pause/step±/reset=seek(0)/speed=setRate）。
-   **精确 seek**：闭式域**能**（重算 state at t）；collision **近似**（采样最近邻）；静态域 no-op。
-   → **无统一时钟抽象、无 `reset()` 方法（reset 即 seek(0)）**。
-
-5. **Observation 是否中介引擎输出？**
-   **部分。** `packages/physics-observation` 有 7 个模块（circuit/composite/electric/induction/mechanics/optics/wave），
-   但 UI 仅在 **mechanics / electric / composite / magnetic**（经 `physics-runtime-bridge.ts`）使用；
-   **circuit/induction/optics/wave 的 observation 模块存在却未被 UI 接线**，thermal/fluid/acoustics/modern 无 observation。
-   → **Observation 只在 4/12 域中介，其余 UI 直读运行时的 `SceneVisualModel`。**
-
-6. **单位走 `physics-units`？**
-   **场景/引擎层走。** `physics-scene` 全量用 `Quantity<'length'>` 等（`scene.ts:105-107`），
-   引擎用 `quantity()`。**但 UI 桥层有重复的展示换算**：`cm = m*100` 在 **7 个 visual-bridge** 各写一份
-   （`fluid-visual-bridge.ts:31`、`lever:31`、`current:65`、`thermometer:28`、`pressure:56`、`light:35`、`energy:37`），
-   `composite-visual-bridge.ts:492 scaleLength*100`、`electric-visual-bridge.ts:525`、`wave-visual-bridge.ts:372-375`。
-   `lever-workspace-runtime.ts:110-111 cmOf/nCmOf` 同型。→ **单位数值本身正确，但换算逻辑未集中，重复 ~10 处（可维护性风险）。**
-
-7. **world→viewport 变换集中？**
-   **集中。** `PhysicsCanvas.tsx:192-211` 统一提供 `px/py/sx/sy/scale/path`（自述「唯一 flip y 的地方」），
-   renderer 只调 `projection.px/py`。**未发现 `x*100+50` 式散落字面量**（渲染器内 `0.5*scale`、`dialFraction*100`
-   是基于 `projection.scale` 的合法用法）。
-
-8. **Timeline 是视频进度条还是物理事件时间轴？**
-   **物理事件时间轴（带命名事件）。** `TimelineMarkers`（`workspace-parts.tsx`）读 `snapshot.events`
-   （`TimelineEvent{id,time,label,kind}`），如 projectile「发射/最高点/落地」、lever「杠杆平衡/开始倾斜/倾斜到位」、
-   composite/echo/buoyancy/thermal 均有具名事件，可点击跳转（`onSeek`）。**事件型实验是事件轴；无事件域退化为纯 scrubber。**
-
-9. **标签/箭头避让？**
-   **有。** `vector-label-layout.ts`（142 行）在屏幕空间解碰撞、沿箭头方向推挤、>15px 引出引线，
-   经 `primitives.tsx:657`（`Vectors`）调用。
-
-10. **窄宽度响应式？**
-    **有 JS 驱动的响应式。** `PhysicsCanvas.tsx:150-184` 用 `ResizeObserver` 设 viewBox、
-    对绘图区做 `Math.max(120,…)/Math.max(90,…)` 下限、`scale=min(sx,sy)` 保比；
-    `ResponsiveInspector.tsx` 管侧栏抽屉/轨道切换。物理 CSS 里唯一的 `@media` 是 `prefers-reduced-motion`
-    （`PhysicsCanvas.module.css:259`、`primitives.module.css:246`）——**无宽度断点**，宽度自适应全走 JS。
+**UI-Ehrlichkeit**: Statische/quasi-statische Experimente meist **ehrlich Zeitlinie deaktiviert und im Code-Kommentar Grund genannt**
+(`current-workspace-runtime.ts:11`, `energy-workspace-runtime.ts:11`, `light:10`, `noise:10`,
+`pressure:11`, `thermometer:10`, `transformer:10`) — das ist richtig gemacht.
+**Einzige Unehrlichkeit ist lever**: Modell ist `STATIC_EQUILIBRIUM`, aber Frontend spielt **vortäuschende Rotationsdynamik** ab.
 
 ---
 
-## 5. 杠杆专项（owner 的截图案例）
+## 4. Architekturfazit (punktweise Beantwortung)
 
-**问题：力矩/力臂/平衡是在引擎里算的，还是硬编码画的？答案是——力矩**是**引擎算的；旋转**不是**动力学，是显示斜坡。**
+Zielkette: `PhysicsScene → Scene Runtime → Engine → Verifier → Observation → SceneVisualModel → Renderer`
 
-现状（file:line）：
+1. **Einheitliche `PhysicsWorkspace`/`WorkspaceRuntime`?**
+   **Shell einheitlich, Runtimes 21 Stück, keine gemeinsame Basisklasse.** Einzige Shell `PhysicsWorkspace.tsx` (Selbstbeschreibung „the one physics workspace")
+   + einzige Canvas `PhysicsCanvas.tsx` + einziger Dispatcher `LabWorkspace.tsx:337 buildWorkspaceRuntime`.
+   Aber **keine** einheitliche `WorkspaceRuntime` Implementierung: `workspace-runtime.ts:63` ist nur **Interface**,
+   21 `*-workspace-runtime.ts` jeweils `implements`, jeweils wiederholen `command<T>()` und `seek/step/advance`
+   (kein `extends`). `LabWorkspace.tsx:337-412` nutzt einen großen `switch` nach Domain+Bench zur Dispatch.
+   → **Fazit: Nicht „ein Runtime“, sondern „ein Interface + 21 Implementierungen“.** Keine feineren per-Experiment Workspace-Seiten gefunden (Owner-Befürchtung unbegründet).
 
-- **力矩/力臂/平衡 = 真引擎算**：`resolveLeverModel`（`engine-lever/src/lever-model.ts:62`，要求支点两侧各一钩码）；
-  `momentsOf`（`statics.ts:50-63`）算 `leftWeight=m·g`、`leftMoment=leftWeight·arm`、`netMoment=左−右`、
-  `balanced=|netMoment|≤1e-9·scale`，即教科书 `F₁l₁=F₂l₂`。重力 g **从场景读取**（`lever-model.ts:74-78`），非写死。
-- **旋转 = 非物理**：`leverStateAt`（`statics.ts:72-83`）是**线性显示斜坡**
-  `tilt = sign·MAX_TILT_RADIANS·min(t/TIP_DURATION,1)`；`MAX_TILT_RADIANS=18°`、`TIP_DURATION=0.6`、
-  `HOLD_DURATION=0.6` 均为**动画/显示模型参数**。文件自述「无转动惯量、无角加速度」（`statics.ts:8-9`），
-  `stateOf` 也把 tilt 注为「力矩差的显示」（`lever-engine.ts:208-210`）。
-- **UI↔模型**：`lever-workspace-runtime.ts` 用 `LeverEngine.simulate()`（`:143`），参数编辑走真实命令
-  `SetHangerMass/SetHangerArm`（`:427,439`），checks 表见 `:77-92`（含 `weight_from_mass`、`moment_from_force`、
-  `moment_balance`）。`chartsOf` 画 θ–t（`:533-552`）。UI 侧有 `cmOf/nCmOf` 展示换算（`:110-111`）。
-- **判定**：模型 = `STATIC_EQUILIBRIUM_MODEL`（力矩平衡）+ 一段**冒充转动动力学**的显示旋转。
-  即：**数值物理（力矩/平衡）正确且可验证；运动视觉不诚实**——它让「不平衡的杠杆」匀速线性转到 18° 停住，
-  而非 `τ=Iα → ω(t) → θ(t)` 收敛。
-- **修复方向（非本次实施）**：要么**如实标注**（把「运行」改为「显示倾斜趋势」并在 UI 说明这是显示模型）；
-  要么**补真动力学**：引入 `τ=Iα`、`ω(t)`、阻尼与终止条件（θ 到限位/接触面），并提供 `I` 作为模型参数。
+2. **Renderer-Registry + `canRender/buildVisualModel/render` Vertrag?**
+   **Registry existiert, aber Vertrag sind nicht jene drei Methoden.** `RENDERERS` (`renderer-registry.tsx:1236`) mit
+   `SceneVisualModel['domain']` als Key registriert **11** React-Komponenten; Vertrag ist `RendererProps`
+   (`:113`: `{view, projection, time?, ...}`). `canRender/buildVisualModel/render` drei Namen **im ganzen Repo nicht existent**.
+   `PhysicsCanvas.tsx:332` holt Renderer via `RENDERERS[view.domain]`. Multi-Bench-Domains in Registry **erneut verzweigt**
+   (magnetic→current, mechanics→lever/energy, optics→light, thermal→thermometer, induction→transformer etc.).
+   → **Registry ja, aber Eintrittsvertrag ist „React-Komponente konsumiert IR“, nicht Owners vorgesehene drei Methoden.**
+
+3. **Gibt es `SceneVisualModel` Zwischenschicht?**
+   **Ja, und es ist echtes IR.** `scene-visual-model.ts` (1890 Zeilen) Selbstbeschreibung: „einzige Eingabe die Renderer konsumieren, importiert nie Engine";
+   `SceneVisualModel` (`:1515-1720`) = Domain + Viewport + shared Primitive-Arrays (bodies/particles/vectors/trajectories…)
+   + ~60 optionale per-bench Felder (circuitComponents/opticalRays/leverBeam…).
+   **Alle Renderer konsumieren nur `SceneVisualModel`, keiner direkt Engine/Runtime-Output** (nur `circuit-renderer.tsx:17`
+   importiert reinen Geometrie-Helper `circuitTerminalPoint`). → **Kein `PhysicsScene → SVG/JSX` Direktanschluss.**
+
+4. **Gibt es `SimulationClock` (play/pause/step/seek/reset/speed)?**
+   **Keine `SimulationClock` Klasse.** Uhr = `PlaybackClock` **Dateninterface** (`scene-visual-model.ts:1846`:
+   time/total/running/rate) + rAF-getrieben `useAnimationClock` (`animation-clock.ts:69`) + jeweilige Runtime private
+   `currentTime/running/rate` Felder. Transport-Controls in Shell (play/pause/step±/reset=seek(0)/speed=setRate).
+   **Präziser Seek**: geschlossene Domänen **können** (Neuberechnung state at t); collision **approximativ** (Sampling Nearest Neighbor); statische Domänen no-op.
+   → **Keine einheitliche Uhr-Abstraktion, keine `reset()` Methode (reset ist seek(0)).**
+
+5. **Vermittelt Observation Engine-Output?**
+   **Teilweise.** `packages/physics-observation` hat 7 Module (circuit/composite/electric/induction/mechanics/optics/wave),
+   aber UI nutzt nur **mechanics / electric / composite / magnetic** (via `physics-runtime-bridge.ts`);
+   **circuit/induction/optics/wave Observation-Module existieren aber nicht an UI verkabelt**, thermal/fluid/acoustics/modern ohne observation.
+   → **Observation nur in 4/12 Domänen vermittelnd, übrige UI liest direkt Runtime `SceneVisualModel`.**
+
+6. **Einheiten via `physics-units`?**
+   **Szene/Engine-Layer ja.** `physics-scene` durchgängig `Quantity<'length'>` etc. (`scene.ts:105-107`),
+   Engine nutzt `quantity()`. **Aber UI-Brücken-Layer hat doppelte Anzeige-Umrechnung**: `cm = m*100` in **7 visual-bridges** je einmal geschrieben
+   (`fluid-visual-bridge.ts:31`, `lever:31`, `current:65`, `thermometer:28`, `pressure:56`, `light:35`, `energy:37`),
+   `composite-visual-bridge.ts:492 scaleLength*100`, `electric-visual-bridge.ts:525`, `wave-visual-bridge.ts:372-375`.
+   `lever-workspace-runtime.ts:110-111 cmOf/nCmOf` analog. → **Einheitswerte selbst korrekt, aber Umrechnungslogik nicht zentralisiert, ~10 Stellen doppelt (Wartbarkeitsrisiko).**
+
+7. **world→viewport Transformation zentralisiert?**
+   **Zentralisiert.** `PhysicsCanvas.tsx:192-211` stellt einheitlich `px/py/sx/sy/scale/path` bereit (Selbstbeschreibung „einzige flip y Stelle"),
+   Renderer ruft nur `projection.px/py` auf. **Keine `x*100+50` Art verstreute Literale gefunden** (Renderer-intern `0.5*scale`, `dialFraction*100`
+   ist eine legitime Nutzung von `projection.scale`).
+
+8. **Ist Timeline ein Videofortschrittsbalken oder eine Physik-Ereigniszeitachse?**
+   **Physik-Ereigniszeitachse (mit benannten Ereignissen).** `TimelineMarkers` (`workspace-parts.tsx`) liest `snapshot.events`
+   (`TimelineEvent{id,time,label,kind}`), z. B. projectile „Start/Höchstpunkt/Aufprall“, lever „Hebelgleichgewicht/Beginn Neigung/Neigung erreicht“,
+   composite/echo/buoyancy/thermal haben alle benannte Ereignisse, per Klick ansteuerbar (`onSeek`). **Ereignisbasierte Experimente sind Ereignisachsen; Domänen ohne Ereignisse degenerieren zu reinen Scrubbern.**
+
+9. **Label/Pfeil-Kollisionsvermeidung?**
+   **Ja.** `vector-label-layout.ts` (142 Zeilen) löst Kollisionen im Bildschirmraum, schiebt entlang der Pfeilrichtung, blendet >15 px Führungslinien ein,
+   aufgerufen über `primitives.tsx:657` (`Vectors`).
+
+10. **Schmale Breite Responsiv?**
+    **Ja, JS-getriebenes Responsiv-Verhalten.** `PhysicsCanvas.tsx:150-184` nutzt `ResizeObserver` für viewBox,
+    setzt für Zeichenbereich `Math.max(120,…)/Math.max(90,…)` als Untergrenzen, `scale=min(sx,sy)` zur Seitenverhältniswahrung;
+    `ResponsiveInspector.tsx` steuert Seitenleisten-Schublade/Tab-Umschaltung. Das einzige `@media` im Physics-CSS ist `prefers-reduced-motion`
+    (`PhysicsCanvas.module.css:259`, `primitives.module.css:246`) — **keine Breiten-Breakpoints**, Breitenanpassung läuft vollständig über JS.
 
 ---
 
-## 6. 每实验分级
+## 5. Hebel-Spezialfall (Owner-Screenshot-Beispiel)
 
-**「Complete」定义（owner 新定义）**：Scene / Engine / Observation / Renderer / 参数可变 / 单位正确 /
-运行时同步 / Verifier **全 PASS**，且**其声明的能力**（timeline/seek/measurement/branch）全部真实存在。
+**Frage: Werden Drehmoment/Kraftarm/Gleichgewicht in der Engine berechnet oder hardcodiert gezeichnet? Antwort: Drehmoment wird von der Engine berechnet; Rotation ist KEINE Dynamik, sondern eine Anzeige-Rampe.**
 
-按此定义，**没有任何实验达到 `Complete`**——主要缺口是 **Observation 未全接线**与**无 measurement 工具**。
-分级结果：
+Ist-Zustand (datei:zeile):
 
-| 等级 | 判定 | 命中 |
+- **Drehmoment/Kraftarm/Gleichgewicht = echt Engine-berechnet**: `resolveLeverModel` (`engine-lever/src/lever-model.ts:62`, verlangt je einen Hakengewicht pro Drehpunkseite);
+  `momentsOf` (`statics.ts:50-63`) berechnet `leftWeight=m·g`, `leftMoment=leftWeight·arm`, `netMoment=links−rechts`,
+  `balanced=|netMoment|≤1e-9·scale`, also Lehrbuch `F₁l₁=F₂l₂`. Gravitation g wird **aus der Szene gelesen** (`lever-model.ts:74-78`), nicht hardcodiert.
+- **Rotation = nicht-physikalisch**: `leverStateAt` (`statics.ts:72-83`) ist eine **lineare Anzeige-Rampe**
+  `tilt = sign·MAX_TILT_RADIANS·min(t/TIP_DURATION,1)`; `MAX_TILT_RADIANS=18°`, `TIP_DURATION=0.6`,
+  `HOLD_DURATION=0.6` sind alles **Animations/Anzeige-Modellparameter**. Datei selbst notiert „kein Trägheitsmoment, keine Winkelbeschleunigung“ (`statics.ts:8-9`),
+  `stateOf` kommentiert tilt ebenfalls als „Darstellung des Drehmomentunterschieds“ (`lever-engine.ts:208-210`).
+- **UI↔Modell**: `lever-workspace-runtime.ts` nutzt `LeverEngine.simulate()` (`:143`), Parameterbearbeitung läuft über echte Befehle
+  `SetHangerMass/SetHangerArm` (`:427,439`), Checks-Tabelle siehe `:77-92` (u. a. `weight_from_mass`, `moment_from_force`,
+  `moment_balance`). `chartsOf` zeichnet θ–t (`:533-552`). UI-Seite hat `cmOf/nCmOf` für Einheitenumrechnung (`:110-111`).
+- **Beurteilung**: Modell = `STATIC_EQUILIBRIUM_MODEL` (Drehmomentgleichgewicht) + ein Stück **vorgegebene Rotationsdynamik** als Anzeigerotation.
+  Also: **Zahlenphysik (Drehmoment/Gleichgewicht) korrekt und verifizierbar; Bewegungsvisualisierung unehrlich** — sie lässt „ungleichgewichtete Hebel“ gleichmäßig linear auf 18° drehen und stoppen,
+  statt `τ=Iα → ω(t) → θ(t)` konvergieren zu lassen.
+- **Fix-Richtung (nicht in dieser Umsetzung)**: Entweder **ehrlich kennzeichnen** („Ausführen“ in „Neigungstendenz anzeigen“ umbenennen und im UI vermerken, dass es ein Anzeigemodell ist);
+  oder **echte Dynamik nachrüsten**: `τ=Iα`, `ω(t)`, Dämpfung und Abbruchkriterien (θ an Anschlag/Kontaktfläche) einführen und `I` als Modellparameter bereitstellen.
+
+---
+
+## 6. Pro-Experiment-Einstufung
+
+**„Complete“-Definition (Owner-Neudefinition)**: Scene / Engine / Observation / Renderer / Parameter veränderbar / Einheiten korrekt /
+Laufzeit-Sync / Verifier **alle PASS**, und **die deklarierten Fähigkeiten** (timeline/seek/measurement/branch) **allesamt real vorhanden**.
+
+Nach dieser Definition **erreicht kein Experiment `Complete`** — Hauptlücken sind **Observation nicht vollständig verdrahtet** und **keine Messwerkzeuge**.
+Einstufungsergebnis:
+
+| Stufe | Kriterium | Treffer |
 | --- | --- | --- |
-| **Complete** | 全部 8 项 + 声明能力全真 | **0** |
-| **Good** | Scene/Engine/Verifier/Renderer/参数/单位/同步 全 PASS，声明能力真实，仅缺 Observation/measurement | collision(4)、mechanics 运动类、composite(6)、induction(4)、wave(7)、echo、buoyancy、thermal(3)、electric 运动类 |
-| **Needs Work** | 真引擎但有诚实性/完整性缺口 | **lever-balance**（模型冒充动力学）、**circuit(8)**（Quasi-static 但时间线像运动）、静态域中「控件禁用但同款工具栏」的实验、`mechanics-view-builders.ts:758` 的 apex 偷算 |
-| **Critical** | 假数据/假动画/UI 算物理/假 verified/时间线失步 | **0**（未确诊） |
+| **Complete** | Alle 8 Punkte + deklarierte Fähigkeiten alle echt | **0** |
+| **Good** | Scene/Engine/Verifier/Renderer/Parameter/Einheiten/Sync alle PASS, deklarierte Fähigkeiten echt, nur Observation/measurement fehlt | collision(4), mechanics Bewegungs-Typen, composite(6), induction(4), wave(7), echo, buoyancy, thermal(3), electric Bewegungs-Typen |
+| **Needs Work** | Echte Engine, aber Ehrlichkeits/Vollständigkeitslücken | **lever-balance** (Modell gibt Dynamik vor), **circuit(8)** (Quasi-statisch aber Timeline wie Bewegung), statische Domänen mit „Controls disabled aber gleiche Toolbar“, `mechanics-view-builders.ts:758` apex-Heimliche-Berechnung |
+| **Critical** | Fake-Daten/Fake-Animation/UI rechnet Physik/fake verified/Timeline out-of-sync | **0** (nicht diagnostiziert) |
 
-**八维打分（简）**：物理正确性普遍 **Good**（引擎闭式且被独立验证）；动画来源 **Needs Work→Good**
-（除 lever 外均来自引擎态）；交互 **Good**（参数编辑、开关、滑变、拖拽比多数产品好）；
-测量 **Critical/缺**（无游标卡尺/量角器类交互测量，只有派生量表）；可视化 **Good**（共享图元 +
-标签避让 + 事件标记）；时间线 **Needs Work**（无事件域只有 scrubber，且 `total=0` 域控件禁用）；
-验证 **Needs Work**（徽章来自字符串、门禁未接渲染路径）；可访问性 **Good**（aria-label、键盘播放、
-`prefers-reduced-motion`、`role=alert`）。
+**Acht-Dimensionen-Bewertung (kurz)**: Physikalische Korrektheit überwiegend **Good** (Engines geschlossen formuliert und unabhängig verifiziert); Animationsherkunft **Needs Work→Good**
+(außer lever alle aus Engine-Zustand); Interaktion **Good** (Parameterbearbeitung, Schalter, Slider, Drag besser als die meisten Produkte);
+Messung **Critical/fehlt** (keine Messschieber/Winkelmesser-Interaktionsmessung, nur abgeleitete Größen-Tabellen); Visualisierung **Good** (geteilte Primitiven +
+Label-Vermeidung + Ereignismarker); Timeline **Needs Work** (keine Ereignisdomäne nur Scrubber, und `total=0` Domänen Controls disabled);
+Verifikation **Needs Work** (Badge aus String, Gate nicht an Renderpfad angebunden); Barrierefreiheit **Good** (aria-label, Tastatur-Play,
+`prefers-reduced-motion`, `role=alert`).
 
 ---
 
-## 7. 建议的 `ExperimentCapabilities` 清单（真实能力，非愿景）
+## 7. Vorgeschlagene `ExperimentCapabilities`-Liste (reale Fähigkeiten, keine Vision)
 
-对每个实验应产出一份**据实**能力声明，供外壳据此显隐控件（而非一律长着同一工具栏）。示例：
+Für jedes Experiment soll eine **faktische** Fähigkeitsdeklaration erzeugt werden, damit die Shell Controls danach ein-/ausblendet (statt pauschal gleiche Toolbar). Beispiel:
 
 ```ts
-// 真实能力（此值为审计判定的真实态，不是期望态）
+// Reale Fähigkeiten (Wert = Audit-Befund des Ist-Zustands, nicht Soll-Zustand)
 { id: 'lever-balance',
-  model: 'quasi-static',              // 力矩平衡 + 显示斜坡，非 dynamic
+  model: 'quasi-static',              // Drehmomentgleichgewicht + Anzeigerampe, nicht dynamic
   timeline: true, seek: true, replay: true, editable: true,
   measurable: false, branchable: true, verifiable: true,
   observations: ['moments', 'arms'],
   measurements: [] }
 
 { id: 'series-circuit',
-  model: 'static',                    // DC 工作点
+  model: 'static',                    // DC-Arbeitspunkt
   timeline: false, seek: false, replay: false, editable: true,
   measurable: false, branchable: true, verifiable: true,
   observations: [], measurements: [] }
 
 { id: 'collision-elastic',
-  model: 'dynamic',                   // 唯一真积分类
-  timeline: true, seek: true /*采样*/, replay: true, editable: true,
+  model: 'dynamic',                   // Einzige echte Integrations-Klasse
+  timeline: true, seek: true /*Sampling*/, replay: true, editable: true,
   measurable: false, branchable: true, verifiable: true,
   observations: [], measurements: [] }
 ```
 
-**应显式标注「显示了但背后无真实能力」的控件**（这是 owner 点名要列的「同一工具栏」finding）：
-- 所有 `model: 'static'` 的 ≈25 个实验：**播放/暂停/单步/复位 + 时间线整行可见但禁用**
-  （`PhysicsWorkspace.tsx:616-662,875-938` 无条件渲染；`:620,633,643,654,880` 依 `clock.total<=0` 禁用）。
-  建议：按 `ExperimentCapabilities.timeline` **隐藏**而非禁用，避免「一排没用的按钮」。
-- `branchable:false` 的两个（magnetic-circular、photoelectric-effect）：**分支徽章/还原入口**对它们永不可达。
-- `measurable:false` 的全部：**无任何交互测量工具**（全仓 `measurementDefinitions` 仅在场景/工厂/测试出现，
-  UI 无测量工具组件）——owner 若把「measurement」列为声明能力，则现在**全部实验都声明了假能力**。
+**Soll explizit kennzeichnen: „Angezeigt, aber dahinter keine echte Fähigkeit“** (das ist der Owner-genannte „gleiche Toolbar“-Befund):
+- Alle `model: 'static'` ≈25 Experimente: **Play/Pause/Step/Reset + ganze Timeline-Zeile sichtbar aber disabled**
+  (`PhysicsWorkspace.tsx:616-662,875-938` bedingungslos gerendert; `:620,633,643,654,880` per `clock.total<=0` deaktiviert).
+  Empfehlung: Nach `ExperimentCapabilities.timeline` **ausblenden** statt deaktivieren, vermeidet „Reihe nutzloser Buttons“.
+- `branchable:false` bei zweien (magnetic-circular, photoelectric-effect): **Branch-Badge/Restore-Entry** für sie nie erreichbar.
+- `measurable:false` bei allen: **Keinerlei interaktive Messwerkzeuge** (Repo-weit `measurementDefinitions` nur in Scene/Factory/Test vorhanden,
+  UI keine Messwerkzeug-Komponente) — falls Owner „measurement“ als deklarierte Fähigkeit führt, **deklarieren jetzt alle Experimente Fake-Fähigkeiten**.
 
 ---
 
 ## 8. P0 / P1 / P2
 
-### P0（错误物理 / 假数据 / 假动画 / UI 算物理 / 时间线失步 / 假 verified）
+### P0 (Falsche Physik / Fake-Daten / Fake-Animation / UI rechnet Physik / Timeline out-of-sync / Fake verified)
 
-| # | 项 | 证据 | 说明 |
+| # | Punkt | Beleg | Erläuterung |
 | --- | --- | --- | --- |
-| P0-1 | **lever 用显示斜坡冒充转动动力学** | `engine-lever/src/statics.ts:8-9,72-83`；`lever-workspace-runtime.ts:225` | 模型是静平衡，却让「运行」播放线性旋转，视觉上等于假动力学。**这是唯一确诊的「假动画」**。 |
-| P0-2 | **验证门禁未接渲染路径**（假 verified 风险） | `physics-core/src/provenance.ts:376` 只在 `agent-tools/src/physics-tool-runtime.ts:305` 被调；UI `verified-result.ts:67-70` 仅按字符串判级 | 徽章可只凭引擎 status 字符串点亮，不回推证据；空 checks 的 `'passed'` 理论上可达。须把 `assertVerifiedPhysicsOutput`/证据回推接进 UI 判定。 |
-| P0-3 | **UI 在算物理（apex 时刻）** | `physics/mechanics-view-builders.ts:758` | 视图构建器自算 `apexTime=vy0/g` 生成时间线事件，越过引擎/事件契约。 |
+| P0-1 | **lever nutzt Anzeigerampe als vorgetäuschte Rotationsdynamik** | `engine-lever/src/statics.ts:8-9,72-83`; `lever-workspace-runtime.ts:225` | Modell ist statisches Gleichgewicht, doch „Ausführen“ spielt lineare Rotation ab, visuell gleich Fake-Dynamik. **Einzige bestätigte „Fake-Animation“.** |
+| P0-2 | **Verifikations-Gate nicht an Renderpfad angebunden** (Fake-verified-Risiko) | `physics-core/src/provenance.ts:376` wird nur in `agent-tools/src/physics-tool-runtime.ts:305` aufgerufen; UI `verified-result.ts:67-70` urteilt nur nach String | Badge kann allein durch Engine-Status-String leuchten, ohne Evidenz zurückzuverfolgen; leere Checks mit `'passed'` theoretisch erreichbar. `assertVerifiedPhysicsOutput`/Evidenz-Rückführung in UI-Entscheidung einbinden. |
+| P0-3 | **UI rechnet Physik (apex-Zeitpunkt)** | `physics/mechanics-view-builders.ts:758` | View-Builder berechnet selbst `apexTime=vy0/g` für Timeline-Events, umgeht Engine/Event-Vertrag. |
 
-> P0 计数：**3**。严格意义上「假数据/假动画」确诊仅 P0-1；P0-2 为高风险架构缺口，P0-3 为越权计算。
+> P0 Anzahl: **3**. Streng genommen „Fake-Daten/Fake-Animation“ nur P0-1 bestätigt; P0-2 hohes Architektur-Risiko, P0-3 Kompetenzüberschreitung.
 
-### P1（真动画 / 测量 / 时间线 / 力矢量 / 场可视化 / inspector）
+### P1 (Echte Animation / Messung / Timeline / Kraftvektoren / Feldvisualisierung / Inspector)
 
-| # | 项 | 证据 |
+| # | Punkt | Beleg |
 | --- | --- | --- |
-| P1-1 | **同款工具栏、半数列控件禁用**（诚实性） | `PhysicsWorkspace.tsx:616-662,875-938` 无条件渲染；`total=0` 域禁用 |
-| P1-2 | **Observation 层未全接线** | `physics-observation/src/{circuit,induction,optics,wave}-observation.ts` 存在，UI 未用（仅 mechanics/electric/composite/magnetic） |
-| P1-3 | **无交互测量工具** | 全仓无测量工具组件；`measurementDefinitions` 未被 UI 消费 |
-| P1-4 | **世界换算重复 ~10 处** | 7 个 `*-visual-bridge.ts` 各写 `cm=m*100` 等 |
-| P1-5 | **`total=0` 域的 seek no-op 未在 schema 上声明能力** | `optics-workspace-runtime.ts:580`、`modern:178` |
-| P1-6 | **UI 侧 g 兜底 9.8** | `mechanics-view-builders.ts:255`（次要） |
+| P1-1 | **Einheitliche Toolbar, Hälfte Controls disabled** (Ehrlichkeit) | `PhysicsWorkspace.tsx:616-662,875-938` bedingungslos gerendert; `total=0` Domänen disabled |
+| P1-2 | **Observation-Layer nicht vollständig verdrahtet** | `physics-observation/src/{circuit,induction,optics,wave}-observation.ts` existieren, UI nutzt nicht (nur mechanics/electric/composite/magnetic) |
+| P1-3 | **Keine interaktiven Messwerkzeuge** | Repo-weit keine Messwerkzeug-Komponenten; `measurementDefinitions` nicht von UI konsumiert |
+| P1-4 | **Welt-Einheitenumrechnung ~10-fach dupliziert** | 7 `*-visual-bridge.ts` schreiben jeweils `cm=m*100` etc. |
+| P1-5 | **`total=0` Domänen seek no-op nicht im Schema als Fähigkeit deklariert** | `optics-workspace-runtime.ts:580`, `modern:178` |
+| P1-6 | **UI-seitiges g-Fallback 9.8** | `mechanics-view-builders.ts:255` (sekundär) |
 
-### P2（笔记本 / 分支对比 / 挑战 / 分享）
+### P2 (Notebook / Branch-Vergleich / Challenge / Teilen)
 
-| # | 项 | 证据 |
+| # | Punkt | Beleg |
 | --- | --- | --- |
-| P2-1 | 教学文案硬编码结果易漂移 | `experiment-summaries.ts:332`（「9.8 N → 5.88 N」） |
-| P2-2 | 分支对比（两场景并排）缺失 | 仅 `forkExperimentalScene` 单支还原，无对比 UI |
-| P2-3 | 挑战/评分模式缺失 | 自测为题库选题（`experiment-self-checks.ts`），非挑战关卡 |
-| P2-4 | 分享/导出仅 CSV | `export-csv.ts`；无分享链接/报告导出 |
-| P2-5 | 无 per-experiment `ExperimentCapabilities` manifest |（§7 建议新增） |
+| P2-1 | Lehrtexte hardcodieren Ergebnisse, driftgefährdet | `experiment-summaries.ts:332` („9.8 N → 5.88 N“) |
+| P2-2 | Branch-Vergleich (zwei Szenen nebeneinander) fehlt | Nur `forkExperimentalScene` Single-Branch-Restore, kein Vergleichs-UI |
+| P2-3 | Challenge/Scoring-Modus fehlt | Selbsttest ist Aufgabenpool-Auswahl (`experiment-self-checks.ts`), keine Challenge-Level |
+| P2-4 | Teilen/Export nur CSV | `export-csv.ts`; keine Share-Links/Report-Export |
+| P2-5 | Kein pro-Experiment `ExperimentCapabilities` Manifest | (§7 Neuanlage empfohlen) |
 
 ---
 
-## 9. 未验证清单（诚实声明）
+## 9. Nicht-verifizierte Liste (ehrliche Erklärung)
 
-- `force-composition / concurrent-equilibrium / uniform-electric` 的 `clock.total`：矩阵中 `TL` 标 `?`，**未逐个确认**。
-- circuit 各电路（无滑变电阻者）的 `endTime` 是否为 0：**未逐电路确认**。
-- 空 checks 的 `'passed'` 是否**真的**能抵达 UI 状态缝：**未确认可达**（列为风险）。
-- 各实验 `observations/measurements` 字段的**逐实验**取值：仅按域/桥抽样确认，未逐实验核。
-- 未运行应用/测试；未做像素级视觉核对（owner 明确「先扫描」）。
+- `force-composition / concurrent-equilibrium / uniform-electric` `clock.total`: In Matrix `TL` mit `?` markiert, **nicht einzeln bestätigt**.
+- Circuit-Schaltungen (ohne Schiefer) `endTime` gleich 0: **nicht pro Schaltung bestätigt**.
+- Leere Checks `'passed'` erreichen **wirklich** die UI-Statuslücke: **Erreichbarkeit nicht bestätigt** (als Risiko geführt).
+- Je Experiment `observations/measurements` Feldwerte **pro Experiment**: nur per Domain/Bridge Stichprobe bestätigt, nicht pro Experiment geprüft.
+- App/Tests nicht ausgeführt; kein Pixel-genauer visueller Abgleich (Owner explizit „erst Scan“).
 
 ---
 
-## 10. 结论
+## 10. Fazit
 
-- owner 的判断**部分成立**：这**不是**「静态图 / 简单动画 / UI 演示」——
-  76 个实验**全部**有真实 Scene Factory、走真实引擎、参数编辑走真实命令并可重算，多数还有真验证与事件轴。
-- 但它**确实读起来像 UI**，根因是三条：**(1) 唯一真动力学只有 collision，其余多为闭式/准静态/静态模型**；
-  **(2) 唯一被冒充的动力学是 lever 的假旋转**；**(3) 外壳对所有实验渲染同一套 transport，`total=0` 的 ≈25 个实验
-  控件全灰**——「同一个工具栏、一半按钮没用」正是此处。
-- 最高优先级不是「补动画」，而是 **①修 lever 的模型诚实性 ②把 provenance 门禁接进渲染路径
-  ③按真实能力显隐控件 ④补齐 Observation/测量**。
+- Owners Urteil **teilweise zutreffend**: Dies ist **NICHT** „Statische Bilder / einfache Animationen / UI-Demo“ —
+  76 Experimente **alle** haben echte Scene Factory, laufen durch echte Engine, Parameterbearbeitung über echte Befehle und sind neu berechenbar, die meisten auch mit echter Verifikation und Ereignisachse.
+- Aber es **wirkt tatsächlich wie UI**, Kernursachen sind drei: **(1) Einzige echte Dynamik nur collision, Rest überwiegend geschlossen/quasi-statisch/statisch**;
+  **(2) Einzige vorgetäuschte Dynamik ist levers Fake-Rotation**; **(3) Shell rendert für alle Experimente identischen Transport, `total=0` bei ≈25 Experimenten
+  Controls alle grau** — „gleiche Toolbar, halbe Buttons nutzlos“ sitzt genau hier.
+- Höchste Priorität ist nicht „Animation nachrüsten“, sondern **① levers Modellehrlichkeit fixen ② provenance-Gate in Renderpfad einbinden
+  ③ Controls nach realen Fähigkeiten ein-/ausblenden ④ Observation/Messung vervollständigen**.
